@@ -1,0 +1,114 @@
+"use client";
+
+import * as React from "react";
+import {
+  IconAd,
+  IconCamera,
+  IconChartBarPopular,
+  IconDashboard,
+  IconFileAi,
+  IconFileDescription,
+  IconInnerShadowTop,
+  IconMessage,
+  IconSend,
+  IconSettings,
+  IconTemplate,
+  IconUsers,
+} from "@tabler/icons-react";
+
+import { NavSubMain } from "@/components/admin-layout/nav-submain";
+import { NavMain } from "@/components/admin-layout/nav-main";
+import { NavSecondary } from "@/components/admin-layout/nav-secondary";
+import { NavUser } from "@/components/admin-layout/nav-user";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@workspace/ui/components/sidebar";
+
+const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/ing/dashboard",
+      icon: IconDashboard,
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Users",
+      url: "/ing/setup/users",
+      icon: IconSettings,
+    },
+  ],
+  whatsapp: [
+    {
+      name: "Marketing Campaigns",
+      url: "/ing/whatsapp/marketing-campaigns",
+      icon: IconSend,
+    },
+    {
+      name: "Conversations",
+      url: "/ing/whatsapp/conversations",
+      icon: IconMessage,
+    },
+
+    {
+      name: "Ads Manager",
+      url: "/ing/whatsapp/ads-manager",
+      icon: IconAd,
+    },
+    {
+      name: "Templates",
+      url: "/ing/whatsapp/templates",
+      icon: IconTemplate,
+    },
+  ],
+  management: [
+    {
+      name: "Contacts",
+      url: "/ing/contacts",
+      icon: IconUsers,
+    },
+  ],
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <a href="#">
+                <IconInnerShadowTop className="!size-5" />
+                <span className="text-base font-semibold">WAPP</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={data.navMain} />
+        <NavSubMain title="WhatsApp" items={data.whatsapp} />
+        <NavSubMain title="Management" items={data.management} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
