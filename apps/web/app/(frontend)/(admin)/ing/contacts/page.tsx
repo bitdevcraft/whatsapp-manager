@@ -6,6 +6,7 @@ import { Contact } from "@workspace/db/schema/contacts";
 import { DataTable } from "@workspace/ui/components/data-table";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Button } from "@workspace/ui/components/button";
 
 export default function Home() {
   const setTitle = useTitle();
@@ -35,7 +36,12 @@ export default function Home() {
         title=""
         columns={columns}
         data={data}
-        actions={() => <></>}
+        actions={() => (
+          <>
+            <Button>Create List</Button>
+          </>
+        )}
+        
         isLoading={loading}
       />
     </section>

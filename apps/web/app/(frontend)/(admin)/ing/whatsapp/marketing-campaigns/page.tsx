@@ -37,7 +37,7 @@ export default function Home() {
         data={data}
         actions={() => (
           <a href="/ing/whatsapp/marketing-campaigns/new">
-            <Button>New</Button>
+            <Button>Create Campaign</Button>
           </a>
         )}
         isLoading={loading}

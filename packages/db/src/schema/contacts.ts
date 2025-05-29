@@ -10,7 +10,8 @@ export const contactsTable = pgTable("contacts", {
   interests: jsonb("interests").$type<string[]>().default([]),
   message: varchar("message", { length: 2048 }).notNull(),
   optIn: boolean("opt_in").default(true),
-  assignedTo: uuid().references(() => usersTable.id),
+  assignedTo: uuid("assigned_to").references(() => usersTable.id),
+  tags: jsonb("tags").$type<string[]>().default([]),
 });
 
 // Relations

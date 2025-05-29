@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import Link from "next/link";
 
 export function NavMain({
   items,
@@ -33,9 +34,12 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+              asChild
             >
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
+              <Link href={"/ing/whatsapp/marketing-campaigns/new"}>
+                <IconCirclePlusFilled />
+                <span>Quick Create</span>
+              </Link>
             </SidebarMenuButton>
             <Button
               size="icon"

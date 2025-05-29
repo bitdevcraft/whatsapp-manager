@@ -5,6 +5,7 @@ import WhatsApp, {
   LanguagesEnum,
   MessageTypesEnum,
   ParametersTypesEnum,
+  WebhookEvent,
   WebhookHandler,
   WebhookMessage,
 } from "@workspace/wa-cloud-api";
@@ -187,3 +188,11 @@ webhookHandler.onMessage(
     });
   }
 );
+
+// webhookHandler.onEvent(
+//   "message_template_status_update",
+//   (event: WebhookEvent) => {
+//     console.log(event.field);
+//     console.log(JSON.stringify(event.value));
+//   }
+// );

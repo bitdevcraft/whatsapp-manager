@@ -14,6 +14,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
+    "@workspace/wa-cloud-api": "workspace:*",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
     "pg": "^8.16.0"

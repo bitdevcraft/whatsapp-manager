@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Template } from "@workspace/db/schema/templates";
 import { columns } from "@/features/templates/columns";
+import { Button } from "@workspace/ui/components/button";
 
 export default function Home() {
   const setTitle = useTitle();
@@ -25,6 +26,14 @@ export default function Home() {
     setLoading(false);
   };
 
+  const onSync = async () => {
+    const response = await axios.get("/api/whatsapp/templates?sync=true", {
+      withCredentials: true,
+    });
+    setData(response.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -35,7 +44,11 @@ export default function Home() {
         title=""
         columns={columns}
         data={data}
-        actions={() => <></>}
+        actions={() => (
+          <>
+            <Button onClick={onSync}>Sync</Button>
+          </>
+        )}
         isLoading={loading}
       />
     </section>

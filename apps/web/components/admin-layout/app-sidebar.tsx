@@ -3,15 +3,12 @@
 import * as React from "react";
 import {
   IconAd,
-  IconCamera,
-  IconChartBarPopular,
+  IconBrandWhatsappFilled,
   IconDashboard,
-  IconFileAi,
-  IconFileDescription,
   IconInnerShadowTop,
-  IconMessage,
-  IconSend,
+  IconMessages,
   IconSettings,
+  IconSpeakerphone,
   IconTemplate,
   IconUsers,
 } from "@tabler/icons-react";
@@ -54,12 +51,12 @@ const data = {
     {
       name: "Marketing Campaigns",
       url: "/ing/whatsapp/marketing-campaigns",
-      icon: IconSend,
+      icon: IconSpeakerphone,
     },
     {
       name: "Conversations",
       url: "/ing/whatsapp/conversations",
-      icon: IconMessage,
+      icon: IconMessages,
     },
 
     {
@@ -93,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+                <IconBrandWhatsappFilled className="!size-5" />
                 <span className="text-base font-semibold">WAPP</span>
               </a>
             </SidebarMenuButton>
