@@ -1,6 +1,6 @@
 "use client";
 
-import { useTitle } from "@/components/title-provider";
+import { useTitle } from "@/components/provider/title-provider";
 import { DataTable } from "@workspace/ui/components/custom/data-table";
 import { useEffect, useState } from "react";
 import axios from "axios";

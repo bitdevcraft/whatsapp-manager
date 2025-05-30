@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSocket } from "./socket-provider";
+import { useSocket } from "./provider/socket-provider";
 import { Button } from "@workspace/ui/components/button";
 
 export default function SocketPage() {

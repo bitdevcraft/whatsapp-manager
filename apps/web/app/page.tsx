@@ -1,7 +1,6 @@
 "use client";
 
 import FacebookLogin from "@/components/facebook-login";
-import SocketPage from "@/components/socket-page";
 import { Button } from "@workspace/ui/components/button";
 import Script from "next/script";
 
@@ -26,7 +25,6 @@ export default function Page() {
         <div className="flex flex-col items-center justify-center gap-4">
           <h1 className="text-2xl font-bold">Hello World</h1>
           <Button size="sm">Button</Button>
-          <SocketPage />
           <FacebookLogin
             appId="1327220865234074"
             onLoginSuccess={handleLoginSuccess}

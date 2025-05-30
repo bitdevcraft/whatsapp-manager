@@ -2,13 +2,14 @@ import { cookies } from "next/headers";
 
 import { AppSidebar } from "@/components/admin-layout/app-sidebar";
 import { SiteHeader } from "@/components/admin-layout/site-header";
-import { TitleProvider } from "@/components/title-provider";
+import { TitleProvider } from "@/components/provider/title-provider";
 import {
   SidebarInset,
   SidebarProvider,
 } from "@workspace/ui/components/sidebar";
 import { Toaster } from "sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
 
 export default async function Layout({
   children,

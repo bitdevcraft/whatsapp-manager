@@ -1,17 +1,19 @@
-import { getContacts } from "@/features/contacts/queries";
-import ContactTable from "./_components/contact-table";
-import { searchParamsCache } from "@/lib/validations";
+import { getContacts } from "@/features/contacts/data-table/queries";
+import ContactTable from "@/features/contacts/data-table/contact-table";
 import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
-import { type SearchParams } from "nuqs/server";
 import { getValidFilters } from "@workspace/ui/lib/data-table";
+import { SearchParams } from "@/types";
+import { contactSearchParamsCache } from "@/features/contacts/_lib/validations";
+import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
 }
 
 export default async function Home(props: IndexPageProps) {
   const searchParams = await props.searchParams;
-  const search = searchParamsCache.parse(searchParams);
+  const search = contactSearchParamsCache.parse(searchParams);
 
   const validFilters = getValidFilters(search.filters);
 
@@ -20,27 +22,29 @@ export default async function Home(props: IndexPageProps) {
   ]);
 
   return (
-    <>
-      <React.Suspense
-        fallback={
-          <DataTableSkeleton
-            columnCount={7}
-            filterCount={2}
-            cellWidths={[
-              "10rem",
-              "30rem",
-              "10rem",
-              "10rem",
-              "6rem",
-              "6rem",
-              "6rem",
-            ]}
-            shrinkZero
-          />
-        }
-      >
-        <ContactTable promises={promises} />
-      </React.Suspense>
-    </>
+    <div className="p-8">
+      <FeatureFlagsProvider>
+        <React.Suspense
+          fallback={
+            <DataTableSkeleton
+              columnCount={7}
+              filterCount={2}
+              cellWidths={[
+                "10rem",
+                "30rem",
+                "10rem",
+                "10rem",
+                "6rem",
+                "6rem",
+                "6rem",
+              ]}
+              shrinkZero
+            />
+          }
+        >
+          <ContactTable promises={promises} />
+        </React.Suspense>
+      </FeatureFlagsProvider>
+    </div>
   );
 }

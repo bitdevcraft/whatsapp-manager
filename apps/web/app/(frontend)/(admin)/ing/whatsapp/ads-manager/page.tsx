@@ -1,6 +1,6 @@
 "use client";
 
-import { useTitle } from "@/components/title-provider";
+import { useTitle } from "@/components/provider/title-provider";
 import { useEffect } from "react";
 
 export default function Home() {

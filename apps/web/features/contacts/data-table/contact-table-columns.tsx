@@ -5,7 +5,8 @@ import { Contact } from "@workspace/db/schema/contacts";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
-import { Ellipsis, Text } from "lucide-react";
+import { formatDate } from "@workspace/ui/lib/format";
+import { CalendarIcon, Ellipsis, Text } from "lucide-react";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -34,6 +35,7 @@ export const columns: ColumnDef<Contact>[] = [
     size: 40,
   },
   {
+    id: "name",
     accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
@@ -46,17 +48,40 @@ export const columns: ColumnDef<Contact>[] = [
     },
     enableColumnFilter: true,
   },
+
   {
+    id: "phone",
     accessorKey: "phone",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Phone" />
     ),
+    meta: {
+      label: "Phone",
+    },
   },
   {
+    id: "email",
     accessorKey: "email",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
+    meta: {
+      label: "Email",
+    },
+  },
+  {
+    id: "createdAt",
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ cell }) => formatDate(cell.getValue<Date>()),
+    meta: {
+      label: "Created At",
+      variant: "dateRange",
+      icon: CalendarIcon,
+    },
+    enableColumnFilter: true,
   },
   {
     id: "actions",

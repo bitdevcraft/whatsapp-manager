@@ -2,7 +2,7 @@
 
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
-import { useCurrentTitle } from "../title-provider";
+import { useCurrentTitle } from "../provider/title-provider";
 
 export function SiteHeader() {
   const title = useCurrentTitle();

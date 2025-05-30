@@ -1,7 +1,7 @@
 "use client";
 
-import { columns } from "@/features/contacts/columns";
 import React from "react";
+
 import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import {
   DataTable,
@@ -10,13 +10,18 @@ import {
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
+
 import { ContactsTableActionBar } from "./contact-table-action-bar";
-import { getContacts } from "@/features/contacts/queries";
+import { columns } from "@/features/contacts/data-table/contact-table-columns";
+import { getContacts } from "@/features/contacts/data-table/queries";
+import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 
 interface ContactTableProps {
   promises: Promise<[Awaited<ReturnType<typeof getContacts>>]>;
 }
 export default function ContactTable({ promises }: ContactTableProps) {
+  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
+
   const [{ data, pageCount }] = React.use(promises);
 
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
@@ -28,6 +33,10 @@ export default function ContactTable({ promises }: ContactTableProps) {
       sorting: [{ id: "createdAt", desc: true }],
       columnPinning: { right: ["actions"] },
       pagination: { pageSize: 10, pageIndex: 1 },
+      columnVisibility: {
+        phone: false,
+        email: false,
+      },
     },
     getRowId: (row) => row.id,
     shallow: false,
@@ -35,24 +44,27 @@ export default function ContactTable({ promises }: ContactTableProps) {
   });
 
   return (
-    <div className="p-8">
+    <div className="">
       <DataTable
         table={table}
         actionBar={<ContactsTableActionBar table={table} />}
       >
-        <DataTableToolbar table={table}>
-          <DataTableSortList table={table} align="start" />
-        </DataTableToolbar>
-        {/* <DataTableAdvancedToolbar table={table}>
-          <DataTableSortList table={table} align="start" />
-          <DataTableFilterList
-            table={table}
-            shallow={shallow}
-            debounceMs={debounceMs}
-            throttleMs={throttleMs}
-            align="start"
-          />
-        </DataTableAdvancedToolbar> */}
+        {enableAdvancedFilter ? (
+          <DataTableAdvancedToolbar table={table}>
+            <DataTableFilterList
+              table={table}
+              shallow={shallow}
+              debounceMs={debounceMs}
+              throttleMs={throttleMs}
+              align="end"
+            />
+            <DataTableSortList table={table} align="start" />
+          </DataTableAdvancedToolbar>
+        ) : (
+          <DataTableToolbar table={table}>
+            <DataTableSortList table={table} align="start" />
+          </DataTableToolbar>
+        )}
       </DataTable>
     </div>
   );
