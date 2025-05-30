@@ -19,8 +19,8 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import React, { JSX } from "react";
-import { DataTablePagination } from "@workspace/ui/components/data-table-pagination";
-import { DataTableViewOptions } from "@workspace/ui/components/data-table-view-options";
+import { DataTablePagination } from "@workspace/ui/components/custom/data-table-pagination";
+import { DataTableViewOptions } from "@workspace/ui/components/custom/data-table-view-options";
 import { Loader2 } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {

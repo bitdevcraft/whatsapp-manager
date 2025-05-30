@@ -1,11 +1,11 @@
 "use client";
 
-import type { Option } from "@workspace/types/data-table";
+import type { Option } from "@workspace/ui/types/data-table";
 import type { Column } from "@tanstack/react-table";
 import { Check, PlusCircle, XCircle } from "lucide-react";
 
-import { Badge } from "@workspace/components/ui/badge";
-import { Button } from "@workspace/components/ui/button";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   Command,
   CommandEmpty,
@@ -14,13 +14,13 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@workspace/components/ui/command";
+} from "@workspace/ui/components/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@workspace/components/ui/popover";
-import { Separator } from "@workspace/components/ui/separator";
+} from "@workspace/ui/components/popover";
+import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import * as React from "react";
 

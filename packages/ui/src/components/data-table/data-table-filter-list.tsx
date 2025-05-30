@@ -12,10 +12,10 @@ import {
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter } from "@workspace/components/data-table/data-table-range-filter";
-import { Badge } from "@workspace/components/ui/badge";
-import { Button } from "@workspace/components/ui/button";
-import { Calendar } from "@workspace/components/ui/calendar";
+import { DataTableRangeFilter } from "@workspace/ui/data-table";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import { Calendar } from "@workspace/ui/components/calendar";
 import {
   Command,
   CommandEmpty,
@@ -23,7 +23,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@workspace/components/ui/command";
+} from "@workspace/ui/components/command";
 import {
   Faceted,
   FacetedBadgeList,
@@ -34,39 +34,42 @@ import {
   FacetedItem,
   FacetedList,
   FacetedTrigger,
-} from "@workspace/components/ui/faceted";
-import { Input } from "@workspace/components/ui/input";
+} from "@workspace/ui/components/faceted";
+import { Input } from "@workspace/ui/components/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@workspace/components/ui/popover";
+} from "@workspace/ui/components/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/components/ui/select";
+} from "@workspace/ui/components/select";
 import {
   Sortable,
   SortableContent,
   SortableItem,
   SortableItemHandle,
   SortableOverlay,
-} from "@workspace/components/ui/sortable";
-import { dataTableConfig } from "@workspace/config/data-table";
-import { useDebouncedCallback } from "@workspace/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@workspace/lib/data-table";
-import { formatDate } from "@workspace/lib/format";
-import { generateId } from "@workspace/lib/id";
-import { getFiltersStateParser } from "@workspace/lib/parsers";
+} from "@workspace/ui/components/sortable";
+import { dataTableConfig } from "@workspace/ui/config/data-table";
+import { useDebouncedCallback } from "@workspace/ui/hooks/use-debounced-callback";
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+} from "@workspace/ui/lib/data-table";
+import { formatDate } from "@workspace/ui/lib/format";
+import { generateId } from "@workspace/ui/lib/id";
+import { getFiltersStateParser } from "@workspace/ui/lib/parsers";
 import { cn } from "@workspace/ui/lib/utils";
 import type {
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
-} from "@workspace/types/data-table";
+} from "@workspace/ui/types/data-table";
 
 const FILTERS_KEY = "filters";
 const JOIN_OPERATOR_KEY = "joinOperator";
@@ -110,7 +113,7 @@ export function DataTableFilterList<TData>({
         clearOnDefault: true,
         shallow,
         throttleMs,
-      }),
+      })
   );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
@@ -119,7 +122,7 @@ export function DataTableFilterList<TData>({
     parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
       clearOnDefault: true,
       shallow,
-    }),
+    })
   );
 
   const onFilterAdd = React.useCallback(() => {
@@ -134,7 +137,7 @@ export function DataTableFilterList<TData>({
         value: "",
         variant: column.columnDef.meta?.variant ?? "text",
         operator: getDefaultFilterOperator(
-          column.columnDef.meta?.variant ?? "text",
+          column.columnDef.meta?.variant ?? "text"
         ),
         filterId: generateId({ length: 8 }),
       },
@@ -144,7 +147,7 @@ export function DataTableFilterList<TData>({
   const onFilterUpdate = React.useCallback(
     (
       filterId: string,
-      updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+      updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
     ) => {
       debouncedSetFilters((prevFilters) => {
         const updatedFilters = prevFilters.map((filter) => {
@@ -156,20 +159,20 @@ export function DataTableFilterList<TData>({
         return updatedFilters;
       });
     },
-    [debouncedSetFilters],
+    [debouncedSetFilters]
   );
 
   const onFilterRemove = React.useCallback(
     (filterId: string) => {
       const updatedFilters = filters.filter(
-        (filter) => filter.filterId !== filterId,
+        (filter) => filter.filterId !== filterId
       );
       void setFilters(updatedFilters);
       requestAnimationFrame(() => {
         addButtonRef.current?.focus();
       });
     },
-    [filters, setFilters],
+    [filters, setFilters]
   );
 
   const onFiltersReset = React.useCallback(() => {
@@ -220,7 +223,7 @@ export function DataTableFilterList<TData>({
         onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
       }
     },
-    [filters, onFilterRemove],
+    [filters, onFilterRemove]
   );
 
   return (
@@ -258,7 +261,7 @@ export function DataTableFilterList<TData>({
               id={descriptionId}
               className={cn(
                 "text-muted-foreground text-sm",
-                filters.length > 0 && "sr-only",
+                filters.length > 0 && "sr-only"
               )}
             >
               {filters.length > 0
@@ -333,7 +336,7 @@ interface DataTableFilterItemProps<TData> {
   columns: Column<TData>[];
   onFilterUpdate: (
     filterId: string,
-    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
   ) => void;
   onFilterRemove: (filterId: string) => void;
 }
@@ -387,7 +390,7 @@ function DataTableFilterItem<TData>({
       showOperatorSelector,
       showValueSelector,
       onFilterRemove,
-    ],
+    ]
   );
 
   return (
@@ -467,7 +470,7 @@ function DataTableFilterItem<TData>({
                           id: value as Extract<keyof TData, string>,
                           variant: column.columnDef.meta?.variant ?? "text",
                           operator: getDefaultFilterOperator(
-                            column.columnDef.meta?.variant ?? "text",
+                            column.columnDef.meta?.variant ?? "text"
                           ),
                           value: "",
                         });
@@ -481,7 +484,7 @@ function DataTableFilterItem<TData>({
                       <Check
                         className={cn(
                           "ml-auto",
-                          column.id === filter.id ? "opacity-100" : "opacity-0",
+                          column.id === filter.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -573,7 +576,7 @@ function onFilterInputRender<TData>({
   columnMeta?: ColumnMeta<TData, unknown>;
   onFilterUpdate: (
     filterId: string,
-    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
   ) => void;
   showValueSelector: boolean;
   setShowValueSelector: (value: boolean) => void;
@@ -749,7 +752,7 @@ function onFilterInputRender<TData>({
       const displayValue =
         filter.operator === "isBetween" && dateValue.length === 2
           ? `${formatDate(new Date(Number(dateValue[0])))} - ${formatDate(
-              new Date(Number(dateValue[1])),
+              new Date(Number(dateValue[1]))
             )}`
           : dateValue[0]
             ? formatDate(new Date(Number(dateValue[0])))
@@ -766,7 +769,7 @@ function onFilterInputRender<TData>({
               size="sm"
               className={cn(
                 "w-full justify-start rounded text-left font-normal",
-                !filter.value && "text-muted-foreground",
+                !filter.value && "text-muted-foreground"
               )}
             >
               <CalendarIcon />

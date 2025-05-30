@@ -8,6 +8,7 @@ import {
   SidebarProvider,
 } from "@workspace/ui/components/sidebar";
 import { Toaster } from "sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export default async function Layout({
   children,

@@ -1,4 +1,4 @@
-import { Skeleton } from "@workspace/components/ui/skeleton";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Table,
   TableBody,
@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@workspace/components/ui/table";
+} from "@workspace/ui/components/table";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface DataTableSkeletonProps extends React.ComponentProps<"div"> {
@@ -32,7 +32,7 @@ export function DataTableSkeleton({
 }: DataTableSkeletonProps) {
   const cozyCellWidths = Array.from(
     { length: columnCount },
-    (_, index) => cellWidths[index % cellWidths.length] ?? "auto",
+    (_, index) => cellWidths[index % cellWidths.length] ?? "auto"
   );
 
   return (

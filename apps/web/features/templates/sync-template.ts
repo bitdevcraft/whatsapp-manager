@@ -1,13 +1,13 @@
 import { db } from "@workspace/db/index";
 import { templatesTable } from "@workspace/db/schema/templates";
-import WhatsApp from "@workspace/wa-cloud-api/";
+import WhatsApp from "@workspace/wa-cloud-api";
 
 const waPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const waAccessToken = process.env.WHATSAPP_API_ACCESS_TOKEN;
 const waBusinessAccountId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
 
 if (!waPhoneNumberId || !waAccessToken || !waBusinessAccountId) {
-  throw new Error("OPEN_AI_API_KEY not defined!");
+  throw new Error("Environment not defined!");
 }
 
 const whatsapp = new WhatsApp({

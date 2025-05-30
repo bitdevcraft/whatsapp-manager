@@ -3,16 +3,16 @@
 import type { Column } from "@tanstack/react-table";
 import * as React from "react";
 
-import { Button } from "@workspace/components/ui/button";
-import { Input } from "@workspace/components/ui/input";
-import { Label } from "@workspace/components/ui/label";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@workspace/components/ui/popover";
-import { Separator } from "@workspace/components/ui/separator";
-import { Slider } from "@workspace/components/ui/slider";
+} from "@workspace/ui/components/popover";
+import { Separator } from "@workspace/ui/components/separator";
+import { Slider } from "@workspace/ui/components/slider";
 import { cn } from "@workspace/ui/lib/utils";
 import { PlusCircle, XCircle } from "lucide-react";
 

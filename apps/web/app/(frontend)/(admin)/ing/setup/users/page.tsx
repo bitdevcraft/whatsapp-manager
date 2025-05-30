@@ -2,7 +2,7 @@
 
 import { useTitle } from "@/components/title-provider";
 import { Contact } from "@workspace/db/schema/contacts";
-import { DataTable } from "@workspace/ui/components/data-table";
+import { DataTable } from "@workspace/ui/components/custom/data-table";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { columns } from "@/features/users/columns";

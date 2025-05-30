@@ -4,12 +4,14 @@ import type { Column, Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import * as React from "react";
 
-import { DataTableDateFilter } from "@workspace/components/data-table/data-table-date-filter";
-import { DataTableFacetedFilter } from "@workspace/components/data-table/data-table-faceted-filter";
-import { DataTableSliderFilter } from "@workspace/components/data-table/data-table-slider-filter";
-import { DataTableViewOptions } from "@workspace/components/data-table/data-table-view-options";
-import { Button } from "@workspace/components/ui/button";
-import { Input } from "@workspace/components/ui/input";
+import {
+  DataTableDateFilter,
+  DataTableFacetedFilter,
+  DataTableSliderFilter,
+  DataTableViewOptions,
+} from "@workspace/ui/data-table";
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
@@ -26,7 +28,7 @@ export function DataTableToolbar<TData>({
 
   const columns = React.useMemo(
     () => table.getAllColumns().filter((column) => column.getCanFilter()),
-    [table],
+    [table]
   );
 
   const onReset = React.useCallback(() => {
@@ -39,7 +41,7 @@ export function DataTableToolbar<TData>({
       aria-orientation="horizontal"
       className={cn(
         "flex w-full items-start justify-between gap-2 p-1",
-        className,
+        className
       )}
       {...props}
     >

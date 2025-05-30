@@ -25,7 +25,8 @@ export default function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
         <Providers>
-          <SocketProvider>{children}</SocketProvider>
+          {/* <SocketProvider>{children}</SocketProvider> */}
+          {children}
         </Providers>
       </body>
     </html>

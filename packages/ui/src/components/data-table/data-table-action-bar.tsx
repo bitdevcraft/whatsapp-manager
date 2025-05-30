@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@workspace/components/ui/button";
-import { Separator } from "@workspace/components/ui/separator";
+import { Button } from "@workspace/ui/components/button";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@workspace/components/ui/tooltip";
+} from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
 import type { Table } from "@tanstack/react-table";
 import { Loader, X } from "lucide-react";

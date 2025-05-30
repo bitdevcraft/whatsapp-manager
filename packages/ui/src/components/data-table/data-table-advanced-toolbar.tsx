@@ -3,7 +3,7 @@
 import type { Table } from "@tanstack/react-table";
 import type * as React from "react";
 
-import { DataTableViewOptions } from "@workspace/components/data-table/data-table-view-options";
+import { DataTableViewOptions } from "@workspace/ui/data-table";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface DataTableAdvancedToolbarProps<TData>
@@ -23,7 +23,7 @@ export function DataTableAdvancedToolbar<TData>({
       aria-orientation="horizontal"
       className={cn(
         "flex w-full items-start justify-between gap-2 p-1",
-        className,
+        className
       )}
       {...props}
     >

@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import { Badge } from "@workspace/components/ui/badge";
-import { Button } from "@workspace/components/ui/button";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
   Command,
   CommandEmpty,
@@ -18,27 +18,27 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@workspace/components/ui/command";
+} from "@workspace/ui/components/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@workspace/components/ui/popover";
+} from "@workspace/ui/components/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/components/ui/select";
+} from "@workspace/ui/components/select";
 import {
   Sortable,
   SortableContent,
   SortableItem,
   SortableItemHandle,
   SortableOverlay,
-} from "@workspace/components/ui/sortable";
-import { dataTableConfig } from "@workspace/config/data-table";
+} from "@workspace/ui/components/sortable";
+import { dataTableConfig } from "@workspace/ui/config/data-table";
 import { cn } from "@workspace/ui/lib/utils";
 
 const OPEN_MENU_SHORTCUT = "s";

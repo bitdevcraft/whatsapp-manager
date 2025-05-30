@@ -7,7 +7,8 @@
   "scripts": {
     "migrate:dev": "drizzle-kit generate",
     "push": "drizzle-kit push",
-    "rollback": "drizzle-kit rollback"
+    "rollback": "drizzle-kit rollback",
+    "db:seed": "dotenv tsx src/seeds/seed-contact.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,12 +21,15 @@
     "pg": "^8.16.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@types/pg": "^8.15.2",
-    "drizzle-kit": "^0.31.1",
-    "tsx": "^4.19.4",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "typescript": "^5.7.3"
+    "drizzle-kit": "^0.31.1",
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.3",
+    "uuid": "^11.1.0",
+    "dotenv-cli": "^8.0.0"
   },
   "exports": {
     ".": "./src/index.ts",

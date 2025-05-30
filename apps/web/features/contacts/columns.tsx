@@ -2,10 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Contact } from "@workspace/db/schema/contacts";
+import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
-import { DataTableColumnHeader } from "@workspace/ui/components/data-table-column-header";
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+import { DataTableColumnHeader } from "@workspace/ui/data-table";
+import { Ellipsis, Text } from "lucide-react";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -18,6 +18,7 @@ export const columns: ColumnDef<Contact>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
+        className="translate-y-0.5"
       />
     ),
     cell: ({ row }) => (
@@ -25,27 +26,50 @@ export const columns: ColumnDef<Contact>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
+        className="translate-y-0.5"
       />
     ),
     enableSorting: false,
     enableHiding: false,
+    size: 40,
   },
   {
     accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Name" />
     ),
+    meta: {
+      label: "Title",
+      placeholder: "Search titles...",
+      variant: "text",
+      icon: Text,
+    },
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: "phone",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Phone" />
+    ),
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Email" />
+    ),
   },
   {
     id: "actions",
-    header: "Actions",
     cell: ({ row }) => (
-      <button
-        onClick={() => console.log("Edit", row.original.id)}
-        className="text-blue-600"
+      <Button
+        aria-label="Open menu"
+        variant="ghost"
+        className="flex size-8 p-0 data-[state=open]:bg-muted"
       >
-        Edit
-      </button>
+        <Ellipsis className="size-4" aria-hidden="true" />
+      </Button>
     ),
+    enableSorting: false,
+    size: 40,
   },
 ];

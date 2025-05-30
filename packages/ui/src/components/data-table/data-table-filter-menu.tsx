@@ -12,9 +12,9 @@ import {
 import { useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter } from "@workspace/components/data-table/data-table-range-filter";
-import { Button } from "@workspace/components/ui/button";
-import { Calendar } from "@workspace/components/ui/calendar";
+import { DataTableRangeFilter } from "@workspace/ui/data-table";
+import { Button } from "@workspace/ui/components/button";
+import { Calendar } from "@workspace/ui/components/calendar";
 import {
   Command,
   CommandEmpty,
@@ -22,27 +22,33 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@workspace/components/ui/command";
-import { Input } from "@workspace/components/ui/input";
+} from "@workspace/ui/components/command";
+import { Input } from "@workspace/ui/components/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@workspace/components/ui/popover";
+} from "@workspace/ui/components/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/components/ui/select";
-import { useDebouncedCallback } from "@workspace/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@workspace/lib/data-table";
-import { formatDate } from "@workspace/lib/format";
-import { generateId } from "@workspace/lib/id";
-import { getFiltersStateParser } from "@workspace/lib/parsers";
+} from "@workspace/ui/components/select";
+import { useDebouncedCallback } from "@workspace/ui/hooks/use-debounced-callback";
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+} from "@workspace/ui/lib/data-table";
+import { formatDate } from "@workspace/ui/lib/format";
+import { generateId } from "@workspace/ui/lib/id";
+import { getFiltersStateParser } from "@workspace/ui/lib/parsers";
 import { cn } from "@workspace/ui/lib/utils";
-import type { ExtendedColumnFilter, FilterOperator } from "@workspace/types/data-table";
+import type {
+  ExtendedColumnFilter,
+  FilterOperator,
+} from "@workspace/ui/types/data-table";
 
 const FILTERS_KEY = "filters";
 const DEBOUNCE_MS = 300;

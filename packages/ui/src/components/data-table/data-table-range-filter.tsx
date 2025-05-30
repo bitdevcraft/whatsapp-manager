@@ -3,9 +3,9 @@
 import type { Column } from "@tanstack/react-table";
 import * as React from "react";
 
-import { Input } from "@workspace/components/ui/input";
+import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
-import type { ExtendedColumnFilter } from "@workspace/types/data-table";
+import type { ExtendedColumnFilter } from "@workspace/ui/types/data-table";
 
 interface DataTableRangeFilterProps<TData> extends React.ComponentProps<"div"> {
   filter: ExtendedColumnFilter<TData>;
