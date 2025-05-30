@@ -5,6 +5,8 @@ import React from "react";
 import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import {
   DataTable,
+  DataTableAdvancedToolbar,
+  DataTableFilterList,
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
@@ -17,16 +19,18 @@ interface ContactTableProps {
 export default function ContactTable({ promises }: ContactTableProps) {
   const [{ data, pageCount }] = React.use(promises);
 
-  const { table } = useDataTable({
+  const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data,
     columns,
     pageCount,
+    enableAdvancedFilter: false,
     initialState: {
+      sorting: [{ id: "createdAt", desc: true }],
       columnPinning: { right: ["actions"] },
       pagination: { pageSize: 10, pageIndex: 1 },
     },
     getRowId: (row) => row.id,
-    shallow: true,
+    shallow: false,
     clearOnDefault: true,
   });
 
@@ -39,6 +43,16 @@ export default function ContactTable({ promises }: ContactTableProps) {
         <DataTableToolbar table={table}>
           <DataTableSortList table={table} align="start" />
         </DataTableToolbar>
+        {/* <DataTableAdvancedToolbar table={table}>
+          <DataTableSortList table={table} align="start" />
+          <DataTableFilterList
+            table={table}
+            shallow={shallow}
+            debounceMs={debounceMs}
+            throttleMs={throttleMs}
+            align="start"
+          />
+        </DataTableAdvancedToolbar> */}
       </DataTable>
     </div>
   );

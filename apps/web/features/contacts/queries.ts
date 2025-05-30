@@ -15,7 +15,7 @@ import {
 } from "drizzle-orm";
 import { contactsTable } from "@workspace/db/schema/contacts";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { text } from "drizzle-orm/mysql-core";
+
 
 export async function getContacts(input: GetSchema) {
   return await unstable_cache(
@@ -24,12 +24,22 @@ export async function getContacts(input: GetSchema) {
         console.log("Render", JSON.stringify(input));
         const offset = (input.page - 1) * input.perPage;
 
+        const orderBy =
+          input.sort.length > 0
+            ? input.sort.map((item) =>
+                item.desc
+                  ? desc(contactsTable[item.id])
+                  : asc(contactsTable[item.id])
+              )
+            : [asc(contactsTable.createdAt)];
+
         const { data, total } = await db.transaction(async (tx) => {
           const data = await tx
             .select()
             .from(contactsTable)
             .limit(input.perPage)
-            .offset(offset);
+            .offset(offset)
+            .orderBy(...orderBy);
 
           const total = await tx
             .select({

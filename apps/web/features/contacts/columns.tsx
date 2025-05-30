@@ -39,8 +39,8 @@ export const columns: ColumnDef<Contact>[] = [
       <DataTableColumnHeader column={column} title="Name" />
     ),
     meta: {
-      label: "Title",
-      placeholder: "Search titles...",
+      label: "Name",
+      placeholder: "Search names...",
       variant: "text",
       icon: Text,
     },
