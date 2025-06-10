@@ -26,7 +26,7 @@ export default function Page() {
           <h1 className="text-2xl font-bold">Hello World</h1>
           <Button size="sm">Button</Button>
           <FacebookLogin
-            appId="1327220865234074"
+            appId="606557539005538"
             onLoginSuccess={handleLoginSuccess}
             onLoginFailure={handleLoginFailure}
           />

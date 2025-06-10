@@ -123,10 +123,12 @@ Our phone: ${message.displayPhoneNumber}`,
       } else {
         const aiResponse = await askAi(text, message.from);
         // Default response for other text messages
-        await client.messages.text({
+        const temp = await client.messages.text({
           body: aiResponse,
           to: message.from,
         });
+
+        console.log(temp);
       }
     }
   }
@@ -189,10 +191,7 @@ webhookHandler.onMessage(
   }
 );
 
-// webhookHandler.onEvent(
-//   "message_template_status_update",
-//   (event: WebhookEvent) => {
-//     console.log(event.field);
-//     console.log(JSON.stringify(event.value));
-//   }
-// );
+webhookHandler.onEvent("statuses", (event: WebhookEvent) => {
+  console.log(event.field);
+  console.log(JSON.stringify(event.value));
+});

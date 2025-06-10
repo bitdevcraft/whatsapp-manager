@@ -2,6 +2,7 @@ import { boolean, jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { baseSchema } from "../helpers/column.helper";
 import { relations } from "drizzle-orm";
 import { usersTable } from "./users";
+import { conversationsTable } from "./conversations";
 
 export const contactsTable = pgTable("contacts", {
   ...baseSchema,
@@ -15,11 +16,12 @@ export const contactsTable = pgTable("contacts", {
 });
 
 // Relations
-export const contactsRelations = relations(contactsTable, ({ one }) => ({
+export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
   assigned_to: one(usersTable, {
     fields: [contactsTable.assignedTo],
     references: [usersTable.id],
   }),
+  conversations: many(conversationsTable),
 }));
 
 export type Contact = typeof contactsTable.$inferSelect;

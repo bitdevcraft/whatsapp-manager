@@ -1,4 +1,4 @@
-import { getContacts } from "@/features/contacts/data-table/queries";
+import { getContacts } from "@/features/contacts/_lib/queries";
 import ContactTable from "@/features/contacts/data-table/contact-table";
 import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";

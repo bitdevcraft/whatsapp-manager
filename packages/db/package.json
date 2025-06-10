@@ -8,7 +8,8 @@
     "migrate:dev": "drizzle-kit generate",
     "push": "drizzle-kit push",
     "rollback": "drizzle-kit rollback",
-    "db:seed": "dotenv tsx src/seeds/seed-contact.ts"
+    "db:seed": "dotenv tsx src/seeds/seed-contact.ts",
+    "db:init": "pnpm push && pnpm db:seed"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +36,7 @@
     ".": "./src/index.ts",
     "./*": "./src/*.ts",
     "./schema/*": "./src/schema/*.ts",
+    "./schema": "./src/schema/index.ts",
     "./repository/*": "./src/repository/*.ts"
   }
 }

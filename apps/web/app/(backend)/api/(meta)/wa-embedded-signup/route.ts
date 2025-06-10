@@ -34,8 +34,7 @@ export async function POST(request: Request) {
       client_secret: process.env.META_CLIENT_SECRET,
       code: body.code,
       grant_type: "authorization_code",
-      redirect_uri:
-        "https://development.centcapio.cc/?business_id=1614850685816682&nonce=0LFAEU5CnRbBw73qzY3wG9b3lUnVApbx",
+      redirect_uri: "https://wa-ing.centcapio.cc/",
     }),
     headers: { "Content-Type": "application/json" },
   });

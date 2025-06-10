@@ -12,11 +12,11 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
-import { Contact, contactsTable } from "@workspace/db/schema/contacts";
+import { conversationsTable } from "@workspace/db/schema/conversations";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { GetContactSchema } from "../_lib/validations";
+import { GetConversationSchema } from "./validations";
 
-export async function getContacts(input: GetContactSchema) {
+export async function getConversations(input: GetConversationSchema) {
   return await unstable_cache(
     async () => {
       try {
@@ -24,7 +24,7 @@ export async function getContacts(input: GetContactSchema) {
         const advancedTable = input.filterFlag === "advancedFilters";
 
         const advancedWhere = filterColumns({
-          table: contactsTable,
+          table: conversationsTable,
           filters: input.filters,
           joinOperator: input.joinOperator,
         });
@@ -32,14 +32,11 @@ export async function getContacts(input: GetContactSchema) {
         const where = advancedTable
           ? advancedWhere
           : and(
-              input.name
-                ? ilike(contactsTable.name, `%${input.name}%`)
-                : undefined,
               input.createdAt.length > 0
                 ? and(
                     input.createdAt[0]
                       ? gte(
-                          contactsTable.createdAt,
+                          conversationsTable.createdAt,
                           (() => {
                             const date = new Date(input.createdAt[0]);
                             date.setHours(0, 0, 0, 0);
@@ -49,7 +46,7 @@ export async function getContacts(input: GetContactSchema) {
                       : undefined,
                     input.createdAt[1]
                       ? lte(
-                          contactsTable.createdAt,
+                          conversationsTable.createdAt,
                           (() => {
                             const date = new Date(input.createdAt[1]);
                             date.setHours(23, 59, 59, 999);
@@ -65,15 +62,15 @@ export async function getContacts(input: GetContactSchema) {
           input.sort.length > 0
             ? input.sort.map((item) =>
                 item.desc
-                  ? desc(contactsTable[item.id])
-                  : asc(contactsTable[item.id])
+                  ? desc(conversationsTable[item.id])
+                  : asc(conversationsTable[item.id])
               )
-            : [asc(contactsTable.createdAt)];
+            : [asc(conversationsTable.createdAt)];
 
         const { data, total } = await db.transaction(async (tx) => {
           const data = await tx
             .select()
-            .from(contactsTable)
+            .from(conversationsTable)
             .where(where)
             .limit(input.perPage)
             .offset(offset)
@@ -83,7 +80,7 @@ export async function getContacts(input: GetContactSchema) {
             .select({
               count: count(),
             })
-            .from(contactsTable)
+            .from(conversationsTable)
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0);
@@ -104,7 +101,7 @@ export async function getContacts(input: GetContactSchema) {
     [JSON.stringify(input)],
     {
       revalidate: 1,
-      tags: ["contacts"],
+      tags: ["Conversations"],
     }
   )();
 }

@@ -20,6 +20,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
+import { MarketingCampaign } from "@workspace/db/schema/marketing-campaigns";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 const actions = [
@@ -31,11 +32,13 @@ const actions = [
 
 type Action = (typeof actions)[number];
 
-interface ContactsTableActionBarProps {
-  table: Table<Contact>;
+interface MarketingCampaignsTableActionBarProps {
+  table: Table<MarketingCampaign>;
 }
 
-export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
+export function MarketingCampaignsTableActionBar({
+  table,
+}: MarketingCampaignsTableActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
   const [isPending, startTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);

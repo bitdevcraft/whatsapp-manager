@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createStepSchema,
   MultiStepForm,
@@ -12,29 +14,28 @@ import { z } from "zod";
 import TemplateStep from "./form-step-template";
 import AudienceStep from "./form-step-audience";
 import DetailsStep from "./form-step-details";
+import { useTitle } from "@/components/provider/title-provider";
+import { useEffect } from "react";
+import {
+  MarketingCampaignFormSchema,
+  MarketingCampaignFormValues,
+} from "@/features/marketing-campaigns/_lib/schema";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export const FormSchema = createStepSchema({
-  template: z.object({
-    template: z.string().min(3),
-  }),
-  audience: z.object({
-    tags: z.array(z.string()),
-    phone: z.array(z.string()),
-  }),
-  details: z.object({
-    campaignName: z.string().min(3),
-    description: z.string().optional(),
-    phoneNumber: z.string().nonempty(),
-    schedule: z.date().nullable(),
-    track: z.boolean(),
-  }),
-});
-
-export type FormValues = z.infer<typeof FormSchema>;
+import axios from "axios";
 
 export default function MarketingCampaignForm() {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
+  const router = useRouter();
+
+  const setTitle = useTitle();
+
+  useEffect(() => {
+    setTitle("Create Marketing Campaign");
+  }, [setTitle]);
+
+  const form = useForm<MarketingCampaignFormValues>({
+    resolver: zodResolver(MarketingCampaignFormSchema),
     defaultValues: {
       template: {
         template: "",
@@ -55,14 +56,34 @@ export default function MarketingCampaignForm() {
     mode: "onChange",
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: MarketingCampaignFormValues) => {
     console.log("Form submitted:", data);
+
+    try {
+      const response = await axios.post(
+        "/api/whatsapp/marketing-campaigns",
+        data
+      );
+
+      console.log(response);
+      toast.success("Marketing Campaign has been created", {
+        description: "Successful",
+      });
+
+      router.push(
+        `/ing/whatsapp/marketing-campaigns/${response.data.data[0].id}`
+      );
+    } catch (error: any) {
+      toast.error("Unsuccessful", {
+        description: `Please reach out the admin with this issue: ${error.message}`,
+      });
+    }
   };
 
   return (
     <MultiStepForm
       className={"space-y-10"}
-      schema={FormSchema}
+      schema={MarketingCampaignFormSchema}
       form={form}
       onSubmit={onSubmit}
     >

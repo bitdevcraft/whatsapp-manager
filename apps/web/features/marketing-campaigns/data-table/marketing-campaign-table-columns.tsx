@@ -1,14 +1,15 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Contact } from "@workspace/db/schema/contacts";
+import { MarketingCampaign } from "@workspace/db/schema/marketing-campaigns";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
 import { CalendarIcon, Ellipsis, Text } from "lucide-react";
+import Link from "next/link";
 
-export const columns: ColumnDef<Contact>[] = [
+export const columns: ColumnDef<MarketingCampaign>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -46,28 +47,14 @@ export const columns: ColumnDef<Contact>[] = [
       variant: "text",
       icon: Text,
     },
+    cell: ({ row }) => {
+      return (
+        <Link href={`/ing/whatsapp/marketing-campaigns/${row.id}`}>
+          {row.original.name}
+        </Link>
+      );
+    },
     enableColumnFilter: true,
-  },
-
-  {
-    id: "phone",
-    accessorKey: "phone",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Phone" />
-    ),
-    meta: {
-      label: "Phone",
-    },
-  },
-  {
-    id: "email",
-    accessorKey: "email",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
-    ),
-    meta: {
-      label: "Email",
-    },
   },
   {
     id: "createdAt",

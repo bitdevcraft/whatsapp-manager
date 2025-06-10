@@ -11,23 +11,23 @@ import {
   DataTableToolbar,
 } from "@workspace/ui/data-table";
 
-import { ContactsTableActionBar } from "./contact-table-action-bar";
-import { columns } from "@/features/contacts/data-table/contact-table-columns";
-import { getContacts } from "@/features/contacts/_lib/queries";
+import { ConversationsTableActionBar } from "./conversation-table-action-bar";
+import { columns } from "@/features/conversations/data-table/conversation-table-columns";
+import { getConversations } from "@/features/conversations/_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { useTitle } from "@/components/provider/title-provider";
 
-interface ContactTableProps {
-  promises: Promise<[Awaited<ReturnType<typeof getContacts>>]>;
+export interface ConversationTableProps {
+  promises: Promise<[Awaited<ReturnType<typeof getConversations>>]>;
 }
-export default function ContactTable({ promises }: ContactTableProps) {
+export default function ConversationTable({
+  promises,
+}: ConversationTableProps) {
   const setTitle = useTitle();
 
   useEffect(() => {
-    setTitle("Contacts");
+    setTitle("Conversations");
   }, [setTitle]);
-
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
 
   const [{ data, pageCount }] = React.use(promises);
 
@@ -54,24 +54,10 @@ export default function ContactTable({ promises }: ContactTableProps) {
     <div className="">
       <DataTable
         table={table}
-        actionBar={<ContactsTableActionBar table={table} />}
+        actionBar={<ConversationsTableActionBar table={table} />}
+        paginationClassName="sm:flex sm:flex-col-reverse"
       >
-        {enableAdvancedFilter ? (
-          <DataTableAdvancedToolbar table={table}>
-            <DataTableFilterList
-              table={table}
-              shallow={shallow}
-              debounceMs={debounceMs}
-              throttleMs={throttleMs}
-              align="end"
-            />
-            <DataTableSortList table={table} align="start" />
-          </DataTableAdvancedToolbar>
-        ) : (
-          <DataTableToolbar table={table}>
-            <DataTableSortList table={table} align="start" />
-          </DataTableToolbar>
-        )}
+        <DataTableToolbar table={table} hideViewColumns></DataTableToolbar>
       </DataTable>
     </div>
   );

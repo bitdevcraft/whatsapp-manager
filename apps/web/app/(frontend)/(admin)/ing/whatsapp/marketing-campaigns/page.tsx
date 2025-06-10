@@ -1,47 +1,51 @@
-"use client";
+import { getMarketingCampaigns } from "@/features/marketing-campaigns/_lib/queries";
+import ContactTable from "@/features/contacts/data-table/contact-table";
+import React from "react";
+import { DataTableSkeleton } from "@workspace/ui/components/data-table";
+import { getValidFilters } from "@workspace/ui/lib/data-table";
+import { SearchParams } from "@/types";
+import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+import { marketingCampaignSearchParamsCache } from "@/features/marketing-campaigns/_lib/validations";
+import MarketingCampaignTable from "@/features/marketing-campaigns/data-table/marketing-campaign-table";
 
-import { useTitle } from "@/components/provider/title-provider";
-import { DataTable } from "@workspace/ui/components/custom/data-table";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { MarketingCampaign } from "@workspace/db/schema/marketing-campaigns";
-import { columns } from "@/features/marketing-campaigns/columns";
-import { Button } from "@workspace/ui/components/button";
-export default function Home() {
-  const setTitle = useTitle();
+interface IndexPageProps {
+  searchParams: Promise<SearchParams>;
+}
 
-  useEffect(() => {
-    setTitle("Marketing Campaigns");
-  }, [setTitle]);
+export default async function Home(props: IndexPageProps) {
+  const searchParams = await props.searchParams;
+  const search = marketingCampaignSearchParamsCache.parse(searchParams);
 
-  const [data, setData] = useState<MarketingCampaign[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const validFilters = getValidFilters(search.filters);
 
-  const fetchData = async () => {
-    const response = await axios.get("/api/whatsapp/marketing-campaigns", {
-      withCredentials: true,
-    });
-    setData(response.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const promises = Promise.all([
+    getMarketingCampaigns({ ...search, filters: validFilters }),
+  ]);
 
   return (
-    <section className="p-4">
-      <DataTable
-        title=""
-        columns={columns}
-        data={data}
-        actions={() => (
-          <a href="/ing/whatsapp/marketing-campaigns/new">
-            <Button>Create Campaign</Button>
-          </a>
-        )}
-        isLoading={loading}
-      />
-    </section>
+    <div className="p-8">
+      <FeatureFlagsProvider>
+        <React.Suspense
+          fallback={
+            <DataTableSkeleton
+              columnCount={7}
+              filterCount={2}
+              cellWidths={[
+                "10rem",
+                "30rem",
+                "10rem",
+                "10rem",
+                "6rem",
+                "6rem",
+                "6rem",
+              ]}
+              shrinkZero
+            />
+          }
+        >
+          <MarketingCampaignTable promises={promises} />
+        </React.Suspense>
+      </FeatureFlagsProvider>
+    </div>
   );
 }

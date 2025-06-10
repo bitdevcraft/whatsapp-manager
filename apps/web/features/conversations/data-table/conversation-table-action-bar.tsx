@@ -1,6 +1,9 @@
 "use client";
 
-import { type Contact, contactsTable } from "@workspace/db/schema/contacts";
+import {
+  type Conversation,
+  conversationsTable,
+} from "@workspace/db/schema/conversations";
 import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
 import { ArrowUp, CheckCircle2, Download, Trash2 } from "lucide-react";
@@ -31,11 +34,13 @@ const actions = [
 
 type Action = (typeof actions)[number];
 
-interface ContactsTableActionBarProps {
-  table: Table<Contact>;
+interface ConversationsTableActionBarProps {
+  table: Table<Conversation>;
 }
 
-export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
+export function ConversationsTableActionBar({
+  table,
+}: ConversationsTableActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
   const [isPending, startTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);
@@ -80,7 +85,7 @@ export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
       <div className="flex items-center gap-1.5">
         <DataTableActionBarAction
           size="icon"
-          tooltip="Export Contacts"
+          tooltip="Export Conversations"
           isPending={getIsActionPending("export")}
           onClick={onTaskExport}
         >
@@ -88,7 +93,7 @@ export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
         </DataTableActionBarAction>
         <DataTableActionBarAction
           size="icon"
-          tooltip="Delete Contacts"
+          tooltip="Delete Conversations"
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}
         >

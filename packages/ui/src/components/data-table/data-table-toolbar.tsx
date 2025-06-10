@@ -16,12 +16,14 @@ import { cn } from "@workspace/ui/lib/utils";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>;
+  hideViewColumns?: boolean;
 }
 
 export function DataTableToolbar<TData>({
   table,
   children,
   className,
+  hideViewColumns = false,
   ...props
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
@@ -64,7 +66,7 @@ export function DataTableToolbar<TData>({
       </div>
       <div className="flex items-center gap-2">
         {children}
-        <DataTableViewOptions table={table} />
+        {!hideViewColumns && <DataTableViewOptions table={table} />}
       </div>
     </div>
   );

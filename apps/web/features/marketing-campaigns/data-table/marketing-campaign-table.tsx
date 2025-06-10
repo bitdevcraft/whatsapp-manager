@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import {
@@ -10,22 +11,28 @@ import {
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
-
-import { ContactsTableActionBar } from "./contact-table-action-bar";
-import { columns } from "@/features/contacts/data-table/contact-table-columns";
-import { getContacts } from "@/features/contacts/_lib/queries";
+import { getMarketingCampaigns } from "../_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
+import { columns } from "./marketing-campaign-table-columns";
+import { MarketingCampaignsTableActionBar } from "./marketing-campaign-table-action-bar";
+import { Button } from "@workspace/ui/components/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
 
-interface ContactTableProps {
-  promises: Promise<[Awaited<ReturnType<typeof getContacts>>]>;
+interface MarketingCampaignTableProps {
+  promises: Promise<[Awaited<ReturnType<typeof getMarketingCampaigns>>]>;
 }
-export default function ContactTable({ promises }: ContactTableProps) {
+export default function MarketingCampaignTable({
+  promises,
+}: MarketingCampaignTableProps) {
   const setTitle = useTitle();
 
   useEffect(() => {
-    setTitle("Contacts");
+    setTitle("Marketing Campaigns");
   }, [setTitle]);
+
+  const pathname = usePathname();
 
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
 
@@ -40,10 +47,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
       sorting: [{ id: "createdAt", desc: true }],
       columnPinning: { right: ["actions"] },
       pagination: { pageSize: 10, pageIndex: 1 },
-      columnVisibility: {
-        phone: false,
-        email: false,
-      },
+      columnVisibility: {},
     },
     getRowId: (row) => row.id,
     shallow: false,
@@ -54,7 +58,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
     <div className="">
       <DataTable
         table={table}
-        actionBar={<ContactsTableActionBar table={table} />}
+        actionBar={<MarketingCampaignsTableActionBar table={table} />}
       >
         {enableAdvancedFilter ? (
           <DataTableAdvancedToolbar table={table}>
@@ -65,10 +69,22 @@ export default function ContactTable({ promises }: ContactTableProps) {
               throttleMs={throttleMs}
               align="end"
             />
+            <Link href={`${pathname}/new`}>
+              <Button size="sm" variant="outline">
+                <Plus />
+                New
+              </Button>
+            </Link>
             <DataTableSortList table={table} align="start" />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
+            <Link href={`${pathname}/new`}>
+              <Button size="sm" variant="outline">
+                <Plus />
+                New
+              </Button>
+            </Link>
             <DataTableSortList table={table} align="start" />
           </DataTableToolbar>
         )}

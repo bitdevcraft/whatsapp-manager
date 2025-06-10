@@ -1,7 +1,6 @@
 "use client";
 
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
-import { FormSchema } from "./marketing-campaign-form";
 import {
   Form,
   FormControl,
@@ -22,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { ArrowRight } from "lucide-react";
+import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 
 function TemplateStep() {
   const [data, setData] = useState<Template[]>([]);
@@ -42,10 +43,15 @@ function TemplateStep() {
   }, []);
 
   const { form, nextStep, isStepValid } =
-    useMultiStepFormContext<typeof FormSchema>();
+    useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
   return (
     <Form {...form}>
+      <div className="flex justify-end gap-2">
+        <Button type="button" size="icon" variant="outline" onClick={nextStep}>
+          <ArrowRight />
+        </Button>
+      </div>
       <div className={"flex flex-col gap-4"}>
         <FormField
           name="template.template"
