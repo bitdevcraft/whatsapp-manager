@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "@/app/(frontend)/(login)/actions";
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -7,6 +8,7 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
+import { User } from "@workspace/db/schema";
 
 import {
   Avatar,
@@ -28,17 +30,21 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
+import { LogOut, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import useSWR from "swr";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export function NavUser() {
   const { isMobile } = useSidebar();
+  const { data: user } = useSWR<User>("/api/user", fetcher);
+  const router = useRouter();
+  async function handleSignOut() {
+    await signOut();
+    router.refresh();
+    router.push("/");
+  }
 
   return (
     <SidebarMenu>
@@ -50,13 +56,15 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarImage src={""} alt={user?.name!} />
+                <AvatarFallback className="rounded-lg">
+                  <UserRound size={15} />
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user?.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
+                  {user?.email}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -71,13 +79,15 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={""} alt={user?.name!} />
+                  <AvatarFallback className="rounded-lg">
+                    <UserRound size={15} />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user?.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
@@ -85,9 +95,9 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/ing/account/profile">
+                <a href="/ing/account">
                   <IconUserCircle />
-                  Profile
+                  Account
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem>
@@ -100,10 +110,14 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
-              Log out
-            </DropdownMenuItem>
+            <form action={handleSignOut} className="w-full">
+              <button type="submit" className="flex w-full">
+                <DropdownMenuItem className="w-full flex-1 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </button>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

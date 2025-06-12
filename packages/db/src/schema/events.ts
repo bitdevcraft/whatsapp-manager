@@ -1,4 +1,4 @@
-import { baseSchema } from "../helpers/column.helper";
+import { baseSchema } from "../helpers/column-helper";
 import {
   integer,
   jsonb,
@@ -7,6 +7,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { teamsTable } from "./teams";
+import { relations } from "drizzle-orm";
 
 export const eventsTable = pgTable("events", {
   // Unique ID for this event
@@ -25,7 +27,17 @@ export const eventsTable = pgTable("events", {
 
   // When it was created
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  teamId: uuid("team_id")
+    .notNull()
+    .references(() => teamsTable.id),
 });
+
+export const eventsRelations = relations(eventsTable, ({ one }) => ({
+  team: one(teamsTable, {
+    fields: [eventsTable.teamId],
+    references: [teamsTable.id],
+  }),
+}));
 
 export type Event = typeof eventsTable.$inferSelect;
 export type NewEvent = typeof eventsTable.$inferInsert;

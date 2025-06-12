@@ -1,5 +1,6 @@
 import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
 import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
+import { getUserWithTeam } from "@/lib/db/queries";
 import { db } from "@workspace/db";
 import {
   marketingCampaignsTable,
@@ -7,6 +8,7 @@ import {
   templatesTable,
 } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const result = await getMarketingCampaigns();
@@ -14,6 +16,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (!userWithTeam.teamId) {
+    return new Response("", {
+      status: 400,
+      statusText: "No Team",
+    });
+  }
+
   const body = (await request.json()) as MarketingCampaignFormValues;
 
   console.log(body);
@@ -36,6 +51,7 @@ export async function POST(request: Request) {
       enableTracking: body.details.track,
       phoneNumber: body.details.phoneNumber,
       status: body.details.schedule ? "pending" : "draft",
+      teamId: userWithTeam.teamId!,
     };
 
     const data = await tx

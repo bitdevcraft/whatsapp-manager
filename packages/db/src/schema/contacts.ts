@@ -1,8 +1,9 @@
 import { boolean, jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
-import { baseSchema } from "../helpers/column.helper";
+import { baseSchema } from "../helpers/column-helper";
 import { relations } from "drizzle-orm";
 import { usersTable } from "./users";
 import { conversationsTable } from "./conversations";
+import { teamsTable } from "./teams";
 
 export const contactsTable = pgTable("contacts", {
   ...baseSchema,
@@ -13,6 +14,9 @@ export const contactsTable = pgTable("contacts", {
   optIn: boolean("opt_in").default(true),
   assignedTo: uuid("assigned_to").references(() => usersTable.id),
   tags: jsonb("tags").$type<string[]>().default([]),
+  teamId: uuid("team_id")
+    .notNull()
+    .references(() => teamsTable.id),
 });
 
 // Relations
@@ -22,6 +26,10 @@ export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
     references: [usersTable.id],
   }),
   conversations: many(conversationsTable),
+  team: one(teamsTable, {
+    fields: [contactsTable.teamId],
+    references: [teamsTable.id],
+  }),
 }));
 
 export type Contact = typeof contactsTable.$inferSelect;

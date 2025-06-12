@@ -9,6 +9,7 @@ import {
   IconMessages,
   IconSettings,
   IconSpeakerphone,
+  IconTag,
   IconTemplate,
   IconUsers,
 } from "@tabler/icons-react";
@@ -26,6 +27,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
+import { TeamSwitcher } from "./team-switcher";
 
 const data = {
   user: {
@@ -33,6 +36,23 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+  teams: [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
   navMain: [
     {
       title: "Dashboard",
@@ -42,8 +62,8 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Users",
-      url: "/ing/setup/users",
+      title: "Settings",
+      url: "/ing/account",
       icon: IconSettings,
     },
   ],
@@ -58,7 +78,6 @@ const data = {
       url: "/ing/whatsapp/conversations",
       icon: IconMessages,
     },
-
     {
       name: "Ads Manager",
       url: "/ing/whatsapp/ads-manager",
@@ -76,6 +95,11 @@ const data = {
       url: "/ing/contacts",
       icon: IconUsers,
     },
+    {
+      name: "Tags",
+      url: "/ing/tags",
+      icon: IconTag,
+    },
   ],
 };
 
@@ -83,7 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
+        {/* <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
@@ -95,7 +119,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </SidebarMenu> */}
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
@@ -104,7 +129,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

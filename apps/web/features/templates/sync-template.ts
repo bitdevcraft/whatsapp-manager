@@ -1,3 +1,4 @@
+import { getUserWithTeam } from "@/lib/db/queries";
 import { db } from "@workspace/db/index";
 import { templatesTable } from "@workspace/db/schema/templates";
 import WhatsApp from "@workspace/wa-cloud-api";
@@ -19,6 +20,8 @@ const whatsapp = new WhatsApp({
 export async function syncTemplate() {
   const response = await whatsapp.templates.getTemplates({});
 
+  const userWithTeam = await getUserWithTeam();
+
   try {
     await db.transaction(async (tx) => {
       for (const item of response.data) {
@@ -28,6 +31,7 @@ export async function syncTemplate() {
             id: item.id,
             name: item.name,
             content: item,
+            teamId: userWithTeam?.teamId!,
           })
           .onConflictDoUpdate({
             target: [templatesTable.id],

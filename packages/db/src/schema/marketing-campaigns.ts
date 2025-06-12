@@ -1,4 +1,4 @@
-import { baseSchema } from "../helpers/column.helper";
+import { baseSchema } from "../helpers/column-helper";
 import {
   varchar,
   pgEnum,
@@ -14,13 +14,14 @@ import { enumToValues } from "../enums/enum-helper";
 import { MarketingCampaignStatusEnum } from "../enums/status-enum";
 import { templatesTable } from "./templates";
 import { relations } from "drizzle-orm";
+import { teamsTable } from "./teams";
 
 export const marketingCampaignStatusEnum = pgEnum(
   "status",
   enumToValues(MarketingCampaignStatusEnum)
 );
 
-interface MarketingCampaignAnalytics {
+export interface MarketingCampaignAnalytics {
   totalRecipients?: number;
   messageSent?: number;
   openRate?: number;
@@ -45,6 +46,9 @@ export const marketingCampaignsTable = pgTable("marketing_campaigns", {
   tags: jsonb("tags").$type<string[]>(),
   recipients: jsonb("recipients").$type<string[]>(),
   analytics: jsonb("analytics").$type<MarketingCampaignAnalytics>(),
+  teamId: uuid("team_id")
+    .notNull()
+    .references(() => teamsTable.id),
 });
 
 export const marketingCampaignRelations = relations(
@@ -53,6 +57,10 @@ export const marketingCampaignRelations = relations(
     template: one(templatesTable, {
       fields: [marketingCampaignsTable.templateId],
       references: [templatesTable.id],
+    }),
+    team: one(teamsTable, {
+      fields: [marketingCampaignsTable.teamId],
+      references: [teamsTable.id],
     }),
   })
 );

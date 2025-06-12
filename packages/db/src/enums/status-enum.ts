@@ -6,3 +6,9 @@ export enum MarketingCampaignStatusEnum {
   Disabled = "disabled",
   Draft = "draft",
 }
+
+export enum MessageStatus {
+  DELIVERED = "delivered",
+  READ = "read",
+  SENT = "sent",
+}

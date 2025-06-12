@@ -1,7 +1,8 @@
 import { boolean, jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
-import { baseSchema } from "../helpers/column.helper";
+import { baseSchema } from "../helpers/column-helper";
 import { relations } from "drizzle-orm";
 import { usersTable } from "./users";
+import { teamsTable } from "./teams";
 
 export const leadsTable = pgTable("leads", {
   ...baseSchema,
@@ -11,6 +12,9 @@ export const leadsTable = pgTable("leads", {
   message: varchar("message", { length: 2048 }).notNull(),
   optIn: boolean("opt_in").default(true),
   assignedTo: uuid().references(() => usersTable.id),
+  teamId: uuid("team_id")
+    .notNull()
+    .references(() => teamsTable.id),
 });
 
 // Relations
@@ -18,6 +22,10 @@ export const leadsRelations = relations(leadsTable, ({ one }) => ({
   assigned_to: one(usersTable, {
     fields: [leadsTable.assignedTo],
     references: [usersTable.id],
+  }),
+  team: one(teamsTable, {
+    fields: [leadsTable.teamId],
+    references: [teamsTable.id],
   }),
 }));
 

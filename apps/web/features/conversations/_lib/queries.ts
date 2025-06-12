@@ -5,6 +5,7 @@ import {
   asc,
   count,
   desc,
+  eq,
   gt,
   gte,
   ilike,
@@ -15,11 +16,17 @@ import {
 import { conversationsTable } from "@workspace/db/schema/conversations";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetConversationSchema } from "./validations";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function getConversations(input: GetConversationSchema) {
+  const userWithTeam = await getUserWithTeam();
+
   return await unstable_cache(
     async () => {
       try {
+        if (!userWithTeam?.teamId) {
+          return { data: [], pageCount: 0 };
+        }
         const offset = (input.page - 1) * input.perPage;
         const advancedTable = input.filterFlag === "advancedFilters";
 
@@ -71,7 +78,10 @@ export async function getConversations(input: GetConversationSchema) {
           const data = await tx
             .select()
             .from(conversationsTable)
-            .where(where)
+            .where(
+              and(where, eq(conversationsTable.teamId, userWithTeam.teamId!))
+            )
+
             .limit(input.perPage)
             .offset(offset)
             .orderBy(...orderBy);
@@ -81,7 +91,10 @@ export async function getConversations(input: GetConversationSchema) {
               count: count(),
             })
             .from(conversationsTable)
-            .where(where)
+            .where(
+              and(where, eq(conversationsTable.teamId, userWithTeam.teamId!))
+            )
+
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
