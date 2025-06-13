@@ -41,6 +41,7 @@
     "./helpers/*": "./src/helpers/*.ts",
     "./schema": "./src/schema/index.ts",
     "./repository/*": "./src/repository/*.ts",
-    "./lib/*": "./src/lib/*.ts"
+    "./lib/*": "./src/lib/*.ts",
+    "./tenant": "./src/tenant/index.ts"
   }
 }

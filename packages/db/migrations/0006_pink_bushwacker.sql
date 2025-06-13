@@ -1,0 +1,5 @@
+ALTER TABLE "activity_logs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE POLICY "activity_logs_select_tenant" ON "activity_logs" AS PERMISSIVE FOR SELECT TO "app_user" USING ("activity_logs"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "activity_logs_insert_tenant" ON "activity_logs" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("activity_logs"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "activity_logs_update_tenant" ON "activity_logs" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("activity_logs"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("activity_logs"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "activity_logs_delete_tenant" ON "activity_logs" AS PERMISSIVE FOR DELETE TO "app_user" USING ("activity_logs"."team_id" = current_setting('app.current_tenant')::uuid);

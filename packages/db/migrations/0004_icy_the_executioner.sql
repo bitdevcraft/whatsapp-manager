@@ -1,0 +1,1 @@
+DROP POLICY "activity_logs_insert_tenant" ON "activity_logs" CASCADE;

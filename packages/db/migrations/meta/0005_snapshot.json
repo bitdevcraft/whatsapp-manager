@@ -1,6 +1,6 @@
 {
-  "id": "f6e77792-02f7-4508-b606-d792e7105328",
-  "prevId": "8476e415-ee2e-49b7-8957-f11f8406fab9",
+  "id": "9ac095cb-37be-45df-995d-0f916e2ffd15",
+  "prevId": "c727377f-064a-46a2-839b-28aecb4a145c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -78,45 +78,7 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {
-        "activity_logs_select_tenant": {
-          "name": "activity_logs_select_tenant",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_insert_tenant": {
-          "name": "activity_logs_insert_tenant",
-          "as": "PERMISSIVE",
-          "for": "INSERT",
-          "to": [
-            "postgres"
-          ],
-          "withCheck": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_update_tenant": {
-          "name": "activity_logs_update_tenant",
-          "as": "PERMISSIVE",
-          "for": "UPDATE",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid",
-          "withCheck": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_delete_tenant": {
-          "name": "activity_logs_delete_tenant",
-          "as": "PERMISSIVE",
-          "for": "DELETE",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
@@ -245,7 +207,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -254,7 +216,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -263,7 +225,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -273,7 +235,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -398,7 +360,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -407,7 +369,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -416,7 +378,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -426,7 +388,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -513,7 +475,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -522,7 +484,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -531,7 +493,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -541,7 +503,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -752,7 +714,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -761,7 +723,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -770,7 +732,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -780,7 +742,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -862,7 +824,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -871,7 +833,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -880,7 +842,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -890,7 +852,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1071,7 +1033,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1080,7 +1042,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1089,7 +1051,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1099,7 +1061,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1249,7 +1211,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1258,7 +1220,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1267,7 +1229,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1277,7 +1239,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1519,7 +1481,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1528,7 +1490,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1537,7 +1499,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1547,7 +1509,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
