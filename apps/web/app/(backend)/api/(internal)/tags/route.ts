@@ -1,6 +1,6 @@
 import { TagsFormValues } from "@/features/tags/_lib/schema";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { tagsTable, NewTag } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { NextResponse } from "next/server";

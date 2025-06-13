@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev --respawn -r dotenv/config src/server.ts",
-    "build": "tsc -b .",
-    "start": "node dist/server.js",
-    "test": "echo 'Add test script here'",
-    "lint": "echo 'Add lint script here'"
+    "build": "tsup",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "lint": "eslint src/",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.1.0",
@@ -28,6 +28,7 @@
     "@workspace/typescript-config": "workspace:*",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsup": "^8.3.6",
     "typescript": "^5.8.3"
   }
 }

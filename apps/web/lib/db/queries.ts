@@ -1,7 +1,7 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import {
   activityLogsTable,
   teamMembersTable,

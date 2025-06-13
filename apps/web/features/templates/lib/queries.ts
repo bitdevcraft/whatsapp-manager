@@ -1,5 +1,5 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { db } from "@workspace/db";
+import { db } from "@workspace/db/config";
 import {
   and,
   asc,

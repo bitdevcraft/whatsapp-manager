@@ -1,4 +1,4 @@
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { stripe } from "../payments/stripe";
 import { hashPassword } from "@/lib/auth/session";
 import {

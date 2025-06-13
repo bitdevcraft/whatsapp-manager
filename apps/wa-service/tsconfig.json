@@ -1,16 +1,14 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
-    "target": "ES5",
-    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "rootDir": "src",
-    "outDir": "dist",
-    "module": "CommonJS",
-    "moduleResolution": "node"
+      "@/*": ["./src"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

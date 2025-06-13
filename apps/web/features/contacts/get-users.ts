@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@workspace/db/config";
 import { contactsTable } from "@workspace/db/schema/contacts";
 
 export async function getContacts() {

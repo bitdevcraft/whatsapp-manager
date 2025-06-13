@@ -1,5 +1,5 @@
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { marketingCampaignsTable, templatesTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";

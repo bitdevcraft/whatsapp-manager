@@ -1,11 +1,14 @@
 {
-  "extends": "@workspace/typescript-config/nextjs.json",
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["dist", "build", "node_modules"],
+  "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src"]
     }
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
