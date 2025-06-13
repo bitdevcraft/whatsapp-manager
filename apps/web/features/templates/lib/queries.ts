@@ -17,6 +17,7 @@ import { templatesTable } from "@workspace/db/schema/templates";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetTemplateSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
+import { withTenantTransaction } from "@workspace/db/tenant";
 
 export async function getTemplates(input: GetTemplateSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -77,29 +78,32 @@ export async function getTemplates(input: GetTemplateSchema) {
               )
             : [asc(templatesTable.createdAt)];
 
-        const { data, total } = await db.transaction(async (tx) => {
-          const data = await tx
-            .select()
-            .from(templatesTable)
-            .where(and(where, eq(templatesTable.teamId, userWithTeam.teamId!)))
-            .limit(input.perPage)
-            .offset(offset)
-            .orderBy(...orderBy);
+        const { data, total } = await withTenantTransaction(
+          userWithTeam?.teamId,
+          async (tx) => {
+            const data = await tx
+              .select()
+              .from(templatesTable)
+              .where(where)
+              .limit(input.perPage)
+              .offset(offset)
+              .orderBy(...orderBy);
 
-          const total = await tx
-            .select({
-              count: count(),
-            })
-            .from(templatesTable)
-            .where(and(where, eq(templatesTable.teamId, userWithTeam.teamId!)))
-            .execute()
-            .then((res) => res[0]?.count ?? 0);
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(templatesTable)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
 
-          return {
-            data,
-            total,
-          };
-        });
+            return {
+              data,
+              total,
+            };
+          }
+        );
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
@@ -117,9 +121,14 @@ export async function getTemplates(input: GetTemplateSchema) {
 }
 
 export async function getAllTemplates(input: GetTemplateSchema) {
+  const userWithTeam = await getUserWithTeam();
+
   return await unstable_cache(
     async () => {
       try {
+        if (!userWithTeam?.teamId) {
+          return { data: [], pageCount: 0 };
+        }
         const advancedTable = input.filterFlag === "advancedFilters";
 
         const advancedWhere = filterColumns({
@@ -169,28 +178,31 @@ export async function getAllTemplates(input: GetTemplateSchema) {
               )
             : [asc(templatesTable.createdAt)];
 
-        const { data, total } = await db.transaction(async (tx) => {
-          const data = await tx
-            .select()
-            .from(templatesTable)
-            .where(where)
-            .limit(input.perPage)
-            .orderBy(...orderBy);
+        const { data, total } = await withTenantTransaction(
+          userWithTeam?.teamId,
+          async (tx) => {
+            const data = await tx
+              .select()
+              .from(templatesTable)
+              .where(where)
+              .limit(input.perPage)
+              .orderBy(...orderBy);
 
-          const total = await tx
-            .select({
-              count: count(),
-            })
-            .from(templatesTable)
-            .where(where)
-            .execute()
-            .then((res) => res[0]?.count ?? 0);
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(templatesTable)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
 
-          return {
-            data,
-            total,
-          };
-        });
+            return {
+              data,
+              total,
+            };
+          }
+        );
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };

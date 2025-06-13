@@ -17,6 +17,7 @@ import { marketingCampaignsTable } from "@workspace/db/schema/marketing-campaign
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetMarketingCampaignSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
+import { withTenantTransaction } from "@workspace/db/tenant";
 
 export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -76,39 +77,32 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
               )
             : [asc(marketingCampaignsTable.createdAt)];
 
-        const { data, total } = await db.transaction(async (tx) => {
-          const data = await tx
-            .select()
-            .from(marketingCampaignsTable)
-            .where(
-              and(
-                where,
-                eq(marketingCampaignsTable.teamId, userWithTeam.teamId!)
-              )
-            )
-            .limit(input.perPage)
-            .offset(offset)
-            .orderBy(...orderBy);
+        const { data, total } = await withTenantTransaction(
+          userWithTeam?.teamId,
+          async (tx) => {
+            const data = await tx
+              .select()
+              .from(marketingCampaignsTable)
+              .where(where)
+              .limit(input.perPage)
+              .offset(offset)
+              .orderBy(...orderBy);
 
-          const total = await tx
-            .select({
-              count: count(),
-            })
-            .from(marketingCampaignsTable)
-            .where(
-              and(
-                where,
-                eq(marketingCampaignsTable.teamId, userWithTeam.teamId!)
-              )
-            )
-            .execute()
-            .then((res) => res[0]?.count ?? 0);
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(marketingCampaignsTable)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
 
-          return {
-            data,
-            total,
-          };
-        });
+            return {
+              data,
+              total,
+            };
+          }
+        );
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };

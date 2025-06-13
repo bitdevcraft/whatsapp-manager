@@ -1,6 +1,7 @@
 import { getUserWithTeam } from "@/lib/db/queries";
 import { db } from "@workspace/db/index";
 import { templatesTable } from "@workspace/db/schema/templates";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp from "@workspace/wa-cloud-api";
 
 const waPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -22,8 +23,16 @@ export async function syncTemplate() {
 
   const userWithTeam = await getUserWithTeam();
 
+  if (!userWithTeam) {
+    return;
+  }
+
+  if (!userWithTeam.teamId) {
+    return;
+  }
+
   try {
-    await db.transaction(async (tx) => {
+    await withTenantTransaction(userWithTeam?.teamId, async (tx) => {
       for (const item of response.data) {
         await tx
           .insert(templatesTable)

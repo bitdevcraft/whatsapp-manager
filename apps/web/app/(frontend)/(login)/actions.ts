@@ -25,6 +25,7 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from "@/lib/auth/middleware";
+import { withTenant, withTenantTransaction } from "@workspace/db/tenant";
 
 async function logActivity(
   teamId: string | null | undefined,
@@ -41,7 +42,10 @@ async function logActivity(
     action: type,
     ipAddress: ipAddress || "",
   };
-  await db.insert(activityLogsTable).values(newActivity);
+
+  await withTenantTransaction(teamId, async (tx) => {
+    await tx.insert(activityLogsTable).values(newActivity);
+  });
 }
 
 const signInSchema = z.object({

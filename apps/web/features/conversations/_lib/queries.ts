@@ -17,6 +17,7 @@ import { conversationsTable } from "@workspace/db/schema/conversations";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetConversationSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
+import { withTenantTransaction } from "@workspace/db/tenant";
 
 export async function getConversations(input: GetConversationSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -74,35 +75,32 @@ export async function getConversations(input: GetConversationSchema) {
               )
             : [asc(conversationsTable.createdAt)];
 
-        const { data, total } = await db.transaction(async (tx) => {
-          const data = await tx
-            .select()
-            .from(conversationsTable)
-            .where(
-              and(where, eq(conversationsTable.teamId, userWithTeam.teamId!))
-            )
+        const { data, total } = await withTenantTransaction(
+          userWithTeam?.teamId,
+          async (tx) => {
+            const data = await tx
+              .select()
+              .from(conversationsTable)
+              .where(where)
+              .limit(input.perPage)
+              .offset(offset)
+              .orderBy(...orderBy);
 
-            .limit(input.perPage)
-            .offset(offset)
-            .orderBy(...orderBy);
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(conversationsTable)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
 
-          const total = await tx
-            .select({
-              count: count(),
-            })
-            .from(conversationsTable)
-            .where(
-              and(where, eq(conversationsTable.teamId, userWithTeam.teamId!))
-            )
-
-            .execute()
-            .then((res) => res[0]?.count ?? 0);
-
-          return {
-            data,
-            total,
-          };
-        });
+            return {
+              data,
+              total,
+            };
+          }
+        );
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };

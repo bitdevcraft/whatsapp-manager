@@ -1,5 +1,6 @@
 import { unstable_cache } from "@/lib/unstable-cache";
 import { db } from "@workspace/db";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import {
   and,
   asc,
@@ -78,29 +79,32 @@ export async function getContacts(input: GetContactSchema) {
               )
             : [asc(contactsTable.createdAt)];
 
-        const { data, total } = await db.transaction(async (tx) => {
-          const data = await tx
-            .select()
-            .from(contactsTable)
-            .where(and(where, eq(contactsTable.teamId, userWithTeam.teamId!)))
-            .limit(input.perPage)
-            .offset(offset)
-            .orderBy(...orderBy);
+        const { data, total } = await withTenantTransaction(
+          userWithTeam?.teamId,
+          async (tx) => {
+            const data = await tx
+              .select()
+              .from(contactsTable)
+              .where(where)
+              .limit(input.perPage)
+              .offset(offset)
+              .orderBy(...orderBy);
 
-          const total = await tx
-            .select({
-              count: count(),
-            })
-            .from(contactsTable)
-            .where(and(where, eq(contactsTable.teamId, userWithTeam.teamId!)))
-            .execute()
-            .then((res) => res[0]?.count ?? 0);
+            const total = await tx
+              .select({
+                count: count(),
+              })
+              .from(contactsTable)
+              .where(where)
+              .execute()
+              .then((res) => res[0]?.count ?? 0);
 
-          return {
-            data,
-            total,
-          };
-        });
+            return {
+              data,
+              total,
+            };
+          }
+        );
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };

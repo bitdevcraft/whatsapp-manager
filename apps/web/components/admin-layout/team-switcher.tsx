@@ -20,6 +20,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import axios from "axios";
 import { Team } from "@workspace/db/schema";
+import { Badge } from "@workspace/ui/components/badge";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
@@ -88,6 +89,7 @@ export function TeamSwitcher() {
                 <Plus className="size-4" />
               </div>
               <div className="text-muted-foreground font-medium">Add team</div>
+              <Badge variant="secondary">Coming Soon</Badge>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

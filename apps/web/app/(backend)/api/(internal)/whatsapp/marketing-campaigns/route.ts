@@ -7,6 +7,7 @@ import {
   NewMarketingCampaign,
   templatesTable,
 } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
 
   console.log(body);
 
-  const data = await db.transaction(async (tx) => {
+  const data = await withTenantTransaction(userWithTeam?.teamId, async (tx) => {
     const template = await tx.query.templatesTable.findFirst({
       where: eq(templatesTable.name, body.template.template),
     });

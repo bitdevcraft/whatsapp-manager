@@ -115,7 +115,6 @@ export async function getUserWithTeam() {
       )
     )
     .limit(1);
-  console.log("getUserWithTeam", result);
 
   if (result.length === 0) {
     return null;
