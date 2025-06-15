@@ -227,7 +227,17 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
 export async function signOut() {
   const user = (await getUser()) as User;
+  if (!user) {
+    (await cookies()).delete("session");
+    return;
+  }
+
   const userWithTeam = await getUserWithTeam();
+  if (!userWithTeam) {
+    (await cookies()).delete("session");
+    return;
+  }
+
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete("session");
 }

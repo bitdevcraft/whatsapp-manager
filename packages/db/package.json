@@ -9,8 +9,8 @@
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "generate": "drizzle-kit generate:pg",
-    "migrate": "tsx src/migrate.ts",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
     "studio": "drizzle-kit studio"
   },
   "keywords": [],
@@ -20,7 +20,7 @@
   "dependencies": {
     "@workspace/wa-cloud-api": "workspace:*",
     "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.43.1",
+    "drizzle-orm": "^0.44.2",
     "pg": "^8.16.0",
     "postgres": "^3.4.7"
   },

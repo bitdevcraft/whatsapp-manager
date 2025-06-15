@@ -12,3 +12,5 @@ export * from "./team-members";
 export * from "./teams";
 export * from "./templates";
 export * from "./users";
+export * from "./whatsapp-business-account-phone-numbers";
+export * from "./whatsapp-business-accounts";

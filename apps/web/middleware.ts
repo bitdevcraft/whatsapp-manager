@@ -3,11 +3,15 @@ import type { NextRequest } from "next/server";
 import { signToken, verifyToken } from "@/lib/auth/session";
 
 const protectedRoutes = "/ing";
+const signInRoutes = ["/sign-in", "sign-up"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get("session");
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
+  const isSignInRoute = signInRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   if (isProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
@@ -32,6 +36,10 @@ export async function middleware(request: NextRequest) {
         sameSite: "lax",
         expires: expiresInOneDay,
       });
+
+      if (isSignInRoute) {
+        return NextResponse.redirect(new URL("/ing/dashboard", request.url));
+      }
     } catch (error) {
       console.error("Error updating session:", error);
       res.cookies.delete("session");

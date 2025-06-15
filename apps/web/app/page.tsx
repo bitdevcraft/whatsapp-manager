@@ -2,6 +2,7 @@
 
 import FacebookLogin from "@/components/facebook-login";
 import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
 import Script from "next/script";
 
 export default function Page() {
@@ -24,12 +25,9 @@ export default function Page() {
       <div className="flex items-center justify-center min-h-svh">
         <div className="flex flex-col items-center justify-center gap-4">
           <h1 className="text-2xl font-bold">Hello World</h1>
-          <Button size="sm">Button</Button>
-          <FacebookLogin
-            appId="606557539005538"
-            onLoginSuccess={handleLoginSuccess}
-            onLoginFailure={handleLoginFailure}
-          />
+          <Link href={"/sign-in"}>
+            <Button size="sm">Sign In</Button>
+          </Link>
         </div>
       </div>
     </div>

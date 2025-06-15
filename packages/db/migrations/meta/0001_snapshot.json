@@ -1,6 +1,6 @@
 {
-  "id": "f6e77792-02f7-4508-b606-d792e7105328",
-  "prevId": "8476e415-ee2e-49b7-8957-f11f8406fab9",
+  "id": "94a2b8b2-c761-424d-8b5f-bbe4e50dc56f",
+  "prevId": "af106a93-53be-45d2-ba03-401f4421ba4c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -78,45 +78,7 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {
-        "activity_logs_select_tenant": {
-          "name": "activity_logs_select_tenant",
-          "as": "PERMISSIVE",
-          "for": "SELECT",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_insert_tenant": {
-          "name": "activity_logs_insert_tenant",
-          "as": "PERMISSIVE",
-          "for": "INSERT",
-          "to": [
-            "postgres"
-          ],
-          "withCheck": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_update_tenant": {
-          "name": "activity_logs_update_tenant",
-          "as": "PERMISSIVE",
-          "for": "UPDATE",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid",
-          "withCheck": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        },
-        "activity_logs_delete_tenant": {
-          "name": "activity_logs_delete_tenant",
-          "as": "PERMISSIVE",
-          "for": "DELETE",
-          "to": [
-            "postgres"
-          ],
-          "using": "\"activity_logs\".\"team_id\" = current_setting('app.current_tenant')::uuid"
-        }
-      },
+      "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
@@ -245,7 +207,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -254,7 +216,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -263,7 +225,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -273,7 +235,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -398,7 +360,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -407,7 +369,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -416,7 +378,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -426,7 +388,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -513,7 +475,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -522,7 +484,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -531,7 +493,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -541,7 +503,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -752,7 +714,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -761,7 +723,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -770,7 +732,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -780,7 +742,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -862,7 +824,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -871,7 +833,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -880,7 +842,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -890,7 +852,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1071,7 +1033,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1080,7 +1042,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1089,7 +1051,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1099,7 +1061,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1242,14 +1204,23 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "tags_per_team": {
+          "name": "tags_per_team",
+          "nullsNotDistinct": false,
+          "columns": [
+            "team_id",
+            "name"
+          ]
+        }
+      },
       "policies": {
         "tags_select_tenant": {
           "name": "tags_select_tenant",
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1258,7 +1229,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1267,7 +1238,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1277,7 +1248,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1519,7 +1490,7 @@
           "as": "PERMISSIVE",
           "for": "SELECT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1528,7 +1499,7 @@
           "as": "PERMISSIVE",
           "for": "INSERT",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         },
@@ -1537,7 +1508,7 @@
           "as": "PERMISSIVE",
           "for": "UPDATE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid",
           "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
@@ -1547,7 +1518,7 @@
           "as": "PERMISSIVE",
           "for": "DELETE",
           "to": [
-            "postgres"
+            "app_user"
           ],
           "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
         }
@@ -1624,6 +1595,294 @@
         }
       },
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.whatsapp_business_account_phone_numbers": {
+      "name": "whatsapp_business_account_phone_numbers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "display_phone_number": {
+          "name": "display_phone_number",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_name": {
+          "name": "verified_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_rating": {
+          "name": "quality_rating",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_visibility": {
+          "name": "search_visibility",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platform_type": {
+          "name": "platform_type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code_verification_status": {
+          "name": "code_verification_status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "whatsapp_business_account_phone_numbers_team_id_teams_id_fk": {
+          "name": "whatsapp_business_account_phone_numbers_team_id_teams_id_fk",
+          "tableFrom": "whatsapp_business_account_phone_numbers",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "whatsapp_business_account_phone_numbers_select_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_account_phone_numbers_insert_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_account_phone_numbers_update_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_account_phone_numbers_delete_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.whatsapp_business_accounts": {
+      "name": "whatsapp_business_accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_business_id": {
+          "name": "owner_business_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_business_name": {
+          "name": "owner_business_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "business_id": {
+          "name": "business_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number_id": {
+          "name": "phone_number_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "waba_id": {
+          "name": "waba_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "auth_response": {
+          "name": "auth_response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "auth_token": {
+          "name": "auth_token",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "whatsapp_business_accounts_team_id_teams_id_fk": {
+          "name": "whatsapp_business_accounts_team_id_teams_id_fk",
+          "tableFrom": "whatsapp_business_accounts",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "whatsapp_business_accounts_select_tenant": {
+          "name": "whatsapp_business_accounts_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_accounts_insert_tenant": {
+          "name": "whatsapp_business_accounts_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_accounts_update_tenant": {
+          "name": "whatsapp_business_accounts_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_accounts_delete_tenant": {
+          "name": "whatsapp_business_accounts_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
       "checkConstraints": {},
       "isRLSEnabled": false
     }

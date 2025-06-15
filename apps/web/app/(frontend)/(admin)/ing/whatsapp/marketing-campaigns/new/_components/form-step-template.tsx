@@ -23,6 +23,7 @@ import {
 } from "@workspace/ui/components/select";
 import { ArrowRight } from "lucide-react";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+import { MessageTemplateForm } from "@/features/templates/forms/message-template";
 
 function TemplateStep() {
   const [data, setData] = useState<Template[]>([]);
@@ -46,46 +47,53 @@ function TemplateStep() {
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
   return (
-    <Form {...form}>
-      <div className="flex justify-end gap-2">
-        <Button type="button" size="icon" variant="outline" onClick={nextStep}>
-          <ArrowRight />
-        </Button>
-      </div>
-      <div className={"flex flex-col gap-4"}>
-        <FormField
-          name="template.template"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Select Template</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {data.map((template, idx) => (
-                        <SelectItem key={template.name} value={template.name}>
-                          {template.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
-
+    <>
+      <Form {...form}>
         <div className="flex justify-end gap-2">
-          <Button onClick={nextStep} disabled={!isStepValid()}>
-            Next
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={nextStep}
+          >
+            <ArrowRight />
           </Button>
         </div>
-      </div>
-    </Form>
+        <div className={"flex flex-col gap-4"}>
+          <FormField
+            name="template.template"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Select Template</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {data.map((template, idx) => (
+                          <SelectItem key={template.name} value={template.name}>
+                            {template.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+
+          <div className="flex justify-end gap-2">
+            <Button onClick={nextStep} disabled={!isStepValid()}>
+              Next
+            </Button>
+          </div>
+        </div>
+      </Form>
+    </>
   );
 }
 

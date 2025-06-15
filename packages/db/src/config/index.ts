@@ -2,9 +2,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import * as dotenv from "dotenv";
+import { getConfig } from "./environments";
 import * as schema from "../schema";
 
-dotenv.config({ path: "../../.env" });
+// dotenv.config({ path: "../../.env" });
+
+// Get environment-specific configuration
+const config = getConfig();
 
 // Database connection config
 const connectionString = process.env.DATABASE_URL;
@@ -13,11 +17,18 @@ if (!connectionString) {
   throw new Error("DATABASE_URL environment variable is not set");
 }
 
-// Client for migrations and queries
-export const migrationClient = postgres(connectionString, { max: 1 });
+// Client for migrations
+export const migrationClient = postgres(connectionString, {
+  max: 1,
+  ssl: config.database.ssl,
+});
 
-// Client for queries only
-export const queryClient = postgres(connectionString);
+// Client for queries
+export const queryClient = postgres(connectionString, {
+  max: config.database.maxConnections,
+  idle_timeout: config.database.idleTimeout,
+  ssl: config.database.ssl,
+});
 
 // Drizzle ORM instance
 export const db = drizzle(queryClient, { schema });
