@@ -1,6 +1,5 @@
 "use client";
 
-import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import {
   Form,
   FormControl,
@@ -9,11 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { Template } from "@workspace/db/schema/templates";
 import {
   Select,
   SelectContent,
@@ -21,21 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Button } from "@workspace/ui/components/button";
+import axios from "axios";
+import { useEffect, useState, useMemo } from "react";
 import { ArrowRight } from "lucide-react";
-import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+
+import { Template } from "@workspace/db/schema/templates";
+import { transformTemplateResponseToFormValues } from "@/features/templates/forms/message-template-actions";
 import { MessageTemplateForm } from "@/features/templates/forms/message-template";
+import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 
 function TemplateStep() {
   const [data, setData] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
 
   const fetchData = async () => {
     try {
       const response = await axios.get<Template[]>("/api/whatsapp/templates");
-      if (response.data) {
-        setData(response.data);
-      }
+      setData(response.data);
     } catch (error) {
-      //
+      // handle error if needed
     }
   };
 
@@ -46,54 +48,70 @@ function TemplateStep() {
   const { form, nextStep, isStepValid } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
+  // Memoize transformed default values
+  const defaultMessageTemplate = useMemo(() => {
+    return selectedTemplate
+      ? transformTemplateResponseToFormValues(selectedTemplate.content!)
+      : undefined;
+  }, [selectedTemplate]);
+
+  // Patch messageTemplate values when template changes
+  useEffect(() => {
+    if (defaultMessageTemplate) {
+      form.setValue("template.messageTemplate", defaultMessageTemplate);
+    }
+  }, [defaultMessageTemplate, form]);
+
   return (
-    <>
-      <Form {...form}>
+    <Form {...form}>
+      <div className={"flex flex-col gap-4"}>
+        <FormField
+          name="template.template"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Select Template</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    const match = data.find((t) => t.name === value);
+                    setSelectedTemplate(match ?? null);
+                  }}
+                  value={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {data.map((template) => (
+                      <SelectItem key={template.name} value={template.name}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {selectedTemplate && (
+          <MessageTemplateForm
+            form={form}
+            namePrefix="template.messageTemplate"
+            initialTemplate={selectedTemplate.content!}
+          />
+        )}
+
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={nextStep}
-          >
-            <ArrowRight />
+          <Button onClick={nextStep} disabled={!isStepValid()}>
+            Next
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
-        <div className={"flex flex-col gap-4"}>
-          <FormField
-            name="template.template"
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>Select Template</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {data.map((template, idx) => (
-                          <SelectItem key={template.name} value={template.name}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button onClick={nextStep} disabled={!isStepValid()}>
-              Next
-            </Button>
-          </div>
-        </div>
-      </Form>
-    </>
+      </div>
+    </Form>
   );
 }
 

@@ -19,21 +19,16 @@ export function transformTemplateResponseToFormValues(
       const comp = component as TemplateHeader;
       const text = comp.text ?? "";
       const paramKeys = extractTemplateParams(text, format);
+      const example =
+        format === "POSITIONAL"
+          ? (comp.example?.header_text ?? [])
+          : (comp.example?.header_text_named_params?.map((e) => e.example) ??
+            []);
 
-      let examples: string[] = [];
-
-      if (format === "POSITIONAL") {
-        examples = comp.example?.header_text ?? [];
-      } else if (format === "NAMED") {
-        examples =
-          comp.example?.header_text_named_params?.map((e) => e.example) ?? [];
-      }
-
-      const parameters: { type: ParametersTypesEnum.Text; text: string }[] =
-        paramKeys.map((_, idx) => ({
-          type: ParametersTypesEnum.Text as const,
-          text: examples[idx] ?? "",
-        }));
+      const parameters = paramKeys.map((_, idx) => ({
+        type: ParametersTypesEnum.Text as const,
+        text: example[idx] ?? "",
+      }));
 
       components.push({
         type: ComponentTypesEnum.Header,
@@ -45,21 +40,15 @@ export function transformTemplateResponseToFormValues(
       const comp = component as TemplateBody;
       const text = comp.text ?? "";
       const paramKeys = extractTemplateParams(text, format);
+      const example =
+        format === "POSITIONAL"
+          ? (comp.example?.body_text?.[0] ?? [])
+          : (comp.example?.body_text_named_params?.map((e) => e.example) ?? []);
 
-      let examples: string[] = [];
-
-      if (format === "POSITIONAL") {
-        examples = comp.example?.body_text?.[0] ?? [];
-      } else if (format === "NAMED") {
-        examples =
-          comp.example?.body_text_named_params?.map((e) => e.example) ?? [];
-      }
-
-      const parameters: { type: ParametersTypesEnum.Text; text: string }[] =
-        paramKeys.map((_, idx) => ({
-          type: ParametersTypesEnum.Text as const,
-          text: examples[idx] ?? "",
-        }));
+      const parameters = paramKeys.map((_, idx) => ({
+        type: ParametersTypesEnum.Text as const,
+        text: example[idx] ?? "",
+      }));
 
       components.push({
         type: ComponentTypesEnum.Body,
@@ -78,13 +67,30 @@ export function transformTemplateResponseToFormValues(
   };
 }
 
+// export function extractTemplateParams(
+//   text: string,
+//   format: "POSITIONAL" | "NAMED"
+// ) {
+//   if (format === "POSITIONAL") {
+//     const matches = [...text.matchAll(/{{(\d+)}}/g)];
+//     return Array.from(new Set(matches.map((m) => m[1]))).map((n) => `{{${n}}}`);
+//   }
+
+//   if (format === "NAMED") {
+//     const matches = [...text.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
+//     return Array.from(new Set(matches.map((m) => m[1])));
+//   }
+
+//   return [];
+// }
+
 export function extractTemplateParams(
   text: string,
   format: "POSITIONAL" | "NAMED"
 ) {
   if (format === "POSITIONAL") {
     const matches = [...text.matchAll(/{{(\d+)}}/g)];
-    return Array.from(new Set(matches.map((m) => m[1]))).map((n) => `{{${n}}}`);
+    return Array.from(new Set(matches.map((m) => m[0])));
   }
 
   if (format === "NAMED") {
