@@ -79,9 +79,7 @@ export default function MarketingCampaignForm() {
         description: "Successful",
       });
 
-      router.push(
-        `/ing/whatsapp/marketing-campaigns/${response.data.data[0].id}`
-      );
+      router.push(`/ing/whatsapp/marketing-campaigns/${response.data.data.id}`);
     } catch (error: any) {
       toast.error("Unsuccessful", {
         description: `Please reach out the admin with this issue: ${error.message}`,

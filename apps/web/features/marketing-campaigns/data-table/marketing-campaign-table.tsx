@@ -20,6 +20,8 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
 
+export const dynamic = "force-dynamic";
+
 interface MarketingCampaignTableProps {
   promises: Promise<[Awaited<ReturnType<typeof getMarketingCampaigns>>]>;
 }

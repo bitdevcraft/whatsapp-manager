@@ -10,6 +10,7 @@ export default function Page() {
     console.log("Login success", response);
   };
 
+  console.log("TEST");
   const handleLoginFailure = (error: string) => {
     console.error("Login failed", error);
   };

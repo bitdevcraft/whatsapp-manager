@@ -121,7 +121,10 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
     [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["marketing-campaigns", userWithTeam?.teamId],
+      tags: [
+        "marketing-campaigns",
+        `marketing-campaigns:${userWithTeam?.teamId}`,
+      ],
     }
   )();
 }

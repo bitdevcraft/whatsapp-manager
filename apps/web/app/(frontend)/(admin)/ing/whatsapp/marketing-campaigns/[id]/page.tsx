@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { toast } from "sonner";
 
 export default function Home() {
   const setTitle = useTitle();
@@ -38,6 +39,24 @@ export default function Home() {
     fetchData();
   }, [setTitle]);
 
+  const sendMarketingCampaign = async () => {
+    try {
+      const response = await axios.post(
+        `/api/whatsapp/marketing-campaigns/${id}/send`,
+        data
+      );
+
+      console.log(response);
+      toast.success("Marketing Campaign Sent is now processing", {
+        description: "Successful",
+      });
+    } catch (error: any) {
+      toast.error("Unsuccessful", {
+        description: `Please reach out the admin with this issue: ${error.message}`,
+      });
+    }
+  };
+
   return (
     <section className="p-8 grid gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2">
@@ -54,6 +73,7 @@ export default function Home() {
             variant="outline"
             className="bg-green-600 text-white font-semibold text-sm"
             disabled={data?.status !== "draft" && data?.status !== "pending"}
+            onClick={sendMarketingCampaign}
           >
             <SendHorizontal />
             Send

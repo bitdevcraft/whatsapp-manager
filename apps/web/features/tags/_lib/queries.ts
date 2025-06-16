@@ -114,7 +114,7 @@ export async function getTags(input: GetTagSchema) {
     [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["contacts", userWithTeam?.teamId],
+      tags: ["tags", `tags:${userWithTeam?.teamId}`],
     }
   )();
 }

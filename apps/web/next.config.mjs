@@ -11,6 +11,10 @@ const nextConfig = {
     "facebook.com",
     "*.facebook.com",
   ],
+  // experimental: {
+  //   nodeMiddleware: true,
+  // },
+  // output: "standalone",
 };
 
 export default nextConfig;

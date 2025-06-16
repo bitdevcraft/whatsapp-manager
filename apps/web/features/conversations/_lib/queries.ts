@@ -115,7 +115,7 @@ export async function getConversations(input: GetConversationSchema) {
     [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["Conversations", userWithTeam?.teamId],
+      tags: ["conversations", `conversations:${userWithTeam?.teamId}`],
     }
   )();
 }

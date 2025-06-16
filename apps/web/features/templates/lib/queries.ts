@@ -115,10 +115,10 @@ export async function getTemplates(input: GetTemplateSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input)],
+    [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["templates"],
+      tags: ["templates", `templates:${userWithTeam?.teamId}`],
     }
   )();
 }
