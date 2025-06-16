@@ -1,7 +1,7 @@
 import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
 import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db";
+import { db } from "@workspace/db/config";
 import {
   marketingCampaignsTable,
   NewMarketingCampaign,
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       enableTracking: body.details.track,
       phoneNumber: body.details.phoneNumber,
       status: body.details.schedule ? "pending" : "draft",
+      messageTemplate: body.template.messageTemplate,
       teamId: userWithTeam.teamId!,
     };
 

@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { syncTemplate } from "./sync-template";
 import { getUserWithTeam } from "@/lib/db/queries";

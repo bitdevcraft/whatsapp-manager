@@ -1,9 +1,11 @@
 import { createStepSchema } from "@/components/forms/multi-step-form";
+import { MessageTemplateSchema } from "@/features/templates/lib/schema";
 import { z } from "zod";
 
 export const MarketingCampaignFormSchema = createStepSchema({
   template: z.object({
     template: z.string().min(3),
+    messageTemplate: MessageTemplateSchema,
   }),
   audience: z.object({
     tags: z.array(z.string()),
@@ -22,4 +24,6 @@ export const MarketingCampaignFormSchema = createStepSchema({
   }),
 });
 
-export type MarketingCampaignFormValues = z.infer<typeof MarketingCampaignFormSchema>;
+export type MarketingCampaignFormValues = z.infer<
+  typeof MarketingCampaignFormSchema
+>;

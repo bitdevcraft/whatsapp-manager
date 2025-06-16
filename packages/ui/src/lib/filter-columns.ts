@@ -1,4 +1,4 @@
-import { isEmpty } from "@workspace/db/utils";
+import { isEmpty } from "@workspace/db";
 import type {
   ExtendedColumnFilter,
   JoinOperator,

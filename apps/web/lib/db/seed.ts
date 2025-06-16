@@ -1,4 +1,4 @@
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { stripe } from "../payments/stripe";
 import { hashPassword } from "@/lib/auth/session";
 import {
@@ -11,6 +11,7 @@ import {
   usersTable,
 } from "@workspace/db/schema";
 import { faker } from "@faker-js/faker";
+import { withTenantTransaction } from "@workspace/db/tenant";
 
 async function createStripeProducts() {
   console.log("Creating Stripe products and prices...");
@@ -103,8 +104,6 @@ async function seed() {
     teamId: team!.id,
   }));
 
-  await db.insert(tagsTable).values(tags);
-
   const contacts: NewContact[] = Array.from({ length: 100 }).map(() => ({
     // baseSchema fields – adjust names if yours differ
     createdAt: faker.date.past({ years: 1 }),
@@ -131,8 +130,12 @@ async function seed() {
     teamId: team!.id,
   }));
 
-  // insert all 100 rows in one go
-  await db.insert(contactsTable).values(contacts);
+  await withTenantTransaction(team!.id, async (tx) => {
+    await tx.insert(tagsTable).values(tags);
+
+    // insert all 100 rows in one go
+    await tx.insert(contactsTable).values(contacts);
+  });
 
   await createStripeProducts();
 }

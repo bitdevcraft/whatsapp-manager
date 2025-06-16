@@ -1,5 +1,7 @@
 "use client";
 
+import { IconBrandWhatsapp } from "@tabler/icons-react";
+import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 
@@ -101,9 +103,18 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   return (
     <div>
       {fbLoaded ? (
-        <button onClick={handleLogin}>Login with Facebook</button>
+        <Button
+          onClick={handleLogin}
+          className="bg-[#25D366] text-white h-16 w-96"
+        >
+          <IconBrandWhatsapp size={40} />
+          Authenticate WhatsApp Business Account
+        </Button>
       ) : (
-        <p>Loading Facebook SDK...</p>
+        <Button className="bg-[#25D366] text-white h-16 w-96" disabled>
+          <IconBrandWhatsapp size={40} />
+          Loading
+        </Button>
       )}
     </div>
   );

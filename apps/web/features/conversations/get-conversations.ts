@@ -1,4 +1,4 @@
-import { db } from "@workspace/db";
+import { db } from "@workspace/db/config";
 import { conversationsTable } from "@workspace/db/schema/conversations";
 
 export async function getConversations() {

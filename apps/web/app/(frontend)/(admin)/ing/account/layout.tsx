@@ -15,16 +15,28 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: "/ing/dashboard/demo", icon: Users, label: "Team" },
-    { href: "/ing/dashboard/demo/general", icon: Settings, label: "General" },
-    { href: "/ing/dashboard/demo/activity", icon: Activity, label: "Activity" },
-    { href: "/ing/dashboard/demo/security", icon: Shield, label: "Security" },
+    { href: "/ing/account", icon: Users, label: "Team" },
+    {
+      href: "/ing/account/general",
+      icon: Settings,
+      label: "General",
+    },
+    {
+      href: "/ing/account/activity",
+      icon: Activity,
+      label: "Activity",
+    },
+    {
+      href: "/ing/account/security",
+      icon: Shield,
+      label: "Security",
+    },
   ];
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
       {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
+      <div className="lg:hidden flex items-center justify-between bg-background border-b border-gray-200 p-4">
         <div className="flex items-center">
           <span className="font-medium">Settings</span>
         </div>
@@ -41,7 +53,7 @@ export default function DashboardLayout({
       <div className="flex flex-1 overflow-hidden h-full">
         {/* Sidebar */}
         <aside
-          className={`w-64 bg-white lg:bg-gray-50 border-r border-gray-200 lg:block ${
+          className={`w-64 bg-background border-r border-gray-200 lg:block ${
             isSidebarOpen ? "block" : "hidden"
           } lg:relative absolute inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -53,7 +65,7 @@ export default function DashboardLayout({
                 <Button
                   variant={pathname === item.href ? "secondary" : "ghost"}
                   className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? "bg-gray-100" : ""
+                    pathname === item.href ? "border" : ""
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >

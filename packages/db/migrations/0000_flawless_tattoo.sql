@@ -25,6 +25,7 @@ CREATE TABLE "contacts" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "contacts" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "conversations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"content" jsonb,
@@ -40,6 +41,7 @@ CREATE TABLE "conversations" (
 	"deleted_at" timestamp
 );
 --> statement-breakpoint
+ALTER TABLE "conversations" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"aggregate_type" varchar(100) NOT NULL,
@@ -51,6 +53,7 @@ CREATE TABLE "events" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "events" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "invitations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"team_id" uuid NOT NULL,
@@ -76,6 +79,7 @@ CREATE TABLE "leads" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "leads" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "list_views" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -86,6 +90,7 @@ CREATE TABLE "list_views" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "list_views" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "marketing_campaigns" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -108,6 +113,7 @@ CREATE TABLE "marketing_campaigns" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "marketing_campaigns" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "outbox" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_id" uuid NOT NULL,
@@ -132,9 +138,11 @@ CREATE TABLE "tags" (
         )
       )
     ) STORED,
-	"team_id" uuid NOT NULL
+	"team_id" uuid NOT NULL,
+	CONSTRAINT "tags_per_team" UNIQUE("team_id","name")
 );
 --> statement-breakpoint
+ALTER TABLE "tags" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "team_members" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -168,6 +176,7 @@ CREATE TABLE "templates" (
 	"team_id" uuid NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "templates" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255),
@@ -200,4 +209,36 @@ ALTER TABLE "outbox" ADD CONSTRAINT "outbox_team_id_teams_id_fk" FOREIGN KEY ("t
 ALTER TABLE "tags" ADD CONSTRAINT "tags_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_members" ADD CONSTRAINT "team_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_members" ADD CONSTRAINT "team_members_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "templates" ADD CONSTRAINT "templates_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "templates" ADD CONSTRAINT "templates_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE POLICY "contacts_select_tenant" ON "contacts" AS PERMISSIVE FOR SELECT TO "app_user" USING ("contacts"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "contacts_insert_tenant" ON "contacts" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("contacts"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "contacts_update_tenant" ON "contacts" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("contacts"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("contacts"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "contacts_delete_tenant" ON "contacts" AS PERMISSIVE FOR DELETE TO "app_user" USING ("contacts"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "conversations_select_tenant" ON "conversations" AS PERMISSIVE FOR SELECT TO "app_user" USING ("conversations"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "conversations_insert_tenant" ON "conversations" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("conversations"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "conversations_update_tenant" ON "conversations" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("conversations"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("conversations"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "conversations_delete_tenant" ON "conversations" AS PERMISSIVE FOR DELETE TO "app_user" USING ("conversations"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "events_select_tenant" ON "events" AS PERMISSIVE FOR SELECT TO "app_user" USING ("events"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "events_insert_tenant" ON "events" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("events"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "events_update_tenant" ON "events" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("events"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("events"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "events_delete_tenant" ON "events" AS PERMISSIVE FOR DELETE TO "app_user" USING ("events"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "leads_select_tenant" ON "leads" AS PERMISSIVE FOR SELECT TO "app_user" USING ("leads"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "leads_insert_tenant" ON "leads" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("leads"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "leads_update_tenant" ON "leads" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("leads"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("leads"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "leads_delete_tenant" ON "leads" AS PERMISSIVE FOR DELETE TO "app_user" USING ("leads"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "list_views_select_tenant" ON "list_views" AS PERMISSIVE FOR SELECT TO "app_user" USING ("list_views"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "list_views_insert_tenant" ON "list_views" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("list_views"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "list_views_update_tenant" ON "list_views" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("list_views"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("list_views"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "list_views_delete_tenant" ON "list_views" AS PERMISSIVE FOR DELETE TO "app_user" USING ("list_views"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "marketing_campaigns_select_tenant" ON "marketing_campaigns" AS PERMISSIVE FOR SELECT TO "app_user" USING ("marketing_campaigns"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "marketing_campaigns_insert_tenant" ON "marketing_campaigns" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("marketing_campaigns"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "marketing_campaigns_update_tenant" ON "marketing_campaigns" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("marketing_campaigns"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("marketing_campaigns"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "marketing_campaigns_delete_tenant" ON "marketing_campaigns" AS PERMISSIVE FOR DELETE TO "app_user" USING ("marketing_campaigns"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "tags_select_tenant" ON "tags" AS PERMISSIVE FOR SELECT TO "app_user" USING ("tags"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "tags_insert_tenant" ON "tags" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("tags"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "tags_update_tenant" ON "tags" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("tags"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("tags"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "tags_delete_tenant" ON "tags" AS PERMISSIVE FOR DELETE TO "app_user" USING ("tags"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "templates_select_tenant" ON "templates" AS PERMISSIVE FOR SELECT TO "app_user" USING ("templates"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "templates_insert_tenant" ON "templates" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("templates"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "templates_update_tenant" ON "templates" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("templates"."team_id" = current_setting('app.current_tenant')::uuid) WITH CHECK ("templates"."team_id" = current_setting('app.current_tenant')::uuid);--> statement-breakpoint
+CREATE POLICY "templates_delete_tenant" ON "templates" AS PERMISSIVE FOR DELETE TO "app_user" USING ("templates"."team_id" = current_setting('app.current_tenant')::uuid);

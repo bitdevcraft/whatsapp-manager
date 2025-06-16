@@ -1,5 +1,5 @@
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp from "@workspace/wa-cloud-api";

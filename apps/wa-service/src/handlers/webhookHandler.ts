@@ -10,6 +10,8 @@ import WhatsApp, {
   WebhookMessage,
 } from "@workspace/wa-cloud-api";
 
+import { contactsTable, db } from "@workspace/db";
+
 const config = {
   accessToken: process.env.CLOUD_API_ACCESS_TOKEN || "",
   phoneNumberId: process.env.WA_PHONE_NUMBER_ID
@@ -128,7 +130,9 @@ Our phone: ${message.displayPhoneNumber}`,
           to: message.from,
         });
 
-        console.log(temp);
+        const contact = await db.select().from(contactsTable).limit(1);
+
+        console.log(contact);
       }
     }
   }

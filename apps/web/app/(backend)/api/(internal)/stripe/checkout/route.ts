@@ -3,7 +3,7 @@ import { setSession } from "@/lib/auth/session";
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/payments/stripe";
 import Stripe from "stripe";
-import { db } from "@workspace/db/index";
+import { db } from "@workspace/db/config";
 import { teamMembersTable, teamsTable, usersTable } from "@workspace/db/schema";
 
 export async function GET(request: NextRequest) {
