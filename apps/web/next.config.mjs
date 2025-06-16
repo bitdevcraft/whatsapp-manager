@@ -3,6 +3,7 @@ const nextConfig = {
   transpilePackages: [
     "@workspace/ui",
     "@workspace/db",
+    "@workspace/shared",
     "@workspace/wa-cloud-api",
   ],
   allowedDevOrigins: [
