@@ -1,23 +1,7 @@
 "use client";
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import { Button } from "@workspace/ui/components/button";
+import { useEffect, useMemo } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-
 import {
   ButtonPositionEnum,
   ButtonTypesEnum,
@@ -25,10 +9,25 @@ import {
   LanguagesEnum,
   TemplateResponse,
 } from "@workspace/wa-cloud-api/types";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
 import { ComponentButtonParameter } from "./message-template-component-button-parameter";
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
-import { useEffect, useMemo } from "react";
 
 type Props = {
   form: UseFormReturn<any>;
@@ -41,35 +40,46 @@ export function MessageTemplateForm({
   namePrefix,
   initialTemplate,
 }: Props) {
-  const { control, watch, setValue } = form;
+  const { control, setValue, watch } = form;
+
+  console.log("watched lang code", watch(`${namePrefix}.language.code`));
 
   const defaultValues = useMemo(() => {
-    if (initialTemplate) {
-      return transformTemplateResponseToFormValues(initialTemplate);
-    }
-    return {
-      name: "",
-      language: {
-        policy: "deterministic",
-        code: LanguagesEnum.English,
-      },
-      components: [],
-    };
+    return initialTemplate
+      ? transformTemplateResponseToFormValues(initialTemplate)
+      : {
+          name: "",
+          language: {
+            policy: "deterministic",
+            code: LanguagesEnum.English,
+          },
+          components: [],
+        };
   }, [initialTemplate]);
 
-  // ⚠️ Patch values into existing form on load
+  const componentsPath = `${namePrefix}.components` as const;
+
+  const { fields, append, remove, replace } = useFieldArray({
+    control,
+    name: componentsPath,
+  });
+
+  // 🔁 When template changes, replace all values & trigger re-render
   useEffect(() => {
     if (initialTemplate) {
-      setValue(namePrefix as any, defaultValues);
+      setValue(`${namePrefix}.name`, defaultValues.name);
+
+      setValue(`${namePrefix}.language.code`, defaultValues.language.code);
+
+      console.log(defaultValues.language.code);
+
+      replace(defaultValues.components);
+
+      form.reset({
+        ...form.getValues(),
+      });
     }
-  }, [initialTemplate, setValue, namePrefix, defaultValues]);
-
-  const componentsFieldPath = `${namePrefix}.components` as const;
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: componentsFieldPath,
-  });
+  }, [initialTemplate, namePrefix, setValue, replace, defaultValues]);
 
   const componentTypes = Object.values(ComponentTypesEnum);
   const languageOptions = Object.values(LanguagesEnum);
@@ -131,15 +141,13 @@ export function MessageTemplateForm({
         </div>
 
         {fields.map((field, index) => {
-          const typePath = `${componentsFieldPath}.${index}.type` as const;
-          const fieldType = watch(typePath);
-
+          const fieldType = watch(`${componentsPath}.${index}.type`);
           return (
             <div key={field.id} className="border p-4 rounded-md space-y-4">
               <div className="flex justify-between items-center">
                 <FormField
                   control={control}
-                  name={typePath}
+                  name={`${componentsPath}.${index}.type`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type</FormLabel>
@@ -173,11 +181,11 @@ export function MessageTemplateForm({
                 </Button>
               </div>
 
-              {fieldType === ComponentTypesEnum.Button && (
+              {fieldType === ComponentTypesEnum.Button ? (
                 <>
                   <FormField
                     control={control}
-                    name={`${componentsFieldPath}.${index}.sub_type`}
+                    name={`${componentsPath}.${index}.sub_type`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Button Sub Type</FormLabel>
@@ -204,7 +212,7 @@ export function MessageTemplateForm({
 
                   <FormField
                     control={control}
-                    name={`${componentsFieldPath}.${index}.index`}
+                    name={`${componentsPath}.${index}.index`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Button Index</FormLabel>
@@ -229,19 +237,9 @@ export function MessageTemplateForm({
                     )}
                   />
                 </>
-              )}
-
-              {fieldType !== ComponentTypesEnum.Button ? (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Parameters</h4>
-                  <ComponentParametersArray
-                    name={`${componentsFieldPath}.${index}.parameters`}
-                    control={control}
-                  />
-                </div>
               ) : (
-                <ComponentButtonParameter
-                  name={`${componentsFieldPath}.${index}.parameters`}
+                <ComponentParametersArray
+                  name={`${componentsPath}.${index}.parameters`}
                   control={control}
                 />
               )}

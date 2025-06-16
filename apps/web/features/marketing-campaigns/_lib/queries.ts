@@ -13,14 +13,21 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
-import { marketingCampaignsTable } from "@workspace/db/schema/marketing-campaigns";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetMarketingCampaignSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { marketingCampaignsTable } from "@workspace/db/schema";
 
 export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
   const userWithTeam = await getUserWithTeam();
+  if (!userWithTeam?.teamId) {
+    return { data: [], pageCount: 0 };
+  }
+  if (!userWithTeam?.teamId) {
+    return { data: [], pageCount: 0 };
+  }
+
   return await unstable_cache(
     async () => {
       try {
@@ -111,10 +118,10 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input)],
+    [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["marketing-campaigns"],
+      tags: ["marketing-campaigns", userWithTeam?.teamId],
     }
   )();
 }

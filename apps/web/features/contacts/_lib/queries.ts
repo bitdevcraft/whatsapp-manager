@@ -1,5 +1,4 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { db } from "@workspace/db/config";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import {
   and,
@@ -14,13 +13,17 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
-import { Contact, contactsTable } from "@workspace/db/schema/contacts";
+import { contactsTable } from "@workspace/db/schema/contacts";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetContactSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function getContacts(input: GetContactSchema) {
   const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return { data: [], pageCount: 0 };
+  }
 
   return await unstable_cache(
     async () => {
@@ -113,10 +116,10 @@ export async function getContacts(input: GetContactSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input)],
+    [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["contacts"],
+      tags: ["contacts", userWithTeam?.teamId],
     }
   )();
 }

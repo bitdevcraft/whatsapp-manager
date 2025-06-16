@@ -30,10 +30,11 @@ export function transformTemplateResponseToFormValues(
         text: example[idx] ?? "",
       }));
 
-      components.push({
-        type: ComponentTypesEnum.Header,
-        parameters,
-      });
+      if (parameters.length > 0)
+        components.push({
+          type: ComponentTypesEnum.Header,
+          parameters,
+        });
     }
 
     if (component.type === "BODY") {
@@ -50,10 +51,11 @@ export function transformTemplateResponseToFormValues(
         text: example[idx] ?? "",
       }));
 
-      components.push({
-        type: ComponentTypesEnum.Body,
-        parameters,
-      });
+      if (parameters.length > 0)
+        components.push({
+          type: ComponentTypesEnum.Body,
+          parameters,
+        });
     }
   });
 

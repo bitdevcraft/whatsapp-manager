@@ -21,6 +21,9 @@ import { withTenantTransaction } from "@workspace/db/tenant";
 
 export async function getTags(input: GetTagSchema) {
   const userWithTeam = await getUserWithTeam();
+  if (!userWithTeam?.teamId) {
+    return { data: [], pageCount: 0 };
+  }
 
   return await unstable_cache(
     async () => {
@@ -108,10 +111,10 @@ export async function getTags(input: GetTagSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input)],
+    [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["contacts"],
+      tags: ["contacts", userWithTeam?.teamId],
     }
   )();
 }

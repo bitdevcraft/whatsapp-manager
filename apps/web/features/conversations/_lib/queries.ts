@@ -22,6 +22,9 @@ import { withTenantTransaction } from "@workspace/db/tenant";
 export async function getConversations(input: GetConversationSchema) {
   const userWithTeam = await getUserWithTeam();
 
+  if (!userWithTeam?.teamId) {
+    return { data: [], pageCount: 0 };
+  }
   return await unstable_cache(
     async () => {
       try {
@@ -109,10 +112,10 @@ export async function getConversations(input: GetConversationSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input)],
+    [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["Conversations"],
+      tags: ["Conversations", userWithTeam?.teamId],
     }
   )();
 }

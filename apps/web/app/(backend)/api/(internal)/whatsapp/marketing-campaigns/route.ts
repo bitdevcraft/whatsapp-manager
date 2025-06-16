@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       enableTracking: body.details.track,
       phoneNumber: body.details.phoneNumber,
       status: body.details.schedule ? "pending" : "draft",
+      messageTemplate: body.template.messageTemplate,
       teamId: userWithTeam.teamId!,
     };
 

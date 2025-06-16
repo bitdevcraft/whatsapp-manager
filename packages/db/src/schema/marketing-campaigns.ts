@@ -46,6 +46,7 @@ export const marketingCampaignsTable = pgTable(
     phoneNumber: varchar("phone_number", { length: 15 }),
     createdBy: uuid("created_by").references(() => usersTable.id),
     payload: jsonb("payload"),
+    messageTemplate: jsonb("message_template"),
     tags: jsonb("tags").$type<string[]>(),
     recipients: jsonb("recipients").$type<string[]>(),
     analytics: jsonb("analytics").$type<MarketingCampaignAnalytics>(),

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import axios from "axios";
+import { LanguagesEnum } from "@workspace/wa-cloud-api/types";
 
 export default function MarketingCampaignForm() {
   const router = useRouter();
@@ -39,6 +40,14 @@ export default function MarketingCampaignForm() {
     defaultValues: {
       template: {
         template: "",
+        messageTemplate: {
+          name: "",
+          language: {
+            policy: "deterministic",
+            code: LanguagesEnum.English,
+          },
+          components: [],
+        },
       },
       audience: {
         tags: [],

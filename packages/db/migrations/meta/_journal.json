@@ -15,6 +15,13 @@
       "when": 1749980752772,
       "tag": "0001_flippant_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750015119558,
+      "tag": "0002_curved_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }
