@@ -9,6 +9,19 @@ import { handleImageMessage } from "./wa-messages/image/incoming-image";
 import { handleDocumentMessage } from "./wa-messages/document/incoming-document";
 import { webhookHandler } from "@/config/whatsapp";
 
+// import { WebhookHandler } from "@workspace/wa-cloud-api";
+
+// const config = {
+//   accessToken: process.env.CLOUD_API_ACCESS_TOKEN || "",
+//   phoneNumberId: process.env.WA_PHONE_NUMBER_ID
+//     ? Number(process.env.WA_PHONE_NUMBER_ID)
+//     : undefined,
+//   businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || "",
+//   webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN || "",
+// };
+
+// export const webhookHandler = new WebhookHandler(config);
+
 // Set up pre-processing handler
 webhookHandler.onMessagePreProcess(
   async (client: WhatsApp, message: WebhookMessage) => {

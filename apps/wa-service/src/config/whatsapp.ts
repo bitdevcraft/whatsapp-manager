@@ -9,4 +9,6 @@ const config = {
   webhookVerificationToken: process.env.WEBHOOK_VERIFICATION_TOKEN || "",
 };
 
-export const webhookHandler = new WebhookHandler(config);
+const webhookHandler = new WebhookHandler(config);
+
+export { webhookHandler };
