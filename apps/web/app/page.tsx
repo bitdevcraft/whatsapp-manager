@@ -17,12 +17,6 @@ export default function Page() {
 
   return (
     <div>
-      <Script
-        src="https://connect.facebook.net/en_US/sdk.js"
-        async
-        defer
-        crossOrigin="anonymous"
-      />
       <div className="flex items-center justify-center min-h-svh">
         <div className="flex flex-col items-center justify-center gap-4">
           <h1 className="text-2xl font-bold">Hello World</h1>

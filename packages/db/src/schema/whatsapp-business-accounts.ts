@@ -36,7 +36,7 @@ export const whatsAppBusinessAccountsTable = pgTable(
     ownerBusinessName: varchar("owner_business_name", { length: 255 }),
     businessId: varchar("business_id", { length: 255 }),
     phoneNumberId: varchar("phone_number_id", { length: 255 }),
-    wabaId: varchar("waba_id", { length: 255 }),
+    wabaId: varchar("waba_id", { length: 255 }).unique(),
     authResponse:
       jsonb("auth_response").$type<WhatsAppBusinessAuthAccountResponse>(),
     accessToken:
@@ -85,7 +85,7 @@ export const whatsappBusinessesRelation = relations(
   })
 );
 
-export type WhatsAppBusiness =
+export type WhatsAppBusinessAccount =
   typeof whatsAppBusinessAccountsTable.$inferSelect;
-export type NewWhatsAppBusiness =
+export type NewWhatsAppBusinessAccount =
   typeof whatsAppBusinessAccountsTable.$inferInsert;

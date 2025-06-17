@@ -95,18 +95,40 @@ export interface WabaHealthStatus {
 }
 
 /**
+ * Information about On Behalf Of relationships this account is part of.
+ */
+export interface WabaOnBehalfOfBusinessInfo {
+    name: string;
+    id: string;
+    status: string;
+    type: string;
+}
+
+/**
+ * Get the ID for the business that owns this WABA. Use this field to fetch a client's business ID.
+ */
+export interface WabaOwnerBusinessInfo {
+    name: string;
+    id: string;
+}
+
+/**
  * WhatsApp Business Account information
  */
 export interface WabaAccount {
-    account_review_status?: WabaAccountReviewStatus;
     id?: string;
+    name?: string;
+    account_review_status?: WabaAccountReviewStatus;
     health_status?: WabaHealthStatus;
     status?: WabaAccountStatus;
     business_verification_status?: WabaBusinessVerificationStatus;
     message_template_namespace?: string;
-    name?: string;
     ownership_type?: string;
     currency?: string;
+    timezone_id?: string;
+    on_behalf_of_business_info?: WabaOnBehalfOfBusinessInfo;
+    owner_business_info?: WabaOwnerBusinessInfo;
+    primary_funding_id?: string;
 }
 
 /**
@@ -123,6 +145,9 @@ export type WabaAccountFields =
     | 'health_status'
     | 'status'
     | 'ownership_type'
+    | 'timezone_id'
+    | 'owner_business_info'
+    | 'primary_funding_id'
     | 'message_template_namespace';
 
 /**

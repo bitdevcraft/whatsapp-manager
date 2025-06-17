@@ -45,6 +45,7 @@
       "dependsOn": ["^check-types"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
@@ -52,13 +53,13 @@
       "cache": false,
       "persistent": true
     },
-    "generate": {
+    "db:generate": {
       "cache": false
     },
-    "migrate": {
+    "db:migrate": {
       "cache": false
     },
-    "studio": {
+    "db:studio": {
       "cache": false
     }
   }

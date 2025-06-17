@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_business_accounts" ADD CONSTRAINT "whatsapp_business_accounts_waba_id_unique" UNIQUE("waba_id");

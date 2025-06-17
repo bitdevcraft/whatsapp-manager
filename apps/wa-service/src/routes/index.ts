@@ -8,13 +8,11 @@ const router: Router = express.Router();
 
 // Set up webhook endpoints
 router.get("/wa-app/webhook", (req) => {
-  console.log("verification");
   webhookHandler.handleVerification(req);
 });
 
 // Handle webhook requests
 router.post("/wa-app/webhook", (req) => {
-  console.log("webhook");
   webhookHandler.handleWebhook(req);
 });
 

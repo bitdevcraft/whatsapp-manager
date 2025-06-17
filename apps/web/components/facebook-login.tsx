@@ -1,9 +1,15 @@
 "use client";
 
 import { IconBrandWhatsapp } from "@tabler/icons-react";
+import {
+  EmbedSignUpFlowEventType,
+  EmbedSignUpLoginSuccess,
+  EmbedSignUpObject,
+  EmbeddedSignUpAuthorizedObject,
+} from "@workspace/shared";
 import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface FacebookLoginProps {
   appId: string;
@@ -17,6 +23,35 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   onLoginFailure,
 }) => {
   const [fbLoaded, setFbLoaded] = useState(false);
+  const loginResponseRef = useRef<EmbedSignUpLoginSuccess | null>(null);
+  const embedDataRef = useRef<EmbedSignUpObject | null>(null);
+  const submittedRef = useRef(false);
+
+  function checkReady() {
+    if (submittedRef.current) return;
+
+    const auth = loginResponseRef.current;
+    const signUp = embedDataRef.current;
+
+    if (auth && signUp) {
+      submittedRef.current = true;
+
+      const data: EmbeddedSignUpAuthorizedObject = {
+        signUp,
+        auth,
+      };
+
+      axios
+        .post("/api/wa-embedded-signup", data)
+        .then(() => {
+          onLoginSuccess("");
+        })
+        .catch((err) => {
+          console.error("Signup failed:", err);
+          onLoginFailure("Signup failed");
+        });
+    }
+  }
 
   // Dynamically load the Facebook SDK client-side only
   useEffect(() => {
@@ -42,14 +77,16 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
 
   useEffect(() => {
     const messageEvent = (event: any) => {
-      console.log(event);
       if (!event.origin.endsWith("facebook.com")) return;
       try {
         const data = JSON.parse(event.data);
         console.log(data);
-        if (data.type === "WA_EMBEDDED_SIGNUP") {
-          console.log("Success message event: ", data); // remove after testing
-          // your code goes here
+        if (
+          data.type === "WA_EMBEDDED_SIGNUP" &&
+          data.event === EmbedSignUpFlowEventType.Finish
+        ) {
+          embedDataRef.current = data;
+          checkReady();
         }
       } catch {
         console.log("Error message event: ", event.data); // remove after testing
@@ -69,10 +106,6 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
     };
   }, []);
 
-  const embedSignup = async (code: string) => {
-    await axios.post("/api/wa-embedded-signup", { code });
-  };
-
   const handleLogin = () => {
     // @ts-ignore
     if (typeof window !== "undefined" && window.FB) {
@@ -80,8 +113,8 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
       window.FB.login(
         (response: any) => {
           if (response.authResponse) {
-            embedSignup(response.authResponse.code);
-            onLoginSuccess(response);
+            loginResponseRef.current = response;
+            checkReady();
           } else {
             onLoginFailure("User cancelled login or did not fully authorize.");
           }
@@ -102,20 +135,14 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
 
   return (
     <div>
-      {fbLoaded ? (
-        <Button
-          onClick={handleLogin}
-          className="bg-[#25D366] text-white h-16 w-96"
-        >
-          <IconBrandWhatsapp size={40} />
-          Authenticate WhatsApp Business Account
-        </Button>
-      ) : (
-        <Button className="bg-[#25D366] text-white h-16 w-96" disabled>
-          <IconBrandWhatsapp size={40} />
-          Loading
-        </Button>
-      )}
+      <Button
+        onClick={handleLogin}
+        className="bg-[#25D366] text-white h-16 w-96"
+        disabled={!fbLoaded}
+      >
+        <IconBrandWhatsapp size={40} />
+        {fbLoaded ? "Authenticate WhatsApp Business Account" : "Loading"}
+      </Button>
     </div>
   );
 };
