@@ -1,5 +1,6 @@
 import { IncomingMessage } from "http";
 import {
+  EventField,
   FlowEndpointRequest,
   FlowTypeEnum,
   MessageTypesEnum,
@@ -8,7 +9,12 @@ import {
 import { WabaConfigType } from "./types/config";
 
 import crypto from "crypto";
-import { EventField, WebhookEvent, WebhookMessage } from "./types/webhook";
+import {
+  ValueObject,
+  WebhookEvent,
+  WebhookMessage,
+  WebhookObject,
+} from "./types/webhook";
 import { importConfig } from "./utils";
 import {
   isFlowDataExchangeRequest,
@@ -99,7 +105,7 @@ export default class WebhookHandler {
     Req extends IRequest,
     Res extends IResponse,
   >(req: Req, res: Res): Promise<void> {
-    const body = req.body;
+    const body = req.body as WebhookObject;
 
     // Check this is a WhatsApp Business Account webhook
     if (body.object !== "whatsapp_business_account") {
@@ -146,14 +152,13 @@ export default class WebhookHandler {
   /**
    * Process incoming messages
    */
-  private async processMessages(value: any): Promise<void> {
+  private async processMessages(value: ValueObject): Promise<void> {
     // Extract metadata
     const metadata = value.metadata;
     const displayPhoneNumber = metadata.display_phone_number;
     const phoneNumberId = metadata.phone_number_id;
-    const profileName =
-      value.contacts?.length > 0 ? value.contacts[0].profile?.name : "";
-    const messages = value.messages as WebhookMessage[];
+    const profileName = value.contacts[0]?.profile?.name ?? "";
+    const messages = value.messages;
 
     // Process messages if present
     if (messages && messages.length > 0) {

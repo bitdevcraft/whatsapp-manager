@@ -1,485 +1,65 @@
-import { MessageTypesEnum } from './enums';
-
-export interface WebhookContact {
-    /**
-     * WhatsApp ID of the contact. Business can respond to this contact using this ID.
-     */
-    wa_id: string;
-    /**
-     *  Additional unique, alphanumeric identifier for a WhatsApp user
-     */
-    user_id?: string;
-    /**
-     * Profile of Whatsapp user
-     */
-    profile: {
-        /**
-         * The display name of the contact
-         */
-        name: string;
-    };
-}
+import {
+  ConversationTypesEnum,
+  CurrencyCodesEnum,
+  DocumentMediaTypesEnum,
+  ImageMediaTypesEnum,
+  MessageTypesEnum,
+  ReferralSourceTypesEnum,
+  StatusEnum,
+  StickerMediaTypesEnum,
+  SystemChangeTypesEnum,
+  VideoMediaTypesEnum,
+} from "./enums";
 
 /**
  * Represents a message received through the webhook
  * Based on Meta's documentation: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object
  */
 export interface WebhookMessage {
-    /**
-     * The message ID
-     */
-    id: string;
+  id: string;
+  from: string;
+  timestamp: string;
+  type: MessageTypesEnum;
+  phoneNumberId: string;
+  displayPhoneNumber: string;
+  profileName: string;
 
-    /**
-     * The sender's phone number
-     */
-    from: string;
+  // Messages Type
+  audio?: AudioObject;
+  button?: ButtonObject;
+  contacts?: ContactMessageObject[];
+  context?: ConTextObject;
+  document?: DocumentObject;
+  errors?: ErrorObject[];
+  identity?: IdentityObject;
+  image?: ImageObject;
+  interactive?: InteractiveObject;
+  location?: LocationObject;
+  order?: Order_Object;
+  reaction?: ReactionObject;
+  referral?: ReferralObject;
+  sticker?: StickerObject;
+  system?: SystemObject;
+  text?: TextObject;
+  video?: VideoObject;
 
-    /**
-     * The timestamp of the message
-     */
-    timestamp: string;
-
-    /**
-     * The type of message (text, image, etc.)
-     */
-    type: MessageTypesEnum;
-
-    /**
-     * The phone number ID that received the message
-     */
-    phoneNumberId: string;
-
-    /**
-     * The display phone number that received the message
-     */
-    displayPhoneNumber: string;
-
-    /**
-     * The profile name of the sender
-     */
-    profileName: string;
-
-    /**
-     * Text object for text messages
-     */
-    text?: {
-        /**
-         * The text content of the message
-         */
-        body: string;
-    };
-
-    /**
-     * Image object for image messages
-     */
-    image?: {
-        /**
-         * The image caption (if provided)
-         */
-        caption?: string;
-        /**
-         * The SHA256 hash of the image
-         */
-        sha256?: string;
-        /**
-         * The ID for the image
-         */
-        id: string;
-        /**
-         * The MIME type of the image
-         */
-        mime_type: string;
-    };
-
-    /**
-     * Video object for video messages
-     */
-    video?: {
-        /**
-         * The video caption (if provided)
-         */
-        caption?: string;
-        /**
-         * The SHA256 hash of the video
-         */
-        sha256?: string;
-        /**
-         * The ID for the video
-         */
-        id: string;
-        /**
-         * The MIME type of the video
-         */
-        mime_type: string;
-    };
-
-    /**
-     * Audio object for audio messages
-     */
-    audio?: {
-        /**
-         * The ID for the audio file
-         */
-        id: string;
-        /**
-         * The MIME type of the audio file
-         */
-        mime_type: string;
-        /**
-         * Whether the audio is a voice message
-         */
-        voice?: boolean;
-    };
-
-    /**
-     * Document object for document messages
-     */
-    document?: {
-        /**
-         * The document caption (if provided)
-         */
-        caption?: string;
-        /**
-         * The document filename
-         */
-        filename: string;
-        /**
-         * The SHA256 hash of the document
-         */
-        sha256?: string;
-        /**
-         * The ID for the document
-         */
-        id: string;
-        /**
-         * The MIME type of the document
-         */
-        mime_type: string;
-    };
-
-    /**
-     * Sticker object for sticker messages
-     */
-    sticker?: {
-        /**
-         * The ID for the sticker
-         */
-        id: string;
-        /**
-         * Whether this is an animated sticker
-         */
-        animated: boolean;
-        /**
-         * The MIME type of the sticker
-         */
-        mime_type: string;
-    };
-
-    /**
-     * Reaction object for reaction messages
-     */
-    reaction?: {
-        /**
-         * The ID of the message being reacted to
-         */
-        message_id: string;
-        /**
-         * Emoji used for the reaction
-         */
-        emoji: string;
-    };
-
-    /**
-     * Contacts object for contact messages
-     */
-    contacts?: Array<{
-        /**
-         * The contact's name
-         */
-        name: {
-            formatted_name: string;
-            first_name?: string;
-            last_name?: string;
-            middle_name?: string;
-            suffix?: string;
-            prefix?: string;
-        };
-        /**
-         * The contact's phone numbers
-         */
-        phones?: Array<{
-            phone: string;
-            type?: string;
-            wa_id?: string;
-        }>;
-        /**
-         * The contact's emails
-         */
-        emails?: Array<{
-            email: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's addresses
-         */
-        addresses?: Array<{
-            street?: string;
-            city?: string;
-            state?: string;
-            zip?: string;
-            country?: string;
-            country_code?: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's organizations
-         */
-        org?: {
-            company?: string;
-            department?: string;
-            title?: string;
-        };
-        /**
-         * The contact's URLs
-         */
-        urls?: Array<{
-            url: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's birthday (YYYY-MM-DD format)
-         */
-        birthday?: string;
-    }>;
-
-    /**
-     * Location object for location messages
-     */
-    location?: {
-        /**
-         * Latitude of the location
-         */
-        latitude: number;
-        /**
-         * Longitude of the location
-         */
-        longitude: number;
-        /**
-         * Name of the location
-         */
-        name?: string;
-        /**
-         * Address of the location
-         */
-        address?: string;
-    };
-
-    /**
-     * Interactive object for interactive messages
-     */
-    interactive?: {
-        /**
-         * Type of the interactive message
-         * Can be: button_reply, list_reply, flow, nfm_reply, etc.
-         */
-        type: string;
-        /**
-         * ID for the button that was clicked
-         */
-        button_reply?: {
-            id: string;
-            title: string;
-        };
-        /**
-         * ID for the list item that was selected
-         */
-        list_reply?: {
-            id: string;
-            title: string;
-            description?: string;
-        };
-
-        /**
-         * NFM (No-Code Flow Message) reply data
-         */
-        nfm_reply?: {
-            /**
-             * Response data in JSON format
-             */
-            response_json: string;
-            /**
-             * Body text of the reply
-             */
-            body: string;
-            /**
-             * Name of the flow
-             */
-            name: string;
-        };
-    };
-
-    /**
-     * System object for system messages (like user phone number changes)
-     */
-    system?: {
-        /**
-         * The type of system update
-         */
-        type: string;
-        /**
-         * User's identity if the update is a customer identity change
-         */
-        identity?: string;
-        /**
-         * Old and new phone numbers if the update is a phone number change
-         */
-        customer?: {
-            /**
-             * The previous phone number
-             */
-            previous_wa_id: string;
-            /**
-             * The new phone number
-             */
-            wa_id: string;
-        };
-    };
-
-    /**
-     * Order object for order messages
-     */
-    order?: {
-        /**
-         * Catalog ID
-         */
-        catalog_id: string;
-        /**
-         * Product items in the order
-         */
-        product_items: Array<{
-            /**
-             * Product ID
-             */
-            product_retailer_id: string;
-            /**
-             * Quantity of the product
-             */
-            quantity: number;
-            /**
-             * Item price
-             */
-            item_price: number;
-            /**
-             * Currency code
-             */
-            currency: string;
-        }>;
-        /**
-         * Text message included with the order
-         */
-        text?: string;
-    };
-
-    /**
-     * Context object, included when a user replies or interacts
-     */
-    context?: {
-        /**
-         * ID of the message
-         */
-        id?: string;
-        /**
-         * ID of the sender
-         */
-        from?: string;
-        /**
-         * ID of the message being replied to or interacted with
-         */
-        message_id: string;
-        /**
-         * ID of the forwarded message, if applicable
-         */
-        forwarded?: boolean;
-        /**
-         * Frequently forwarded status
-         */
-        frequently_forwarded?: boolean;
-        /**
-         * Original message information if the message was referred
-         */
-        referred_product?: {
-            /**
-             * Catalog ID
-             */
-            catalog_id: string;
-            /**
-             * Product ID
-             */
-            product_retailer_id: string;
-        };
-    };
-
-    /**
-     * Errors array, if the message had errors
-     */
-    errors?: Array<{
-        /**
-         * Error code
-         */
-        code: number;
-        /**
-         * Error title
-         */
-        title: string;
-        /**
-         * Error message
-         */
-        message: string;
-        /**
-         * Error details object
-         */
-        error_data?: {
-            /**
-             * Describes the error details
-             */
-            details: string;
-        };
-    }>;
-
-    /**
-     * Button object for button messages
-     */
-    button?: {
-        /**
-         * The payload for the button
-         */
-        payload: string;
-        /**
-         * Button text
-         */
-        text: string;
-    };
-
-    /**
-     * The original message data as received from the webhook
-     */
-    originalData: any;
+  // Original Data
+  originalData: any;
 }
 
 /**
  * Represents a non-message event received through the webhook
  */
 export interface WebhookEvent {
-    /**
-     * The field type of the event
-     */
-    field: string;
+  /**
+   * The field type of the event
+   */
+  field: string;
 
-    /**
-     * The event data
-     */
-    value: any;
+  /**
+   * The event data
+   */
+  value: any;
 }
 
 /**
@@ -492,23 +72,298 @@ export type MessageHandler = (message: WebhookMessage) => void | Promise<void>;
  */
 export type EventHandler = (event: WebhookEvent) => void | Promise<void>;
 
-/**
- * Statuses that can be received in status updates
- */
-export enum MessageStatus {
-    DELIVERED = 'delivered',
-    READ = 'read',
-    SENT = 'sent',
-}
+type PricingObject = {
+  category: ConversationTypesEnum;
+  pricing_model: "CBP";
+};
 
-/**
- * Event fields that can be received through the webhook
- */
-export enum EventField {
-    MESSAGES = 'messages',
-    STATUSES = 'statuses',
-    MESSAGE_TEMPLATE_STATUS_UPDATE = 'message_template_status_update',
-    PHONE_NUMBER_QUALITY_UPDATE = 'phone_number_quality_update',
-    PHONE_NUMBER_NAME_UPDATE = 'phone_number_name_update',
-    UNKNOWN = 'unknown',
-}
+type OriginObject = {
+  type: ConversationTypesEnum;
+};
+
+type ConversationObject = {
+  id: string;
+  origin: OriginObject;
+  expiration_timestamp: string;
+};
+
+type ErrorDataObject = {
+  details: string;
+};
+
+type ErrorObject = {
+  code: number;
+  title: string;
+  message: string;
+  error_data: ErrorDataObject;
+};
+
+export type StatusesObject = {
+  conversation: ConversationObject;
+  errors: ErrorObject[];
+  id: string;
+  pricing: PricingObject;
+  recipient_id: string;
+  status: StatusEnum;
+  timestamp: string;
+};
+
+type AudioObject = {
+  id: string;
+  mime_type: string;
+  voice?: boolean;
+};
+
+type ButtonObject = {
+  payload: string;
+  text: string;
+};
+
+type ConTextObject = {
+  forwarded: boolean;
+  frequently_forwarded: boolean;
+  from: string;
+  id: string;
+  message_id?: string;
+  referred_product: {
+    catalog_id: string;
+    product_retailer_id: string;
+  };
+};
+
+type DocumentObject = {
+  caption?: string;
+  filename: string;
+  sha256?: string;
+  mime_type: DocumentMediaTypesEnum;
+  id: string;
+};
+
+type IdentityObject = {
+  acknowledged: string;
+  created_timestamp: string;
+  hash: string;
+};
+
+type ImageObject = {
+  caption?: string;
+  sha256?: string;
+  id: string;
+  mime_type: ImageMediaTypesEnum;
+};
+
+type ButtonReplyObject = {
+  button_reply: {
+    id: string;
+    title: string;
+  };
+};
+
+type ListReplyObject = {
+  list_reply: {
+    id: string;
+    title: string;
+    description: string;
+  };
+};
+
+type NfmReplyObject = {
+  nfm_reply: {
+    response_json: string;
+    body: string;
+
+    name: string;
+  };
+};
+
+type InteractiveObject = {
+  type: ButtonReplyObject | ListReplyObject | NfmReplyObject;
+};
+
+type ProductItemsObject = {
+  product_retailer_id: string;
+  quantity: string;
+  item_price: string;
+  currency: CurrencyCodesEnum;
+};
+
+type Order_Object = {
+  catalog_id: string;
+  text?: string;
+  product_items: ProductItemsObject[];
+};
+
+type ReactionObject = {
+  message_id: string;
+  emoji: string;
+};
+
+type ReferralObject = {
+  source_url: URL;
+  source_type: ReferralSourceTypesEnum;
+  source_id: string;
+  headline: string;
+  body: string;
+  media_type: ImageMediaTypesEnum | VideoMediaTypesEnum;
+  image_url: URL;
+  video_url: URL;
+  thumbnail_url: URL;
+};
+
+type StickerObject = {
+  mime_type: StickerMediaTypesEnum;
+  sha256?: string;
+  id: string;
+  animated: boolean;
+};
+
+type SystemObject = {
+  body: string;
+  identity: string;
+  new_wa_id: string;
+  wa_id: string;
+  type: SystemChangeTypesEnum;
+  customer: string;
+};
+
+type TextObject = {
+  body: string;
+};
+
+type VideoObject = {
+  caption?: string;
+  filename?: string;
+  sha256?: string;
+  id: string;
+  mime_type: VideoMediaTypesEnum;
+};
+
+type LocationObject = {
+  latitude: number;
+  longitude: number;
+  name?: string;
+  address?: string;
+};
+
+export type MessagesObject = {
+  id: string;
+  from: string;
+  timestamp: string;
+  type: MessageTypesEnum;
+
+  audio?: AudioObject;
+  button?: ButtonObject;
+  contacts?: ContactMessageObject[];
+  context?: ConTextObject;
+  document?: DocumentObject;
+  errors?: ErrorObject[];
+  identity?: IdentityObject;
+  image?: ImageObject;
+  interactive?: InteractiveObject;
+  location?: LocationObject;
+  order?: Order_Object;
+  reaction?: ReactionObject;
+  referral: ReferralObject;
+  sticker?: StickerObject;
+  system?: SystemObject;
+  text?: TextObject;
+  video?: VideoObject;
+};
+
+type ProfileObject = {
+  name: string;
+};
+
+type ContactObject = {
+  wa_id: string;
+  user_id?: string;
+  profile: ProfileObject;
+};
+
+type ContactMessageObject = {
+  name: ContactNameObject;
+  phones?: ContactPhoneObject[];
+  emails?: ContactEmailObject[];
+  addresses?: ContactAddressObject[];
+  org?: ContactOrgObject;
+  urls?: ContactUrlObject[];
+  birthday?: string;
+};
+
+type ContactNameObject = {
+  formatted_name: string;
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string;
+  suffix?: string;
+  prefix?: string;
+};
+
+type ContactPhoneObject = {
+  phone: string;
+  type?: string;
+  wa_id?: string;
+};
+
+type ContactEmailObject = {
+  email: string;
+  type?: string;
+};
+
+type ContactAddressObject = {
+  street?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+  country_code?: string;
+  type?: string;
+};
+
+type ContactOrgObject = {
+  company?: string;
+  department?: string;
+  title?: string;
+};
+
+type ContactUrlObject = {
+  url: string;
+  type?: string;
+};
+
+type MetadataObject = {
+  display_phone_number: string;
+  phone_number_id: string;
+};
+
+export type ValueObject = {
+  messaging_product: "whatsapp";
+  contacts: ContactObject[];
+  errors: ErrorObject[];
+  messages: MessagesObject[];
+  metadata: MetadataObject;
+  statuses: StatusesObject[];
+};
+
+type ChangesObject = {
+  field: string;
+  value: ValueObject;
+};
+
+type Entry_Object = {
+  id: string;
+  changes: ChangesObject[];
+};
+
+export type WebhookObject = {
+  object: "whatsapp_business_account";
+  entry: Entry_Object[];
+};
+
+export type WebhookSubscribeQuery = {
+  hub: {
+    mode: "subscribe";
+    challenge: string;
+    verify_token: string;
+  };
+};

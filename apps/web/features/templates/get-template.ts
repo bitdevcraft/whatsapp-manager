@@ -4,7 +4,6 @@ import { syncTemplate } from "./sync-template";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenant, withTenantTransaction } from "@workspace/db/tenant";
 import { sql } from "drizzle-orm";
-import { T } from "../../../../packages/wa-cloud-api/dist/enums-CI7vzKhn";
 
 export async function getTemplates(sync = false) {
   if (sync) {

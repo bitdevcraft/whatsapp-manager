@@ -1,0 +1,31 @@
+import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
+
+export async function handleInteractiveMessage(
+  client: WhatsApp,
+  message: WebhookMessage
+) {
+  console.log("Received interactive message:", message.interactive);
+
+  if (message.interactive && "button_reply" in message.interactive) {
+    const buttonId = message.interactive.type.button_reply?.id;
+
+    if (buttonId === "help_button") {
+      await client.messages.text({
+        body: `Available commands:
+    - hello/hi: Get a greeting
+    - help: Show this help message
+    - info: Get account information
+    - template: See a template example
+    - interactive: See interactive message example`,
+        to: message.from,
+      });
+    } else if (buttonId === "info_button") {
+      await client.messages.text({
+        body: `Your WhatsApp number: ${message.from}
+    Profile name: ${message.profileName}
+    Our phone: ${message.displayPhoneNumber}`,
+        to: message.from,
+      });
+    }
+  }
+}
