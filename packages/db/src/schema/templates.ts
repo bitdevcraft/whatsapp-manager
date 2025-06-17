@@ -1,5 +1,3 @@
-import { TemplateResponse } from "@workspace/wa-cloud-api/types";
-import { baseSchema } from "../helpers/column-helper";
 import {
   integer,
   jsonb,
@@ -11,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { teamsTable } from "./teams";
 import { relations, sql } from "drizzle-orm";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
 
 export const templatesTable = pgTable(
   "templates",

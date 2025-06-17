@@ -1,29 +1,107 @@
 {
   "name": "@workspace/wa-cloud-api",
-  "version": "0.0.0",
+  "version": "0.2.42",
   "description": "TypeScript wrapper for Meta's Cloud API",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "prepublishOnly": "pnpm build",
+    "prepare": "husky",
+    "cz": "cz",
+    "dev": "tsup --watch",
+    "build": "tsup --clean",
+    "format": "prettier .",
+    "lint": "eslint .",
+    "clean": "rm -rf dist node_modules",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./api": {
-      "types": "./dist/api/index.d.ts",
-      "import": "./dist/api/index.js",
-      "default": "./dist/api/index.js"
+    "./messages": {
+      "types": "./dist/features/messages/index.d.ts",
+      "import": "./dist/features/messages/index.js",
+      "default": "./dist/features/messages/index.js"
     },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js",
-      "default": "./dist/types/index.js"
+    "./media": {
+      "types": "./dist/features/media/index.d.ts",
+      "import": "./dist/features/media/index.js",
+      "default": "./dist/features/media/index.js"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js",
-      "default": "./dist/utils/index.js"
+    "./profile": {
+      "types": "./dist/features/profile/index.d.ts",
+      "import": "./dist/features/profile/index.js",
+      "default": "./dist/features/profile/index.js"
+    },
+    "./flow": {
+      "types": "./dist/features/flow/index.d.ts",
+      "import": "./dist/features/flow/index.js",
+      "default": "./dist/features/flow/index.js"
+    },
+    "./phone": {
+      "types": "./dist/features/phone/index.d.ts",
+      "import": "./dist/features/phone/index.js",
+      "default": "./dist/features/phone/index.js"
+    },
+    "./template": {
+      "types": "./dist/features/template/index.d.ts",
+      "import": "./dist/features/template/index.js",
+      "default": "./dist/features/template/index.js"
+    },
+    "./waba": {
+      "types": "./dist/features/waba/index.d.ts",
+      "import": "./dist/features/waba/index.js",
+      "default": "./dist/features/waba/index.js"
+    },
+    "./qrCode": {
+      "types": "./dist/features/qrCode/index.d.ts",
+      "import": "./dist/features/qrCode/index.js",
+      "default": "./dist/features/qrCode/index.js"
+    },
+    "./twoStepVerification": {
+      "types": "./dist/features/twoStepVerification/index.d.ts",
+      "import": "./dist/features/twoStepVerification/index.js",
+      "default": "./dist/features/twoStepVerification/index.js"
+    },
+    "./encryption": {
+      "types": "./dist/features/encryption/index.d.ts",
+      "import": "./dist/features/encryption/index.js",
+      "default": "./dist/features/encryption/index.js"
+    },
+    "./registration": {
+      "types": "./dist/features/registration/index.d.ts",
+      "import": "./dist/features/registration/index.js",
+      "default": "./dist/features/registration/index.js"
+    },
+    "./shared/types": {
+      "types": "./dist/shared/types/index.d.ts",
+      "import": "./dist/shared/types/index.js",
+      "default": "./dist/shared/types/index.js"
+    },
+    "./shared/utils": {
+      "types": "./dist/shared/utils/index.d.ts",
+      "import": "./dist/shared/utils/index.js",
+      "default": "./dist/shared/utils/index.js"
+    },
+    "./core/webhook": {
+      "types": "./dist/core/webhook/index.d.ts",
+      "import": "./dist/core/webhook/index.js",
+      "default": "./dist/core/webhook/index.js"
+    },
+    "./core/whatsapp": {
+      "types": "./dist/core/whatsapp/index.d.ts",
+      "import": "./dist/core/whatsapp/index.js",
+      "default": "./dist/core/whatsapp/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -34,19 +112,42 @@
   "engines": {
     "node": ">=18"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsup --watch",
-    "build": "tsup --clean",
-    "clean": "rm -rf dist node_modules",
-    "typecheck": "tsc --noEmit"
-  },
-  "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.15.31",
-    "@workspace/typescript-config": "workspace:*",
-    "dotenv": "^16.5.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "@changesets/cli": "^2.28.1",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/cz-commitlint": "^19.6.1",
+    "@commitlint/types": "^19.5.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.17.0",
+    "@types/eslint-config-prettier": "^6.11.3",
+    "@types/eslint__eslintrc": "^2.1.2",
+    "@types/node": "^22.15.29",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "commitizen": "^4.3.1",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.5.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^2.1.8"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "prettier --write --ignore-unknown",
+      "eslint --fix"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
   }
 }

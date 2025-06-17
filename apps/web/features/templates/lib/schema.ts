@@ -2,11 +2,11 @@ import { z } from "zod";
 import {
   ComponentTypesEnum,
   ParametersTypesEnum,
-  ButtonTypesEnum,
+  SubTypeEnum,
   ButtonPositionEnum,
   LanguagesEnum,
   CurrencyCodesEnum,
-} from "@workspace/wa-cloud-api/types";
+} from "@workspace/wa-cloud-api";
 
 // Base parameter types
 const SimpleTextObjectSchema = z.object({ text: z.string() });
@@ -90,7 +90,7 @@ const ComponentSchema = z.object({
 const ButtonComponentSchema = z.object({
   type: z.literal(ComponentTypesEnum.Button),
   parameters: ButtonParameterUnion,
-  sub_type: z.nativeEnum(ButtonTypesEnum),
+  sub_type: z.nativeEnum(SubTypeEnum),
   index: z.nativeEnum(ButtonPositionEnum),
 });
 

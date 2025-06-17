@@ -24,11 +24,11 @@ import { z } from "zod";
 import { useMemo } from "react";
 import {
   ButtonPositionEnum,
-  ButtonTypesEnum,
+  SubTypeEnum,
   ComponentTypesEnum,
   LanguagesEnum,
   TemplateResponse,
-} from "@workspace/wa-cloud-api/types";
+} from "@workspace/wa-cloud-api";
 import { MessageTemplateSchema, MessageTemplateValues } from "../lib/schema";
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
 import { ComponentButtonParameter } from "./message-template-component-button-parameter";
@@ -71,7 +71,7 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
 
   const componentTypes = Object.values(ComponentTypesEnum);
   const languageOptions = Object.values(LanguagesEnum);
-  const buttonTypes = Object.values(ButtonTypesEnum);
+  const buttonTypes = Object.values(SubTypeEnum);
   const buttonPositions = Object.values(ButtonPositionEnum);
 
   return (

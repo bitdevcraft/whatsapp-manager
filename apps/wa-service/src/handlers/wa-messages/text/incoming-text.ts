@@ -9,6 +9,7 @@ export async function handleTextMessage(
   if (message.text?.body) {
     const text = message.text.body.toLowerCase();
 
+    console.log(text);
     // Handle Command Type Message
     const handler = cmdMessageHandler[text];
     if (handler) {

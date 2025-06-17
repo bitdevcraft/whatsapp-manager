@@ -4,11 +4,11 @@ import { useEffect, useMemo } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import {
   ButtonPositionEnum,
-  ButtonTypesEnum,
   ComponentTypesEnum,
   LanguagesEnum,
+  SubTypeEnum,
   TemplateResponse,
-} from "@workspace/wa-cloud-api/types";
+} from "@workspace/wa-cloud-api";
 import {
   FormField,
   FormItem,
@@ -83,7 +83,7 @@ export function MessageTemplateForm({
 
   const componentTypes = Object.values(ComponentTypesEnum);
   const languageOptions = Object.values(LanguagesEnum);
-  const buttonTypes = Object.values(ButtonTypesEnum);
+  const buttonTypes = Object.values(SubTypeEnum);
   const buttonPositions = Object.values(ButtonPositionEnum);
 
   return (

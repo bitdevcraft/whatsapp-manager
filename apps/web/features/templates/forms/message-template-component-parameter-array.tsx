@@ -14,7 +14,7 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { Button } from "@workspace/ui/components/button";
-import { ParametersTypesEnum } from "@workspace/wa-cloud-api/types";
+import { ParametersTypesEnum } from "@workspace/wa-cloud-api";
 
 export function ComponentParametersArray({
   name,

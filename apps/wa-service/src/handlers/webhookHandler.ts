@@ -1,14 +1,13 @@
 import WhatsApp, {
   MessageTypesEnum,
-  WebhookEvent,
   WebhookMessage,
 } from "@workspace/wa-cloud-api";
 
 import { handleTextMessage } from "./wa-messages/text/incoming-text";
-import { webhookHandler } from "@/config/whatsapp";
 import { handleInteractiveMessage } from "./wa-messages/interactive/incoming-interactive";
 import { handleImageMessage } from "./wa-messages/image/incoming-image";
 import { handleDocumentMessage } from "./wa-messages/document/incoming-document";
+import { webhookHandler } from "@/config/whatsapp";
 
 // Set up pre-processing handler
 webhookHandler.onMessagePreProcess(
@@ -21,6 +20,8 @@ webhookHandler.onMessagePreProcess(
 webhookHandler.onMessage(
   MessageTypesEnum.Text,
   async (client: WhatsApp, message: WebhookMessage) => {
+    console.log("Text Message");
+
     await handleTextMessage(client, message);
   }
 );
@@ -49,7 +50,8 @@ webhookHandler.onMessage(
   }
 );
 
-webhookHandler.onEvent("statuses", (event: WebhookEvent) => {
-  console.log(event.field);
-  console.log(JSON.stringify(event.value));
-});
+webhookHandler.onMessagePostProcess(
+  async (client: WhatsApp, message: WebhookMessage) => {
+    console.log(message);
+  }
+);

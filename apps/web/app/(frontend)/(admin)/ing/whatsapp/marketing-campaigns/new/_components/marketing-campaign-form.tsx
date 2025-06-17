@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import axios from "axios";
-import { LanguagesEnum } from "@workspace/wa-cloud-api/types";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
 
 export default function MarketingCampaignForm() {
   const router = useRouter();

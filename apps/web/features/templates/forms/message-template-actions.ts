@@ -1,10 +1,13 @@
 import {
-  ComponentTypesEnum,
   ParametersTypesEnum,
+  ComponentTypesEnum,
+} from "@workspace/wa-cloud-api";
+
+import {
   TemplateBody,
   TemplateHeader,
   TemplateResponse,
-} from "@workspace/wa-cloud-api/types";
+} from "@workspace/wa-cloud-api/template";
 import { MessageTemplateValues } from "../lib/schema";
 
 export function transformTemplateResponseToFormValues(

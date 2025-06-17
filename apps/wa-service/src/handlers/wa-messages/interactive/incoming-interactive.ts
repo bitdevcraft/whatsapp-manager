@@ -6,8 +6,8 @@ export async function handleInteractiveMessage(
 ) {
   console.log("Received interactive message:", message.interactive);
 
-  if (message.interactive && "button_reply" in message.interactive) {
-    const buttonId = message.interactive.type.button_reply?.id;
+  if (message.interactive?.type === "button_reply") {
+    const buttonId = message.interactive.button_reply?.id;
 
     if (buttonId === "help_button") {
       await client.messages.text({

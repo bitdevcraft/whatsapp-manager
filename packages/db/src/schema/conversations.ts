@@ -11,8 +11,8 @@ import {
 import { contactsTable } from "./contacts";
 import { relations, sql } from "drizzle-orm";
 import { enumToValues } from "../enums/enum-helper";
-import { MessageStatus } from "@workspace/wa-cloud-api";
 import { teamsTable } from "./teams";
+import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
 
 export const conversationStatusEnum = pgEnum(
   "status",

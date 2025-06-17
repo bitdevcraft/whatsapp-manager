@@ -3,8 +3,8 @@ import WhatsApp, {
   InteractiveTypesEnum,
   LanguagesEnum,
   ParametersTypesEnum,
+  WebhookMessage,
 } from "@workspace/wa-cloud-api";
-import { WebhookMessage } from "@workspace/wa-cloud-api/types";
 
 type CmdMessageHandlerMap = {
   [key: string]: (client: WhatsApp, message: WebhookMessage) => void;

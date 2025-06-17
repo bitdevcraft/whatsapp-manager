@@ -2,7 +2,7 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import WhatsApp from "@workspace/wa-cloud-api";
+import { WhatsApp } from "@workspace/wa-cloud-api";
 
 const waPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const waAccessToken = process.env.WHATSAPP_API_ACCESS_TOKEN;
