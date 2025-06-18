@@ -29,6 +29,27 @@
       "when": 1750182180647,
       "tag": "0003_confused_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1750226451167,
+      "tag": "0004_fast_green_goblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1750226844344,
+      "tag": "0005_great_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750226918547,
+      "tag": "0006_old_husk",
+      "breakpoints": true
     }
   ]
 }

@@ -42,6 +42,7 @@ export type {
     MessageTemplateObject,
     PhoneNumberClass,
     PhoneNumberResponse,
+    PhoneNumbersResponse,
     QrCodeClass,
     QrCodeResponse,
     ReactionParams,

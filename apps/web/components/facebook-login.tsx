@@ -6,7 +6,7 @@ import {
   EmbedSignUpLoginSuccess,
   EmbedSignUpObject,
   EmbeddedSignUpAuthorizedObject,
-} from "@workspace/shared";
+} from "@/types/embedded-signup";
 import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";

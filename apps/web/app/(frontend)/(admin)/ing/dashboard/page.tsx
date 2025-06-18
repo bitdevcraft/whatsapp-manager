@@ -1,10 +1,8 @@
 "use client";
 
 import { ChartAreaInteractive } from "@/components/admin-layout/chart-area-interactive";
-import { DataTable } from "@/components/admin-layout/data-table";
 import { SectionCards } from "@/components/admin-layout/section-cards";
 
-import data from "./data.json";
 import FacebookLogin from "@/components/facebook-login";
 import {
   Card,

@@ -1,7 +1,11 @@
 import { encryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import {
+  NewTemplate,
+  NewWhatsAppBusinessAccountPhoneNumber,
+  templatesTable,
   WhatsAppBusinessAccountAccessToken,
+  whatsAppBusinessAccountPhoneNumbersTable,
   whatsAppBusinessAccountsTable,
   WhatsAppBusinessAuthAccountResponse,
 } from "@workspace/db";
@@ -13,9 +17,13 @@ import {
   EmbeddedSignUpAuthorizedObject,
   EmbedSignUpExchangeToken,
   EmbedSignupSuccessObject,
-} from "@workspace/shared";
-import WhatsApp from "@workspace/wa-cloud-api";
+} from "@/types/embedded-signup";
+import WhatsApp, {
+  PhoneNumberResponse,
+  TemplateResponse,
+} from "@workspace/wa-cloud-api";
 import axios from "axios";
+import { buildConflictUpdateColumns } from "@workspace/db/lib";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();
@@ -53,7 +61,7 @@ export async function POST(request: Request) {
       },
       {
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
 
     const config = {
@@ -94,23 +102,66 @@ export async function POST(request: Request) {
     };
 
     const encryptedAccessToken = await encryptApiKey(
-      response.data.access_token
+      response.data.access_token,
     );
 
     const accessToken: WhatsAppBusinessAccountAccessToken = {
       ...encryptedAccessToken,
     };
 
-    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
-      const newAccount: NewWhatsAppBusinessAccount = {
-        id: Number(business.waba_id),
-        teamId: userWithTeam.teamId!,
-        ownerBusinessId: account.owner_business_info?.id,
-        ownerBusinessName: account.owner_business_info?.name,
-        accessToken,
-        authResponse,
-      };
+    const newAccount: NewWhatsAppBusinessAccount = {
+      id: Number(business.waba_id),
+      teamId: userWithTeam.teamId!,
+      ownerBusinessId: account.owner_business_info?.id,
+      ownerBusinessName: account.owner_business_info?.name,
+      accessToken,
+      authResponse,
+    };
 
+    const newTemplates: NewTemplate[] = templates.data.map(
+      (template: TemplateResponse) => {
+        const temp: NewTemplate = {
+          id: template.id,
+          name: template.name,
+          teamId: userWithTeam.teamId!,
+          content: template,
+        };
+        return temp;
+      },
+    );
+
+    const newPhoneNumbers: NewWhatsAppBusinessAccountPhoneNumber[] =
+      phoneNumbers.data.map((phoneNumber: PhoneNumberResponse) => {
+        const temp: NewWhatsAppBusinessAccountPhoneNumber = {
+          id: Number(phoneNumber.id),
+          teamId: userWithTeam.teamId!,
+          displayPhoneNumber: phoneNumber.display_phone_number,
+          verifiedName: phoneNumber.verified_name,
+          status: phoneNumber.status,
+          qualityRating: phoneNumber.quality_rating,
+          searchVisibility: phoneNumber.search_visibility,
+          platformType: phoneNumber.platform_type,
+          codeVerificationStatus: phoneNumber.code_verification_status,
+          accountMode: phoneNumber.account_mode,
+          certificate: phoneNumber.certificate,
+          conversationalAutomation: phoneNumber.conversational_automation,
+          healthStatus: phoneNumber.health_status,
+          isOfficialBusinessAccount: phoneNumber.is_official_business_account,
+          isOnBizApp: phoneNumber.is_on_biz_app,
+          isPinEnabled: phoneNumber.is_pin_enabled,
+          isPreverifiedNumber: phoneNumber.is_preverified_number,
+          lastOnboardTime: phoneNumber.last_onboarded_time,
+          messagingLimitTier: phoneNumber.messaging_limit_tier,
+          nameStatus: phoneNumber.name_status,
+          newCertificate: phoneNumber.new_certificate,
+          newNameStatus: phoneNumber.new_name_status,
+          qualityScore: phoneNumber.quality_score,
+          throughput: phoneNumber.throughput,
+        };
+        return temp;
+      });
+
+    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
       await tx
         .insert(whatsAppBusinessAccountsTable)
         .values(newAccount)
@@ -120,6 +171,50 @@ export async function POST(request: Request) {
             ...newAccount,
           },
         });
+
+      await tx
+        .insert(templatesTable)
+        .values(newTemplates)
+        .onConflictDoUpdate({
+          target: templatesTable.id,
+          set: buildConflictUpdateColumns(templatesTable, [
+            "updatedAt",
+            "name",
+            "content",
+          ]),
+        });
+
+      await tx
+        .insert(whatsAppBusinessAccountPhoneNumbersTable)
+        .values(newPhoneNumbers)
+        .onConflictDoUpdate({
+          target: whatsAppBusinessAccountPhoneNumbersTable.id,
+          set: buildConflictUpdateColumns(
+            whatsAppBusinessAccountPhoneNumbersTable,
+            [
+              "displayPhoneNumber",
+              "verifiedName",
+              "status",
+              "qualityScore",
+              "qualityRating",
+              "codeVerificationStatus",
+              "healthStatus",
+              "isOfficialBusinessAccount",
+              "isOnBizApp",
+              "isPinEnabled",
+              "isPreverifiedNumber",
+              "lastOnboardTime",
+              "messagingLimitTier",
+              "nameStatus",
+              "newCertificate",
+              "newNameStatus",
+            ],
+          ),
+        });
+    });
+
+    return new Response("", {
+      status: 200,
     });
   } catch (error: any) {
     return new Response("", {
