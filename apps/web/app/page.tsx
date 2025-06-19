@@ -4,15 +4,15 @@ import FacebookLogin from "@/components/facebook-login";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import Script from "next/script";
+import { logger } from "@/lib/logger";
 
 export default function Page() {
   const handleLoginSuccess = (response: any) => {
-    console.log("Login success", response);
+    logger.log("Login success", response);
   };
 
-  console.log("TEST");
   const handleLoginFailure = (error: string) => {
-    console.error("Login failed", error);
+    logger.error("Login failed", error);
   };
 
   return (

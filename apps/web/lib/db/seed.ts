@@ -12,9 +12,10 @@ import {
 } from "@workspace/db/schema";
 import { faker } from "@faker-js/faker";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { logger } from "@/lib/logger";
 
 async function createStripeProducts() {
-  console.log("Creating Stripe products and prices...");
+  logger.log("Creating Stripe products and prices...");
 
   const baseProduct = await stripe.products.create({
     name: "Base",
@@ -46,7 +47,7 @@ async function createStripeProducts() {
     },
   });
 
-  console.log("Stripe products and prices created successfully.");
+  logger.log("Stripe products and prices created successfully.");
 }
 
 async function seed() {
@@ -65,7 +66,7 @@ async function seed() {
     ])
     .returning();
 
-  console.log("Initial user created.");
+  logger.log("Initial user created.");
 
   const [team] = await db
     .insert(teamsTable)
@@ -142,10 +143,10 @@ async function seed() {
 
 seed()
   .catch((error) => {
-    console.error("Seed process failed:", error);
+    logger.error("Seed process failed:", error);
     process.exit(1);
   })
   .finally(() => {
-    console.log("Seed process finished. Exiting...");
+    logger.log("Seed process finished. Exiting...");
     process.exit(0);
   });

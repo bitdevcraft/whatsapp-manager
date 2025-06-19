@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSocket } from "./provider/socket-provider";
 import { Button } from "@workspace/ui/components/button";
+import { logger } from "@/lib/logger";
 
 export default function SocketPage() {
   const socket = useSocket();
@@ -15,10 +16,10 @@ export default function SocketPage() {
   };
   useEffect(() => {
     if (!socket) return;
-    console.log("Socket connected");
+    logger.log("Socket connected");
 
     socket.on("whatsapp_message", async () => {
-      console.log("meta webhook socket");
+      logger.log("meta webhook socket");
     });
 
     return () => {

@@ -28,6 +28,7 @@ import {
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
 import { ComponentButtonParameter } from "./message-template-component-button-parameter";
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
+import { logger } from "@/lib/logger";
 
 type Props = {
   form: UseFormReturn<any>;
@@ -42,7 +43,7 @@ export function MessageTemplateForm({
 }: Props) {
   const { control, setValue, watch } = form;
 
-  console.log("watched lang code", watch(`${namePrefix}.language.code`));
+  logger.log("watched lang code", watch(`${namePrefix}.language.code`));
 
   const defaultValues = useMemo(() => {
     return initialTemplate
@@ -70,8 +71,6 @@ export function MessageTemplateForm({
       setValue(`${namePrefix}.name`, defaultValues.name);
 
       setValue(`${namePrefix}.language.code`, defaultValues.language.code);
-
-      console.log(defaultValues.language.code);
 
       replace(defaultValues.components);
 

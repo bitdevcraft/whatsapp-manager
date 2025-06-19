@@ -5,6 +5,7 @@ import { stripe } from "@/lib/payments/stripe";
 import Stripe from "stripe";
 import { db } from "@workspace/db/config";
 import { teamMembersTable, teamsTable, usersTable } from "@workspace/db/schema";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -55,8 +56,6 @@ export async function GET(request: NextRequest) {
       throw new Error("No user ID found in session's client_reference_id.");
     }
 
-    
-
     const user = await db
       .select()
       .from(usersTable)
@@ -95,7 +94,7 @@ export async function GET(request: NextRequest) {
     await setSession(user[0]!, team[0]);
     return NextResponse.redirect(new URL("/dashboard", request.url));
   } catch (error) {
-    console.error("Error handling successful checkout:", error);
+    logger.error("Error handling successful checkout:", error);
     return NextResponse.redirect(new URL("/error", request.url));
   }
 }

@@ -20,6 +20,7 @@ import { useTitle } from "@/components/provider/title-provider";
 interface ContactTableProps {
   promises: Promise<[Awaited<ReturnType<typeof getContacts>>]>;
 }
+
 export default function ContactTable({ promises }: ContactTableProps) {
   const setTitle = useTitle();
 
@@ -43,6 +44,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
       columnVisibility: {
         phone: false,
         email: false,
+        createdAt: false,
       },
     },
     getRowId: (row) => row.id,

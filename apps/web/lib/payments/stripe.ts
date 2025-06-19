@@ -6,6 +6,7 @@ import {
   updateTeamSubscription,
 } from "@/lib/db/queries";
 import { Team } from "@workspace/db/schema";
+import { logger } from "../logger";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-05-28.basil",
@@ -124,7 +125,7 @@ export async function handleSubscriptionChange(
   const team = await getTeamByStripeCustomerId(customerId);
 
   if (!team) {
-    console.error("Team not found for Stripe customer:", customerId);
+    logger.error("Team not found for Stripe customer:", customerId);
     return;
   }
 

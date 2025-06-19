@@ -10,13 +10,13 @@ import {
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-
 import {
   IJobMessageOutgoing,
   waMessagesOutgoingQueue,
   WhatsAppEvents,
 } from "@workspace/shared";
 import { revalidateTag } from "next/cache";
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
 
 export async function GET() {
   const result = await getMarketingCampaigns();
@@ -37,72 +37,74 @@ export async function POST(request: Request) {
     });
   }
 
-  await revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`);
+  try {
+    await revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`);
 
-  const body = (await request.json()) as MarketingCampaignFormValues;
+    const body = (await request.json()) as MarketingCampaignFormValues;
 
-  console.log(body);
+    const result = await withTenantTransaction(
+      userWithTeam?.teamId,
+      async (tx) => {
+        const template = await tx.query.templatesTable.findFirst({
+          where: eq(templatesTable.name, body.template.template),
+        });
 
-  const result = await withTenantTransaction(
-    userWithTeam?.teamId,
-    async (tx) => {
-      const template = await tx.query.templatesTable.findFirst({
-        where: eq(templatesTable.name, body.template.template),
-      });
+        if (!template)
+          return {
+            data: {
+              id: null,
+            },
+          };
 
-      if (!template)
-        return {
-          data: {
-            id: null,
-          },
+        const marketingCampaign: NewMarketingCampaign = {
+          name: body.details.campaignName,
+          templateId: template.id,
+          scheduleAt: body.details.schedule
+            ? new Date(body.details.schedule)
+            : null,
+          recipients: body.audience.phone.map((phone) => phone.value),
+          tags: body.audience.tags,
+          enableTracking: body.details.track,
+          phoneNumber: body.details.phoneNumber,
+          status: body.details.schedule ? "pending" : "draft",
+          messageTemplate: body.template.messageTemplate,
+          teamId: userWithTeam.teamId!,
         };
 
-      const marketingCampaign: NewMarketingCampaign = {
-        name: body.details.campaignName,
-        templateId: template.id,
-        scheduleAt: body.details.schedule
-          ? new Date(body.details.schedule)
-          : null,
-        recipients: body.audience.phone.map((phone) => phone.value),
-        tags: body.audience.tags,
-        enableTracking: body.details.track,
-        phoneNumber: body.details.phoneNumber,
-        status: body.details.schedule ? "pending" : "draft",
-        messageTemplate: body.template.messageTemplate,
-        teamId: userWithTeam.teamId!,
-      };
+        const data = await tx
+          .insert(marketingCampaignsTable)
+          .values([marketingCampaign])
+          .returning({ id: marketingCampaignsTable.id });
 
-      const data = await tx
-        .insert(marketingCampaignsTable)
-        .values([marketingCampaign])
-        .returning({ id: marketingCampaignsTable.id });
-
-      return {
-        data: data[0],
-      };
-    }
-  );
-
-  if (result?.data?.id && body.details.schedule) {
-    const jobData: IJobMessageOutgoing = {
-      teamId: userWithTeam.teamId,
-      marketingCampaignId: result.data.id,
-    };
-
-    const jobId = `${WhatsAppEvents.MessagesOutgoing}:${userWithTeam.teamId}:${result.data.id}`;
-
-    const delay = Math.max(
-      0,
-      new Date(body.details.schedule).getTime() - Date.now()
+        return {
+          data: data[0],
+        };
+      }
     );
 
-    await waMessagesOutgoingQueue.add(jobId, jobData, {
-      jobId,
-      delay,
+    if (result?.data?.id && body.details.schedule) {
+      const jobData: IJobMessageOutgoing = {
+        teamId: userWithTeam.teamId,
+        marketingCampaignId: result.data.id,
+      };
+
+      const jobId = `${WhatsAppEvents.MessagesOutgoing}:${userWithTeam.teamId}:${result.data.id}`;
+
+      const delay = Math.max(
+        0,
+        new Date(body.details.schedule).getTime() - Date.now()
+      );
+
+      await waMessagesOutgoingQueue.add(jobId, jobData, {
+        jobId,
+        delay,
+      });
+    }
+
+    return new Response(JSON.stringify(result), {
+      status: RESPONSE_CODE.SUCCESS,
     });
-
-    return new Response(JSON.stringify(result), { status: 200 });
+  } catch (error) {
+    return new Response("", { status: RESPONSE_CODE.BAD_REQUEST });
   }
-
-  return new Response("", { status: 400 });
 }

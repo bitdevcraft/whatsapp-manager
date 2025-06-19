@@ -18,6 +18,7 @@ import { GetMarketingCampaignSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { marketingCampaignsTable } from "@workspace/db/schema";
+import { logger } from "@/lib/logger";
 
 export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -114,7 +115,7 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return { data: [], pageCount: 0 };
       }
     },

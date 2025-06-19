@@ -23,6 +23,7 @@ import {
   useMultiStepFormContext,
 } from "@/components/forms/multi-step-form";
 import { Stepper } from "@workspace/ui/components/stepper";
+import { logger } from "@/lib/logger";
 
 const FormSchema = createStepSchema({
   account: z.object({
@@ -54,7 +55,7 @@ export function MultiStepFormDemo() {
   });
 
   const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data);
+    logger.log("Form submitted:", data);
   };
 
   return (

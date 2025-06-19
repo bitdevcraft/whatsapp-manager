@@ -17,6 +17,7 @@ import { contactsTable } from "@workspace/db/schema/contacts";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetContactSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
+import { logger } from "@/lib/logger";
 
 export async function getContacts(input: GetContactSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -112,7 +113,7 @@ export async function getContacts(input: GetContactSchema) {
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return { data: [], pageCount: 0 };
       }
     },

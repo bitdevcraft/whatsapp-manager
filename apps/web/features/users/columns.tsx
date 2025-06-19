@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/logger";
 import { ColumnDef } from "@tanstack/react-table";
 import { User } from "@workspace/db/schema/users";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
@@ -18,7 +19,7 @@ export const columns: ColumnDef<User>[] = [
     header: "Actions",
     cell: ({ row }) => (
       <button
-        onClick={() => console.log("Edit", row.original.id)}
+        onClick={() => logger.log("Edit", row.original.id)}
         className="text-blue-600"
       >
         Edit

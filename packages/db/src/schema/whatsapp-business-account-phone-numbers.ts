@@ -1,5 +1,5 @@
 import { timestamps } from "../helpers/column-helper";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -92,7 +92,17 @@ export const whatsAppBusinessAccountPhoneNumbersTable = pgTable(
       using: sql`${t.teamId}
             = current_setting('app.current_tenant')::uuid`,
     }),
-  ],
+  ]
+);
+
+export const whatsAppBusinessAccountPhoneNumberRelations = relations(
+  whatsAppBusinessAccountPhoneNumbersTable,
+  ({ one }) => ({
+    team: one(teamsTable, {
+      fields: [whatsAppBusinessAccountPhoneNumbersTable.teamId],
+      references: [teamsTable.id],
+    }),
+  })
 );
 
 export type WhatsAppBusinessAccountPhoneNumber =

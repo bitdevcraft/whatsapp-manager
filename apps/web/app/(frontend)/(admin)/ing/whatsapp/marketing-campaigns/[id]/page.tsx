@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export default function Home() {
   const setTitle = useTitle();
@@ -30,7 +31,7 @@ export default function Home() {
 
   const fetchData = async () => {
     const response = await axios.get(`/api/whatsapp/marketing-campaigns/${id}`);
-    console.log(response.data.data);
+    logger.log(response.data.data);
     setData(response.data.data);
   };
 
@@ -46,7 +47,7 @@ export default function Home() {
         data
       );
 
-      console.log(response);
+      logger.log(response);
       toast.success("Marketing Campaign Sent is now processing", {
         description: "Successful",
       });

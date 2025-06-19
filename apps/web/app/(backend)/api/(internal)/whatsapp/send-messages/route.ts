@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { whatsappQueue } from "@/lib/message-queue";
 import { NextResponse } from "next/server";
 
@@ -6,7 +7,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  console.log("Send Message POST");
+  logger.log("Send Message POST");
   await whatsappQueue.add("textmessage", {});
   return NextResponse.json({ ok: true });
 }

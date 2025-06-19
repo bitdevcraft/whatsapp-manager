@@ -1,11 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 
 export default function ActivityPageSkeleton() {
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-        Activity Log
-      </h1>
+      <h1 className="text-lg lg:text-2xl font-medium mb-6">Activity Log</h1>
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>

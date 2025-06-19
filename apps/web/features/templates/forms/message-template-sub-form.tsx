@@ -33,6 +33,7 @@ import { MessageTemplateSchema, MessageTemplateValues } from "../lib/schema";
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
 import { ComponentButtonParameter } from "./message-template-component-button-parameter";
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
+import { logger } from "@/lib/logger";
 
 type Props = {
   initialTemplate?: TemplateResponse;
@@ -66,7 +67,7 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
   });
 
   const onSubmit = (data: MessageTemplateValues) => {
-    console.log("Form submitted:", data);
+    logger.log("Form submitted:", data);
   };
 
   const componentTypes = Object.values(ComponentTypesEnum);

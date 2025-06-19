@@ -78,7 +78,7 @@ export default async function ActivityPage() {
 
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
+      <h1 className="text-lg lg:text-2xl font-medium text-foreground mb-6">
         Activity Log
       </h1>
       <Card>
@@ -91,7 +91,7 @@ export default async function ActivityPage() {
               {logs.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
                 const formattedAction = formatAction(
-                  log.action as ActivityType
+                  log.action as ActivityType,
                 );
 
                 return (
@@ -100,7 +100,7 @@ export default async function ActivityPage() {
                       <Icon className="w-5 h-5 text-orange-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         {formattedAction}
                         {log.ipAddress && ` from IP ${log.ipAddress}`}
                       </p>

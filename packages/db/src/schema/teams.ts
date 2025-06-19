@@ -14,6 +14,8 @@ import { marketingCampaignsTable } from "./marketing-campaigns";
 import { outboxTable } from "./outbox";
 import { tagsTable } from "./tags";
 import { templatesTable } from "./templates";
+import { whatsAppBusinessAccountsTable } from "./whatsapp-business-accounts";
+import { whatsAppBusinessAccountPhoneNumbersTable } from "./whatsapp-business-account-phone-numbers";
 
 export const teamsTable = pgTable("teams", {
   ...baseSchema,
@@ -40,6 +42,8 @@ export const teamsRelations = relations(teamsTable, ({ many }) => ({
   tags: many(tagsTable),
   teamMembers: many(teamMembersTable),
   templates: many(templatesTable),
+  waBusinessAccount: many(whatsAppBusinessAccountsTable),
+  waBusinessPhoneNumber: many(whatsAppBusinessAccountPhoneNumbersTable),
 }));
 
 export type TeamDataWithMembers = Team & {

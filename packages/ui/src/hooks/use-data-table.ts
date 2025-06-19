@@ -169,17 +169,11 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const filterableColumns = React.useMemo(() => {
     if (enableAdvancedFilter) return [];
 
-    console.log(
-      "FILTER",
-      columns.filter((column) => column.enableColumnFilter)
-    );
-
     return columns.filter((column) => column.enableColumnFilter);
   }, [columns, enableAdvancedFilter]);
 
   const filterParsers = React.useMemo(() => {
     if (enableAdvancedFilter) return {};
-    console.log("RYAAAAN");
 
     return filterableColumns.reduce<
       Record<string, Parser<string> | Parser<string[]>>
@@ -201,7 +195,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const debouncedSetFilterValues = useDebouncedCallback(
     (values: typeof filterValues) => {
       void setPage(1);
-      console.log("RYAAAAN", values);
 
       void setFilterValues(values);
     },

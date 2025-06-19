@@ -24,11 +24,15 @@ import WhatsApp, {
 } from "@workspace/wa-cloud-api";
 import axios from "axios";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
+import { logger } from "@/lib/logger";
+import { eq } from "drizzle-orm";
 
-export async function POST(request: Request) {
+export async function GET() {
   const userWithTeam = await getUserWithTeam();
 
   if (!userWithTeam) {
+    logger.log("No team");
+
     return new Response("", {
       status: 400,
       statusText: "No Team",
@@ -36,6 +40,42 @@ export async function POST(request: Request) {
   }
 
   if (!userWithTeam.teamId) {
+    logger.log("No Team ID");
+
+    return new Response("", {
+      status: 400,
+      statusText: "No Team",
+    });
+  }
+
+  const data = await withTenantTransaction(userWithTeam.teamId, async (tx) => {
+    return await tx.query.whatsAppBusinessAccountsTable.findFirst({
+      where: eq(whatsAppBusinessAccountsTable.teamId, userWithTeam.teamId!),
+    });
+  });
+
+  if (!data) return Response.json({ id: null, teamId: userWithTeam.teamId });
+
+  return Response.json({ id: data?.id, teamId: userWithTeam.teamId });
+}
+
+export async function POST(request: Request) {
+  logger.log("New Account");
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam) {
+    logger.log("No team");
+
+    return new Response("", {
+      status: 400,
+      statusText: "No Team",
+    });
+  }
+
+  if (!userWithTeam.teamId) {
+    logger.log("No Team ID");
+
     return new Response("", {
       status: 400,
       statusText: "No Team",
@@ -57,14 +97,14 @@ export async function POST(request: Request) {
         client_secret: process.env.META_CLIENT_SECRET,
         code: code,
         grant_type: "authorization_code",
-        redirect_uri: "https://wa-ing.centcapio.cc/",
       },
       {
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
 
     const config = {
+      // accessToken: process.env.WHATSAPP_API_ACCESS_TOKEN!,
       accessToken: response.data.access_token,
       phoneNumberId: Number(business.phone_number_id),
       businessAcctId: business.waba_id,
@@ -75,35 +115,28 @@ export async function POST(request: Request) {
     const account = await whatsapp.waba.getWabaAccount([
       "id",
       "name",
-      "account_review_status",
-      "auth_international_rate_eligibility",
-      "business_verification_status",
-      "country",
-      "currency",
-      "health_status",
-      "status",
-      "ownership_type",
-      "timezone_id",
       "owner_business_info",
-      "primary_funding_id",
-      "message_template_namespace",
     ]);
 
     // TODO
     const phoneNumbers = await whatsapp.phoneNumber.getPhoneNumbers();
+    logger.log(phoneNumbers);
 
     // TODO
     const templates = await whatsapp.templates.getTemplates();
+    logger.log(templates);
 
     const encryptedAuth = await encryptApiKey(code);
+    logger.log(encryptedAuth);
 
     const authResponse: WhatsAppBusinessAuthAccountResponse = {
       ...encryptedAuth,
     };
 
     const encryptedAccessToken = await encryptApiKey(
-      response.data.access_token,
+      response.data.access_token
     );
+    logger.log(encryptedAccessToken);
 
     const accessToken: WhatsAppBusinessAccountAccessToken = {
       ...encryptedAccessToken,
@@ -127,7 +160,7 @@ export async function POST(request: Request) {
           content: template,
         };
         return temp;
-      },
+      }
     );
 
     const newPhoneNumbers: NewWhatsAppBusinessAccountPhoneNumber[] =
@@ -161,57 +194,68 @@ export async function POST(request: Request) {
         return temp;
       });
 
-    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
-      await tx
-        .insert(whatsAppBusinessAccountsTable)
-        .values(newAccount)
-        .onConflictDoUpdate({
-          target: whatsAppBusinessAccountsTable.wabaId,
-          set: {
-            ...newAccount,
-          },
-        });
+    const temp = await withTenantTransaction(
+      userWithTeam.teamId,
+      async (tx) => {
+        const accountData = await tx
+          .insert(whatsAppBusinessAccountsTable)
+          .values(newAccount)
+          .onConflictDoUpdate({
+            target: whatsAppBusinessAccountsTable.wabaId,
+            set: {
+              ...newAccount,
+            },
+          });
 
-      await tx
-        .insert(templatesTable)
-        .values(newTemplates)
-        .onConflictDoUpdate({
-          target: templatesTable.id,
-          set: buildConflictUpdateColumns(templatesTable, [
-            "updatedAt",
-            "name",
-            "content",
-          ]),
-        });
+        if (newTemplates.length > 0)
+          await tx
+            .insert(templatesTable)
+            .values(newTemplates)
+            .onConflictDoUpdate({
+              target: templatesTable.id,
+              set: buildConflictUpdateColumns(templatesTable, [
+                "updatedAt",
+                "name",
+                "content",
+              ]),
+            });
 
-      await tx
-        .insert(whatsAppBusinessAccountPhoneNumbersTable)
-        .values(newPhoneNumbers)
-        .onConflictDoUpdate({
-          target: whatsAppBusinessAccountPhoneNumbersTable.id,
-          set: buildConflictUpdateColumns(
-            whatsAppBusinessAccountPhoneNumbersTable,
-            [
-              "displayPhoneNumber",
-              "verifiedName",
-              "status",
-              "qualityScore",
-              "qualityRating",
-              "codeVerificationStatus",
-              "healthStatus",
-              "isOfficialBusinessAccount",
-              "isOnBizApp",
-              "isPinEnabled",
-              "isPreverifiedNumber",
-              "lastOnboardTime",
-              "messagingLimitTier",
-              "nameStatus",
-              "newCertificate",
-              "newNameStatus",
-            ],
-          ),
-        });
-    });
+        if (newPhoneNumbers.length > 0)
+          await tx
+            .insert(whatsAppBusinessAccountPhoneNumbersTable)
+            .values(newPhoneNumbers)
+            .onConflictDoUpdate({
+              target: whatsAppBusinessAccountPhoneNumbersTable.id,
+              set: buildConflictUpdateColumns(
+                whatsAppBusinessAccountPhoneNumbersTable,
+                [
+                  "displayPhoneNumber",
+                  "verifiedName",
+                  "status",
+                  "qualityScore",
+                  "qualityRating",
+                  "codeVerificationStatus",
+                  "healthStatus",
+                  "isOfficialBusinessAccount",
+                  "isOnBizApp",
+                  "isPinEnabled",
+                  "isPreverifiedNumber",
+                  "lastOnboardTime",
+                  "messagingLimitTier",
+                  "nameStatus",
+                  "newCertificate",
+                  "newNameStatus",
+                ]
+              ),
+            });
+
+        return {
+          accountData,
+        };
+      }
+    );
+
+    logger.log(temp);
 
     return new Response("", {
       status: 200,

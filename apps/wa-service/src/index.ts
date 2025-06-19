@@ -14,7 +14,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("WhatsApp API Server is running!");
 });
 
-// messagesOutgoingWorker;
+messagesOutgoingWorker;
 
 // Start the server
 app.listen(PORT, () => {

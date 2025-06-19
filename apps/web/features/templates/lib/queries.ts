@@ -111,7 +111,6 @@ export async function getTemplates(input: GetTemplateSchema) {
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
       } catch (error) {
-        console.error(error);
         return { data: [], pageCount: 0 };
       }
     },
@@ -213,7 +212,6 @@ export async function getAllTemplates(input: GetTemplateSchema) {
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
       } catch (error) {
-        console.error(error);
         return { data: [], pageCount: 0 };
       }
     },

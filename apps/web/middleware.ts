@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { signToken, verifyToken } from "@/lib/auth/session";
+import { logger } from "@/lib/logger";
 
 const protectedRoutes = "/ing";
 const signInRoutes = ["/sign-in", "sign-up"];
@@ -17,7 +18,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  console.log("Middleware", pathname);
+  logger.log("Middleware", pathname);
   let res = NextResponse.next();
 
   if (sessionCookie && request.method === "GET") {
@@ -41,7 +42,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/ing/dashboard", request.url));
       }
     } catch (error) {
-      console.error("Error updating session:", error);
+      logger.error("Error updating session:", error);
       res.cookies.delete("session");
       if (isProtectedRoute) {
         return NextResponse.redirect(new URL("/sign-in", request.url));

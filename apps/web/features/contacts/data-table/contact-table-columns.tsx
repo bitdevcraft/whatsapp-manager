@@ -4,9 +4,15 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Contact } from "@workspace/db/schema/contacts";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@workspace/ui/components/popover";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
 import { CalendarIcon, Ellipsis, Text } from "lucide-react";
+import { Badge } from "@workspace/ui/components/badge";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -48,7 +54,48 @@ export const columns: ColumnDef<Contact>[] = [
     },
     enableColumnFilter: true,
   },
+  {
+    id: "tags",
+    accessorKey: "tags",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tags" />
+    ),
+    cell: ({ cell }) => {
+      const tags = cell.getValue<string[]>() || [];
 
+      const visibleTags = tags.slice(0, 3);
+      const hiddenTagCount = tags.length - visibleTags.length;
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <div className="flex flex-wrap gap-1 cursor-pointer">
+              {visibleTags.map((tag, idx) => (
+                <Badge key={idx} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+              {hiddenTagCount > 0 && (
+                <Badge variant="outline">+{hiddenTagCount} more</Badge>
+              )}
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="max-w-xs">
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag, idx) => (
+                <Badge key={idx} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    },
+    meta: {
+      label: "Tags",
+    },
+  },
   {
     id: "phone",
     accessorKey: "phone",

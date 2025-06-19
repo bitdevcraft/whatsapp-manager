@@ -18,6 +18,7 @@ import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetTagSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { logger } from "@/lib/logger";
 
 export async function getTags(input: GetTagSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -107,7 +108,7 @@ export async function getTags(input: GetTagSchema) {
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return { data: [], pageCount: 0 };
       }
     },

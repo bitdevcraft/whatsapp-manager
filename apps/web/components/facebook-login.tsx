@@ -10,24 +10,25 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
+import { logger } from "@/lib/logger";
 
 interface FacebookLoginProps {
   appId: string;
-  onLoginSuccess: (response: any) => void;
-  onLoginFailure: (error: string) => void;
+  onLoginSuccess?: (response: any) => void;
+  onLoginFailure?: (error: string) => void;
 }
 
 const FacebookLogin: React.FC<FacebookLoginProps> = ({
   appId,
-  onLoginSuccess,
-  onLoginFailure,
+  onLoginSuccess = (response: any) => {},
+  onLoginFailure = (error: string) => {},
 }) => {
   const [fbLoaded, setFbLoaded] = useState(false);
   const loginResponseRef = useRef<EmbedSignUpLoginSuccess | null>(null);
   const embedDataRef = useRef<EmbedSignUpObject | null>(null);
   const submittedRef = useRef(false);
 
-  function checkReady() {
+  const checkReady = async () => {
     if (submittedRef.current) return;
 
     const auth = loginResponseRef.current;
@@ -41,17 +42,19 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         auth,
       };
 
-      axios
-        .post("/api/wa-embedded-signup", data)
+      console.log(data);
+
+      const response = await axios
+        .post("/api/whatsapp/business-account", data)
         .then(() => {
           onLoginSuccess("");
         })
         .catch((err) => {
-          console.error("Signup failed:", err);
+          logger.error("Signup failed:", err);
           onLoginFailure("Signup failed");
         });
     }
-  }
+  };
 
   // Dynamically load the Facebook SDK client-side only
   useEffect(() => {
@@ -80,7 +83,6 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
       if (!event.origin.endsWith("facebook.com")) return;
       try {
         const data = JSON.parse(event.data);
-        console.log(data);
         if (
           data.type === "WA_EMBEDDED_SIGNUP" &&
           data.event === EmbedSignUpFlowEventType.Finish
@@ -89,8 +91,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           checkReady();
         }
       } catch {
-        console.log("Error message event: ", event.data); // remove after testing
-        // your code goes here
+        onLoginFailure("User cancelled login or did not fully authorize.");
       }
     };
     // Adding event listener
@@ -134,16 +135,14 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   };
 
   return (
-    <div>
-      <Button
-        onClick={handleLogin}
-        className="bg-[#25D366] text-white h-16 w-96"
-        disabled={!fbLoaded}
-      >
-        <IconBrandWhatsapp size={40} />
-        {fbLoaded ? "Authenticate WhatsApp Business Account" : "Loading"}
-      </Button>
-    </div>
+    <Button
+      onClick={handleLogin}
+      className="bg-[#25D366] text-white wrap-normal"
+      disabled={!fbLoaded}
+    >
+      <IconBrandWhatsapp size={40} />
+      {fbLoaded ? <span className="flex">Authenticate</span> : <p>Loading</p>}
+    </Button>
   );
 };
 

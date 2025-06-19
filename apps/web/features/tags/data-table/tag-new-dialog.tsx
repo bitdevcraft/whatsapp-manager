@@ -22,7 +22,6 @@ export default function TagNewDialog() {
       });
       router.refresh();
     } catch (error: any) {
-      console.log(error);
       toast.error(
         <div>
           <p>Tags can't be created. Please check with the support.</p>

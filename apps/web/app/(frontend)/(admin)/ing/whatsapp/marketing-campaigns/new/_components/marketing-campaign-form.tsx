@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 
 import axios from "axios";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import { logger } from "@/lib/logger";
 
 export default function MarketingCampaignForm() {
   const router = useRouter();
@@ -66,7 +67,7 @@ export default function MarketingCampaignForm() {
   });
 
   const onSubmit = async (data: MarketingCampaignFormValues) => {
-    console.log("Form submitted:", data);
+    logger.log("Form submitted:", data);
 
     try {
       const response = await axios.post(
@@ -74,7 +75,6 @@ export default function MarketingCampaignForm() {
         data
       );
 
-      console.log(response);
       toast.success("Marketing Campaign has been created", {
         description: "Successful",
       });
