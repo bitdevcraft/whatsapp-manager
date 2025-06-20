@@ -16,6 +16,7 @@ import { useFieldArray } from "react-hook-form";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import * as React from "react";
+import { getSelectTags } from "./queries";
 
 const tagsList = [
   { value: "real-estate", label: "Real Estate" },
@@ -23,29 +24,13 @@ const tagsList = [
   { value: "social-media", label: "Social Media" },
 ];
 
-function AudienceStep() {
+interface AudienceStepFormProps {
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
+}
+
+function AudienceStep({ tags }: AudienceStepFormProps) {
   const { form, nextStep, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
-
-  const [tags, setTags] = React.useState<{ label: string; value: string }[]>(
-    [],
-  );
-
-  React.useEffect(() => {
-    async function fetchTags() {
-      const res = await fetch("/api/tags");
-      const json = await res.json();
-      console.log(json);
-      setTags(
-        json.map((data: { name: string; normalName: string }) => ({
-          value: data.normalName,
-          label: data.name,
-        })) ?? [],
-      );
-    }
-
-    fetchTags();
-  }, []);
 
   const { control } = form;
 
@@ -90,7 +75,7 @@ function AudienceStep() {
                   </FormLabel>
                   <FormControl>
                     <MultiSelect
-                      options={tags}
+                      options={tags.tags}
                       onValueChange={field.onChange}
                       value={field.value || []}
                       placeholder="Select tags"

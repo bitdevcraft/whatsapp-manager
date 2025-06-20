@@ -15,8 +15,20 @@ import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
 import { Checkbox } from "@workspace/ui/components/checkbox"; // or Switch, if you prefer
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+import { getSelectPhoneNumber } from "./queries";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 
-export default function DetailsStep() {
+interface DetailsStepFormProps {
+  phoneNumbers: Awaited<ReturnType<typeof getSelectPhoneNumber>>;
+}
+
+export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
   const { form, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
   const { control } = form;
@@ -76,7 +88,22 @@ export default function DetailsStep() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="97150xxxxxxx" />
+                    {/* <Input {...field} placeholder="97150xxxxxxx" /> */}
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {phoneNumbers.phoneNumbers.map((phoneNumber) => (
+                          <SelectItem
+                            key={phoneNumber.value}
+                            value={String(phoneNumber.value)}
+                          >
+                            {phoneNumber.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

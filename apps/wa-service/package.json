@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
-    "lint": "eslint src/",
-    "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "old:build": "tsup",
+    "old:dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "old:lint": "eslint src/",
+    "old:start": "node dist/index.js",
+    "old:typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.5.1",

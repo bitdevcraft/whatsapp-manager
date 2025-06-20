@@ -25,25 +25,20 @@ import { transformTemplateResponseToFormValues } from "@/features/templates/form
 import { MessageTemplateForm } from "@/features/templates/forms/message-template";
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+import {
+  getSelectPhoneNumber,
+  getSelectTags,
+  getSelectTemplates,
+} from "./queries";
 
-function TemplateStep() {
-  const [data, setData] = useState<Template[]>([]);
+interface TemplateStepFormProps {
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
+}
+
+function TemplateStep({ templates }: TemplateStepFormProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
   );
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get<Template[]>("/api/whatsapp/templates");
-      setData(response.data);
-    } catch (error) {
-      // handle error if needed
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const { form, nextStep, isStepValid } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
@@ -74,7 +69,9 @@ function TemplateStep() {
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
-                    const match = data.find((t) => t.name === value);
+                    const match = templates.templates.find(
+                      (t) => t.id === value
+                    );
                     setSelectedTemplate(match ?? null);
                   }}
                   value={field.value}
@@ -83,8 +80,8 @@ function TemplateStep() {
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {data.map((template) => (
-                      <SelectItem key={template.name} value={template.name}>
+                    {templates.templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
                         {template.name}
                       </SelectItem>
                     ))}

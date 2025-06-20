@@ -12,11 +12,11 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import {
   IJobMessageOutgoing,
-  waMessagesOutgoingQueue,
   WhatsAppEvents,
 } from "@workspace/shared";
 import { revalidateTag } from "next/cache";
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
 
 export async function GET() {
   const result = await getMarketingCampaigns();
@@ -45,20 +45,9 @@ export async function POST(request: Request) {
     const result = await withTenantTransaction(
       userWithTeam?.teamId,
       async (tx) => {
-        const template = await tx.query.templatesTable.findFirst({
-          where: eq(templatesTable.name, body.template.template),
-        });
-
-        if (!template)
-          return {
-            data: {
-              id: null,
-            },
-          };
-
         const marketingCampaign: NewMarketingCampaign = {
           name: body.details.campaignName,
-          templateId: template.id,
+          templateId: body.template.template,
           scheduleAt: body.details.schedule
             ? new Date(body.details.schedule)
             : null,
@@ -88,14 +77,14 @@ export async function POST(request: Request) {
         marketingCampaignId: result.data.id,
       };
 
-      const jobId = `${WhatsAppEvents.MessagesOutgoing}:${userWithTeam.teamId}:${result.data.id}`;
+      const jobId = `${WhatsAppEvents.BulkMessagesOutgoing}:${userWithTeam.teamId}:${result.data.id}`;
 
       const delay = Math.max(
         0,
         new Date(body.details.schedule).getTime() - Date.now()
       );
 
-      await waMessagesOutgoingQueue.add(jobId, jobData, {
+      await waBulkMessagesOutgoingQueue.add(jobId, jobData, {
         jobId,
         delay,
       });

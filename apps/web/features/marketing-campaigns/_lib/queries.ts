@@ -129,3 +129,35 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
     }
   )();
 }
+
+export async function getMarketingCampaignById(id: string) {
+  const userWithTeam = await getUserWithTeam();
+  if (!userWithTeam?.teamId) {
+    return null;
+  }
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const data = await withTenantTransaction(teamId, async (tx) => {
+          const data = await tx.query.marketingCampaignsTable.findFirst({
+            where: eq(marketingCampaignsTable.id, id),
+          });
+
+          return data;
+        });
+
+        if (data) return data;
+
+        return null;
+      } catch (error) {
+        return null;
+      }
+    },
+    [`marketingCampaign:byId:${teamId}:${id}`],
+    {
+      tags: [`marketingCampaign:byId:${teamId}:${id}`],
+    }
+  )();
+}

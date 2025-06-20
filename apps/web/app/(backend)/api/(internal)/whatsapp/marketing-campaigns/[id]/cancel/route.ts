@@ -1,5 +1,6 @@
+import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { waMessagesOutgoingQueue, WhatsAppEvents } from "@workspace/shared";
+import { WhatsAppEvents } from "@workspace/shared";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -26,7 +27,7 @@ export async function POST(
 
   const jobId = `${WhatsAppEvents.MessagesOutgoing}:${userWithTeam.teamId}:${id}`;
 
-  await waMessagesOutgoingQueue.remove(jobId);
+  await waBulkMessagesOutgoingQueue.remove(jobId);
 
   return new Response("", { status: 200 });
 }

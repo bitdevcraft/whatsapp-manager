@@ -6,7 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { logger } from "@/lib/logger";
 
 export default function SocketPage() {
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const onSend = async () => {
     await fetch("/api/whatsapp/send-messages", {

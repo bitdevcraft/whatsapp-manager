@@ -26,8 +26,23 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
 import { logger } from "@/lib/logger";
+import {
+  getSelectPhoneNumber,
+  getSelectTags,
+  getSelectTemplates,
+} from "./queries";
 
-export default function MarketingCampaignForm() {
+interface MarketingCampaignFormProps {
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
+  phoneNumbers: Awaited<ReturnType<typeof getSelectPhoneNumber>>;
+}
+
+export default function MarketingCampaignForm({
+  templates,
+  tags,
+  phoneNumbers,
+}: MarketingCampaignFormProps) {
   const router = useRouter();
 
   const setTitle = useTitle();
@@ -67,7 +82,7 @@ export default function MarketingCampaignForm() {
   });
 
   const onSubmit = async (data: MarketingCampaignFormValues) => {
-    logger.log("Form submitted:", data);
+    console.log("Form submitted:", data);
 
     try {
       const response = await axios.post(
@@ -113,15 +128,15 @@ export default function MarketingCampaignForm() {
       </MultiStepFormHeader>
 
       <MultiStepFormStep name="template">
-        <TemplateStep />
+        <TemplateStep templates={templates} />
       </MultiStepFormStep>
 
       <MultiStepFormStep name="audience">
-        <AudienceStep />
+        <AudienceStep tags={tags} />
       </MultiStepFormStep>
 
       <MultiStepFormStep name="details">
-        <DetailsStep />
+        <DetailsStep phoneNumbers={phoneNumbers} />
       </MultiStepFormStep>
     </MultiStepForm>
   );

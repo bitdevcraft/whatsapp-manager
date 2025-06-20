@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev --respawn -r dotenv/config src/index.ts",
-    "build": "tsc -b .",
-    "start": "node dist/index.js",
-    "test": "echo 'Add test script here'",
-    "lint": "echo 'Add lint script here'"
+    "old:dev": "ts-node-dev --respawn -r dotenv/config src/index.ts",
+    "old:build": "tsc -b .",
+    "old:start": "node dist/index.js",
+    "old:test": "echo 'Add test script here'",
+    "old:lint": "echo 'Add lint script here'"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",
