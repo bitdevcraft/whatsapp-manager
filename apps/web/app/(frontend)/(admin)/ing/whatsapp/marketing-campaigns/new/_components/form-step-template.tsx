@@ -25,11 +25,7 @@ import { transformTemplateResponseToFormValues } from "@/features/templates/form
 import { MessageTemplateForm } from "@/features/templates/forms/message-template";
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
-import {
-  getSelectPhoneNumber,
-  getSelectTags,
-  getSelectTemplates,
-} from "./queries";
+import { getSelectTemplates } from "./queries";
 
 interface TemplateStepFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
