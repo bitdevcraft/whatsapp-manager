@@ -13,7 +13,7 @@ import {
 import { usersTable } from "./users";
 import { enumToValues } from "../enums/enum-helper";
 import { MarketingCampaignStatusEnum } from "../enums/status-enum";
-import { templatesTable } from "./templates";
+import { Template, templatesTable } from "./templates";
 import { relations, sql } from "drizzle-orm";
 import { teamsTable } from "./teams";
 
@@ -99,3 +99,7 @@ export const marketingCampaignRelations = relations(
 
 export type MarketingCampaign = typeof marketingCampaignsTable.$inferSelect;
 export type NewMarketingCampaign = typeof marketingCampaignsTable.$inferInsert;
+
+export type MarketingCampaignWithTemplate = MarketingCampaign & {
+  template: Template;
+};

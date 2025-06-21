@@ -2,10 +2,10 @@ import { MessageTemplateForm } from "@/features/templates/forms/message-template
 import MarketingCampaignForm from "./_components/marketing-campaign-form";
 import {
   getSelectPhoneNumber,
-  getSelectTags,
   getSelectTemplates,
 } from "./_components/queries";
 import React from "react";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 
 export default function Home() {
   const [templates, tags, phoneNumbers] = React.use(

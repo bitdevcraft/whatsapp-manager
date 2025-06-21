@@ -25,6 +25,7 @@ import {
   updateContacts,
 } from "@/features/contacts/_lib/actions";
 import { logger } from "@/lib/logger";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 const actions = ["update-tags", "update-priority", "export", "delete"] as const;
@@ -33,31 +34,21 @@ type Action = (typeof actions)[number];
 
 interface ContactsTableActionBarProps {
   table: Table<Contact>;
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
 }
 
-export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
+export function ContactsTableActionBar({
+  table,
+  tags,
+}: ContactsTableActionBarProps) {
   const rows = table.getFilteredSelectedRowModel().rows;
   const [isPending, startTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);
-  const [tags, setTags] = React.useState<
-    { name: string; normalName: string }[]
-  >([]);
 
   const getIsActionPending = React.useCallback(
     (action: Action) => isPending && currentAction === action,
-    [isPending, currentAction],
+    [isPending, currentAction]
   );
-
-  React.useEffect(() => {
-    async function fetchTags() {
-      const res = await fetch("/api/tags");
-      const json = await res.json();
-      console.log(json);
-      setTags(json ?? []);
-    }
-
-    fetchTags();
-  }, []);
 
   const onContactUpdate = React.useCallback(
     ({ field, value }: { field: "tags" | "priority"; value: string }) => {
@@ -75,7 +66,7 @@ export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
         toast.success("Tasks updated");
       });
     },
-    [rows],
+    [rows]
   );
 
   const onTaskExport = React.useCallback(() => {
@@ -129,11 +120,11 @@ export function ContactsTableActionBar({ table }: ContactsTableActionBarProps) {
             <SelectGroup>
               {tags.map((tag) => (
                 <SelectItem
-                  key={tag.normalName}
-                  value={tag.normalName}
+                  key={tag.value}
+                  value={tag.value}
                   className="capitalize"
                 >
-                  {tag.name}
+                  {tag.label}
                 </SelectItem>
               ))}
             </SelectGroup>

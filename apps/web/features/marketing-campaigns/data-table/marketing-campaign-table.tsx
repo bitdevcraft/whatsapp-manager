@@ -19,6 +19,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 
 export const dynamic = "force-dynamic";
 

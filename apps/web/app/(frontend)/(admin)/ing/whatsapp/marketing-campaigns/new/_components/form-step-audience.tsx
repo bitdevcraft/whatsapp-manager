@@ -16,7 +16,7 @@ import { useFieldArray } from "react-hook-form";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import * as React from "react";
-import { getSelectTags } from "./queries";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 
 const tagsList = [
   { value: "real-estate", label: "Real Estate" },
@@ -75,7 +75,7 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
                   </FormLabel>
                   <FormControl>
                     <MultiSelect
-                      options={tags.tags}
+                      options={tags}
                       onValueChange={field.onChange}
                       value={field.value || []}
                       placeholder="Select tags"

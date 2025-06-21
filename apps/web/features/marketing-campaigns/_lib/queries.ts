@@ -88,13 +88,23 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
         const { data, total } = await withTenantTransaction(
           userWithTeam?.teamId,
           async (tx) => {
-            const data = await tx
-              .select()
-              .from(marketingCampaignsTable)
-              .where(where)
-              .limit(input.perPage)
-              .offset(offset)
-              .orderBy(...orderBy);
+            // const data = await tx
+            //   .select()
+            //   .from(marketingCampaignsTable)
+            //   .where(where)
+            //   .limit(input.perPage)
+            //   .offset(offset)
+            //   .orderBy(...orderBy);
+
+            const data = await tx.query.marketingCampaignsTable.findMany({
+              where,
+              limit: input.perPage,
+              offset,
+              orderBy,
+              with: {
+                template: true,
+              },
+            });
 
             const total = await tx
               .select({
@@ -155,9 +165,9 @@ export async function getMarketingCampaignById(id: string) {
         return null;
       }
     },
-    [`marketingCampaign:byId:${teamId}:${id}`],
+    [`${teamId}:${id}`],
     {
-      tags: [`marketingCampaign:byId:${teamId}:${id}`],
+      tags: [`${teamId}:${id}`],
     }
   )();
 }

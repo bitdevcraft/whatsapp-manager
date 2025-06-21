@@ -21,6 +21,7 @@ import {
   notIlike,
   notInArray,
   or,
+  sql,
 } from "drizzle-orm";
 
 export function filterColumns<T extends Table>({
@@ -247,6 +248,30 @@ export function filterColumns<T extends Table>({
 
       case "isNotEmpty":
         return not(isEmpty(column));
+
+      case "arrayIncludesAny":
+        if (Array.isArray(filter.value)) {
+          return sql`${column} ?| ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `
+          )}]`;
+        }
+        return undefined;
+
+      case "arrayIncludesNone":
+        if (Array.isArray(filter.value)) {
+          return sql`NOT (${column} ?| ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `
+          )}])`;
+        }
+        return undefined;
+
+      case "arrayIsEmpty":
+        return sql`jsonb_array_length(${column}) = 0`;
+
+      case "arrayIsNotEmpty":
+        return sql`jsonb_array_length(${column}) > 0`;
 
       default:
         throw new Error(`Unsupported operator: ${filter.operator}`);
@@ -480,6 +505,30 @@ export function filterQueries<T extends Table>({
 
       case "isNotEmpty":
         return not(isEmpty(column));
+
+      case "arrayIncludesAny":
+        if (Array.isArray(filter.value)) {
+          return sql`${column} ?| ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `
+          )}]`;
+        }
+        return undefined;
+
+      case "arrayIncludesNone":
+        if (Array.isArray(filter.value)) {
+          return sql`NOT (${column} ?| ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `
+          )}])`;
+        }
+        return undefined;
+
+      case "arrayIsEmpty":
+        return sql`jsonb_array_length(${column}) = 0`;
+
+      case "arrayIsNotEmpty":
+        return sql`jsonb_array_length(${column}) > 0`;
 
       default:
         throw new Error(`Unsupported operator: ${filter.operator}`);

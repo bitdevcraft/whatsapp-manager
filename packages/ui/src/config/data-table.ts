@@ -44,6 +44,12 @@ export const dataTableConfig = {
     { label: "Is empty", value: "isEmpty" as const },
     { label: "Is not empty", value: "isNotEmpty" as const },
   ],
+  multiSelectArrayOperators: [
+    { label: "Has any of", value: "arrayIncludesAny" as const },
+    { label: "Has none of", value: "arrayIncludesNone" as const },
+    { label: "Is empty", value: "arrayIsEmpty" as const },
+    { label: "Is not empty", value: "arrayIsNotEmpty" as const },
+  ],
   booleanOperators: [
     { label: "Is", value: "eq" as const },
     { label: "Is not", value: "ne" as const },
@@ -61,6 +67,7 @@ export const dataTableConfig = {
     "boolean",
     "select",
     "multiSelect",
+    "multiSelectArray",
   ] as const,
   operators: [
     "iLike",
@@ -77,6 +84,10 @@ export const dataTableConfig = {
     "gte",
     "isBetween",
     "isRelativeToToday",
+    "arrayIncludesAny",
+    "arrayIncludesNone",
+    "arrayIsEmpty",
+    "arrayIsNotEmpty",
   ] as const,
   joinOperators: ["and", "or"] as const,
 };

@@ -6,6 +6,7 @@ import { getValidFilters } from "@workspace/ui/lib/data-table";
 import { SearchParams } from "@/types";
 import { contactSearchParamsCache } from "@/features/contacts/_lib/validations";
 import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
@@ -19,6 +20,7 @@ export default async function Home(props: IndexPageProps) {
 
   const promises = Promise.all([
     getContacts({ ...search, filters: validFilters }),
+    getSelectTags(),
   ]);
 
   return (

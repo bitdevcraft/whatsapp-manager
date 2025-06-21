@@ -2,7 +2,11 @@ import { Worker } from "bullmq";
 import { redisConnection } from "@/lib/redis";
 import { ioInstance } from "@/socket";
 import { socketRegistry } from "@/socket";
-import { IJobMessageOutgoing, WhatsAppEvents } from "@workspace/shared";
+import {
+  IJobMessageOutgoing,
+  NotificationEvent,
+  WhatsAppEvents,
+} from "@workspace/shared";
 import {
   marketingCampaignsTable,
   MarketingCampaignStatusEnum,
@@ -15,32 +19,58 @@ export function setupBulkMessagesOutgoingWorker() {
     WhatsAppEvents.BulkMessagesOutgoing,
     async (job) => {
       console.log("Processing job:", job.id, job.data);
-      const { teamId, marketingCampaignId } = job.data;
+      const { teamId, marketingCampaignId, userId } = job.data;
 
       await updateMarketingCampaignStatus(
         marketingCampaignId,
         MarketingCampaignStatusEnum.Processing,
         teamId
       );
+
+      const socketId = socketRegistry.getSocketId(userId);
+
+      if (socketId) {
+        ioInstance
+          .to(`team:${teamId}`)
+          .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
+            jobId: job.id,
+            payload: {
+              message: "Campaign Processed",
+              data: {},
+            },
+            userId,
+            teamId,
+            relatedId: marketingCampaignId,
+          });
+      }
     },
     { connection: redisConnection }
   );
 
   worker.on("completed", async (job) => {
-    const { teamId, marketingCampaignId } = job.data;
+    const { teamId, marketingCampaignId, userId } = job.data;
 
-    const socketId = socketRegistry.getSocketId(teamId);
     await updateMarketingCampaignStatus(
       marketingCampaignId,
       MarketingCampaignStatusEnum.Success,
       teamId
     );
 
+    const socketId = socketRegistry.getSocketId(userId);
+
     if (socketId) {
-      ioInstance.to(socketId).emit("job:completed", {
-        jobId: job.id,
-        message: "Job completed successfully",
-      });
+      ioInstance
+        .to(`team:${teamId}`)
+        .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
+          jobId: job.id,
+          payload: {
+            message: "Campaign Success",
+            data: {},
+          },
+          userId,
+          teamId,
+          relatedId: marketingCampaignId,
+        });
     }
   });
 
@@ -49,9 +79,9 @@ export function setupBulkMessagesOutgoingWorker() {
       return;
     }
 
-    const { teamId, marketingCampaignId } = job.data;
+    const { teamId, marketingCampaignId, userId } = job.data;
 
-    const socketId = socketRegistry.getSocketId(teamId);
+    const socketId = socketRegistry.getSocketId(userId);
 
     await updateMarketingCampaignStatus(
       marketingCampaignId,
@@ -60,10 +90,18 @@ export function setupBulkMessagesOutgoingWorker() {
     );
 
     if (socketId) {
-      ioInstance.to(socketId).emit("job:failed", {
-        jobId: job?.id,
-        error: err.message,
-      });
+      ioInstance
+        .to(`team:${teamId}`)
+        .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
+          jobId: job.id!, // if `job.id` is possibly undefined, make sure it's not
+          payload: {
+            message: "Campaign Failed",
+          },
+          userId,
+          teamId,
+          error: err,
+          relatedId: marketingCampaignId,
+        });
     }
   });
 }

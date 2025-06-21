@@ -20,7 +20,8 @@ import {
 } from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
-import { MarketingCampaign } from "@workspace/db/schema/marketing-campaigns";
+import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 const actions = [
@@ -33,7 +34,7 @@ const actions = [
 type Action = (typeof actions)[number];
 
 interface MarketingCampaignsTableActionBarProps {
-  table: Table<MarketingCampaign>;
+  table: Table<MarketingCampaignWithTemplate>;
 }
 
 export function MarketingCampaignsTableActionBar({

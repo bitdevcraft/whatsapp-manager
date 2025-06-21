@@ -16,6 +16,7 @@ import AuthenticateWaba from "./_components/authenticate-waba";
 import { SocketProvider } from "@/components/provider/socket-provider";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
+import Notification from "./notification";
 
 export default async function Layout({
   children,
@@ -62,7 +63,12 @@ export default async function Layout({
               </SidebarInset>
             </div>
           </SidebarProvider>
-          <Toaster />
+          <Toaster
+            toastOptions={{
+              duration: 10000,
+            }}
+          />
+          <Notification />
         </TitleProvider>
       </SocketProvider>
     </>

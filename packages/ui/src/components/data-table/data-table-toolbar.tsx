@@ -133,13 +133,17 @@ function DataTableToolbarFilter<TData>({
           );
 
         case "select":
+        case "multiSelectArray":
         case "multiSelect":
           return (
             <DataTableFacetedFilter
               column={column}
               title={columnMeta.label ?? column.id}
               options={columnMeta.options ?? []}
-              multiple={columnMeta.variant === "multiSelect"}
+              multiple={
+                columnMeta.variant === "multiSelect" ||
+                columnMeta.variant === "multiSelectArray"
+              }
             />
           );
 

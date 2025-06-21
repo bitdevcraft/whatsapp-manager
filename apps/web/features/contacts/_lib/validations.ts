@@ -9,6 +9,7 @@ export const contactSearchParamsCache = createSearchParamsCache({
   sort: getSortingStateParser<Contact>().withDefault([
     { id: "createdAt", desc: true },
   ]),
+  tags: parseAsArrayOf(z.string()).withDefault([]),
   createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
 });
 

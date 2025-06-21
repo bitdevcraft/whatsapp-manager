@@ -35,6 +35,7 @@ export async function POST(
   const jobData: IJobMessageOutgoing = {
     teamId: userWithTeam.teamId,
     marketingCampaignId: id,
+    userId: userWithTeam.user.id,
   };
 
   await waBulkMessagesOutgoingQueue.add(jobId, jobData, {

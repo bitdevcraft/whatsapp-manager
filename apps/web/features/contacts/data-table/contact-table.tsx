@@ -7,18 +7,27 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
+  DataTableFilterMenu,
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
 
 import { ContactsTableActionBar } from "./contact-table-action-bar";
-import { columns } from "@/features/contacts/data-table/contact-table-columns";
 import { getContacts } from "@/features/contacts/_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { useTitle } from "@/components/provider/title-provider";
+import { getSelectTags } from "@/features/tags/_lib/queries";
+import { getTableColumns } from "./contact-table-columns";
+import { DataTableRowAction } from "@workspace/ui/types/data-table";
+import { Contact } from "@workspace/db";
 
 interface ContactTableProps {
-  promises: Promise<[Awaited<ReturnType<typeof getContacts>>]>;
+  promises: Promise<
+    [
+      Awaited<ReturnType<typeof getContacts>>,
+      Awaited<ReturnType<typeof getSelectTags>>,
+    ]
+  >;
 }
 
 export default function ContactTable({ promises }: ContactTableProps) {
@@ -30,7 +39,19 @@ export default function ContactTable({ promises }: ContactTableProps) {
 
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
 
-  const [{ data, pageCount }] = React.use(promises);
+  const [{ data, pageCount }, tags] = React.use(promises);
+
+  const [rowAction, setRowAction] =
+    React.useState<DataTableRowAction<Contact> | null>(null);
+
+  const columns = React.useMemo(
+    () =>
+      getTableColumns({
+        setRowAction,
+        tags,
+      }),
+    []
+  );
 
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data,
@@ -56,7 +77,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
     <div className="">
       <DataTable
         table={table}
-        actionBar={<ContactsTableActionBar table={table} />}
+        actionBar={<ContactsTableActionBar table={table} tags={tags} />}
         pageSizeOptions={[10, 20, 50, 100, 200]}
       >
         {enableAdvancedFilter ? (

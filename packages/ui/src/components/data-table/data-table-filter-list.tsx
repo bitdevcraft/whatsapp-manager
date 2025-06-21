@@ -741,6 +741,63 @@ function onFilterInputRender<TData>({
       );
     }
 
+    case "multiSelectArray": {
+      const inputListboxId = `${inputId}-listbox`;
+      const selectedValues = Array.isArray(filter.value) ? filter.value : [];
+
+      return (
+        <Faceted
+          open={showValueSelector}
+          onOpenChange={setShowValueSelector}
+          value={selectedValues}
+          onValueChange={(value) =>
+            onFilterUpdate(filter.filterId, {
+              value,
+            })
+          }
+          multiple
+        >
+          <FacetedTrigger asChild>
+            <Button
+              id={inputId}
+              aria-controls={inputListboxId}
+              aria-label={`${columnMeta?.label} filter values`}
+              variant="outline"
+              size="sm"
+              className="w-full rounded font-normal"
+            >
+              <FacetedBadgeList
+                options={columnMeta?.options}
+                placeholder={columnMeta?.placeholder ?? "Select values..."}
+              />
+            </Button>
+          </FacetedTrigger>
+          <FacetedContent
+            id={inputListboxId}
+            className="w-[200px] origin-[var(--radix-popover-content-transform-origin)]"
+          >
+            <FacetedInput placeholder="Search values..." />
+            <FacetedList>
+              <FacetedEmpty>No options found.</FacetedEmpty>
+              <FacetedGroup>
+                {columnMeta?.options?.map((option) => (
+                  <FacetedItem key={option.value} value={option.value}>
+                    {option.icon && <option.icon />}
+                    <span>{option.label}</span>
+                    {option.count && (
+                      <span className="ml-auto font-mono text-xs">
+                        {option.count}
+                      </span>
+                    )}
+                  </FacetedItem>
+                ))}
+              </FacetedGroup>
+            </FacetedList>
+          </FacetedContent>
+        </Faceted>
+      );
+    }
+
     case "date":
     case "dateRange": {
       const inputListboxId = `${inputId}-listbox`;

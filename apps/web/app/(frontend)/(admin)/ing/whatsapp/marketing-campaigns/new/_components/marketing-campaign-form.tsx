@@ -26,11 +26,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
 import { logger } from "@/lib/logger";
-import {
-  getSelectPhoneNumber,
-  getSelectTags,
-  getSelectTemplates,
-} from "./queries";
+import { getSelectPhoneNumber, getSelectTemplates } from "./queries";
+import { getSelectTags } from "@/features/tags/_lib/queries";
 
 interface MarketingCampaignFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;

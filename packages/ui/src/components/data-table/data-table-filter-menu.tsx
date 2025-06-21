@@ -109,7 +109,7 @@ export function DataTableFilterMenu<TData>({
         setSelectedColumn(null);
       }
     },
-    [inputValue, selectedColumn],
+    [inputValue, selectedColumn]
   );
 
   const [filters, setFilters] = useQueryState(
@@ -120,7 +120,7 @@ export function DataTableFilterMenu<TData>({
         clearOnDefault: true,
         shallow,
         throttleMs,
-      }),
+      })
   );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
@@ -138,7 +138,7 @@ export function DataTableFilterMenu<TData>({
         value: filterValue,
         variant: column.columnDef.meta?.variant ?? "text",
         operator: getDefaultFilterOperator(
-          column.columnDef.meta?.variant ?? "text",
+          column.columnDef.meta?.variant ?? "text"
         ),
         filterId: generateId({ length: 8 }),
       };
@@ -151,26 +151,26 @@ export function DataTableFilterMenu<TData>({
         setInputValue("");
       }, 100);
     },
-    [filters, debouncedSetFilters],
+    [filters, debouncedSetFilters]
   );
 
   const onFilterRemove = React.useCallback(
     (filterId: string) => {
       const updatedFilters = filters.filter(
-        (filter) => filter.filterId !== filterId,
+        (filter) => filter.filterId !== filterId
       );
       debouncedSetFilters(updatedFilters);
       requestAnimationFrame(() => {
         triggerRef.current?.focus();
       });
     },
-    [filters, debouncedSetFilters],
+    [filters, debouncedSetFilters]
   );
 
   const onFilterUpdate = React.useCallback(
     (
       filterId: string,
-      updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+      updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
     ) => {
       debouncedSetFilters((prevFilters) => {
         const updatedFilters = prevFilters.map((filter) => {
@@ -182,7 +182,7 @@ export function DataTableFilterMenu<TData>({
         return updatedFilters;
       });
     },
-    [debouncedSetFilters],
+    [debouncedSetFilters]
   );
 
   const onFiltersReset = React.useCallback(() => {
@@ -233,7 +233,7 @@ export function DataTableFilterMenu<TData>({
         onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
       }
     },
-    [filters, onFilterRemove],
+    [filters, onFilterRemove]
   );
 
   return (
@@ -343,7 +343,7 @@ interface DataTableFilterItemProps<TData> {
   columns: Column<TData>[];
   onFilterUpdate: (
     filterId: string,
-    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
   ) => void;
   onFilterRemove: (filterId: string) => void;
 }
@@ -394,7 +394,7 @@ function DataTableFilterItem<TData>({
         showOperatorSelector,
         showValueSelector,
         onFilterRemove,
-      ],
+      ]
     );
 
     return (
@@ -436,7 +436,7 @@ function DataTableFilterItem<TData>({
                           id: column.id as Extract<keyof TData, string>,
                           variant: column.columnDef.meta?.variant ?? "text",
                           operator: getDefaultFilterOperator(
-                            column.columnDef.meta?.variant ?? "text",
+                            column.columnDef.meta?.variant ?? "text"
                           ),
                           value: "",
                         });
@@ -453,7 +453,7 @@ function DataTableFilterItem<TData>({
                       <Check
                         className={cn(
                           "ml-auto",
-                          column.id === filter.id ? "opacity-100" : "opacity-0",
+                          column.id === filter.id ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -547,6 +547,7 @@ function FilterValueSelector<TData>({
       );
 
     case "select":
+    case "multiSelectArray":
     case "multiSelect":
       return (
         <CommandGroup>
@@ -620,7 +621,7 @@ function onFilterInputRender<TData>({
   inputId: string;
   onFilterUpdate: (
     filterId: string,
-    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
   ) => void;
   showValueSelector: boolean;
   setShowValueSelector: (value: boolean) => void;
@@ -704,6 +705,7 @@ function onFilterInputRender<TData>({
     }
 
     case "select":
+    case "multiSelectArray":
     case "multiSelect": {
       const inputListboxId = `${inputId}-listbox`;
 
@@ -713,7 +715,7 @@ function onFilterInputRender<TData>({
         : [filter.value];
 
       const selectedOptions = options.filter((option) =>
-        selectedValues.includes(option.value),
+        selectedValues.includes(option.value)
       );
 
       return (
@@ -743,7 +745,7 @@ function onFilterInputRender<TData>({
                         >
                           <selectedOption.icon className="size-3.5" />
                         </div>
-                      ) : null,
+                      ) : null
                     )}
                   </div>
                   <span className="truncate">
@@ -787,7 +789,7 @@ function onFilterInputRender<TData>({
                             "ml-auto",
                             selectedValues.includes(option.value)
                               ? "opacity-100"
-                              : "opacity-0",
+                              : "opacity-0"
                           )}
                         />
                       )}
@@ -812,7 +814,7 @@ function onFilterInputRender<TData>({
       const displayValue =
         filter.operator === "isBetween" && dateValue.length === 2
           ? `${formatDate(new Date(Number(dateValue[0])))} - ${formatDate(
-              new Date(Number(dateValue[1])),
+              new Date(Number(dateValue[1]))
             )}`
           : dateValue[0]
             ? formatDate(new Date(Number(dateValue[0])))
@@ -828,7 +830,7 @@ function onFilterInputRender<TData>({
               size="sm"
               className={cn(
                 "h-full rounded-none border px-1.5 font-normal dark:bg-input/30",
-                !filter.value && "text-muted-foreground",
+                !filter.value && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="size-3.5" />

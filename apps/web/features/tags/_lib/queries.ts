@@ -119,3 +119,45 @@ export async function getTags(input: GetTagSchema) {
     }
   )();
 }
+
+export async function getSelectTags() {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return [];
+  }
+
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const tags = await withTenantTransaction(teamId, async (tx) => {
+          const data = await tx
+            .select({
+              label: tagsTable.name,
+              value: tagsTable.normalizedName,
+            })
+            .from(tagsTable)
+            .orderBy(tagsTable.name);
+
+          const tags: { label: string; value: string }[] = data.map((t) => ({
+            label: t.label,
+            value: t.value || "",
+          }));
+
+          return tags;
+        });
+
+        return tags;
+      } catch (error) {
+        logger.error(error);
+        return [];
+      }
+    },
+    [`tags:select:${teamId}`],
+    {
+      tags: [`tags:select:${teamId}`],
+    }
+  )();
+}

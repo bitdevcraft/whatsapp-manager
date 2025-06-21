@@ -42,11 +42,19 @@ export async function getContacts(input: GetContactSchema) {
           joinOperator: input.joinOperator,
         });
 
+        logger.log("RYAN", input.tags);
+
         const where = advancedTable
           ? advancedWhere
           : and(
               input.name
                 ? ilike(contactsTable.name, `%${input.name}%`)
+                : undefined,
+              input.tags.length > 0
+                ? sql`${contactsTable.tags} ?| ARRAY[${sql.join(
+                    input.tags.map((v) => sql`${v}`),
+                    sql`, `
+                  )}]`
                 : undefined,
               input.createdAt.length > 0
                 ? and(

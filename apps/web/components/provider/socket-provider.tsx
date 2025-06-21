@@ -1,5 +1,6 @@
 "use client";
 
+import { SocketEventPayloads } from "@workspace/shared";
 import React, {
   createContext,
   useContext,
@@ -10,7 +11,7 @@ import React, {
 import { io, Socket } from "socket.io-client";
 
 interface SocketContextType {
-  socket: Socket | null;
+  socket: Socket<SocketEventPayloads> | null;
   userId: string;
   teamId: string;
 }
@@ -28,16 +29,21 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   userId,
   teamId,
 }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket<SocketEventPayloads> | null>(
+    null
+  );
 
   useEffect(() => {
-    const socketInstance = io("http://localhost:3000", {
-      path: "/socket.io",
-      query: {
-        userId,
-        teamId,
-      },
-    });
+    const socketInstance: Socket<SocketEventPayloads> = io(
+      "http://localhost:3000",
+      {
+        path: "/socket.io",
+        query: {
+          userId,
+          teamId,
+        },
+      }
+    );
 
     setSocket(socketInstance);
 

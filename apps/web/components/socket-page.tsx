@@ -14,18 +14,18 @@ export default function SocketPage() {
       body: "",
     });
   };
-  useEffect(() => {
-    if (!socket) return;
-    logger.log("Socket connected");
+  // useEffect(() => {
+  //   if (!socket) return;
+  //   logger.log("Socket connected");
 
-    socket.on("whatsapp_message", async () => {
-      logger.log("meta webhook socket");
-    });
+  //   socket.on("whatsapp_message", async () => {
+  //     logger.log("meta webhook socket");
+  //   });
 
-    return () => {
-      socket.off("whatsapp_message");
-    };
-  }, [socket]);
+  //   return () => {
+  //     socket.off("whatsapp_message");
+  //   };
+  // }, [socket]);
 
   return (
     <>

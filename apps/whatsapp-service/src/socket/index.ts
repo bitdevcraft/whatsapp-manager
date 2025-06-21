@@ -1,13 +1,14 @@
 import type { Server as HttpServer } from "http";
-import { Server } from "socket.io";
+import { DefaultEventsMap, Server as IOServer } from "socket.io";
 
 import { SocketRegistry } from "./socket-registry";
+import { SocketEventPayloads } from "@workspace/shared";
 
 export const socketRegistry = new SocketRegistry();
-export let ioInstance: Server;
+export let ioInstance: IOServer<SocketEventPayloads>;
 
 export function initSocket(server: HttpServer) {
-  const io = new Server(server, {
+  const io = new IOServer(server, {
     cors: { origin: "*" },
     path: "/socket.io", // match your client path
   });

@@ -1,15 +1,19 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
-import { MarketingCampaign } from "@workspace/db/schema/marketing-campaigns";
+import { marketingCampaignsTable } from "@workspace/db";
+import {
+  MarketingCampaign,
+  MarketingCampaignWithTemplate,
+} from "@workspace/db/schema/marketing-campaigns";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
 import { CalendarIcon, Ellipsis, Text } from "lucide-react";
 import Link from "next/link";
+import { getMarketingCampaignStatusIcon } from "../_lib/utils";
 
-export const columns: ColumnDef<MarketingCampaign>[] = [
+export const columns: ColumnDef<MarketingCampaignWithTemplate>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -52,6 +56,36 @@ export const columns: ColumnDef<MarketingCampaign>[] = [
         <Link href={`/ing/whatsapp/marketing-campaigns/${row.id}`}>
           {row.original.name}
         </Link>
+      );
+    },
+    enableColumnFilter: true,
+  },
+  {
+    id: "template.name",
+    accessorKey: "template.name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Template" />
+    ),
+    enableColumnFilter: true,
+  },
+  {
+    id: "status",
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      const Icon = getMarketingCampaignStatusIcon(row.original.status || "");
+
+      return (
+        <Badge variant="outline" className="py-1 [&>svg]:size-3.5">
+          <Icon
+            className={
+              row.original.status === "processing" ? `animate-spin` : ""
+            }
+          />
+          <span className="capitalize">{row.original.status}</span>
+        </Badge>
       );
     },
     enableColumnFilter: true,

@@ -10,10 +10,7 @@ import {
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import {
-  IJobMessageOutgoing,
-  WhatsAppEvents,
-} from "@workspace/shared";
+import { IJobMessageOutgoing, WhatsAppEvents } from "@workspace/shared";
 import { revalidateTag } from "next/cache";
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
 import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
@@ -75,6 +72,7 @@ export async function POST(request: Request) {
       const jobData: IJobMessageOutgoing = {
         teamId: userWithTeam.teamId,
         marketingCampaignId: result.data.id,
+        userId: userWithTeam.user.id,
       };
 
       const jobId = `${WhatsAppEvents.BulkMessagesOutgoing}:${userWithTeam.teamId}:${result.data.id}`;
