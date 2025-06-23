@@ -1,1 +1,0 @@
-{"root":["./src/server.ts","./src/types.ts","./src/handlers/webhookhandler.ts","./src/routes/index.ts","./src/utils/cache.ts","./src/utils/gemini.ts","./src/utils/gpt.ts"],"version":"5.8.3"}
