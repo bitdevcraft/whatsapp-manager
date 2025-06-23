@@ -16,22 +16,22 @@ export function setupWorker() {
   worker.on("completed", (job) => {
     const userId = job.data.userId;
     const socketId = socketRegistry.getSocketId(userId);
-    if (socketId) {
-      ioInstance.to(socketId).emit("job:completed", {
-        jobId: job.id,
-        message: "Job completed successfully",
-      });
-    }
+    // if (socketId) {
+    //   ioInstance.to(socketId).emit("job:completed", {
+    //     jobId: job.id,
+    //     message: "Job completed successfully",
+    //   });
+    // }
   });
 
   worker.on("failed", (job, err) => {
     const userId = job?.data?.userId;
     const socketId = socketRegistry.getSocketId(userId);
-    if (socketId) {
-      ioInstance.to(socketId).emit("job:failed", {
-        jobId: job?.id,
-        error: err.message,
-      });
-    }
+    // if (socketId) {
+    //   ioInstance.to(socketId).emit("job:failed", {
+    //     jobId: job?.id,
+    //     error: err.message,
+    //   });
+    // }
   });
 }

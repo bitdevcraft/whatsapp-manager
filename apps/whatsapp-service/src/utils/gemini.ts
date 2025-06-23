@@ -13,7 +13,7 @@ import {
 const geminiAiApiKey = process.env.GOOGLE_GENAI_API_KEY;
 
 if (!geminiAiApiKey) {
-  throw new Error("OPEN_AI_API_KEY not defined!");
+  throw new Error("GEMINI_AI_API_KEY not defined!");
 }
 
 const ai = new GoogleGenAI({ apiKey: geminiAiApiKey });

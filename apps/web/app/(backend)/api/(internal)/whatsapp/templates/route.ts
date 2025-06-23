@@ -1,4 +1,4 @@
-import { getTemplates } from "@/features/templates/get-template";
+import { getTemplates } from "@/features/whatsapp/templates/get-template";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {

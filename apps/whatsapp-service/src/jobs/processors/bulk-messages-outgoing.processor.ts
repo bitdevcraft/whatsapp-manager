@@ -13,6 +13,7 @@ import {
   withTenantTransaction,
 } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { processOutgoingMarketingCampaign } from "@/app/whatsapp/services/processors/bulk-messages";
 
 export function setupBulkMessagesOutgoingWorker() {
   const worker = new Worker<IJobMessageOutgoing>(
@@ -20,6 +21,12 @@ export function setupBulkMessagesOutgoingWorker() {
     async (job) => {
       console.log("Processing job:", job.id, job.data);
       const { teamId, marketingCampaignId, userId } = job.data;
+
+      await processOutgoingMarketingCampaign(
+        marketingCampaignId,
+        teamId,
+        userId
+      );
 
       await updateMarketingCampaignStatus(
         marketingCampaignId,

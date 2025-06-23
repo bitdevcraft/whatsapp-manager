@@ -11,6 +11,7 @@ import {
   IconSpeakerphone,
   IconTag,
   IconTemplate,
+  IconUserCircle,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -87,6 +88,11 @@ const data = {
       name: "Templates",
       url: "/ing/whatsapp/templates",
       icon: IconTemplate,
+    },
+    {
+      name: "Business Account",
+      url: "/ing/whatsapp/business-account",
+      icon: IconUserCircle,
     },
   ],
   management: [

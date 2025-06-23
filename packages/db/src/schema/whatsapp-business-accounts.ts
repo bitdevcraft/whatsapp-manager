@@ -9,9 +9,10 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { teamsTable } from "./teams";
+import { Team, teamsTable } from "./teams";
 import { relations, sql } from "drizzle-orm";
 import { timestamps } from "../helpers/column-helper";
+import { WhatsAppBusinessAccountPhoneNumber } from "./whatsapp-business-account-phone-numbers";
 
 export interface WhatsAppBusinessAuthAccountResponse {
   data: string;
@@ -89,3 +90,9 @@ export type WhatsAppBusinessAccount =
   typeof whatsAppBusinessAccountsTable.$inferSelect;
 export type NewWhatsAppBusinessAccount =
   typeof whatsAppBusinessAccountsTable.$inferInsert;
+
+export type WhatsAppBusinessAccountDetails = WhatsAppBusinessAccount & {
+  team: Team & {
+    waBusinessPhoneNumber: WhatsAppBusinessAccountPhoneNumber;
+  };
+};

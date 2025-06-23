@@ -42,7 +42,7 @@ type DateTimeObject = {
     fallback_value: string;
 };
 
-type DateTimeParametersObject = ParametersObject<ParametersTypesEnum.Currency> & {
+type DateTimeParametersObject = ParametersObject<ParametersTypesEnum.DateTime> & {
     date_time: DateTimeObject;
 };
 

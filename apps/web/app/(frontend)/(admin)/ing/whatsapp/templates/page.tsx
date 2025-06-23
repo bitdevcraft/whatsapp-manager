@@ -5,7 +5,7 @@ import { DataTable } from "@workspace/ui/components/custom/data-table";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Template } from "@workspace/db/schema/templates";
-import { columns } from "@/features/templates/columns";
+import { columns } from "@/features/whatsapp/templates/columns";
 import { Button } from "@workspace/ui/components/button";
 
 export default function Home() {

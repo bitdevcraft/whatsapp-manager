@@ -21,8 +21,8 @@ import { useEffect, useState, useMemo } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Template } from "@workspace/db/schema/templates";
-import { transformTemplateResponseToFormValues } from "@/features/templates/forms/message-template-actions";
-import { MessageTemplateForm } from "@/features/templates/forms/message-template";
+import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
+import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import { getSelectTemplates } from "./queries";

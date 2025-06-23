@@ -1,5 +1,5 @@
 import { createStepSchema } from "@/components/forms/multi-step-form";
-import { MessageTemplateSchema } from "@/features/templates/lib/schema";
+import { MessageTemplateSchema } from "@/features/whatsapp/templates/lib/schema";
 import { z } from "zod";
 
 export const MarketingCampaignFormSchema = createStepSchema({

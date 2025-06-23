@@ -16,6 +16,10 @@ import { MarketingCampaignStatusEnum } from "../enums/status-enum";
 import { Template, templatesTable } from "./templates";
 import { relations, sql } from "drizzle-orm";
 import { teamsTable } from "./teams";
+import {
+  ComponentTypesEnum,
+  MessageTemplateObject,
+} from "@workspace/wa-cloud-api";
 
 export const marketingCampaignStatusEnum = pgEnum(
   "status",
