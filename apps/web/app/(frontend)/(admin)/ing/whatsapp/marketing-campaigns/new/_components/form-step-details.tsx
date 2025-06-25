@@ -29,7 +29,7 @@ interface DetailsStepFormProps {
 }
 
 export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
-  const { form, prevStep } =
+  const { form, prevStep, nextStep, isStepValid } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
   const { control } = form;
 
@@ -42,11 +42,8 @@ export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
               type="button"
               size="icon"
               variant="outline"
-              onClick={prevStep}
+              onClick={nextStep}
             >
-              <ArrowLeft />
-            </Button>
-            <Button type="button" size="icon" variant="outline" disabled>
               <ArrowRight />
             </Button>
           </div>
@@ -142,11 +139,12 @@ export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
           </div>
         </div>
         {/* navigation */}
-        <div className="flex justify-end gap-2 mt-6">
-          <Button type="button" variant="outline" onClick={prevStep}>
-            Previous
+
+        <div className="flex justify-end gap-2">
+          <Button onClick={nextStep} disabled={!isStepValid()}>
+            Next
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button type="submit">Submit</Button>
         </div>
       </div>
     </Form>

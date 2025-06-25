@@ -116,7 +116,7 @@ export default function MarketingCampaignForm({
             <div className="">
               <Stepper
                 variant={"numbers"}
-                steps={["Template", "Audience", "Details"]}
+                steps={["Details", "Template", "Audience"]}
                 currentStep={currentStepIndex}
               />
             </div>
@@ -124,16 +124,16 @@ export default function MarketingCampaignForm({
         </MultiStepFormContextProvider>
       </MultiStepFormHeader>
 
+      <MultiStepFormStep name="details">
+        <DetailsStep phoneNumbers={phoneNumbers} />
+      </MultiStepFormStep>
+
       <MultiStepFormStep name="template">
         <TemplateStep templates={templates} />
       </MultiStepFormStep>
 
       <MultiStepFormStep name="audience">
         <AudienceStep tags={tags} />
-      </MultiStepFormStep>
-
-      <MultiStepFormStep name="details">
-        <DetailsStep phoneNumbers={phoneNumbers} />
       </MultiStepFormStep>
     </MultiStepForm>
   );

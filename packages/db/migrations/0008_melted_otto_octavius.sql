@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_business_account_phone_numbers" RENAME COLUMN "isRegistered" TO "is_registered";

@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_business_account_phone_numbers" ADD COLUMN "isRegistered" boolean;

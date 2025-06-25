@@ -7,6 +7,7 @@ import {
   whatsAppBusinessAccountPhoneNumbersTable,
   withTenantTransaction,
 } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { Label } from "recharts";
 
 export async function getSelectTemplates() {
@@ -67,6 +68,9 @@ export async function getSelectPhoneNumber() {
                 value: whatsAppBusinessAccountPhoneNumbersTable.id,
               })
               .from(whatsAppBusinessAccountPhoneNumbersTable)
+              .where(
+                eq(whatsAppBusinessAccountPhoneNumbersTable.isRegistered, true)
+              )
               .orderBy(
                 whatsAppBusinessAccountPhoneNumbersTable.displayPhoneNumber
               );

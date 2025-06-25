@@ -19,7 +19,9 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
 import { GetWaPhoneNumberSchema } from "./validation";
 
-export async function getWhatsAppBusinessAccountPhoneNumber(input: GetWaPhoneNumberSchema) {
+export async function getWhatsAppBusinessAccountPhoneNumber(
+  input: GetWaPhoneNumberSchema
+) {
   const userWithTeam = await getUserWithTeam();
 
   if (!userWithTeam?.teamId) {
@@ -123,7 +125,7 @@ export async function getWhatsAppBusinessAccountPhoneNumber(input: GetWaPhoneNum
     [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["contacts", `contacts:${userWithTeam?.teamId}`],
+      tags: ["phone-number", `phone-number:${userWithTeam?.teamId}`],
     }
   )();
 }

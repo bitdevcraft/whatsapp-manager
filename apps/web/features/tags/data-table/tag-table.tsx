@@ -17,6 +17,7 @@ import { getTags } from "@/features/tags/_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { useTitle } from "@/components/provider/title-provider";
 import TagNewDialog from "./tag-new-dialog";
+import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 
 interface TagTableProps {
   promises: Promise<[Awaited<ReturnType<typeof getTags>>]>;
@@ -65,12 +66,14 @@ export default function TagsTable({ promises }: TagTableProps) {
             />
             <TagNewDialog />
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
             <TagNewDialog />
 
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableToolbar>
         )}
       </DataTable>

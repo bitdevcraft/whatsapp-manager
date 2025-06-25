@@ -20,6 +20,8 @@ import { getSelectTags } from "@/features/tags/_lib/queries";
 import { getTableColumns } from "./contact-table-columns";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { Contact } from "@workspace/db";
+import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import UploadCSVContact from "../_components/upload-csv-form";
 
 interface ContactTableProps {
   promises: Promise<
@@ -89,11 +91,16 @@ export default function ContactTable({ promises }: ContactTableProps) {
               throttleMs={throttleMs}
               align="end"
             />
+            <UploadCSVContact />
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
+            <UploadCSVContact />
+
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableToolbar>
         )}
       </DataTable>

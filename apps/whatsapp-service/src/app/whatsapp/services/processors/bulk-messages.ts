@@ -107,6 +107,7 @@ export async function processOutgoingMarketingCampaign(
     const messageTemplate: BulkMessageQueue[] = data.contacts.map((contact) => {
       const temp: BulkMessageQueue = {
         registryId,
+        teamId: tenantId,
         template: {
           body: data.messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
           to: contact,

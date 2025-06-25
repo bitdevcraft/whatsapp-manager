@@ -20,6 +20,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
 import { getSelectTags } from "@/features/tags/_lib/queries";
+import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,7 @@ export default function MarketingCampaignTable({
               </Button>
             </Link>
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
@@ -89,6 +91,7 @@ export default function MarketingCampaignTable({
               </Button>
             </Link>
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableToolbar>
         )}
       </DataTable>

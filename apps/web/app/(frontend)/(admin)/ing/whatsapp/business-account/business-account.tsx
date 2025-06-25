@@ -3,6 +3,7 @@ import { getWhatsAppBusinessAccountDetails } from "@/features/whatsapp/business-
 import { getWhatsAppBusinessAccountPhoneNumber } from "@/features/whatsapp/phone-number/_lib/queries";
 import WhatsAppBusinesAccountPhoneNumberTable from "@/features/whatsapp/phone-number/data-table/phone-number-table";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
+import { Separator } from "@workspace/ui/components/separator";
 import React from "react";
 
 interface Props {
@@ -20,9 +21,11 @@ export default function BusinessAccount({ promises }: Props) {
   const promise = Promise.all([data]);
 
   return (
-    <>
-      <p>{waba?.id}</p>
-      <div className="p-8">
+    <div className="p-8 grid gap-5">
+      <p className="font-semibold">{waba?.ownerBusinessName}</p>
+      <Separator />
+      <p className="text-sm">Phone Numbers</p>
+      <div className="">
         <FeatureFlagsProvider>
           <React.Suspense
             fallback={
@@ -46,6 +49,6 @@ export default function BusinessAccount({ promises }: Props) {
           </React.Suspense>
         </FeatureFlagsProvider>
       </div>
-    </>
+    </div>
   );
 }

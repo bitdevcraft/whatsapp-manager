@@ -4,6 +4,8 @@
 @source "../**/*.{ts,tsx}";
 
 @import "tw-animate-css";
+@import "@uppy/core/dist/style.css";
+@import "@uppy/dashboard/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 

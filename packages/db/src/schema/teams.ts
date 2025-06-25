@@ -1,6 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { baseSchema } from "../helpers/column-helper";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { bigint, integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { TeamMember, teamMembersTable } from "./team-members";
 import { activityLogsTable } from "./activity-logs";
 import { invitationsTable } from "./invitations";
@@ -24,6 +24,15 @@ export const teamsTable = pgTable("teams", {
   stripeProductId: text("stripe_product_id"),
   planName: varchar("plan_name", { length: 50 }),
   subscriptionStatus: varchar("subscription_status", { length: 20 }),
+  maxFileStorageSize: bigint("max_file_storage_size", {
+    mode: "number",
+  }).default(
+    // 2 Gb
+    2 * 1024 * 1024 * 1024
+  ),
+  currentFileStorageSize: bigint("current_file_storage_size", {
+    mode: "number",
+  }).default(0),
 });
 
 export type Team = typeof teamsTable.$inferSelect;

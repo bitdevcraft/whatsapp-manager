@@ -25,6 +25,7 @@ import { InputOTPForm } from "./phone-number-register-form";
 import { TagsFormValues } from "@/features/tags/_lib/schema";
 import axios from "axios";
 import { toast } from "sonner";
+import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 
 interface WhatsAppBusinessAccountPhoneNumberTableProps {
   promises: Promise<
@@ -38,7 +39,7 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
   const setTitle = useTitle();
 
   useEffect(() => {
-    setTitle("Contacts");
+    setTitle("Business Account");
   }, [setTitle]);
 
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
@@ -127,10 +128,12 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
               align="end"
             />
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
             <DataTableSortList table={table} align="start" />
+            <FeatureFlagsToggle />
           </DataTableToolbar>
         )}
       </DataTable>

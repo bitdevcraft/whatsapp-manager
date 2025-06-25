@@ -11,7 +11,7 @@ import {
 import { MessageTemplateValues } from "../lib/schema";
 
 export function transformTemplateResponseToFormValues(
-  template: TemplateResponse
+  template: TemplateResponse,
 ): MessageTemplateValues {
   const components: MessageTemplateValues["components"] = [];
 
@@ -28,17 +28,47 @@ export function transformTemplateResponseToFormValues(
           : (comp.example?.header_text_named_params?.map((e) => e.example) ??
             []);
 
-      const parameters =
-        format === "POSITIONAL"
-          ? paramKeys.map((_, idx) => ({
+      const parameters = paramKeys
+        .map((parameter_name, idx) => {
+          if (comp.format === "TEXT" && format === "POSITIONAL") {
+            return {
               type: ParametersTypesEnum.Text as const,
               text: example[idx] ?? "",
-            }))
-          : paramKeys.map((parameter_name, idx) => ({
+            };
+          }
+
+          if (comp.format === "TEXT" && format === "NAMED") {
+            return {
               type: ParametersTypesEnum.Text as const,
               text: example[idx] ?? "",
               parameter_name,
-            }));
+            };
+          }
+
+          if (comp.format === "IMAGE") {
+            return {
+              type: ParametersTypesEnum.Image as const,
+              id: "",
+            };
+          }
+
+          if (comp.format === "VIDEO") {
+            return {
+              type: ParametersTypesEnum.Video as const,
+              id: "",
+            };
+          }
+
+          if (comp.format === "DOCUMENT") {
+            return {
+              type: ParametersTypesEnum.Document as const,
+              id: "",
+            };
+          }
+
+          return null;
+        })
+        .filter((t) => t !== null);
 
       if (parameters.length > 0)
         components.push({
@@ -107,7 +137,7 @@ export function transformTemplateResponseToFormValues(
 
 export function extractTemplateParams(
   text: string,
-  format: "POSITIONAL" | "NAMED"
+  format: "POSITIONAL" | "NAMED",
 ) {
   if (format === "POSITIONAL") {
     const matches = [...text.matchAll(/{{(\d+)}}/g)];

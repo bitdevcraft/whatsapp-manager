@@ -2,10 +2,14 @@ import { RESPONSE_CODE } from "@/lib/constants/response-code";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { whatsAppBusinessAccountsTable } from "@workspace/db";
+import {
+  whatsAppBusinessAccountPhoneNumbersTable,
+  whatsAppBusinessAccountsTable,
+} from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/index";
 import WhatsApp from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();
@@ -56,12 +60,22 @@ export async function POST(request: Request) {
 
   const response = await whatsapp.registration.register(pin);
 
-  if (response.success)
-    return new Response(JSON.stringify(response), {
-      status: RESPONSE_CODE.SUCCESS,
+  if (response.success) {
+    await withTenantTransaction(teamId, async (tx) => {
+      await tx
+        .update(whatsAppBusinessAccountPhoneNumbersTable)
+        .set({
+          isRegistered: true,
+        })
+        .where(
+          eq(whatsAppBusinessAccountPhoneNumbersTable.id, Number(phoneNumberId))
+        );
     });
+    revalidateTag(`phone-number:${teamId}`);
+    return new Response(JSON.stringify(response), { status: 200 });
+  }
 
-  return new Response(JSON.stringify(response), {
-    status: RESPONSE_CODE.BAD_REQUEST,
-  });
+  revalidateTag(`phone-number:${teamId}`);
+
+  return new Response(JSON.stringify(response), { status: 400 });
 }

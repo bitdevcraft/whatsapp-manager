@@ -6,5 +6,6 @@ import {
 
 export interface BulkMessageQueue {
   registryId: string;
+  teamId: string;
   template: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>>;
 }

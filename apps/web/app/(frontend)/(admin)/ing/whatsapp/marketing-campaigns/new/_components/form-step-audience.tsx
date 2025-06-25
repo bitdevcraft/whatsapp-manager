@@ -53,12 +53,7 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
             >
               <ArrowLeft />
             </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              onClick={nextStep}
-            >
+            <Button type="button" size="icon" variant="outline" disabled>
               <ArrowRight />
             </Button>
           </div>
@@ -125,11 +120,11 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
             </Button>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 mt-6">
           <Button type="button" variant="outline" onClick={prevStep}>
             Previous
           </Button>
-          <Button onClick={nextStep}>Next</Button>
+          <Button type="submit">Submit</Button>
         </div>
       </div>
     </Form>

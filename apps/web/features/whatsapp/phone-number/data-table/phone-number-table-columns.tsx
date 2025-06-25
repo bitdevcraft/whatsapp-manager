@@ -11,7 +11,14 @@ import {
 } from "@workspace/ui/components/popover";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
-import { CalendarIcon, CircleDashed, Ellipsis, Text } from "lucide-react";
+import {
+  CalendarIcon,
+  CheckCircle2Icon,
+  CircleDashed,
+  Ellipsis,
+  Text,
+  XCircle,
+} from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { getSelectTags } from "@/features/tags/_lib/queries";
@@ -72,6 +79,44 @@ export function getTableColumns({
       enableColumnFilter: true,
     },
     {
+      id: "isPinEnabled",
+      accessorKey: "isPinEnabled",
+      header: ({ column }) => (
+        <div className="flex justify-center">
+          <DataTableColumnHeader column={column} title="Is Pin Enabled" />
+        </div>
+      ),
+      cell: ({ cell }) =>
+        cell.getValue() ? (
+          <div className="flex justify-center">
+            <CheckCircle2Icon className="text-green-500" />
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <XCircle className="text-red-500" />
+          </div>
+        ),
+    },
+    {
+      id: "isRegistered",
+      accessorKey: "isRegistered",
+      header: ({ column }) => (
+        <div className="flex justify-center">
+          <DataTableColumnHeader column={column} title="Is Registered" />
+        </div>
+      ),
+      cell: ({ cell }) =>
+        cell.getValue() ? (
+          <div className="flex justify-center">
+            <CheckCircle2Icon className="text-green-500" />
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <XCircle className="text-red-500" />
+          </div>
+        ),
+    },
+    {
       id: "createdAt",
       accessorKey: "createdAt",
       header: ({ column }) => (
@@ -102,13 +147,17 @@ export function getTableColumns({
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 onSelect={() => setRowAction({ row, variant: "register" })}
+                disabled={!!row.original.isRegistered}
               >
-                Register
+                1. Register
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => setRowAction({ row, variant: "setup-2FA" })}
+                disabled={
+                  !row.original.isRegistered || !!row.original.isPinEnabled
+                }
               >
-                Setup-2FA
+                2. Setup-2FA
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

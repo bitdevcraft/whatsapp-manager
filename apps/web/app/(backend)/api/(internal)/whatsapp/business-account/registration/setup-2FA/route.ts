@@ -9,6 +9,7 @@ import {
 import { withTenantTransaction } from "@workspace/db/index";
 import WhatsApp from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();
@@ -28,6 +29,8 @@ export async function POST(request: Request) {
   };
 
   const { teamId } = userWithTeam;
+
+  revalidateTag(`phone-number:${teamId}`);
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
@@ -70,8 +73,12 @@ export async function POST(request: Request) {
         .where(
           eq(whatsAppBusinessAccountPhoneNumbersTable.id, Number(phoneNumberId))
         );
-      return new Response(JSON.stringify(response), { status: 200 });
     });
+
+    revalidateTag(`phone-number:${teamId}`);
+    return new Response(JSON.stringify(response), { status: 200 });
   }
+
+  revalidateTag(`phone-number:${teamId}`);
   return new Response(JSON.stringify(response), { status: 400 });
 }

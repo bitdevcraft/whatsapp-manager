@@ -5,6 +5,7 @@ import { socketRegistry } from "@/socket";
 import { WhatsAppEvents } from "@workspace/shared";
 import { BulkMessageQueue } from "@/types/bulk-message";
 import { waClientRegistry } from "@/instance";
+import { withTenantTransaction } from "@workspace/db";
 
 export function setupBulkMessagesWorker() {
   const worker = new Worker<BulkMessageQueue>(
@@ -13,11 +14,15 @@ export function setupBulkMessagesWorker() {
       console.log("Processing job:", job.id, job.data);
       // Perform async task here...
 
-      const whatsapp = waClientRegistry.get(job.data.registryId);
+      try {
+        const whatsapp = waClientRegistry.get(job.data.registryId);
 
-      const response = await whatsapp?.messages.template(job.data.template);
+        const response = await whatsapp?.messages.template(job.data.template);
 
-      console.log(response);
+        console.log(response);
+
+        await withTenantTransaction(job.data.teamId, async (tx) => {});
+      } catch (error) {}
     },
     {
       connection: redisConnection,

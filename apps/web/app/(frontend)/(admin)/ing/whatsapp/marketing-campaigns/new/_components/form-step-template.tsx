@@ -18,7 +18,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
 import { useEffect, useState, useMemo } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { Template } from "@workspace/db/schema/templates";
 import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
@@ -36,7 +36,7 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
     null
   );
 
-  const { form, nextStep, isStepValid } =
+  const { form, nextStep, isStepValid, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
   // Memoize transformed default values
@@ -51,11 +51,35 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
     if (defaultMessageTemplate) {
       form.setValue("template.messageTemplate", defaultMessageTemplate);
     }
+    const templateId = form.getValues().template.template;
+
+    if (templateId) {
+      const match = templates.templates.find((t: any) => t.id === templateId);
+      setSelectedTemplate(match ?? null);
+    }
   }, [defaultMessageTemplate, form]);
 
   return (
     <Form {...form}>
       <div className={"flex flex-col gap-4"}>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={prevStep}
+          >
+            <ArrowLeft />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={nextStep}
+          >
+            <ArrowRight />
+          </Button>
+        </div>
         <FormField
           name="template.template"
           render={({ field }) => (
@@ -94,14 +118,15 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
             form={form}
             namePrefix="template.messageTemplate"
             initialTemplate={selectedTemplate.content!}
+            preview
           />
         )}
 
         <div className="flex justify-end gap-2">
-          <Button onClick={nextStep} disabled={!isStepValid()}>
-            Next
-            <ArrowRight className="ml-2 h-4 w-4" />
+          <Button type="button" variant="outline" onClick={prevStep}>
+            Previous
           </Button>
+          <Button onClick={nextStep}>Next</Button>
         </div>
       </div>
     </Form>

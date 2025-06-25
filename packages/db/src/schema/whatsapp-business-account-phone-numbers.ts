@@ -54,6 +54,7 @@ export const whatsAppBusinessAccountPhoneNumbersTable = pgTable(
     newNameStatus: varchar("new_name_status", { length: 50 }),
     qualityScore: jsonb("quality_score"),
     throughput: jsonb("throughput").$type<{ level: string }>(),
+    isRegistered: boolean("is_registered"),
 
     //   Team ID
     teamId: uuid("team_id")

@@ -1,37 +1,31 @@
+// components/feature-flags-provider.tsx
 "use client";
 
+import React, { createContext, useContext, useCallback, useMemo } from "react";
 import { useQueryState } from "nuqs";
-import * as React from "react";
-
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
-import { type FlagConfig, flagConfig } from "@/config/flag";
+import { FlagConfig, flagConfig } from "@/config/flag";
 
 type FilterFlag = FlagConfig["featureFlags"][number]["value"];
 
-interface FeatureFlagsContextValue {
-  filterFlag: FilterFlag;
+export interface FeatureFlagsContextValue {
+  filterFlag: FilterFlag | null;
   enableAdvancedFilter: boolean;
+  onFilterFlagChange: (value: FilterFlag) => void;
+  clearFilterFlag: () => void; // ← added here
 }
 
-const FeatureFlagsContext =
-  React.createContext<FeatureFlagsContextValue | null>(null);
+const FeatureFlagsContext = createContext<FeatureFlagsContextValue | undefined>(
+  undefined
+);
 
-export function useFeatureFlags() {
-  const context = React.useContext(FeatureFlagsContext);
-  if (!context) {
+export function useFeatureFlags(): FeatureFlagsContextValue {
+  const ctx = useContext(FeatureFlagsContext);
+  if (!ctx) {
     throw new Error(
       "useFeatureFlags must be used within a FeatureFlagsProvider"
     );
   }
-  return context;
+  return ctx;
 }
 
 interface FeatureFlagsProviderProps {
@@ -42,14 +36,12 @@ export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
   const [filterFlag, setFilterFlag] = useQueryState<FilterFlag | null>(
     "filterFlag",
     {
-      parse: (value) => {
-        if (!value) return null;
-        const validValues = flagConfig.featureFlags.map((flag) => flag.value);
-        return validValues.includes(value as FilterFlag)
-          ? (value as FilterFlag)
-          : null;
+      parse: (v) => {
+        if (!v) return null;
+        const valid = flagConfig.featureFlags.map((f) => f.value);
+        return valid.includes(v as FilterFlag) ? (v as FilterFlag) : null;
       },
-      serialize: (value) => value ?? "",
+      serialize: (v) => v ?? "",
       defaultValue: null,
       clearOnDefault: true,
       shallow: false,
@@ -57,60 +49,30 @@ export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
     }
   );
 
-  const onFilterFlagChange = React.useCallback(
-    (value: FilterFlag) => {
-      setFilterFlag(value);
-    },
+  const onFilterFlagChange = useCallback(
+    (value: FilterFlag) => setFilterFlag(value),
     [setFilterFlag]
   );
+  const clearFilterFlag = useCallback(
+    () => setFilterFlag(null),
+    [setFilterFlag]
+  ); // ← and here
 
-  const contextValue = React.useMemo<FeatureFlagsContextValue>(
+  const enableAdvancedFilter =
+    filterFlag === "advancedFilters" || filterFlag === "commandFilters";
+
+  const value = useMemo(
     () => ({
       filterFlag,
-      enableAdvancedFilter:
-        filterFlag === "advancedFilters" || filterFlag === "commandFilters",
+      enableAdvancedFilter,
+      onFilterFlagChange,
+      clearFilterFlag, // ← and include here
     }),
-    [filterFlag]
+    [filterFlag, enableAdvancedFilter, onFilterFlagChange, clearFilterFlag]
   );
 
   return (
-    <FeatureFlagsContext.Provider value={contextValue}>
-      <div className="w-full overflow-x-auto p-1 flex justify-end">
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
-          value={filterFlag}
-          onValueChange={onFilterFlagChange}
-          className="w-fit gap-0"
-        >
-          {flagConfig.featureFlags.map((flag) => (
-            <Tooltip key={flag.value} delayDuration={700}>
-              <ToggleGroupItem
-                value={flag.value}
-                className="whitespace-nowrap px-3 text-xs data-[state=on]:bg-accent/70 data-[state=on]:hover:bg-accent/90"
-                asChild
-              >
-                <TooltipTrigger>
-                  <flag.icon className="size-3.5 shrink-0" />
-                  {flag.label}
-                </TooltipTrigger>
-              </ToggleGroupItem>
-              <TooltipContent
-                align="start"
-                side="bottom"
-                sideOffset={6}
-                className="flex flex-col gap-1.5 border bg-background py-2 font-semibold text-foreground [&>span]:hidden"
-              >
-                <div>{flag.tooltipTitle}</div>
-                <p className="text-balance text-muted-foreground text-xs">
-                  {flag.tooltipDescription}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </ToggleGroup>
-      </div>
+    <FeatureFlagsContext.Provider value={value}>
       {children}
     </FeatureFlagsContext.Provider>
   );

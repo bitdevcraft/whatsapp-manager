@@ -5,7 +5,7 @@ import { db } from "..";
  * Extract the type of the `tx` parameter that `db.transaction` gives you.
  */
 type Tx = Parameters<typeof db.transaction>[0] extends (
-  tx: infer T
+  tx: infer T,
 ) => Promise<unknown>
   ? T
   : never;
@@ -16,18 +16,21 @@ type Tx = Parameters<typeof db.transaction>[0] extends (
  */
 export async function withTenantTransaction<T>(
   tenantId: string,
-  fn: (tx: Tx) => Promise<T>
+  fn: (tx: Tx) => Promise<T>,
 ): Promise<T> {
   return await db.transaction(async (tx) => {
     // 1) Scope this transaction’s session to the tenant
     await tx.execute(
-      sql`SET LOCAL app.current_tenant = ${sql.raw(`'${tenantId}'`)}`
+      sql`SET LOCAL app.current_tenant = ${sql.raw(`'${tenantId}'`)}`,
     );
 
     // VERIFY it is set:
     // @ts-ignore
     const [{ value }] = await tx
-      .select({ value: sql`current_setting('app.current_tenant')` })
+      .select({
+        value: sql`current_setting
+                ('app.current_tenant')`,
+      })
       .from(sql`(SELECT 1)`);
     console.log("session var is:", value);
     // 2) Run your logic on the transaction client
@@ -36,22 +39,4 @@ export async function withTenantTransaction<T>(
     // 3) Commit happens automatically if no error is thrown
     return result;
   });
-}
-
-export async function withTenant<T>(tenantId: string, fn: () => Promise<T>) {
-  // Scope all subsequent RLS tables to this tenant
-  if (!tenantId) {
-    throw new Error("withTenant: missing tenantId");
-  }
-  await db.execute(
-    sql`SET LOCAL app.current_tenant = ${sql.raw(`'${tenantId}'`)}`
-  );
-
-  // VERIFY it is set:
-  // @ts-ignore
-  const [{ value }] = await db
-    .select({ value: sql`current_setting('app.current_tenant')` })
-    .from(sql`(SELECT 1)`);
-  console.log("session var is:", value);
-  return await fn();
 }

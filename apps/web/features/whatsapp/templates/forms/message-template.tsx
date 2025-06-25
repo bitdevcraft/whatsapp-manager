@@ -34,12 +34,14 @@ type Props = {
   form: UseFormReturn<any>;
   namePrefix: string;
   initialTemplate?: TemplateResponse;
+  preview?: boolean;
 };
 
 export function MessageTemplateForm({
   form,
   namePrefix,
   initialTemplate,
+  preview = false,
 }: Props) {
   const { control, setValue, watch } = form;
 
@@ -89,44 +91,71 @@ export function MessageTemplateForm({
 
   return (
     <div className="space-y-6">
-      <FormField
-        control={control}
-        name={`${namePrefix}.name`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Template Name</FormLabel>
-            <FormControl>
-              <Input placeholder="Template name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name={`${namePrefix}.language.code`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Language</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+      <div className="flex gap-4">
+        <FormField
+          control={control}
+          name={`${namePrefix}.name`}
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel
+                className={preview ? `font-light text-muted-foreground` : ""}
+              >
+                Template Name
+              </FormLabel>
               <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
+                <Input
+                  placeholder="Template name"
+                  {...field}
+                  className={
+                    preview
+                      ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                      : ``
+                  }
+                  disabled={preview}
+                  readOnly={preview}
+                />
               </FormControl>
-              <SelectContent>
-                {languageOptions.map((lang) => (
-                  <SelectItem key={lang} value={lang}>
-                    {lang}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name={`${namePrefix}.language.code`}
+          render={({ field }) => (
+            <FormItem className="basis-1/6">
+              <FormLabel
+                className={preview ? `font-light text-muted-foreground` : ""}
+              >
+                Language
+              </FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger
+                    className={
+                      preview
+                        ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                        : ``
+                    }
+                    disabled={preview}
+                  >
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {languageOptions.map((lang) => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -136,6 +165,7 @@ export function MessageTemplateForm({
             onClick={() =>
               append({ type: ComponentTypesEnum.Body, parameters: [] })
             }
+            hidden={preview}
           >
             Add Component
           </Button>
@@ -151,13 +181,26 @@ export function MessageTemplateForm({
                   name={`${componentsPath}.${index}.type`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel
+                        className={
+                          preview ? `font-light text-muted-foreground` : ""
+                        }
+                      >
+                        Type
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={
+                              preview
+                                ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                                : ``
+                            }
+                            disabled={preview}
+                          >
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -177,6 +220,7 @@ export function MessageTemplateForm({
                   type="button"
                   variant="destructive"
                   onClick={() => remove(index)}
+                  hidden={preview}
                 >
                   Remove
                 </Button>
@@ -189,7 +233,13 @@ export function MessageTemplateForm({
                     name={`${componentsPath}.${index}.sub_type`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Button Sub Type</FormLabel>
+                        <FormLabel
+                          className={
+                            preview ? `font-light text-muted-foreground` : ""
+                          }
+                        >
+                          Button Sub Type
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -216,7 +266,13 @@ export function MessageTemplateForm({
                     name={`${componentsPath}.${index}.index`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Button Index</FormLabel>
+                        <FormLabel
+                          className={
+                            preview ? `font-light text-muted-foreground` : ""
+                          }
+                        >
+                          Button Index
+                        </FormLabel>
                         <Select
                           onValueChange={(v) => field.onChange(parseInt(v))}
                           value={field.value?.toString()}
@@ -242,6 +298,7 @@ export function MessageTemplateForm({
                 <ComponentParametersArray
                   name={`${componentsPath}.${index}.parameters`}
                   control={control}
+                  preview={preview}
                 />
               )}
             </div>
