@@ -100,12 +100,10 @@ export async function getConversations(input: GetConversationSchema) {
                   limit: 1,
                 },
               },
-              orderBy: (conversationsTable, { desc }) => [
-                desc(conversationsTable.createdAt),
+              orderBy: (conversationsTable, { asc }) => [
+                asc(conversationsTable.createdAt),
               ],
             });
-
-            // console.log(JSON.stringify(temp));
 
             const total = await tx
               .select({
@@ -134,6 +132,46 @@ export async function getConversations(input: GetConversationSchema) {
     {
       revalidate: 1,
       tags: ["conversations", `conversations:${userWithTeam?.teamId}`],
+    }
+  )();
+}
+
+export async function getContactConversation(contact: string) {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return [];
+  }
+
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const data = await withTenantTransaction(teamId, async (tx) => {
+          const data = await tx.query.conversationsTable.findMany({
+            where: eq(conversationsTable.contactId, contact),
+            orderBy: (conversationsTable, { asc }) => [
+              asc(conversationsTable.createdAt),
+            ],
+          });
+
+          return data;
+        });
+
+        return data;
+      } catch (error) {
+        return [];
+      }
+    },
+    [JSON.stringify(contact), teamId],
+    {
+      revalidate: 1,
+      tags: [
+        "conversations",
+        `conversations:${teamId}`,
+        `conversations:${teamId}:${contact}`,
+      ],
     }
   )();
 }

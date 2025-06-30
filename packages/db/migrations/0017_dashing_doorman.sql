@@ -1,0 +1,1 @@
+ALTER TABLE "conversations" ADD COLUMN "replied_to" varchar(65535);

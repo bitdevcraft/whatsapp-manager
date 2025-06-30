@@ -24,7 +24,9 @@ export const conversationStatusEnum = pgEnum(
 export interface baseConversation {
   text?: string;
   media?: {
-    url: string;
+    url?: string;
+    id?: string;
+    caption?: string;
   };
 }
 
@@ -38,7 +40,10 @@ export interface ConversationBody {
     name?: string;
     address?: string;
   };
-  buttons: string[];
+  buttons?: {
+    type: string;
+    text?: string;
+  }[];
 }
 
 export const conversationsTable = pgTable(
@@ -55,7 +60,7 @@ export const conversationsTable = pgTable(
     success: boolean("success"),
     waResponse: jsonb("wa_response"),
     wamid: varchar("wamid", { length: 65_535 }),
-    relatedWamid: varchar("wamid", { length: 65_535 }),
+    repliedTo: varchar("replied_to", { length: 65_535 }),
     status: conversationStatusEnum(),
     body: jsonb("body").$type<ConversationBody>(),
     teamId: uuid("team_id")
@@ -108,7 +113,7 @@ export const conversationsRelations = relations(
       references: [teamsTable.id],
     }),
     repliedConversation: one(conversationsTable, {
-      fields: [conversationsTable.relatedWamid],
+      fields: [conversationsTable.repliedTo],
       references: [conversationsTable.wamid],
     }),
     relatedConversations: many(conversationsTable),

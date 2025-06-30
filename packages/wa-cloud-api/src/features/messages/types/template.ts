@@ -21,6 +21,7 @@ type ParametersObject<T extends ParametersTypesEnum> = {
 
 type SimpleTextObject = {
     text: string;
+    parameter_name?: string;
 };
 
 type TextParametersObject = ParametersObject<ParametersTypesEnum.Text> & SimpleTextObject;

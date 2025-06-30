@@ -13,7 +13,10 @@ import {
 
 import { ConversationsTableActionBar } from "./conversation-table-action-bar";
 import { columns } from "@/features/conversations/data-table/conversation-table-columns";
-import { getConversations } from "@/features/conversations/_lib/queries";
+import {
+  getContactConversation,
+  getConversations,
+} from "@/features/conversations/_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { useTitle } from "@/components/provider/title-provider";
 

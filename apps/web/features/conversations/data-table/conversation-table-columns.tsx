@@ -2,9 +2,11 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ContactConversation } from "@workspace/db/schema";
+import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { Text } from "lucide-react";
+import { useQueryState } from "nuqs";
 
 export const columns: ColumnDef<ContactConversation>[] = [
   {
@@ -48,6 +50,11 @@ export const columns: ColumnDef<ContactConversation>[] = [
           ? row.original.name
           : row.original.normalizedPhone;
 
+      const [contact, setContact] = useQueryState("contact", {
+        defaultValue: "",
+        shallow: false,
+      });
+
       const createdDate = row.original.conversations[0]?.createdAt
         ? new Date(row.original.conversations[0]?.createdAt)
         : new Date();
@@ -55,7 +62,9 @@ export const columns: ColumnDef<ContactConversation>[] = [
 
       return (
         <div className="flex justify-between">
-          <p>{name}</p>
+          <Button variant="link" onClick={() => setContact(row.original.id)}>
+            {name}
+          </Button>
           <p className="font-light text-xs">{lastSend}</p>
         </div>
       );

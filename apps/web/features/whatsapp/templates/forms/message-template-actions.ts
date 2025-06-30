@@ -118,22 +118,6 @@ export function transformTemplateResponseToFormValues(
   };
 }
 
-// export function extractTemplateParams(
-//   text: string,
-//   format: "POSITIONAL" | "NAMED"
-// ) {
-//   if (format === "POSITIONAL") {
-//     const matches = [...text.matchAll(/{{(\d+)}}/g)];
-//     return Array.from(new Set(matches.map((m) => m[1]))).map((n) => `{{${n}}}`);
-//   }
-
-//   if (format === "NAMED") {
-//     const matches = [...text.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
-//     return Array.from(new Set(matches.map((m) => m[1])));
-//   }
-
-//   return [];
-// }
 
 export function extractTemplateParams(
   text: string,

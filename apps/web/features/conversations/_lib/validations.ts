@@ -5,6 +5,7 @@ import {
   createSearchParamsCache,
   parseAsArrayOf,
   parseAsBoolean,
+  parseAsString,
 } from "nuqs/server";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ export const conversationSearchParamsCache = createSearchParamsCache({
   ]),
   createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
   unread: parseAsBoolean.withDefault(false),
+  contact: parseAsString.withDefault(""),
 });
 
 export type GetConversationSchema = Awaited<
