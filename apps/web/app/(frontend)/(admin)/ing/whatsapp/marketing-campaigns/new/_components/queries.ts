@@ -8,7 +8,6 @@ import {
   withTenantTransaction,
 } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { Label } from "recharts";
 
 export async function getSelectTemplates() {
   const userWithTeam = await getUserWithTeam();

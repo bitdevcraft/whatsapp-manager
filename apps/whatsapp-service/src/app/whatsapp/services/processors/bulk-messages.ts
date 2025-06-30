@@ -112,6 +112,7 @@ export async function processOutgoingMarketingCampaign(
           body: data.messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
           to: contact,
         },
+        marketingCampaignId: marketingId,
       };
 
       return temp;

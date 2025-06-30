@@ -3,13 +3,14 @@ import {
   jsonb,
   pgPolicy,
   pgTable,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { baseSchema } from "../helpers/column-helper";
-import { relations, sql } from "drizzle-orm";
+import { relations, SQL, sql } from "drizzle-orm";
 import { usersTable } from "./users";
-import { conversationsTable } from "./conversations";
+import { Conversation, conversationsTable } from "./conversations";
 import { teamsTable } from "./teams";
 
 export const contactsTable = pgTable(
@@ -17,6 +18,11 @@ export const contactsTable = pgTable(
   {
     ...baseSchema,
     phone: varchar("phone", { length: 255 }).notNull(),
+    normalizedPhone: varchar("normalized_phone", {
+      length: 255,
+    }).generatedAlwaysAs(
+      (): SQL => sql`regexp_replace(${contactsTable.phone}, '\\D', '', 'g')`
+    ),
     email: varchar("email", { length: 255 }).notNull(),
     interests: jsonb("interests").$type<string[]>().default([]),
     message: varchar("message", { length: 2048 }).notNull(),
@@ -53,6 +59,7 @@ export const contactsTable = pgTable(
       to: process.env.POSTGRES_USER_ROLE!,
       using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
     }),
+    uniqueIndex("contacts_team_phone_unique").on(t.teamId, t.phone),
   ]
 );
 
@@ -71,3 +78,7 @@ export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
 
 export type Contact = typeof contactsTable.$inferSelect;
 export type NewContact = typeof contactsTable.$inferInsert;
+
+export type ContactConversation = Contact & {
+  conversations: Conversation[];
+};

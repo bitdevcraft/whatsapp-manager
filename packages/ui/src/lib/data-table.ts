@@ -70,6 +70,8 @@ export function getValidFilters<TData>(
     (filter) =>
       filter.operator === "isEmpty" ||
       filter.operator === "isNotEmpty" ||
+      filter.operator === "arrayIsEmpty" ||
+      filter.operator === "arrayIsNotEmpty" ||
       (Array.isArray(filter.value)
         ? filter.value.length > 0
         : filter.value !== "" &&

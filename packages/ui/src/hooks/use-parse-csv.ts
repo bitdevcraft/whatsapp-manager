@@ -220,15 +220,20 @@ export function useParseCsv({
   }
 
   function getSanitizedData({ data }: { data: Record<string, unknown>[] }) {
-    return data.map((row) =>
-      Object.keys(row).reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: row[key] === null ? "" : row[key],
-        }),
-        {}
-      )
-    );
+    const wantedKeys = fields.map((f) => f.value);
+
+    return data.map((row) => {
+      return wantedKeys.reduce(
+        (acc, key) => {
+          const raw = row[key];
+          return {
+            ...acc,
+            [key]: raw == null ? "" : raw,
+          };
+        },
+        {} as Record<(typeof fields)[number]["value"], unknown>
+      );
+    });
   }
 
   return {

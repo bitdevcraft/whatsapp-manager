@@ -17,7 +17,7 @@ export const whatsAppBusinessAccountPhoneNumbersTable = pgTable(
   "whatsapp_business_account_phone_numbers",
   {
     id: bigint({ mode: "number" }).primaryKey().notNull(),
-    displayPhoneNumber: varchar("display_phone_number", { length: 15 }),
+    displayPhoneNumber: varchar("display_phone_number", { length: 50 }),
     verifiedName: varchar("verified_name", { length: 50 }),
     status: varchar("status", { length: 50 }),
     qualityRating: varchar("quality_rating", { length: 50 }),

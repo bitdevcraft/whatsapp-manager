@@ -157,3 +157,44 @@ export async function updateContacts(input: {
     };
   }
 }
+
+export async function removeContactTags(input: { ids: string[]; tag: string }) {
+  unstable_noStore();
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    toast.error("There is no team");
+    return {
+      data: null,
+      error: null,
+    };
+  }
+
+  try {
+    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
+      await tx
+        .update(contactsTable)
+        .set({
+          tags: sql`
+                        (SELECT jsonb_agg(DISTINCT elem)
+                         FROM jsonb_array_elements_text(
+                                      COALESCE(${contactsTable.tags}, '[]'::jsonb) - ${input.tag}
+                              ) elem)
+                    `,
+        })
+        .where(inArray(contactsTable.id, input.ids));
+    });
+
+    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+
+    return {
+      data: null,
+      error: null,
+    };
+  } catch (err) {
+    return {
+      data: null,
+      error: getErrorMessage(err),
+    };
+  }
+}

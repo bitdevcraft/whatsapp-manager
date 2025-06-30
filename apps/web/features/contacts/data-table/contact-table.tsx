@@ -22,6 +22,7 @@ import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { Contact } from "@workspace/db";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import UploadCSVContact from "../_components/upload-csv-form";
+import ContactNewDialog from "./contact-new-dialog";
 
 interface ContactTableProps {
   promises: Promise<
@@ -92,13 +93,14 @@ export default function ContactTable({ promises }: ContactTableProps) {
               align="end"
             />
             <UploadCSVContact />
+            <ContactNewDialog tags={tags} />
             <DataTableSortList table={table} align="start" />
             <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
             <UploadCSVContact />
-
+            <ContactNewDialog tags={tags} />
             <DataTableSortList table={table} align="start" />
             <FeatureFlagsToggle />
           </DataTableToolbar>

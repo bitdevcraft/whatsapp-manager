@@ -25,7 +25,7 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from "@/lib/auth/middleware";
-import { withTenant, withTenantTransaction } from "@workspace/db/tenant";
+import { withTenantTransaction } from "@workspace/db/tenant";
 
 async function logActivity(
   teamId: string | null | undefined,

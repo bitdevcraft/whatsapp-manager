@@ -2,7 +2,7 @@ import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { syncTemplate } from "./sync-template";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { withTenant, withTenantTransaction } from "@workspace/db/tenant";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { sql } from "drizzle-orm";
 
 export async function getTemplates(sync = false) {

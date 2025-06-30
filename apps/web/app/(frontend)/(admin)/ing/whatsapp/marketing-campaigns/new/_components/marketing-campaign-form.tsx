@@ -74,7 +74,7 @@ export default function MarketingCampaignForm({
         track: false,
       },
     },
-    reValidateMode: "onBlur",
+    // reValidateMode: "onBlur",
     mode: "onChange",
   });
 

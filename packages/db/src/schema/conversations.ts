@@ -5,6 +5,7 @@ import {
   pgEnum,
   pgPolicy,
   pgTable,
+  text,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -13,11 +14,32 @@ import { relations, sql } from "drizzle-orm";
 import { enumToValues } from "../enums/enum-helper";
 import { teamsTable } from "./teams";
 import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
+import { marketingCampaignsTable } from "./marketing-campaigns";
 
 export const conversationStatusEnum = pgEnum(
-  "status",
+  "message_status",
   enumToValues(MessageStatus)
 );
+
+export interface baseConversation {
+  text?: string;
+  media?: {
+    url: string;
+  };
+}
+
+export interface ConversationBody {
+  header?: baseConversation;
+  body?: baseConversation;
+  footer?: string;
+  location?: {
+    longitude: number;
+    latitude: number;
+    name?: string;
+    address?: string;
+  };
+  buttons: string[];
+}
 
 export const conversationsTable = pgTable(
   "conversations",
@@ -27,9 +49,15 @@ export const conversationsTable = pgTable(
     from: uuid("from"),
     contactId: uuid("contact_id").references(() => contactsTable.id),
     isMarketingCampaign: boolean("is_marketing_campaign"),
+    marketingCampaignId: uuid("marketing_campaign_id").references(
+      () => marketingCampaignsTable.id
+    ),
+    success: boolean("success"),
     waResponse: jsonb("wa_response"),
     wamid: varchar("wamid", { length: 65_535 }),
+    relatedWamid: varchar("wamid", { length: 65_535 }),
     status: conversationStatusEnum(),
+    body: jsonb("body").$type<ConversationBody>(),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
@@ -66,15 +94,24 @@ export const conversationsTable = pgTable(
 
 export const conversationsRelations = relations(
   conversationsTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     contact: one(contactsTable, {
       fields: [conversationsTable.contactId],
       references: [contactsTable.id],
+    }),
+    marketingCampaign: one(marketingCampaignsTable, {
+      fields: [conversationsTable.marketingCampaignId],
+      references: [marketingCampaignsTable.id],
     }),
     team: one(teamsTable, {
       fields: [conversationsTable.teamId],
       references: [teamsTable.id],
     }),
+    repliedConversation: one(conversationsTable, {
+      fields: [conversationsTable.relatedWamid],
+      references: [conversationsTable.wamid],
+    }),
+    relatedConversations: many(conversationsTable),
   })
 );
 

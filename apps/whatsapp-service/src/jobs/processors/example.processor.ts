@@ -34,4 +34,6 @@ export function setupWorker() {
     //   });
     // }
   });
+
+  return worker;
 }

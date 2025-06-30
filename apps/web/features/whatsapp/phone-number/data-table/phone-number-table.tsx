@@ -26,6 +26,9 @@ import { TagsFormValues } from "@/features/tags/_lib/schema";
 import axios from "axios";
 import { toast } from "sonner";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import { Button } from "@workspace/ui/components/button";
+import { RefreshCcw, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface WhatsAppBusinessAccountPhoneNumberTableProps {
   promises: Promise<
@@ -37,6 +40,8 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
   promises,
 }: WhatsAppBusinessAccountPhoneNumberTableProps) {
   const setTitle = useTitle();
+
+  const router = useRouter();
 
   useEffect(() => {
     setTitle("Business Account");
@@ -89,11 +94,14 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
           phoneNumberId,
         }
       );
+      router.refresh();
+
       toast.success("Registered Successfully");
     } catch (error) {
       toast.error("Error Encountered, please check with admin");
     }
   };
+
   const setup2FAPin = async (data: { pin: string }, phoneNumberId: string) => {
     try {
       const response = await axios.post(
@@ -104,6 +112,18 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
         }
       );
       toast.success("Registered Successfully");
+      router.refresh();
+    } catch (error) {
+      toast.error("Error Encountered, please check with admin");
+    }
+  };
+  const getPhoneNumbers = async () => {
+    try {
+      const response = await axios.get(
+        "/api/whatsapp/business-account/get-phone-numbers"
+      );
+      toast.success("Registered Successfully");
+      router.refresh();
     } catch (error) {
       toast.error("Error Encountered, please check with admin");
     }
@@ -132,6 +152,9 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
+            <Button size="sm" onClick={getPhoneNumbers}>
+              <RefreshCcw />
+            </Button>
             <DataTableSortList table={table} align="start" />
             <FeatureFlagsToggle />
           </DataTableToolbar>

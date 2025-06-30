@@ -82,13 +82,30 @@ export async function getConversations(input: GetConversationSchema) {
         const { data, total } = await withTenantTransaction(
           userWithTeam?.teamId,
           async (tx) => {
-            const data = await tx
-              .select()
-              .from(conversationsTable)
-              .where(where)
-              .limit(input.perPage)
-              .offset(offset)
-              .orderBy(...orderBy);
+            // const temp = await tx
+            //   .select()
+            //   .from(conversationsTable)
+            //   .where(where)
+            //   .limit(input.perPage)
+            //   .offset(offset)
+            //   .orderBy(...orderBy);
+
+            const data = await tx.query.contactsTable.findMany({
+              with: {
+                conversations: {
+                  where,
+                  orderBy: (conversationsTable, { desc, asc }) => [
+                    desc(conversationsTable.createdAt),
+                  ],
+                  limit: 1,
+                },
+              },
+              orderBy: (conversationsTable, { desc }) => [
+                desc(conversationsTable.createdAt),
+              ],
+            });
+
+            // console.log(JSON.stringify(temp));
 
             const total = await tx
               .select({

@@ -1,0 +1,2 @@
+CREATE TYPE "public"."message_status" AS ENUM('delivered', 'read', 'sent');--> statement-breakpoint
+ALTER TABLE "conversations" ALTER COLUMN "status" SET DATA TYPE "public"."message_status" USING "status"::text::"public"."message_status";

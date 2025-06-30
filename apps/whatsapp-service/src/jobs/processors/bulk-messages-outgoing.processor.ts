@@ -111,6 +111,8 @@ export function setupBulkMessagesOutgoingWorker() {
         });
     }
   });
+
+  return worker;
 }
 
 async function updateMarketingCampaignStatus(
