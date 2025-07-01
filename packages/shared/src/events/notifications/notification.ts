@@ -4,6 +4,14 @@ export enum NotificationEvent {
   WhatsAppBulkMessageOutgoingFailed = "whatsapp_bulk_message_outgoing_failed",
   WhatsAppMessageReceived = "whatsapp_message_received",
 }
+
+export enum NotificationRelatedObject {
+  MarketingCampaign = "marketing-campaigns",
+  Conversation = "conversations",
+  Contact = "contacts",
+  Template = "templates",
+}
+
 interface NotificationPayload {
   jobId?: string | null;
   payload: {
@@ -14,6 +22,7 @@ interface NotificationPayload {
   userId?: string;
   teamId: string;
   relatedId: string;
+  relatedObject: NotificationRelatedObject;
 }
 
 export interface SocketEventPayloads {

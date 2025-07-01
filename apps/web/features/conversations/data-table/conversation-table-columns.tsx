@@ -3,37 +3,35 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ContactConversation } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { Text } from "lucide-react";
 import { useQueryState } from "nuqs";
 
 export const columns: ColumnDef<ContactConversation>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-0.5"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-0.5"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-    size: 40,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <Checkbox
+  //       checked={
+  //         table.getIsAllPageRowsSelected() ||
+  //         (table.getIsSomePageRowsSelected() && "indeterminate")
+  //       }
+  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //       aria-label="Select all"
+  //       className="translate-y-0.5"
+  //     />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Checkbox
+  //       checked={row.getIsSelected()}
+  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //       aria-label="Select row"
+  //       className="translate-y-0.5"
+  //     />
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  //   size: 40,
+  // },
   {
     id: "name",
     accessorKey: "name",
@@ -62,7 +60,11 @@ export const columns: ColumnDef<ContactConversation>[] = [
 
       return (
         <div className="flex justify-between">
-          <Button variant="link" onClick={() => setContact(row.original.id)}>
+          <Button
+            variant="link"
+            onClick={() => setContact(row.original.id)}
+            className="text-foreground font-light"
+          >
             {name}
           </Button>
           <p className="font-light text-xs">{lastSend}</p>

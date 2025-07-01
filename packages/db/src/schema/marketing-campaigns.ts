@@ -54,6 +54,7 @@ export const marketingCampaignsTable = pgTable(
     tags: jsonb("tags").$type<string[]>(),
     recipients: jsonb("recipients").$type<string[]>(),
     analytics: jsonb("analytics").$type<MarketingCampaignAnalytics>(),
+    totalRecipients: integer("total_recipients"),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),

@@ -199,5 +199,6 @@ export async function getTeamsForUser() {
     },
   });
 
+  // const currentTeam = await db
   return result;
 }

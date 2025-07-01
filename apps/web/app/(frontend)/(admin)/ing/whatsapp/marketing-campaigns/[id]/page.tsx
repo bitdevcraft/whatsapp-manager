@@ -10,11 +10,11 @@ interface IndexPageProps {
 export default async function Home({ params }: IndexPageProps) {
   const { id } = await params;
 
-  const data = await getMarketingCampaignById(id);
+  const promises = Promise.all([getMarketingCampaignById(id)]);
 
   return (
     <React.Suspense fallback={<MarketingCampaignSkeleton />}>
-      <MarketingCampaignDashboard initialData={data} />
+      <MarketingCampaignDashboard promises={promises} />
     </React.Suspense>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "conversations" ALTER COLUMN "replied_to" SET DATA TYPE text;

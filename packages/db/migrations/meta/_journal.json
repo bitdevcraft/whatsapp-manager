@@ -127,6 +127,69 @@
       "when": 1751266592316,
       "tag": "0017_dashing_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1751273970772,
+      "tag": "0018_wandering_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1751284906881,
+      "tag": "0019_giant_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1751287270623,
+      "tag": "0020_sad_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1751287331084,
+      "tag": "0021_slippery_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1751287369825,
+      "tag": "0022_wakeful_dreaming_celestial",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1751287421915,
+      "tag": "0023_aspiring_obadiah_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1751288387381,
+      "tag": "0024_calm_beast",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1751365985217,
+      "tag": "0025_sticky_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1751366078143,
+      "tag": "0026_shocking_wallow",
+      "breakpoints": true
     }
   ]
 }

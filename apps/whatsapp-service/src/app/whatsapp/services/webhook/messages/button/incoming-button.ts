@@ -2,25 +2,17 @@ import { ConversationBody } from "@workspace/db";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
 import { insertConversation } from "../action";
 
-export async function handleDocumentMessage(
+export async function handleButtonMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log("Received document message");
+  console.log("Received Button message");
 
   const body: ConversationBody = {
     body: {
-      text: message.document?.filename,
-      media: {
-        id: message.document?.id,
-      },
+      text: message.button?.text,
     },
   };
 
   await insertConversation(body, message);
-
-  await client.messages.text({
-    body: "Thanks for the document! I've received it.",
-    to: message.from,
-  });
 }

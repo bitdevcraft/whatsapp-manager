@@ -70,6 +70,13 @@ export async function processOutgoingMarketingCampaign(
       if (data.recipients && data.recipients.length > 0)
         contacts.push(...cleanToDigitsOnly(data.recipients));
 
+      await tx
+        .update(marketingCampaignsTable)
+        .set({
+          totalRecipients: contacts.length,
+        })
+        .where(eq(marketingCampaignsTable.id, marketingId));
+
       const encryptedApiKey = data.team.waBusinessAccount[0]?.accessToken;
       const phoneNumberId = data.phoneNumber;
       const businessAcctId = data.team.waBusinessAccount[0]?.id;
@@ -113,6 +120,7 @@ export async function processOutgoingMarketingCampaign(
           to: contact,
         },
         marketingCampaignId: marketingId,
+        userId,
       };
 
       return temp;

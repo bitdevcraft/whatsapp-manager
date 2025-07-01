@@ -140,23 +140,30 @@ const DateTimeParametersObjectSchema = z.object({
 const DocumentParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Document),
   id: z.string().optional(),
-  link: z.string().optional(),
-  caption: z.string().optional(),
-  filename: z.string().optional(),
+  document: z.object({
+    id: z.string().optional(),
+    link: z.string().optional(),
+    caption: z.string().optional(),
+    filename: z.string().optional(),
+  }),
 });
 
 const ImageParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Image),
-  id: z.string().optional(),
-  link: z.string().optional(),
-  caption: z.string().optional(),
+  image: z.object({
+    id: z.string().optional(),
+    link: z.string().optional(),
+    caption: z.string().optional(),
+  }),
 });
 
 const VideoParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Video),
-  id: z.string().optional(),
-  link: z.string().optional(),
-  caption: z.string().optional(),
+  video: z.object({
+    id: z.string().optional(),
+    link: z.string().optional(),
+    caption: z.string().optional(),
+  }),
 });
 
 // Union of all parameter schemas
@@ -211,3 +218,5 @@ export const MessageTemplateSchema = z.object({
 
 // Type inference
 export type MessageTemplateValues = z.infer<typeof MessageTemplateSchema>;
+export type ComponentValues = z.infer<typeof ComponentSchema>;
+export type ParameterValues = z.infer<typeof ParameterSchema>;

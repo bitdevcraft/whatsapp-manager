@@ -5,6 +5,7 @@ import { socketRegistry } from "@/socket";
 import {
   IJobMessageOutgoing,
   NotificationEvent,
+  NotificationRelatedObject,
   WhatsAppEvents,
 } from "@workspace/shared";
 import {
@@ -48,6 +49,7 @@ export function setupBulkMessagesOutgoingWorker() {
             userId,
             teamId,
             relatedId: marketingCampaignId,
+            relatedObject: NotificationRelatedObject.MarketingCampaign,
           });
       }
     },
@@ -77,6 +79,7 @@ export function setupBulkMessagesOutgoingWorker() {
           userId,
           teamId,
           relatedId: marketingCampaignId,
+          relatedObject: NotificationRelatedObject.MarketingCampaign,
         });
     }
   });
@@ -108,6 +111,7 @@ export function setupBulkMessagesOutgoingWorker() {
           teamId,
           error: err,
           relatedId: marketingCampaignId,
+          relatedObject: NotificationRelatedObject.MarketingCampaign,
         });
     }
   });

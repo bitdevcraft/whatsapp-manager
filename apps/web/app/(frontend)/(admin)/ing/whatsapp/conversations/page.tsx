@@ -65,7 +65,7 @@ export default async function Home(props: IndexPageProps) {
         </div>
         <div className="border rounded-md bg-[#ebe5de]">
           <div className="bg-[url(/whatsapp-bg.png)] bg-opacity-40 ">
-            <div className="bg-muted/80 backdrop-invert backdrop-opacity-10 min-h-[90vh] p-4">
+            <div className="bg-muted/80 backdrop-invert backdrop-opacity-10 min-h-[87vh]">
               <Conversation promises={promisesConversation} />
             </div>
           </div>

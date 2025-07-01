@@ -1,10 +1,20 @@
+import { ConversationBody } from "@workspace/db";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
+import { insertConversation } from "../action";
 
 export async function handleInteractiveMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
   console.log("Received interactive message:", message.interactive);
+
+  const body: ConversationBody = {
+    body: {
+      text: JSON.stringify(message.interactive),
+    },
+  };
+
+  await insertConversation(body, message);
 
   if (message.interactive?.type === "button_reply") {
     const buttonId = message.interactive.button_reply?.id;

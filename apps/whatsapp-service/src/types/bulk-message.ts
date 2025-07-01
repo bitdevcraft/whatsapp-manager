@@ -9,4 +9,5 @@ export interface BulkMessageQueue {
   teamId: string;
   template: MessageRequestParams<MessageTemplateObject<ComponentTypesEnum>>;
   marketingCampaignId: string;
+  userId?: string;
 }

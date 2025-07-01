@@ -31,7 +31,8 @@ export function setupBulkMessagesWorker() {
       // Perform async task here...
 
       try {
-        const { template, teamId, registryId, marketingCampaignId } = job.data;
+        const { template, teamId, registryId, marketingCampaignId, userId } =
+          job.data;
 
         const whatsapp = waClientRegistry.get(registryId);
 
@@ -156,8 +157,8 @@ export function setupBulkMessagesWorker() {
             parameters.forEach((parameter) => {
               switch (parameter.type) {
                 case ParametersTypesEnum.Text:
-                  if (parameter.parameter_named)
-                    parameterName[parameter.parameter_named] = parameter.text;
+                  if (parameter.parameter_name)
+                    parameterName[parameter.parameter_name] = parameter.text;
                   else indexName.push(parameter.text);
                   break;
 
@@ -225,6 +226,8 @@ export function setupBulkMessagesWorker() {
             contactId: contactId,
             marketingCampaignId: marketingCampaignId,
             body: conversationBody,
+            direction: "outbound",
+            userId,
           };
 
           return await tx

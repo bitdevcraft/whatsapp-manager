@@ -15,6 +15,7 @@ import { enumToValues } from "../enums/enum-helper";
 import { teamsTable } from "./teams";
 import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
 import { marketingCampaignsTable } from "./marketing-campaigns";
+import { usersTable } from "./users";
 
 export const conversationStatusEnum = pgEnum(
   "message_status",
@@ -59,10 +60,15 @@ export const conversationsTable = pgTable(
     ),
     success: boolean("success"),
     waResponse: jsonb("wa_response"),
-    wamid: varchar("wamid", { length: 65_535 }),
-    repliedTo: varchar("replied_to", { length: 65_535 }),
+    wamid: text("wamid").unique(),
+    repliedTo: text("replied_to"),
     status: conversationStatusEnum(),
     body: jsonb("body").$type<ConversationBody>(),
+    direction: varchar("direction", {
+      length: 30,
+      enum: ["inbound", "outbound"],
+    }),
+    userId: uuid("user_id").references(() => usersTable.id),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
@@ -111,6 +117,10 @@ export const conversationsRelations = relations(
     team: one(teamsTable, {
       fields: [conversationsTable.teamId],
       references: [teamsTable.id],
+    }),
+    user: one(usersTable, {
+      fields: [conversationsTable.userId],
+      references: [usersTable.id],
     }),
     repliedConversation: one(conversationsTable, {
       fields: [conversationsTable.repliedTo],

@@ -7,10 +7,16 @@ import { handleDocumentMessage } from "./messages/document/incoming-document";
 import { handleImageMessage } from "./messages/image/incoming-image";
 import { handleInteractiveMessage } from "./messages/interactive/incoming-interactive";
 import { handleTextMessage } from "./messages/text/incoming-text";
+import { handleMessageStatus } from "./messages/statuses/message-status";
+import { handleButtonMessage } from "./messages/button/incoming-button";
+import { db, whatsAppBusinessAccountsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 export function registerWebhook() {
   webhookHandler.onMessagePreProcess(
     async (client: WhatsApp, message: WebhookMessage) => {
+      console.log(JSON.stringify(message));
+
       await client.messages.markAsRead({ messageId: message.id });
     }
   );
@@ -49,9 +55,25 @@ export function registerWebhook() {
     }
   );
 
+  // Handle button messages
+  webhookHandler.onMessage(
+    MessageTypesEnum.Button,
+    async (client: WhatsApp, message: WebhookMessage) => {
+      await handleButtonMessage(client, message);
+    }
+  );
+
+  // Handle document messages
+  webhookHandler.onMessage(
+    MessageTypesEnum.Statuses,
+    async (client: WhatsApp, message: WebhookMessage) => {
+      await handleMessageStatus(client, message);
+    }
+  );
+
   webhookHandler.onMessagePostProcess(
     async (client: WhatsApp, message: WebhookMessage) => {
-      console.log(message);
+      console.log(JSON.stringify(message));
     }
   );
 }

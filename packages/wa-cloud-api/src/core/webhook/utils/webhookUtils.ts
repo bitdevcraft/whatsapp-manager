@@ -88,6 +88,8 @@ export async function processWebhookMessages(
         };
     }
 
+    console.log(JSON.stringify(body));
+
     // Process each entry
     for (const entry of body.entry) {
         try {

@@ -1,22 +1,44 @@
 "use client";
 
 import { useSocket } from "@/components/provider/socket-provider";
-import { NotificationEvent } from "@workspace/shared";
+import {
+  NotificationEvent,
+  NotificationRelatedObject,
+} from "@workspace/shared";
 import axios from "axios";
+import { nanoid } from "nanoid";
+import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function Notification() {
   const { socket } = useSocket();
 
-  const revalidateMarketingCampaignById = async (
+  const [reload, setReload] = useQueryState("rId", {
+    defaultValue: "",
+    shallow: false,
+  });
+
+  const revalidateTagApi = async (
+    relatedObject: string,
     teamId: string,
     id: string
   ) => {
     try {
+      const tags = [
+        `${teamId}:${id}`,
+        `${relatedObject}:${teamId}`,
+        `${relatedObject}:${teamId}:${id}`,
+      ];
+
+      if (relatedObject === NotificationRelatedObject.MarketingCampaign)
+        tags.push(`${NotificationRelatedObject.Conversation}:${teamId}`);
+
       await axios.post("/api/revalidate", {
-        tags: [`${teamId}:${id}`, `marketing-campaigns:${teamId}`],
+        tags,
       });
+
+      setReload(nanoid());
     } catch (error) {
       console.error(error);
     }
@@ -32,7 +54,8 @@ export default function Notification() {
         console.log("meta webhook socket", data);
         toast.error(data.payload.message);
 
-        await revalidateMarketingCampaignById(data.teamId!, data.relatedId);
+        const { relatedId, relatedObject, teamId } = data;
+        await revalidateTagApi(relatedObject, teamId, relatedId);
       }
     );
     socket.on(
@@ -41,7 +64,8 @@ export default function Notification() {
         console.log("meta webhook socket", data);
         toast.info(data.payload.message);
 
-        await revalidateMarketingCampaignById(data.teamId!, data.relatedId);
+        const { relatedId, relatedObject, teamId } = data;
+        await revalidateTagApi(relatedObject, teamId, relatedId);
       }
     );
     socket.on(
@@ -49,7 +73,8 @@ export default function Notification() {
       async (data) => {
         console.log("meta webhook socket", data);
         toast.success(data.payload.message);
-        await revalidateMarketingCampaignById(data.teamId!, data.relatedId);
+        const { relatedId, relatedObject, teamId } = data;
+        await revalidateTagApi(relatedObject, teamId, relatedId);
       }
     );
 

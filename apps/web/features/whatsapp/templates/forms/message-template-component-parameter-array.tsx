@@ -63,7 +63,10 @@ export function ComponentParametersArray({
 
   const onFileUpload = async (
     data: File[],
-    field: ControllerRenderProps<FieldValues, `${string}.${number}.id`>
+    field: ControllerRenderProps<
+      FieldValues,
+      `${string}.${number}.${string}.id`
+    >
   ) => {
     const file = data[0];
     if (!file) return;
@@ -151,7 +154,7 @@ export function ComponentParametersArray({
               type === ParametersTypesEnum.Document) && (
               <FormField
                 control={control}
-                name={`${name}.${i}.id`}
+                name={`${name}.${i}.${String(type).toLowerCase()}.id`}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Text</FormLabel>

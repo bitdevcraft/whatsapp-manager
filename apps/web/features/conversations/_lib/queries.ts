@@ -154,6 +154,9 @@ export async function getContactConversation(contact: string) {
             orderBy: (conversationsTable, { asc }) => [
               asc(conversationsTable.createdAt),
             ],
+            with: {
+              user: true,
+            },
           });
 
           return data;
