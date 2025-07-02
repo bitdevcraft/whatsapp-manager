@@ -16,6 +16,17 @@ const nextConfig = {
   //   nodeMiddleware: true,
   // },
   // output: "standalone",
+  async rewrites() {
+    const REALTIME_SVC =
+      process.env.REALTIME_SERVICE_URL ?? "http://localhost:3000";
+    return [
+      // → all Socket.IO traffic
+      {
+        source: "/socket.io/:path*",
+        destination: `${REALTIME_SVC}/socket.io/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
