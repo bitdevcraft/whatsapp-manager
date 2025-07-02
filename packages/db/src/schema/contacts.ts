@@ -3,6 +3,7 @@ import {
   jsonb,
   pgPolicy,
   pgTable,
+  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -29,6 +30,7 @@ export const contactsTable = pgTable(
     optIn: boolean("opt_in").default(true),
     assignedTo: uuid("assigned_to").references(() => usersTable.id),
     tags: jsonb("tags").$type<string[]>().default([]),
+    lastMessageDate: timestamp("last_message_date"),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),

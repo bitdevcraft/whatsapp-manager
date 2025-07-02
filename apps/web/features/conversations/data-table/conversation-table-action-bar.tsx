@@ -24,6 +24,7 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
 import { ContactConversation } from "@workspace/db/schema";
+import { ConversationContact } from "../_lib/types";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 const actions = [
@@ -36,7 +37,7 @@ const actions = [
 type Action = (typeof actions)[number];
 
 interface ConversationsTableActionBarProps {
-  table: Table<ContactConversation>;
+  table: Table<ConversationContact>;
 }
 
 export function ConversationsTableActionBar({

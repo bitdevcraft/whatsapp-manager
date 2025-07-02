@@ -6,15 +6,32 @@ import ConversationTable, {
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
+import { useQueryState } from "nuqs";
 import React from "react";
 
 export default function ConversationMenu({ promises }: ConversationTableProps) {
+  const [unread, setUnread] = useQueryState("unread", {
+    defaultValue: "false",
+    shallow: false,
+  });
+  const [contact, setContact] = useQueryState("contact", {
+    defaultValue: "",
+    shallow: false,
+  });
+
   return (
     <div className="border min-h-[90vh] p-4 rounded-md ">
-      <Tabs defaultValue="all" className="w-full md:w-96">
+      <Tabs
+        defaultValue="all"
+        className="w-full md:w-96"
+        onValueChange={(v) => {
+          setUnread(v);
+          setContact("");
+        }}
+      >
         <TabsList className="w-full">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="unread">Unread</TabsTrigger>
+          <TabsTrigger value="false">All</TabsTrigger>
+          <TabsTrigger value="true">Unread</TabsTrigger>
         </TabsList>
         {/* <TabsContent value="all">
           Make changes to your account here.

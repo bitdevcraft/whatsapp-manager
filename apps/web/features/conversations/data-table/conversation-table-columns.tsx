@@ -5,8 +5,9 @@ import { ContactConversation } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
 import { Text } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { ConversationContact } from "../_lib/types";
 
-export const columns: ColumnDef<ContactConversation>[] = [
+export const columns: ColumnDef<ConversationContact>[] = [
   // {
   //   id: "select",
   //   header: ({ table }) => (
@@ -44,17 +45,17 @@ export const columns: ColumnDef<ContactConversation>[] = [
     },
     cell: ({ row }) => {
       const name =
-        row.original.name !== ""
-          ? row.original.name
-          : row.original.normalizedPhone;
+        row.original.contact.name !== ""
+          ? row.original.contact.name
+          : row.original.contact.phone;
 
       const [contact, setContact] = useQueryState("contact", {
         defaultValue: "",
         shallow: false,
       });
 
-      const createdDate = row.original.conversations[0]?.createdAt
-        ? new Date(row.original.conversations[0]?.createdAt)
+      const createdDate = row.original.createdAt
+        ? new Date(row.original.createdAt)
         : new Date();
       const lastSend: string = formatMessageTimestamp(createdDate);
 

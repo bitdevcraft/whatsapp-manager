@@ -3,21 +3,11 @@
 import React, { useEffect } from "react";
 
 import { useDataTable } from "@workspace/ui/hooks/use-data-table";
-import {
-  DataTable,
-  DataTableAdvancedToolbar,
-  DataTableFilterList,
-  DataTableSortList,
-  DataTableToolbar,
-} from "@workspace/ui/data-table";
+import { DataTable, DataTableToolbar } from "@workspace/ui/data-table";
 
 import { ConversationsTableActionBar } from "./conversation-table-action-bar";
 import { columns } from "@/features/conversations/data-table/conversation-table-columns";
-import {
-  getContactConversation,
-  getConversations,
-} from "@/features/conversations/_lib/queries";
-import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
+import { getConversations } from "@/features/conversations/_lib/queries";
 import { useTitle } from "@/components/provider/title-provider";
 
 export interface ConversationTableProps {
@@ -48,7 +38,7 @@ export default function ConversationTable({
         email: false,
       },
     },
-    getRowId: (row) => row.id,
+    getRowId: (row) => row.id!,
     shallow: false,
     clearOnDefault: true,
   });

@@ -6,6 +6,7 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
   gt,
   gte,
   ilike,
@@ -19,17 +20,23 @@ import { GetConversationSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { logger } from "@/lib/logger";
+import { contactsTable, conversationMembersTable } from "@workspace/db";
+import { ConversationContact } from "./types";
 
-export async function getConversations(input: GetConversationSchema) {
+export async function getConversations(
+  input: GetConversationSchema
+): Promise<{ data: ConversationContact[]; pageCount: number }> {
   const userWithTeam = await getUserWithTeam();
 
   if (!userWithTeam?.teamId) {
     return { data: [], pageCount: 0 };
   }
+
+  const { teamId, user } = userWithTeam;
   return await unstable_cache(
     async () => {
       try {
-        if (!userWithTeam?.teamId) {
+        if (!teamId) {
           return { data: [], pageCount: 0 };
         }
         const offset = (input.page - 1) * input.perPage;
@@ -80,30 +87,53 @@ export async function getConversations(input: GetConversationSchema) {
             : [asc(conversationsTable.createdAt)];
 
         const { data, total } = await withTenantTransaction(
-          userWithTeam?.teamId,
+          teamId,
           async (tx) => {
-            // const temp = await tx
-            //   .select()
-            //   .from(conversationsTable)
-            //   .where(where)
-            //   .limit(input.perPage)
-            //   .offset(offset)
-            //   .orderBy(...orderBy);
-
-            const data = await tx.query.contactsTable.findMany({
-              with: {
-                conversations: {
-                  where,
-                  orderBy: (conversationsTable, { desc, asc }) => [
-                    desc(conversationsTable.createdAt),
-                  ],
-                  limit: 1,
-                },
-              },
-              orderBy: (conversationsTable, { asc }) => [
-                asc(conversationsTable.createdAt),
-              ],
-            });
+            const data = await tx
+              .select()
+              .from(
+                tx
+                  .select({
+                    // ...getTableColumns(conversationsTable),
+                    id: contactsTable.id,
+                    message: conversationsTable.body,
+                    createdAt: conversationsTable.createdAt,
+                    contact: {
+                      name: contactsTable.name,
+                      phone: contactsTable.phone,
+                    },
+                    isUnread: sql<boolean>`
+                      (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
+                    `.as("isUnread"),
+                    rn: sql<number>`row_number() over (
+                      partition by ${conversationsTable.contactId}
+                      order by ${conversationsTable.createdAt} desc
+                    )`.as("rn"),
+                  })
+                  .from(conversationsTable)
+                  .innerJoin(
+                    conversationMembersTable,
+                    and(
+                      eq(
+                        conversationMembersTable.contactId,
+                        conversationsTable.contactId
+                      ),
+                      eq(conversationMembersTable.userId, user.id),
+                      input.unread
+                        ? gt(
+                            conversationsTable.createdAt,
+                            conversationMembersTable.lastReadAt
+                          )
+                        : undefined
+                    )
+                  )
+                  .leftJoin(
+                    contactsTable,
+                    eq(contactsTable.id, conversationsTable.contactId)
+                  )
+                  .as("sub")
+              )
+              .where(eq(sql<number>`"sub"."rn"`, 1));
 
             const total = await tx
               .select({
@@ -128,10 +158,10 @@ export async function getConversations(input: GetConversationSchema) {
         return { data: [], pageCount: 0 };
       }
     },
-    [JSON.stringify(input), userWithTeam?.teamId],
+    [JSON.stringify(input), teamId],
     {
       revalidate: 1,
-      tags: ["conversations", `conversations:${userWithTeam?.teamId}`],
+      tags: ["conversations", `conversations:${teamId}`],
     }
   )();
 }
