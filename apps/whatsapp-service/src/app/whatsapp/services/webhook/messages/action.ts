@@ -64,7 +64,7 @@ export async function insertConversation(
       .to(`team:${account.teamId}`)
       .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
         payload: {
-          message: "Campaign Failed",
+          message: "New Message Received",
         },
         teamId: account.teamId,
         relatedId: data[0].id,

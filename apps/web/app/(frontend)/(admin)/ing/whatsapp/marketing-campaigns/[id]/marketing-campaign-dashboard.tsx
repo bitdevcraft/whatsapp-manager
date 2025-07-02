@@ -32,6 +32,7 @@ import {
   DialogTrigger,
 } from "@workspace/ui/components/dialog";
 import Link from "next/link";
+import { SingleTemplatePreview } from "./template-preview";
 
 interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getMarketingCampaignById>>]>;
@@ -121,19 +122,25 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
           contacts={contacts}
         />
       </div>
-      <CampaignTemplatePreview />
-      <ContactsTable contacts={contacts} />
+      <CampaignTemplatePreview template={data?.template} />
     </section>
   );
 }
 
-function CampaignTemplatePreview() {
+function CampaignTemplatePreview({ template }: { template?: Template }) {
+  if (!template?.content) return null;
+
   return (
     <div className="min-h-16 border rounded p-4 flex flex-col gap-4">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Template Preview
       </h3>
-      <div className="min-h-16 bg-muted rounded-sm"></div>
+      <div className="min-h-16 bg-muted rounded-sm">
+        <pre className="p-4 rounded">
+          {/* {JSON.stringify(template.content, null, 2)} */}
+          <SingleTemplatePreview template={template.content} />
+        </pre>
+      </div>
     </div>
   );
 }

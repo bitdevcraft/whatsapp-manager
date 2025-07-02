@@ -2,7 +2,11 @@ import { Worker } from "bullmq";
 import { redisConnection } from "@/lib/redis";
 import { ioInstance } from "@/socket";
 import { socketRegistry } from "@/socket";
-import { NotificationEvent, WhatsAppEvents } from "@workspace/shared";
+import {
+  NotificationEvent,
+  NotificationRelatedObject,
+  WhatsAppEvents,
+} from "@workspace/shared";
 import { BulkMessageQueue } from "@/types/bulk-message";
 import { waClientRegistry } from "@/instance";
 import {
@@ -263,6 +267,7 @@ export function setupBulkMessagesWorker() {
         },
         teamId,
         relatedId: marketingCampaignId,
+        relatedObject: NotificationRelatedObject.MarketingCampaign,
       });
 
     console.log("Bulk Message Success");
@@ -282,6 +287,7 @@ export function setupBulkMessagesWorker() {
         teamId,
         error: err,
         relatedId: marketingCampaignId,
+        relatedObject: NotificationRelatedObject.MarketingCampaign,
       });
 
     console.log("Bulk Message Failed");

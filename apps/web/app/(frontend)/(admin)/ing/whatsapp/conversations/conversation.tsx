@@ -19,6 +19,11 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Separator } from "@workspace/ui/components/separator";
+import { cn } from "@workspace/ui/lib/utils";
+import { toast } from "sonner";
+import axios from "axios";
+import { useQueryState } from "nuqs";
+import { nanoid } from "nanoid";
 
 const FormSchema = z.object({
   text: z.string().nonempty(),
@@ -33,8 +38,18 @@ export default function Conversation({ promises }: Props) {
   const [data] = React.use(promises);
   const endRef = React.useRef<HTMLDivElement>(null);
 
+  const [hasInbound, setHasInbound] = React.useState<boolean>(false);
+
+  const [reload, setReload] = useQueryState("rId", {
+    defaultValue: "",
+    shallow: false,
+  });
+
   React.useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    const i = data.some((el) => el.direction === "inbound");
+    setHasInbound(i);
   }, [data]);
 
   const form = useForm<FormValues>({
@@ -45,7 +60,23 @@ export default function Conversation({ promises }: Props) {
   });
 
   const onSubmit = async (input: FormValues) => {
-    console.log(input);
+    if (data[0]) {
+      console.log(input);
+
+      const { contactId } = data[0];
+
+      try {
+        await axios.post("/api/whatsapp/conversations", {
+          contactId,
+          text: input.text,
+        });
+
+        form.reset();
+        setReload(nanoid());
+      } catch (error) {
+        toast.error("Error Sending");
+      }
+    }
   };
 
   return (
@@ -54,7 +85,10 @@ export default function Conversation({ promises }: Props) {
         {data.map((el, i) => (
           <div
             key={i}
-            className={`flex mb-2 ${el.direction === "inbound" ? "justify-start" : "justify-end"}`}
+            className={cn(
+              `flex mb-2`,
+              el.direction === "inbound" ? "justify-start" : "justify-end"
+            )}
           >
             {el.body && (
               <PreviewMessage
@@ -78,7 +112,12 @@ export default function Conversation({ promises }: Props) {
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
-                  <Textarea {...field} placeholder="Message" rows={1} />
+                  <Textarea
+                    {...field}
+                    placeholder="Message"
+                    rows={1}
+                    disabled={!hasInbound}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

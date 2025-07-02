@@ -1,3 +1,6 @@
+"use client";
+
+import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 import { Badge } from "@workspace/ui/components/badge";
@@ -9,15 +12,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import React from "react";
 
-export function SectionCards() {
+export interface Props {
+  promises: Promise<[Awaited<ReturnType<typeof getDashboardAnalytics>>]>;
+}
+
+export function SectionCards({ promises }: Props) {
+  const [{ totalContacts, totalNewContacts, openRate, replyRate }] =
+    React.use(promises);
+
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-5">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Recipients</CardDescription>
+          <CardDescription>Total Contacts</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            0
+            {totalContacts}
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
@@ -29,12 +40,12 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>New Contacts</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            0
+            {totalNewContacts}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <IconTrendingDown />
-              -20%
+              {totalNewContacts > 0 && <IconTrendingDown />}
+              {(totalNewContacts / totalContacts) * 100}%
             </Badge>
           </CardAction>
         </CardHeader>
@@ -48,7 +59,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Open Rate</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            0
+            {openRate}%
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
@@ -60,12 +71,12 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Reply Rate</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            0
+            {replyRate}%
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Received Response</div>
+          <div className="text-muted-foreground">Received Replied Response</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">

@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ContactConversation } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
-import { Text } from "lucide-react";
+import { Circle, Text } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { ConversationContact } from "../_lib/types";
 
@@ -61,13 +61,18 @@ export const columns: ColumnDef<ConversationContact>[] = [
 
       return (
         <div className="flex justify-between">
-          <Button
-            variant="link"
-            onClick={() => setContact(row.original.id)}
-            className="text-foreground font-light"
-          >
-            {name}
-          </Button>
+          <div className="flex items-center pl-2">
+            {row.original.isUnread && (
+              <div className="rounded-full size-4 bg-primary"></div>
+            )}
+            <Button
+              variant="link"
+              onClick={() => setContact(row.original.id)}
+              className="text-foreground font-light"
+            >
+              {name}
+            </Button>
+          </div>
           <p className="font-light text-xs">{lastSend}</p>
         </div>
       );

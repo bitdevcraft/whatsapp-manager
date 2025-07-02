@@ -171,6 +171,9 @@ export async function getMarketingCampaignById(id: string) {
         } = await withTenantTransaction(teamId, async (tx) => {
           const data = await tx.query.marketingCampaignsTable.findFirst({
             where: eq(marketingCampaignsTable.id, id),
+            with: {
+              template: true,
+            },
           });
 
           // Total Recipients

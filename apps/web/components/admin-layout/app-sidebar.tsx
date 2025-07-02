@@ -79,11 +79,11 @@ const data = {
       url: "/ing/whatsapp/conversations",
       icon: IconMessages,
     },
-    {
-      name: "Ads Manager",
-      url: "/ing/whatsapp/ads-manager",
-      icon: IconAd,
-    },
+    // {
+    //   name: "Ads Manager",
+    //   url: "/ing/whatsapp/ads-manager",
+    //   icon: IconAd,
+    // },
     {
       name: "Templates",
       url: "/ing/whatsapp/templates",

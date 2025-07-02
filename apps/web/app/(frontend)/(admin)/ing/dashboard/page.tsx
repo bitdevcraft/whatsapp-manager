@@ -1,10 +1,11 @@
-"use client";
-
-import { ChartAreaInteractive } from "@/components/admin-layout/chart-area-interactive";
-import { SectionCards } from "@/components/admin-layout/section-cards";
+import { ChartAreaInteractive } from "@/app/(frontend)/(admin)/ing/dashboard/chart-area-interactive";
+import { SectionCards } from "@/app/(frontend)/(admin)/ing/dashboard/section-cards";
 
 import FacebookLogin from "@/components/facebook-login";
+import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
+import { dashboardSearchParams } from "@/features/dashboard/_lib/validations";
 import { logger } from "@/lib/logger";
+import { SearchParams } from "@/types";
 import { banner } from "@workspace/ui/components/banner";
 import { registerBanner } from "@workspace/ui/components/banner/banner-registry";
 import {
@@ -18,56 +19,32 @@ import {
 import axios from "axios";
 import Script from "next/script";
 import React from "react";
+import MarketingCampaignDashboard from "../whatsapp/marketing-campaigns/[id]/marketing-campaign-dashboard";
+import MarketingCampaignStats from "./marketing-campaign-stats";
+import DeliveryStatus from "./delivery-status";
 
-export default function Page() {
-  
+interface IndexPageProps {
+  searchParams: Promise<SearchParams>;
+}
 
-  const handleLoginSuccess = (response: any) => {
-    logger.log("Login success", response);
-  };
+export default async function Home(props: IndexPageProps) {
+  const searchParams = await props.searchParams;
+  const search = dashboardSearchParams.parse(searchParams);
 
-  const handleLoginFailure = (error: string) => {
-    logger.error("Login failed", error);
-  };
+  const promises = Promise.all([getDashboardAnalytics(search)]);
 
   return (
     <>
-      
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <div className="px-6">
-              {/* {!hasWaAccount && (
-                <Card className="@container/card bg-yellow-100/20">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl ">
-                      Important
-                    </CardTitle>
-                    <CardDescription className="text-muted-foreground grid gap-4">
-                      <p>Your WhatsApp Business Account isn't connected yet</p>
-                      <p>
-                        Linking your account is required to send and receive
-                        messages, and to use the messaging features
-                      </p>
-                      <p className="text-base font-bold">
-                        Need help? Contact Us
-                      </p>
-                    </CardDescription>
-                    <CardAction></CardAction>
-                  </CardHeader>
-                  <CardFooter className="grid sm:flex sm:flex-col items-center md:items-start gap-1.5 text-sm w-full">
-                    <FacebookLogin
-                      appId="606557539005538"
-                      onLoginSuccess={handleLoginSuccess}
-                      onLoginFailure={handleLoginFailure}
-                    />
-                  </CardFooter>
-                </Card>
-              )} */}
-            </div>
+            <SectionCards promises={promises} />
 
-            <SectionCards />
-            <div className="px-4 lg:px-6">
+            <div className="px-4 lg:px-6 grid gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <MarketingCampaignStats promises={promises} />
+                <DeliveryStatus promises={promises} />
+              </div>
               <ChartAreaInteractive />
             </div>
           </div>

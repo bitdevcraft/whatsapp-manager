@@ -94,7 +94,7 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Tags</FormLabel>
               <FormControl>
                 <MultiSelect
                   options={tags}

@@ -22,6 +22,7 @@ import { withTenantTransaction } from "@workspace/db/tenant";
 import { logger } from "@/lib/logger";
 import { contactsTable, conversationMembersTable } from "@workspace/db";
 import { ConversationContact } from "./types";
+import { revalidateTag } from "next/cache";
 
 export async function getConversations(
   input: GetConversationSchema
@@ -89,58 +90,60 @@ export async function getConversations(
         const { data, total } = await withTenantTransaction(
           teamId,
           async (tx) => {
-            const data = await tx
-              .select()
-              .from(
-                tx
-                  .select({
-                    // ...getTableColumns(conversationsTable),
-                    id: contactsTable.id,
-                    message: conversationsTable.body,
-                    createdAt: conversationsTable.createdAt,
-                    contact: {
-                      name: contactsTable.name,
-                      phone: contactsTable.phone,
-                    },
-                    isUnread: sql<boolean>`
+            const messages = tx
+              .select({
+                // ...getTableColumns(conversationsTable),
+                id: contactsTable.id,
+                message: conversationsTable.body,
+                createdAt: conversationsTable.createdAt,
+                contact: {
+                  name: contactsTable.name,
+                  phone: contactsTable.phone,
+                },
+                isUnread: sql<boolean>`
                       (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
                     `.as("isUnread"),
-                    rn: sql<number>`row_number() over (
+                rn: sql<number>`row_number() over (
                       partition by ${conversationsTable.contactId}
                       order by ${conversationsTable.createdAt} desc
                     )`.as("rn"),
-                  })
-                  .from(conversationsTable)
-                  .innerJoin(
-                    conversationMembersTable,
-                    and(
-                      eq(
-                        conversationMembersTable.contactId,
-                        conversationsTable.contactId
-                      ),
-                      eq(conversationMembersTable.userId, user.id),
-                      input.unread
-                        ? gt(
-                            conversationsTable.createdAt,
-                            conversationMembersTable.lastReadAt
-                          )
-                        : undefined
-                    )
-                  )
-                  .leftJoin(
-                    contactsTable,
-                    eq(contactsTable.id, conversationsTable.contactId)
-                  )
-                  .as("sub")
+              })
+              .from(conversationsTable)
+              .innerJoin(
+                conversationMembersTable,
+                and(
+                  eq(
+                    conversationMembersTable.contactId,
+                    conversationsTable.contactId
+                  ),
+                  eq(conversationMembersTable.userId, user.id),
+                  input.unread
+                    ? gt(
+                        conversationsTable.createdAt,
+                        conversationMembersTable.lastReadAt
+                      )
+                    : undefined
+                )
               )
-              .where(eq(sql<number>`"sub"."rn"`, 1));
+              .leftJoin(
+                contactsTable,
+                eq(contactsTable.id, conversationsTable.contactId)
+              )
+              .as("sub");
+
+            const data = await tx
+              .select()
+              .from(messages)
+              .where(eq(sql<number>`"sub"."rn"`, 1))
+              .limit(input.perPage)
+              .offset(offset);
 
             const total = await tx
               .select({
                 count: count(),
               })
-              .from(conversationsTable)
-              .where(where)
+              .from(messages)
+              .where(eq(sql<number>`"sub"."rn"`, 1))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 
@@ -173,7 +176,7 @@ export async function getContactConversation(contact: string) {
     return [];
   }
 
-  const { teamId } = userWithTeam;
+  const { teamId, user } = userWithTeam;
 
   return await unstable_cache(
     async () => {
@@ -189,6 +192,16 @@ export async function getContactConversation(contact: string) {
             },
           });
 
+          await tx
+            .update(conversationMembersTable)
+            .set({ lastReadAt: new Date() })
+            .where(
+              and(
+                eq(conversationMembersTable.contactId, contact),
+                eq(conversationMembersTable.userId, user.id)
+              )
+            );
+
           return data;
         });
 
@@ -200,11 +213,7 @@ export async function getContactConversation(contact: string) {
     [JSON.stringify(contact), teamId],
     {
       revalidate: 1,
-      tags: [
-        "conversations",
-        `conversations:${teamId}`,
-        `conversations:${teamId}:${contact}`,
-      ],
+      tags: ["conversations", `conversations:${teamId}:${contact}`],
     }
   )();
 }
