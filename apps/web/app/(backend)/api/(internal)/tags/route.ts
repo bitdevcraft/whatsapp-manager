@@ -6,6 +6,7 @@ import { tagsTable, NewTag } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { NextResponse } from "next/server";
 import { getTags } from "@/features/tags/_lib/actions";
+import { revalidateTag } from "next/cache";
 
 export async function GET() {
   const tags = await getTags();
@@ -26,6 +27,11 @@ export async function POST(request: Request) {
     });
   }
 
+  const { teamId } = userWithTeam;
+
+  revalidateTag(`tags:select:${teamId}`);
+  revalidateTag(`tags:${teamId}`);
+
   const body = (await request.json()) as TagsFormValues;
 
   try {
@@ -40,7 +46,7 @@ export async function POST(request: Request) {
         return {
           data,
         };
-      },
+      }
     );
 
     return new Response(JSON.stringify(data), { status: 200 });
