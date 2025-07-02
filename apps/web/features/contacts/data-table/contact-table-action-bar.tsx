@@ -136,7 +136,7 @@ export function ContactsTableActionBar({
           <SelectTrigger asChild>
             <DataTableActionBarAction
               size="icon"
-              tooltip="Update status"
+              tooltip="Update Tags"
               isPending={getIsActionPending("update-tags")}
             >
               <CheckCircle2 />

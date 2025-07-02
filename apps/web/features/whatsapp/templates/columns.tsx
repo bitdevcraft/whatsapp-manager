@@ -14,16 +14,16 @@ export const columns: ColumnDef<Template>[] = [
       <DataTableColumnHeader column={column} title="Name" />
     ),
   },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <button
-        onClick={() => logger.log("Edit", row.original.id)}
-        className="text-blue-600"
-      >
-        Edit
-      </button>
-    ),
-  },
+  // {
+  //   id: "actions",
+  //   header: "Actions",
+  //   cell: ({ row }) => (
+  //     <button
+  //       onClick={() => logger.log("Edit", row.original.id)}
+  //       className="text-blue-600"
+  //     >
+  //       Edit
+  //     </button>
+  //   ),
+  // },
 ];
