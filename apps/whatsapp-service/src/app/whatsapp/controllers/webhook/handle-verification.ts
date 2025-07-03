@@ -11,6 +11,6 @@ export const handleVerification = createBaseController().handle(
 
     const { statusCode, body } = webhookHandler.handleVerification(req);
 
-    return res.status(statusCode).json(body);
+    return res.status(statusCode).type("text/plain").send(body);
   }
 );
