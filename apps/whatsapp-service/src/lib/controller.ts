@@ -7,7 +7,7 @@ export class BaseController {
       req: Request,
       res: Response,
       next: NextFunction
-    ) => Promise<void> | void
+    ) => Promise<any> | any
   ) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
