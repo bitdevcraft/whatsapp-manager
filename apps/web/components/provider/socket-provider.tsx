@@ -35,7 +35,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   useEffect(() => {
     const socketInstance: Socket<SocketEventPayloads> = io(
-      "http://localhost:3000",
+      process.env.REALTIME_SERVICE_URL,
       {
         path: "/socket.io",
         query: {
