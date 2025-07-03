@@ -1,7 +1,10 @@
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function Page() {
+  redirect("/sign-in");
+
   return (
     <div>
       <div className="flex items-center justify-center min-h-svh">
