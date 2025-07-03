@@ -5,8 +5,12 @@ import { webhookHandler } from "@/app/whatsapp/config";
 
 export const handleVerification = createBaseController().handle(
   async (req, res) => {
-    const response = webhookHandler.handleVerification(req);
+    const mode = req.query["hub.mode"];
+    const token = req.query["hub.verify_token"];
+    const challenge = req.query["hub.challenge"];
 
-    return res.status(200).json(response);
+    const { statusCode, body } = webhookHandler.handleVerification(req);
+
+    return res.status(statusCode).json(body);
   }
 );
