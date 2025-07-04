@@ -15,8 +15,6 @@ import { eq } from "drizzle-orm";
 export function registerWebhook() {
   webhookHandler.onMessagePreProcess(
     async (client: WhatsApp, message: WebhookMessage) => {
-      console.log(JSON.stringify(message));
-
       await client.messages.markAsRead({ messageId: message.id });
     }
   );
@@ -25,8 +23,6 @@ export function registerWebhook() {
   webhookHandler.onMessage(
     MessageTypesEnum.Text,
     async (client: WhatsApp, message: WebhookMessage) => {
-      console.log("Text Message");
-
       await handleTextMessage(client, message);
     }
   );

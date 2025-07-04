@@ -6,8 +6,6 @@ export async function handleMessageStatus(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log(JSON.stringify(message));
-
   if (!message.statuses) return;
   const { id, status } = message.statuses;
 

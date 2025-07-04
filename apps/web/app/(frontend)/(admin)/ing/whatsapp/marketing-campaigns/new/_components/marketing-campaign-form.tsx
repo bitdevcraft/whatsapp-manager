@@ -79,8 +79,6 @@ export default function MarketingCampaignForm({
   });
 
   const onSubmit = async (data: MarketingCampaignFormValues) => {
-    console.log("Form submitted:", data);
-
     try {
       const response = await axios.post(
         "/api/whatsapp/marketing-campaigns",

@@ -7,7 +7,6 @@ export function setupWorker() {
   const worker = new Worker(
     "example-queue",
     async (job) => {
-      console.log("Processing job:", job.id, job.data);
       // Perform async task here...
     },
     { connection: redisConnection }

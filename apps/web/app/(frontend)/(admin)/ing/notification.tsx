@@ -46,12 +46,10 @@ export default function Notification() {
 
   useEffect(() => {
     if (!socket) return;
-    console.log("Socket connected");
 
     socket.on(
       NotificationEvent.WhatsAppBulkMessageOutgoingFailed,
       async (data) => {
-        console.log("meta webhook socket", data);
         toast.error(data.payload.message);
 
         const { relatedId, relatedObject, teamId } = data;
@@ -61,7 +59,6 @@ export default function Notification() {
     socket.on(
       NotificationEvent.WhatsAppBulkMessageOutgoingProcessing,
       async (data) => {
-        console.log("meta webhook socket", data);
         toast.info(data.payload.message);
 
         const { relatedId, relatedObject, teamId } = data;
@@ -71,7 +68,6 @@ export default function Notification() {
     socket.on(
       NotificationEvent.WhatsAppBulkMessageOutgoingSuccess,
       async (data) => {
-        console.log("meta webhook socket", data);
         toast.success(data.payload.message);
         const { relatedId, relatedObject, teamId } = data;
         await revalidateTagApi(relatedObject, teamId, relatedId);

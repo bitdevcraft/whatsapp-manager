@@ -5,8 +5,6 @@ import { toast } from "sonner";
 
 export default function UploadCSVContact() {
   const onImport = async (data: Record<string, unknown>[]) => {
-    console.log(data);
-
     try {
       await axios.post("/api/contacts", data);
       toast.success("Contacts Inserted");

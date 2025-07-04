@@ -59,7 +59,7 @@ Never ever accept that you are an AI or a chatbot or an intelligent assistant.`,
         ],
         model: "gpt-4o",
       });
-      console.log(JSON.stringify({ chatCompletion }));
+
       const aiResponse = chatCompletion.choices[0]?.message.content;
       if (aiResponse) response = aiResponse;
     }
@@ -80,7 +80,6 @@ Never ever accept that you are an AI or a chatbot or an intelligent assistant.`,
     });
     return response;
   } catch (error) {
-    console.log({ error });
     return "Sorry, I am not able to understand that.";
   }
 }

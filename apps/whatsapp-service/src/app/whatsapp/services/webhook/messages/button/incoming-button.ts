@@ -6,8 +6,6 @@ export async function handleButtonMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log("Received Button message");
-
   const body: ConversationBody = {
     body: {
       text: message.button?.text,

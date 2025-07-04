@@ -34,8 +34,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   );
 
   useEffect(() => {
+    console.log(process.env.NEXT_PUBLIC_WEB_SOCKET);
     const socketInstance: Socket<SocketEventPayloads> = io(
-      process.env.REALTIME_SERVICE_URL,
+      process.env.NEXT_PUBLIC_WEB_SOCKET,
       {
         path: "/socket.io",
         query: {

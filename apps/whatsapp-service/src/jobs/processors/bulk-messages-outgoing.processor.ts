@@ -20,7 +20,6 @@ export function setupBulkMessagesOutgoingWorker() {
   const worker = new Worker<IJobMessageOutgoing>(
     WhatsAppEvents.BulkMessagesOutgoing,
     async (job) => {
-      console.log("Processing job:", job.id, job.data);
       const { teamId, marketingCampaignId, userId } = job.data;
 
       await processOutgoingMarketingCampaign(

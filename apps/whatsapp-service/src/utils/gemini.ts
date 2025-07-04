@@ -72,7 +72,6 @@ export async function askAi(
     });
     return response;
   } catch (error) {
-    console.log({ error });
     return "Sorry, I am not able to understand that.";
   }
 }

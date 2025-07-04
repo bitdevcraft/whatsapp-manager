@@ -61,8 +61,6 @@ export default function Conversation({ promises }: Props) {
 
   const onSubmit = async (input: FormValues) => {
     if (data[0]) {
-      console.log(input);
-
       const { contactId } = data[0];
 
       try {
