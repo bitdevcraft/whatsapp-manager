@@ -6,8 +6,6 @@ export async function handleInteractiveMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log("Received interactive message:", message.interactive);
-
   const body: ConversationBody = {
     body: {
       text: JSON.stringify(message.interactive),

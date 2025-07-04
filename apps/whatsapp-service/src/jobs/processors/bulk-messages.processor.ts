@@ -31,9 +31,6 @@ export function setupBulkMessagesWorker() {
   const worker = new Worker<BulkMessageQueue>(
     WhatsAppEvents.ProcessingBulkMessagesOutgoing,
     async (job) => {
-      console.log("Processing job:", job.id, job.data);
-      // Perform async task here...
-
       try {
         const { template, teamId, registryId, marketingCampaignId, userId } =
           job.data;
@@ -41,8 +38,6 @@ export function setupBulkMessagesWorker() {
         const whatsapp = waClientRegistry.get(registryId);
 
         const response = await whatsapp?.messages.template(template);
-
-        console.log(response);
 
         const isSuccess = !!response?.messages[0]?.id;
 
@@ -269,8 +264,6 @@ export function setupBulkMessagesWorker() {
         relatedId: marketingCampaignId,
         relatedObject: NotificationRelatedObject.MarketingCampaign,
       });
-
-    console.log("Bulk Message Success");
   });
 
   worker.on("failed", (job, err) => {
@@ -289,8 +282,6 @@ export function setupBulkMessagesWorker() {
         relatedId: marketingCampaignId,
         relatedObject: NotificationRelatedObject.MarketingCampaign,
       });
-
-    console.log("Bulk Message Failed");
   });
 
   return worker;

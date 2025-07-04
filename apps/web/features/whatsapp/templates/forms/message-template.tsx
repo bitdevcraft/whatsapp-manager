@@ -76,7 +76,6 @@ export function MessageTemplateForm({
 
       replace(defaultValues.components);
 
-      console.log(JSON.stringify(defaultValues.components));
 
       form.reset({
         ...form.getValues(),

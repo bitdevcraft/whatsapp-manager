@@ -6,8 +6,6 @@ export async function handleDocumentMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log("Received document message");
-
   const body: ConversationBody = {
     body: {
       text: message.document?.filename,

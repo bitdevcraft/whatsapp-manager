@@ -62,7 +62,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
         } = await withTenantTransaction(teamId, async (tx) => {
           const totalContacts = await tx.$count(contactsTable);
 
-          console.log("Total Contacts", totalContacts);
 
           const totalNewContacts = await tx.$count(
             contactsTable,
@@ -81,7 +80,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             isNotNull(conversationsTable.marketingCampaignId)
           );
 
-          console.log("Total New Contacts", totalNewContacts);
 
           //   Total Recipients
           const totalRecipients = await tx
@@ -90,7 +88,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             .execute()
             .then((res) => Number(res[0]?.value) ?? 0);
 
-          console.log("Total Recipients", totalRecipients);
 
           // Open Rate
           const openConversation = await tx.$count(
@@ -101,13 +98,11 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             )
           );
 
-          console.log("Open Conversation", openConversation);
 
           const openRate =
             (openConversation / (totalRecipients > 0 ? totalRecipients : 1)) *
             100;
 
-          console.log("Open Rate", openRate);
 
           // Reply Rate
           const campaign = tx.select().from(conversationsTable).as("campaign");
@@ -153,12 +148,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
               (totalRecipients > 0 ? totalRecipients : 1)) *
             100;
 
-          console.log(
-            "Delivery Status",
-            totalConversationByMarketingCampaign,
-            totalRecipients
-          );
-
           const failed =
             (totalRecipients -
               totalConversationByMarketingCampaign /
@@ -202,7 +191,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
           deliveryStatus,
         };
       } catch (error) {
-        console.log("ERROR", error);
         return dataTemp;
       }
     },

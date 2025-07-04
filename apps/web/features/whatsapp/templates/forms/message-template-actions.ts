@@ -107,7 +107,6 @@ export function transformTemplateResponseToFormValues(
     }
   });
 
-  console.log(JSON.stringify(components));
 
   return {
     name: template.name,
@@ -130,7 +129,6 @@ export function extractTemplateParams(
 
   if (format === "NAMED") {
     const matches = [...text.matchAll(/{{\s*([a-zA-Z0-9_]+)\s*}}/g)];
-    console.log(matches);
     return Array.from(new Set(matches.map((m) => m[1])));
   }
 

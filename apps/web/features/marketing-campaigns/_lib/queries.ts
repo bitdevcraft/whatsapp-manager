@@ -203,7 +203,6 @@ export async function getMarketingCampaignById(id: string) {
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
-          console.log(openConversation);
           const openRate =
             (openConversation / (totalRecipients > 0 ? totalRecipients : 1)) *
             100;
@@ -242,7 +241,6 @@ export async function getMarketingCampaignById(id: string) {
             )
             .where(eq(conversationsTable.marketingCampaignId, id));
 
-          console.log(contacts);
           // Engagement
 
           return {

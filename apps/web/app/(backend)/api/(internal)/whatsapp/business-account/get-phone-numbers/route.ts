@@ -57,8 +57,6 @@ export async function GET() {
   try {
     const phoneNumbers = await whatsapp.phoneNumber.getPhoneNumbers();
 
-    console.log(phoneNumbers);
-
     const newPhoneNumbers: NewWhatsAppBusinessAccountPhoneNumber[] =
       phoneNumbers.data.map((phoneNumber: PhoneNumberResponse) => {
         const temp: NewWhatsAppBusinessAccountPhoneNumber = {

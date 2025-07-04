@@ -6,8 +6,6 @@ export async function handleImageMessage(
   client: WhatsApp,
   message: WebhookMessage
 ) {
-  console.log("Received image message");
-
   const body: ConversationBody = {
     body: {
       text: message.image?.caption,

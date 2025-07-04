@@ -42,8 +42,6 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         auth,
       };
 
-      console.log(data);
-
       const response = await axios
         .post("/api/whatsapp/business-account", data)
         .then(() => {
