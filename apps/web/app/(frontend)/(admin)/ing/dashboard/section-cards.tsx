@@ -45,7 +45,7 @@ export function SectionCards({ promises }: Props) {
           <CardAction>
             <Badge variant="outline">
               {totalNewContacts > 0 && <IconTrendingDown />}
-              {(totalNewContacts / totalContacts) * 100}%
+              {((totalNewContacts / totalContacts) * 100).toFixed(2)}%
             </Badge>
           </CardAction>
         </CardHeader>
@@ -59,7 +59,7 @@ export function SectionCards({ promises }: Props) {
         <CardHeader>
           <CardDescription>Open Rate</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {openRate}%
+            {openRate.toFixed(2)}%
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>
@@ -71,7 +71,7 @@ export function SectionCards({ promises }: Props) {
         <CardHeader>
           <CardDescription>Reply Rate</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {replyRate}%
+            {replyRate.toFixed(2)}%
           </CardTitle>
           <CardAction></CardAction>
         </CardHeader>

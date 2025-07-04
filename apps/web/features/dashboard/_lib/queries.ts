@@ -62,7 +62,6 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
         } = await withTenantTransaction(teamId, async (tx) => {
           const totalContacts = await tx.$count(contactsTable);
 
-
           const totalNewContacts = await tx.$count(
             contactsTable,
             and(
@@ -80,14 +79,12 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             isNotNull(conversationsTable.marketingCampaignId)
           );
 
-
           //   Total Recipients
           const totalRecipients = await tx
             .select({ value: sum(marketingCampaignsTable.totalRecipients) })
             .from(marketingCampaignsTable)
             .execute()
             .then((res) => Number(res[0]?.value) ?? 0);
-
 
           // Open Rate
           const openConversation = await tx.$count(
@@ -98,11 +95,9 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             )
           );
 
-
           const openRate =
             (openConversation / (totalRecipients > 0 ? totalRecipients : 1)) *
             100;
-
 
           // Reply Rate
           const campaign = tx.select().from(conversationsTable).as("campaign");
@@ -165,7 +160,7 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
           if (failed > 0) {
             deliveryStatus.push({
               status: "failed",
-              value: failed,
+              value: failed > 100 ? 100 - delivered : failed,
               fill: "var(--color-failed)",
             });
           }
