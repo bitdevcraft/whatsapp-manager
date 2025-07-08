@@ -31,8 +31,10 @@ export default function Notification() {
         `${relatedObject}:${teamId}:${id}`,
       ];
 
-      if (relatedObject === NotificationRelatedObject.MarketingCampaign)
+      if (relatedObject !== NotificationRelatedObject.Conversation)
         tags.push(`${NotificationRelatedObject.Conversation}:${teamId}`);
+      if (relatedObject !== NotificationRelatedObject.MarketingCampaign)
+        tags.push(`${NotificationRelatedObject.MarketingCampaign}:${teamId}`);
 
       await axios.post("/api/revalidate", {
         tags,

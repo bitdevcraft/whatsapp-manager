@@ -41,7 +41,11 @@ export async function getWhatsAppBusinessAccountDetails() {
     },
     [`whatsapp:business-account:${teamId}`],
     {
-      tags: [`whatsapp:business-account:${teamId}`],
+      revalidate: 10,
+      tags: [
+        `whatsapp:business-account`,
+        `whatsapp:business-account:${teamId}`,
+      ],
     }
   )();
 }
