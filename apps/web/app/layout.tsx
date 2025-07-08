@@ -21,6 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <link rel="icon" href="/icon.svg" sizes="any" />
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >

@@ -10,9 +10,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get("session");
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
-  const isSignInRoute = signInRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+    const isSignInRoute = signInRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
 
   if (isProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
