@@ -29,6 +29,7 @@ export default function Notification() {
         `${teamId}:${id}`,
         `${relatedObject}:${teamId}`,
         `${relatedObject}:${teamId}:${id}`,
+        `dashboard:${teamId}`,
       ];
 
       if (relatedObject !== NotificationRelatedObject.Conversation)
