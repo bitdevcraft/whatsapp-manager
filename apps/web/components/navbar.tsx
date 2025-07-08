@@ -27,22 +27,9 @@ export default function Navbar() {
             <NavbarMenu />
           </li>
           <li>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button>Login</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="space-y-1">
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={"/login"}
-                    className="flex justify-start font-semibold px-4"
-                  >
-                    <p>Login</p>
-                    <div className="flex gap-2"></div>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Link href={"/sign-in"}>
+              <Button>Login</Button>
+            </Link>
           </li>
         </ul>
       </div>
