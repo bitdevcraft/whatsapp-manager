@@ -213,7 +213,11 @@ export async function getContactConversation(contact: string) {
     [JSON.stringify(contact), teamId],
     {
       revalidate: 10,
-      tags: ["conversations", `conversations:${teamId}:${contact}`],
+      tags: [
+        "conversations",
+        `conversations:${teamId}:${contact}`,
+        `conversations:${teamId}`,
+      ],
     }
   )();
 }
