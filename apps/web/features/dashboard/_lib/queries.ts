@@ -191,6 +191,7 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
     },
     [`dashboard:${teamId}`],
     {
+      revalidate: 10,
       tags: [`dashboard:${teamId}`],
     }
   )();

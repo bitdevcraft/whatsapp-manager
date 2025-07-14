@@ -24,7 +24,7 @@ export async function getTags() {
                 normalName: tagsTable.normalizedName,
               })
               .from(tagsTable);
-          },
+          }
         );
 
         logger.log(data);
@@ -41,7 +41,7 @@ export async function getTags() {
     [`contacts:tags:${userWithTeam?.teamId}`],
     {
       revalidate: 1,
-      tags: [`contacts:tags:${userWithTeam?.teamId}`],
-    },
+      tags: ["contacts:tags", `contacts:tags:${userWithTeam?.teamId}`],
+    }
   )();
 }

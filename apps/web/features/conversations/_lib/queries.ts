@@ -163,7 +163,7 @@ export async function getConversations(
     },
     [JSON.stringify(input), teamId],
     {
-      revalidate: 1,
+      revalidate: 10,
       tags: ["conversations", `conversations:${teamId}`],
     }
   )();
@@ -212,8 +212,12 @@ export async function getContactConversation(contact: string) {
     },
     [JSON.stringify(contact), teamId],
     {
-      revalidate: 1,
-      tags: ["conversations", `conversations:${teamId}:${contact}`],
+      revalidate: 10,
+      tags: [
+        "conversations",
+        `conversations:${teamId}:${contact}`,
+        `conversations:${teamId}`,
+      ],
     }
   )();
 }

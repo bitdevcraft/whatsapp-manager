@@ -29,10 +29,13 @@ export default function Notification() {
         `${teamId}:${id}`,
         `${relatedObject}:${teamId}`,
         `${relatedObject}:${teamId}:${id}`,
+        `dashboard:${teamId}`,
       ];
 
-      if (relatedObject === NotificationRelatedObject.MarketingCampaign)
+      if (relatedObject !== NotificationRelatedObject.Conversation)
         tags.push(`${NotificationRelatedObject.Conversation}:${teamId}`);
+      if (relatedObject !== NotificationRelatedObject.MarketingCampaign)
+        tags.push(`${NotificationRelatedObject.MarketingCampaign}:${teamId}`);
 
       await axios.post("/api/revalidate", {
         tags,

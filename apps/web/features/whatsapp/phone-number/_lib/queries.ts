@@ -124,7 +124,7 @@ export async function getWhatsAppBusinessAccountPhoneNumber(
     },
     [JSON.stringify(input), userWithTeam?.teamId],
     {
-      revalidate: 1,
+      revalidate: 10,
       tags: ["phone-number", `phone-number:${userWithTeam?.teamId}`],
     }
   )();

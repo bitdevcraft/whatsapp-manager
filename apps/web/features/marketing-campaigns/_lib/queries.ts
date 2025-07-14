@@ -274,9 +274,14 @@ export async function getMarketingCampaignById(id: string) {
         };
       }
     },
-    [`${teamId}:${id}`],
+    [`marketing-campaigns:${teamId}:${id}`],
     {
-      tags: [`${teamId}:${id}`],
+      tags: [
+        `marketing-campaigns`,
+        `marketing-campaigns:${teamId}:${id}`,
+        `marketing-campaigns:${teamId}`,
+      ],
+      revalidate: 10,
     }
   )();
 }

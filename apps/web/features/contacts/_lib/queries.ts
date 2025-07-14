@@ -127,7 +127,7 @@ export async function getContacts(input: GetContactSchema) {
     },
     [JSON.stringify(input), userWithTeam?.teamId],
     {
-      revalidate: 1,
+      revalidate: 10,
       tags: ["contacts", `contacts:${userWithTeam?.teamId}`],
     }
   )();
