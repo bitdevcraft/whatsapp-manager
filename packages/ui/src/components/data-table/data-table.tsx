@@ -18,6 +18,7 @@ interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   actionBar?: React.ReactNode;
   paginationClassName?: string;
   pageSizeOptions?: number[];
+  hideFirstAndLastPageButton?: boolean;
 }
 
 export function DataTable<TData>({
@@ -27,6 +28,7 @@ export function DataTable<TData>({
   className,
   paginationClassName,
   pageSizeOptions,
+  hideFirstAndLastPageButton = false,
   ...props
 }: DataTableProps<TData>) {
   return (
@@ -99,6 +101,7 @@ export function DataTable<TData>({
           table={table}
           className={paginationClassName}
           pageSizeOptions={pageSizeOptions}
+          hideFirstAndLastPageButton={hideFirstAndLastPageButton}
         />
         {actionBar &&
           table.getFilteredSelectedRowModel().rows.length > 0 &&

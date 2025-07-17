@@ -19,12 +19,14 @@ import { cn } from "@workspace/ui/lib/utils";
 interface DataTablePaginationProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>;
   pageSizeOptions?: number[];
+  hideFirstAndLastPageButton?: boolean;
 }
 
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [10, 20, 30, 40, 50],
   className,
+  hideFirstAndLastPageButton = false,
   ...props
 }: DataTablePaginationProps<TData>) {
   return (
@@ -72,6 +74,7 @@ export function DataTablePagination<TData>({
           className="hidden size-8 lg:flex"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
+          hidden={hideFirstAndLastPageButton}
         >
           <ChevronsLeft />
         </Button>
@@ -102,6 +105,7 @@ export function DataTablePagination<TData>({
           className="hidden size-8 lg:flex"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
+          hidden={hideFirstAndLastPageButton}
         >
           <ChevronsRight />
         </Button>

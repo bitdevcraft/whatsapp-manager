@@ -89,13 +89,21 @@ const data = {
       url: "/ing/whatsapp/templates",
       icon: IconTemplate,
     },
+  ],
+  ads: [
     {
-      name: "Business Account",
-      url: "/ing/whatsapp/business-account",
-      icon: IconUserCircle,
+      name: "Ads Manager",
+      url: "/ing/ads/ads-manager",
+      icon: IconSpeakerphone,
     },
   ],
+
   management: [
+    {
+      name: "Business Account",
+      url: "/ing/business-account",
+      icon: IconUserCircle,
+    },
     {
       name: "Contacts",
       url: "/ing/contacts",
@@ -131,6 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSubMain title="WhatsApp" items={data.whatsapp} />
+        <NavSubMain title="Ads" items={data.ads} />
         <NavSubMain title="Management" items={data.management} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

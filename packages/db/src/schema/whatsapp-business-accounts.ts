@@ -38,6 +38,7 @@ export const whatsAppBusinessAccountsTable = pgTable(
     businessId: varchar("business_id", { length: 255 }),
     phoneNumberId: varchar("phone_number_id", { length: 255 }),
     wabaId: varchar("waba_id", { length: 255 }).unique(),
+    adAccountId: varchar("ad_account_id", { length: 255 }),
     authResponse:
       jsonb("auth_response").$type<WhatsAppBusinessAuthAccountResponse>(),
     accessToken:

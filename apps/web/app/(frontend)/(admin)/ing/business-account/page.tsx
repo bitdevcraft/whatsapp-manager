@@ -1,4 +1,7 @@
-import { getWhatsAppBusinessAccountDetails } from "@/features/whatsapp/business-account/_lib/queries";
+import {
+  getAdAccount,
+  getWhatsAppBusinessAccountDetails,
+} from "@/features/business-account/_lib/queries";
 import BusinessAccount from "./business-account";
 import React from "react";
 import { getWhatsAppBusinessAccountPhoneNumber } from "@/features/whatsapp/phone-number/_lib/queries";
@@ -19,10 +22,11 @@ export default async function Home(props: IndexPageProps) {
   const promises = Promise.all([
     getWhatsAppBusinessAccountDetails(),
     getWhatsAppBusinessAccountPhoneNumber({ ...search, filters: validFilters }),
+    getAdAccount(),
   ]);
   return (
-    <>
+    <div className="relative w-full ">
       <BusinessAccount promises={promises} />
-    </>
+    </div>
   );
 }

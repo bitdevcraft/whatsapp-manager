@@ -1,0 +1,23 @@
+{
+  "name": "meta-ads-api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Add dev script here'",
+    "build": "echo 'Add build script here'",
+    "test": "echo 'Add test script here'",
+    "lint": "echo 'Add lint script here'"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/shared": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "dotenv-cli": "^8.0.0",
+    "tsup": "^8.5.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "zod": "^3.25.64"
+  }
+}
