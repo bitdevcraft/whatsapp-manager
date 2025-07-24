@@ -104,20 +104,20 @@ export const columns: ColumnDef<MarketingCampaignWithTemplate>[] = [
     },
     enableColumnFilter: true,
   },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="w-full flex justify-end">
-        <Button
-          aria-label="Open menu"
-          variant="ghost"
-          className="flex size-8 p-0 data-[state=open]:bg-muted"
-        >
-          <Ellipsis className="size-4" aria-hidden="true" />
-        </Button>
-      </div>
-    ),
-    enableSorting: false,
-    size: 40,
-  },
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => (
+  //     <div className="w-full flex justify-end bg-background rounded">
+  //       <Button
+  //         aria-label="Open menu"
+  //         variant="ghost"
+  //         className="flex size-8 p-0 data-[state=open]:bg-muted"
+  //       >
+  //         <Ellipsis className="size-4" aria-hidden="true" />
+  //       </Button>
+  //     </div>
+  //   ),
+  //   enableSorting: false,
+  //   size: 40,
+  // },
 ];

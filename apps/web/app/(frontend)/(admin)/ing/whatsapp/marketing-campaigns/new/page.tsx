@@ -13,16 +13,14 @@ export default function Home() {
   );
 
   return (
-    <div className="md:p-4 gap-4">
-      <div className="max-w-3xl mx-auto md:border md:border-muted shadow-lg rounded-xl min-h-[90dvh] p-4 md:p-8">
+    <div className="md:p-4 gap-4 ">
+      <div className="max-w-3xl mx-auto md:border md:border-muted rounded-xl min-h-[90dvh] p-4 md:p-8 bg-background">
         <MarketingCampaignForm
           templates={templates}
           tags={tags}
           phoneNumbers={phoneNumbers}
         />
-        {/* <MessageTemplateForm /> */}
       </div>
-      {/* <div className="col-span-12 md:col-span-6 lg:col-span-5 border border-muted shadow-lg rounded-xl min-h-[90dvh] p-8"></div> */}
     </div>
   );
 }

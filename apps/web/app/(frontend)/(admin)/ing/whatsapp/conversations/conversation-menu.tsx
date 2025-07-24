@@ -20,7 +20,7 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
   });
 
   return (
-    <div className="border min-h-[90vh] p-4 rounded-md ">
+    <div className="min-h-[90vh] p-4 rounded-md bg-background">
       <Tabs
         defaultValue="all"
         className="w-full md:w-96"

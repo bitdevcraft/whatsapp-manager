@@ -42,7 +42,7 @@ export function MarketingCampaignSkeleton() {
         <SkeletonCampaignDetails />
       </div>
 
-      <div className="min-h-16 border rounded p-4 flex flex-col gap-4">
+      <div className="min-h-16 border rounded p-4 flex flex-col gap-4 bg-background">
         <h3 className="text-secondary-foreground text-sm font-semibold">
           Template Preview
         </h3>
@@ -58,7 +58,7 @@ function SkeletonAnalytics() {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="min-h-16 border rounded flex flex-col p-4 gap-2"
+          className="min-h-16 border rounded flex flex-col p-4 gap-2 bg-background"
         >
           <div className="bg-muted h-4 w-1/2 rounded" />
           <div className="bg-muted h-6 w-1/3 rounded" />
@@ -71,7 +71,7 @@ function SkeletonAnalytics() {
 
 function SkeletonDeliveryStatus() {
   return (
-    <div className="rounded border p-4 grid gap-4">
+    <div className="rounded border p-4 grid gap-4 bg-background">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Delivery Status
       </h3>
@@ -90,14 +90,14 @@ function SkeletonDeliveryStatus() {
 
 function SkeletonCampaignDetails() {
   return (
-    <div className="rounded border p-4 flex flex-col gap-4">
+    <div className="rounded border p-4 flex flex-col gap-4 bg-background">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Campaign Details
       </h3>
       <div className="flex gap-2 flex-wrap items-center">
         <Tag size={15} />
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="w-12 h-6 bg-muted rounded" />
+          <div key={i} className="w-12 h-6 bg-muted rounded " />
         ))}
       </div>
       <div className="flex gap-2 flex-wrap items-center">

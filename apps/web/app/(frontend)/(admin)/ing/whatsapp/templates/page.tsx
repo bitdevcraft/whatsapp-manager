@@ -39,7 +39,7 @@ export default function Home() {
   }, []);
 
   return (
-    <section className="p-4">
+    <section className="p-4 bg-background rounded">
       <DataTable
         title=""
         columns={columns}

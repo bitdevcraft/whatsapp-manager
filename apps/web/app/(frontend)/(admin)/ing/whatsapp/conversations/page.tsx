@@ -41,7 +41,7 @@ export default async function Home(props: IndexPageProps) {
 
   return (
     <div className="flex">
-      <div className="p-2 hidden md:flex">
+      <div className="p-2 hidden md:flex ">
         <ConversationMenu promises={promises} />
       </div>
       <div className="flex-1 p-2">
@@ -63,7 +63,7 @@ export default async function Home(props: IndexPageProps) {
             </SheetContent>
           </Sheet>
         </div>
-        <div className="border rounded-md bg-[#ebe5de]">
+        <div className="rounded bg-[#ebe5de] bg-background">
           <div className="bg-[url(/whatsapp-bg.png)] bg-opacity-40 ">
             <div className="bg-muted/80 backdrop-invert backdrop-opacity-10 min-h-[87vh]">
               <Conversation promises={promisesConversation} />

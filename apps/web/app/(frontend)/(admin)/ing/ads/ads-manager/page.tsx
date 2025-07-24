@@ -2,10 +2,8 @@
 
 import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
-import { create } from "domain";
-import { renderToHTML } from "next/dist/server/render";
+import Link from "next/link";
 import { toast } from "sonner";
-import { renderToString } from "react-dom/server";
 
 export default function Home() {
   const createCampaign = async () => {
@@ -17,11 +15,12 @@ export default function Home() {
     }
   };
 
-  console.log(renderToString(<Button onClick={createCampaign}>Create</Button>));
   return (
-    <div>
+    <div className="p-4">
       Ads
-      <Button onClick={createCampaign}>Create</Button>
+      <Link href={`create`}>
+        <Button>Create</Button>
+      </Link>
     </div>
   );
 }

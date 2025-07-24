@@ -74,7 +74,7 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
   };
 
   return (
-    <section className="p-8 grid gap-4">
+    <section className="p-8 grid gap-4 ">
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="flex gap-2 items-center">
           <Badge variant="outline">{data?.status}</Badge>
@@ -131,11 +131,11 @@ function CampaignTemplatePreview({ template }: { template?: Template }) {
   if (!template?.content) return null;
 
   return (
-    <div className="min-h-16 border rounded p-4 flex flex-col gap-4">
+    <div className="min-h-16 bg-background border rounded p-4 flex flex-col gap-4">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Template Preview
       </h3>
-      <div className="min-h-16 bg-muted rounded-sm">
+      <div className="min-h-16 bg-background bg-muted rounded-sm">
         <pre className="p-4 rounded">
           {/* {JSON.stringify(template.content, null, 2)} */}
           <SingleTemplatePreview template={template.content} />
@@ -153,7 +153,7 @@ function DeliveryStatus({
   totalRecipients: number;
 }) {
   return (
-    <div className="rounded border p-4 grid gap-4">
+    <div className="rounded border p-4 grid gap-4 bg-background">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Delivery Status
       </h3>
@@ -187,7 +187,7 @@ function CampaignDetails({
   contacts: { name: string; phone: string; id: string }[] | null;
 }) {
   return (
-    <div className="rounded border p-4 flex flex-col gap-4">
+    <div className="rounded border p-4 flex flex-col gap-4 bg-background">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Campaign Details
       </h3>
@@ -263,21 +263,21 @@ function CampaignAnalytics({
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      <div className="min-h-16 border rounded flex flex-col p-4 gap-2">
+      <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Total Recipients</h3>
         <p className="text-3xl font-semibold">{totalRecipients}</p>
         <p className="text-xs font-light text-muted-foreground">
           Total Number of contacts
         </p>
       </div>
-      <div className="min-h-16 border rounded flex flex-col p-4 gap-2">
+      <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Messages Sent</h3>
         <p className="text-3xl font-semibold">{messageSent}</p>
         <p className="text-xs font-light text-muted-foreground">
           Total messages dispatched
         </p>
       </div>
-      <div className="min-h-16 border rounded flex flex-col p-4 gap-2">
+      <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Open Rate</h3>
         <p className="text-3xl font-semibold">
           {openRate}&nbsp;
@@ -287,7 +287,7 @@ function CampaignAnalytics({
           Messages viewed
         </p>
       </div>
-      <div className="min-h-16 border rounded flex flex-col p-4 gap-2">
+      <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Reply Rate</h3>
         <p className="text-3xl font-semibold">
           {replyRate}&nbsp;
@@ -297,7 +297,7 @@ function CampaignAnalytics({
           Received responses
         </p>
       </div>
-      <div className="min-h-16 border rounded flex flex-col p-4 gap-2">
+      <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Engagement</h3>
         <p className="text-3xl font-semibold">
           {engagement}&nbsp;

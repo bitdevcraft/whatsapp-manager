@@ -23,7 +23,7 @@ export default async function Home(props: IndexPageProps) {
   ]);
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-background rounded">
       <FeatureFlagsProvider>
         <React.Suspense
           fallback={

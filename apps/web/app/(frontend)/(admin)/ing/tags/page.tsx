@@ -20,7 +20,7 @@ export default async function Home(props: IndexPageProps) {
   const promises = Promise.all([getTags({ ...search, filters: validFilters })]);
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-background rounded">
       <FeatureFlagsProvider>
         <React.Suspense
           fallback={

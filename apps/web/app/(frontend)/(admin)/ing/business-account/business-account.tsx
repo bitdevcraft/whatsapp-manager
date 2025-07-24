@@ -60,7 +60,7 @@ export default function BusinessAccount({ promises }: Props) {
         </div>
         <Separator />
 
-        <Card>
+        <Card className="shadow-none border-none">
           <CardHeader>Phone Numbers</CardHeader>
           <CardContent>
             <div className="">
@@ -82,7 +82,7 @@ export default function BusinessAccount({ promises }: Props) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-none border-none">
           <CardHeader>Ad Account</CardHeader>
           <CardContent>
             {adAccount.data ? (
