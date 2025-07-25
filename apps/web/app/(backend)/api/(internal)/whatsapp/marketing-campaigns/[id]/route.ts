@@ -4,6 +4,7 @@ import { db } from "@workspace/db/config";
 import { marketingCampaignsTable, templatesTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -86,7 +87,6 @@ export async function POST(
           tags: true,
           enableTracking: true,
           phoneNumber: true,
-          status: true,
           messageTemplate: true,
           teamId: true,
         },
@@ -95,7 +95,7 @@ export async function POST(
       if (data) {
         const result = await tx
           .insert(marketingCampaignsTable)
-          .values([{ ...data, name }])
+          .values([{ ...data, name, status: "draft" }])
           .returning({ id: marketingCampaignsTable.id });
 
         return {
@@ -108,10 +108,22 @@ export async function POST(
       };
     });
 
+    revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`);
+
+    if (!result.data) {
+      return new Response("", {
+        status: RESPONSE_CODE.BAD_REQUEST,
+        statusText: "nothing to clone",
+      });
+    }
+
     return new Response(JSON.stringify(result), {
       status: RESPONSE_CODE.SUCCESS,
     });
-  } catch (error) {
-    return new Response("", { status: RESPONSE_CODE.BAD_REQUEST });
+  } catch (error: any) {
+    return new Response("", {
+      status: RESPONSE_CODE.BAD_REQUEST,
+      statusText: error.message,
+    });
   }
 }

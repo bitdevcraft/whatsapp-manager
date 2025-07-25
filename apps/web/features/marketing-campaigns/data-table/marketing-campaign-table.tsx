@@ -76,11 +76,14 @@ export default function MarketingCampaignTable({
 
   return (
     <div className="">
-      <CloneMarketingCampaign
-        isOpen={rowAction?.variant === "clone"}
-        setIsOpen={() => setRowAction(null)}
-        title="Are you sure?"
-      />
+      {rowAction && (
+        <CloneMarketingCampaign
+          isOpen={rowAction?.variant === "clone"}
+          recordId={rowAction?.row.id}
+          setIsOpen={() => setRowAction(null)}
+          title="Are you sure?"
+        />
+      )}
 
       <DataTable
         table={table}
