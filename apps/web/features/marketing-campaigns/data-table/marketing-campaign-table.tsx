@@ -13,7 +13,7 @@ import {
 } from "@workspace/ui/data-table";
 import { getMarketingCampaigns } from "../_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
-import { columns } from "./marketing-campaign-table-columns";
+import { getTableColumns } from "./marketing-campaign-table-columns";
 import { MarketingCampaignsTableActionBar } from "./marketing-campaign-table-action-bar";
 import { Button } from "@workspace/ui/components/button";
 import { Plus } from "lucide-react";
@@ -21,6 +21,9 @@ import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
 import { getSelectTags } from "@/features/tags/_lib/queries";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import { DataTableRowAction } from "@workspace/ui/types/data-table";
+import { MarketingCampaignWithTemplate } from "@workspace/db";
+import { CloneMarketingCampaign } from "./marketing-campaign-clone-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +45,19 @@ export default function MarketingCampaignTable({
 
   const [{ data, pageCount }] = React.use(promises);
 
+  const [rowAction, setRowAction] =
+    React.useState<DataTableRowAction<MarketingCampaignWithTemplate> | null>(
+      null
+    );
+
+  const columns = React.useMemo(
+    () =>
+      getTableColumns({
+        setRowAction,
+      }),
+    []
+  );
+
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data,
     columns,
@@ -60,6 +76,15 @@ export default function MarketingCampaignTable({
 
   return (
     <div className="">
+      {rowAction && (
+        <CloneMarketingCampaign
+          isOpen={rowAction?.variant === "clone"}
+          recordId={rowAction?.row.id}
+          setIsOpen={() => setRowAction(null)}
+          title="Are you sure?"
+        />
+      )}
+
       <DataTable
         table={table}
         actionBar={<MarketingCampaignsTableActionBar table={table} />}
