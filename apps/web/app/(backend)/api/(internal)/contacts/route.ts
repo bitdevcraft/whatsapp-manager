@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     name: string;
     phoneNumber: string;
     email: string;
+    tags: string[];
   }[];
 
   const { teamId } = userWithTeam;
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       email: d.email,
       phone: d.phoneNumber,
       message: "",
+      tags: d.tags,
     };
 
     return temp;
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
           "name",
           "phone",
           "email",
+          "tags",
         ]),
       })
       .returning();
