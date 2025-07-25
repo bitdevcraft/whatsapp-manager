@@ -40,6 +40,8 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
     onSubmit(data);
   }
 
+  console.log(form.getValues().tags);
+
   return (
     <Form {...form}>
       <form
@@ -100,6 +102,7 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
                   options={tags}
                   onValueChange={field.onChange}
                   value={field.value || []}
+                  defaultValue={field.value || []}
                   placeholder="Select tags"
                   variant="default"
                   maxCount={3}
