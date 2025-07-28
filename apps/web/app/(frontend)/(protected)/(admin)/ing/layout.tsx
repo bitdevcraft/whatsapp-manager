@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers as nextHeaders } from "next/headers";
 
 import { AppSidebar } from "@/components/admin-layout/app-sidebar";
 import { SiteHeader } from "@/components/admin-layout/site-header";
@@ -17,6 +17,7 @@ import { SocketProvider } from "@/components/provider/socket-provider";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import Notification from "./notification";
+import { auth } from "@workspace/auth";
 
 export default async function Layout({
   children,
@@ -26,19 +27,25 @@ export default async function Layout({
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
-  const userWithTeam = await getUserWithTeam();
+  const headers = await nextHeaders();
 
-  console.log(userWithTeam);
+  const data = await auth.api.listOrganizations({ headers });
 
-  if (!userWithTeam?.teamId) {
-    redirect("/auth/login");
+  const authSession = await auth.api.getSession({
+    headers,
+  });
+
+  if (!authSession) {
+    const pathname = headers.get("x-current-path");
+    redirect(`/auth/login?path=${pathname}`);
   }
-
-  const { user, teamId } = userWithTeam;
 
   return (
     <div>
-      <SocketProvider userId={user.id} teamId={teamId}>
+      <SocketProvider
+        userId={authSession.user.id}
+        teamId={authSession.session.activeOrganizationId!}
+      >
         <AuthenticateWaba />
         <TitleProvider defaultTitle="">
           <SidebarProvider
@@ -51,7 +58,11 @@ export default async function Layout({
             }
           >
             <div className="flex flex-1">
-              <AppSidebar variant="inset" />
+              <AppSidebar
+                variant="inset"
+                teams={data}
+                user={authSession.user}
+              />
               <SidebarInset>
                 <div className="px-1">
                   <BannerList />
