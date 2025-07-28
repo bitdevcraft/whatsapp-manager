@@ -1,10 +1,11 @@
 import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { teamsTable } from "./teams";
 import { usersTable } from "./users";
 import { relations } from "drizzle-orm";
+import { baseIdModel } from "./abstract/baseIdModel";
+import { teamsTable } from "./teams";
 
 export const invitationsTable = pgTable("invitations", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  ...baseIdModel,
   teamId: uuid("team_id")
     .notNull()
     .references(() => teamsTable.id),

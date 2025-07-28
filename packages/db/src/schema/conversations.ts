@@ -16,6 +16,7 @@ import { teamsTable } from "./teams";
 import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
 import { marketingCampaignsTable } from "./marketing-campaigns";
 import { usersTable } from "./users";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export const conversationStatusEnum = pgEnum(
   "message_status",
@@ -50,7 +51,7 @@ export interface ConversationBody {
 export const conversationsTable = pgTable(
   "conversations",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...baseIdModel,
     content: jsonb("content"),
     from: uuid("from"),
     contactId: uuid("contact_id").references(() => contactsTable.id),

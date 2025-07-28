@@ -9,11 +9,12 @@ import {
 import { teamsTable } from "./teams";
 import { usersTable } from "./users";
 import { relations, sql } from "drizzle-orm";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export const activityLogsTable = pgTable(
   "activity_logs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...baseIdModel,
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),

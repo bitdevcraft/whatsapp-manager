@@ -95,7 +95,7 @@ export function ContactsTableActionBar({
     [rows]
   );
 
-  const onTaskExport = React.useCallback(() => {
+  const onContactExport = React.useCallback(() => {
     setCurrentAction("export");
     startTransition(() => {
       exportTableToCSV(table, {
@@ -105,7 +105,7 @@ export function ContactsTableActionBar({
     });
   }, [table]);
 
-  const onTaskDelete = React.useCallback(() => {
+  const onContactDelete = React.useCallback(() => {
     setCurrentAction("delete");
     startTransition(async () => {
       const { error } = await deleteContacts({
@@ -188,7 +188,7 @@ export function ContactsTableActionBar({
           size="icon"
           tooltip="Export Contacts"
           isPending={getIsActionPending("export")}
-          onClick={onTaskExport}
+          onClick={onContactExport}
           disabled
         >
           <Download />
@@ -197,7 +197,7 @@ export function ContactsTableActionBar({
           size="icon"
           tooltip="Delete Contacts"
           isPending={getIsActionPending("delete")}
-          onClick={onTaskDelete}
+          onClick={onContactDelete}
         >
           <Trash2 />
         </DataTableActionBarAction>

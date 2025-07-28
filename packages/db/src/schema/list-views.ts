@@ -4,13 +4,14 @@ import { baseSchema } from "../helpers/column-helper";
 import { pgEnum, pgPolicy, pgTable, uuid } from "drizzle-orm/pg-core";
 import { teamsTable } from "./teams";
 import { relations, sql } from "drizzle-orm";
+import { baseModel } from "./abstract/baseModel";
 
 export const entityEnum = pgEnum("entity", enumToValues(Entity));
 
 export const listViewsTable = pgTable(
   "list_views",
   {
-    ...baseSchema,
+    ...baseModel,
     entity: entityEnum("entity"),
     teamId: uuid("team_id")
       .notNull()

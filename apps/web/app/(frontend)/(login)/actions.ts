@@ -63,7 +63,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     })
     .from(usersTable)
     .leftJoin(teamMembersTable, eq(usersTable.id, teamMembersTable.userId))
-    .leftJoin(teamsTable, eq(teamMembersTable.teamId, teamsTable.id))
+    .leftJoin(teamsTable, eq(teamMembersTable.organizationId, teamsTable.id))
     .where(eq(usersTable.email, email))
     .limit(1);
 
@@ -206,14 +206,14 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const newTeamMember: NewTeamMember = {
     userId: createdUser.id,
-    teamId: teamId,
+    organizationId: teamId,
     role: userRole,
   };
 
   await Promise.all([
     db.insert(teamMembersTable).values(newTeamMember),
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser, createdTeam),
+    // setSession(createdUser, createdTeam),
   ]);
 
   const redirectTo = formData.get("redirect") as string | null;
@@ -222,7 +222,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam || null, priceId });
   }
 
-  redirect("/ing/dashboard");
+  redirect("/sign-in");
 });
 
 export async function signOut() {
@@ -342,7 +342,7 @@ export const deleteAccount = validatedActionWithUser(
         .where(
           and(
             eq(teamMembersTable.userId, user.id),
-            eq(teamMembersTable.teamId, userWithTeam?.teamId)
+            eq(teamMembersTable.organizationId, userWithTeam?.teamId)
           )
         );
     }
@@ -394,7 +394,7 @@ export const removeTeamMember = validatedActionWithUser(
       .where(
         and(
           eq(teamMembersTable.id, memberId),
-          eq(teamMembersTable.teamId, userWithTeam?.teamId)
+          eq(teamMembersTable.organizationId, userWithTeam?.teamId)
         )
       );
 
@@ -430,7 +430,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .where(
         and(
           eq(usersTable.email, email),
-          eq(teamMembersTable.teamId, userWithTeam?.teamId)
+          eq(teamMembersTable.organizationId, userWithTeam?.teamId)
         )
       )
       .limit(1);

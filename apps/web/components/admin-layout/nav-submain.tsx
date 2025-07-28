@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
+import Link from "next/link";
 
 export function NavSubMain({
   title = "Others",
@@ -31,10 +32,10 @@ export function NavSubMain({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton tooltip={item.name} asChild>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
