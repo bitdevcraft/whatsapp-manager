@@ -1,21 +1,23 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Toaster } from "sonner";
+import Script from "next/script";
 
 import { AppSidebar } from "@/components/admin-layout/app-sidebar";
 import { SiteHeader } from "@/components/admin-layout/site-header";
 import { TitleProvider } from "@/components/provider/title-provider";
+import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+import { SocketProvider } from "@/components/provider/socket-provider";
+import { BannerArea } from "@/components/banner/banner-area";
+import { getUserWithTeam } from "@/lib/db/queries";
+
 import {
   SidebarInset,
   SidebarProvider,
 } from "@workspace/ui/components/sidebar";
-import { BannerList } from "@workspace/ui/components/banner";
-import { Toaster } from "sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
-import Script from "next/script";
+
 import AuthenticateWaba from "./_components/authenticate-waba";
-import { SocketProvider } from "@/components/provider/socket-provider";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { redirect } from "next/navigation";
 import Notification from "./notification";
 
 export default async function Layout({
@@ -51,9 +53,7 @@ export default async function Layout({
             <div className="flex flex-1">
               <AppSidebar variant="inset" />
               <SidebarInset>
-                <div className="px-1">
-                  <BannerList />
-                </div>
+                <BannerArea />
                 <SiteHeader />
                 <div className="flex flex-1 flex-col">
                   <div className="@container/main flex flex-1 flex-col gap-2">
