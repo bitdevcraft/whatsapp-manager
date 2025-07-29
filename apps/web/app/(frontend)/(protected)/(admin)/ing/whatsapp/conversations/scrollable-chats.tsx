@@ -7,6 +7,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { PreviewMessage } from "./preview-message";
 import { Conversation } from "@workspace/db";
 import { Input } from "@workspace/ui/components/input";
+import { useContactStore } from "./contact-store";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -16,6 +17,8 @@ interface PaginatedResponse<T> {
 
 export function ScrollableChats({ id }: { id: string }) {
   if (!id) return null;
+
+  const contactId = useContactStore((state) => state.contactId);
 
   const {
     status,
@@ -29,12 +32,12 @@ export function ScrollableChats({ id }: { id: string }) {
     hasNextPage,
     hasPreviousPage,
   } = useInfiniteQuery<PaginatedResponse<Conversation>>({
-    queryKey: ["conversations"],
+    queryKey: ["conversations", id, contactId],
     queryFn: async ({
       pageParam,
     }): Promise<PaginatedResponse<Conversation>> => {
       const response = await fetch(
-        `/api/whatsapp/conversations/${id}?offset=${pageParam}`
+        `/api/whatsapp/conversations/${contactId ?? id}?offset=${pageParam}`
       );
       return await response.json();
     },
