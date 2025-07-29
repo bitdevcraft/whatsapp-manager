@@ -9,11 +9,12 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { teamsTable } from "./teams";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export const tagsTable = pgTable(
   "tags",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...baseIdModel,
     updatedAt: timestamp("updated_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),

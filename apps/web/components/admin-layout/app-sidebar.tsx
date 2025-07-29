@@ -30,6 +30,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import { TeamSwitcher } from "./team-switcher";
+import { Organization } from "better-auth/plugins/organization";
 
 const data = {
   user: {
@@ -117,7 +118,22 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  teams,
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  teams: Organization[];
+  user: {
+    id: string;
+    name: string;
+    emailVerified: boolean;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+    image?: string | null | undefined | undefined | undefined;
+  };
+}) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -134,7 +150,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu> */}
-        <TeamSwitcher />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
@@ -144,7 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

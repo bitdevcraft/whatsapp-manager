@@ -12,6 +12,7 @@ import {
   ilike,
   inArray,
   lte,
+  or,
   sql,
 } from "drizzle-orm";
 import { conversationsTable } from "@workspace/db/schema/conversations";
@@ -165,6 +166,60 @@ export async function getConversations(
     {
       revalidate: 10,
       tags: ["conversations", `conversations:${teamId}`],
+    }
+  )();
+}
+
+export async function getConversationSearch(searchInput: string) {
+  const defaultValue = { contacts: [], conversations: [] };
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return defaultValue;
+  }
+
+  const { teamId, user } = userWithTeam;
+
+  return unstable_cache(
+    async () => {
+      try {
+        const { contacts, conversations } = await withTenantTransaction(
+          teamId,
+          async (tx) => {
+            const contacts = await tx
+              .select()
+              .from(contactsTable)
+              .where(
+                or(
+                  ilike(contactsTable.name, `%${searchInput}%`),
+                  ilike(contactsTable.phone, `%${searchInput}%`)
+                )
+              )
+              .limit(10);
+
+            const conversations = await tx
+              .select()
+              .from(conversationsTable)
+              .where(or(sql`similarity (body::text, '${searchInput}') > 0.1`))
+              .limit(10);
+
+            return {
+              contacts,
+              conversations,
+            };
+          }
+        );
+
+        return { contacts, conversations };
+      } catch (error) {
+        return defaultValue;
+      }
+    },
+    [`${searchInput}:${teamId}`],
+    {
+      revalidate: 10,
+      tags: [`${searchInput}:${teamId}`],
     }
   )();
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { Building, ChevronsUpDown, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -18,29 +18,26 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import axios from "axios";
-import { Team } from "@workspace/db/schema";
+import { Organization } from "better-auth/plugins/organization";
+import { authClient } from "@/lib/auth/auth-client";
+import { useOrganization } from "../organization-provider";
 import { Badge } from "@workspace/ui/components/badge";
 
-export function TeamSwitcher() {
+export function TeamSwitcher({ teams }: { teams: Organization[] }) {
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState<Team>();
-  const [teams, setTeams] = React.useState<Team[]>();
+  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
 
-  const fetchData = async () => {
-    const response = await axios.get("/api/teams");
-    // @ts-ignore
-    setTeams(response.data.map(({ team }) => team));
-    setActiveTeam(response.data[0].team);
-  };
-
-  React.useEffect(() => {
-    fetchData();
-  }, []);
+  const { organizations, activeOrganization, setActiveOrganization } =
+    useOrganization();
 
   if (!activeTeam) {
     return null;
   }
+
+  const onChange = async (team: Organization) => {
+    setActiveTeam(team);
+    setActiveOrganization(team.id);
+  };
 
   return (
     <SidebarMenu>
@@ -52,10 +49,12 @@ export function TeamSwitcher() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                {/* <activeTeam.logo className="size-4" /> */}
+                <Building className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
+                <span className="truncate font-medium">
+                  {activeOrganization?.name}
+                </span>
                 {/* <span className="truncate text-xs">{activeTeam.plan}</span> */}
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -70,15 +69,15 @@ export function TeamSwitcher() {
             <DropdownMenuLabel className="text-muted-foreground text-xs">
               Teams
             </DropdownMenuLabel>
-            {teams?.map((team, index) => (
+            {organizations.map((team, index) => (
               <DropdownMenuItem
                 key={team.name}
-                onClick={() => setActiveTeam(team)}
+                onClick={() => onChange(team)}
                 className="gap-2 p-2"
               >
-                {/* <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
-                </div> */}
+                <div className="flex size-6 items-center justify-center rounded-md border">
+                  <Building className="size-3.5 shrink-0" />
+                </div>
                 {team.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>

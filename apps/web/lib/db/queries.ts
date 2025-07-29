@@ -1,5 +1,5 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
-import { cookies } from "next/headers";
+import { cookies, headers as nextHeaders } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { db } from "@workspace/db/config";
 import {
@@ -8,40 +8,20 @@ import {
   teamsTable,
   usersTable,
 } from "@workspace/db/schema";
+import { auth } from "@workspace/auth";
 
 export async function getUser() {
-  const sessionCookie = (await cookies()).get("session");
-  if (!sessionCookie || !sessionCookie.value) {
+  const headers = await nextHeaders();
+
+  const session = await auth.api.getSession({
+    headers,
+  });
+
+  if (!session) {
     return null;
   }
 
-  const sessionData = await verifyToken(sessionCookie.value);
-
-  if (
-    !sessionData ||
-    !sessionData.user ||
-    typeof sessionData.user.id !== "string"
-  ) {
-    return null;
-  }
-
-  if (new Date(sessionData.expires) < new Date()) {
-    return null;
-  }
-
-  const user = await db
-    .select()
-    .from(usersTable)
-    .where(
-      and(eq(usersTable.id, sessionData.user.id), isNull(usersTable.deletedAt))
-    )
-    .limit(1);
-
-  if (user.length === 0) {
-    return null;
-  }
-
-  return user[0];
+  return session.user;
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {
@@ -73,52 +53,67 @@ export async function updateTeamSubscription(
 }
 
 export async function getUserWithTeam() {
-  const sessionCookie = (await cookies()).get("session");
-  if (!sessionCookie || !sessionCookie.value) {
+  const headers = await nextHeaders();
+
+  const session = await auth.api.getSession({
+    headers,
+  });
+
+  if (!session) {
     return null;
   }
 
-  const sessionData = await verifyToken(sessionCookie.value);
+  return {
+    user: session.user,
+    teamId: session.session.activeOrganizationId,
+  };
 
-  if (
-    !sessionData ||
-    !sessionData.user ||
-    typeof sessionData.user.id !== "string"
-  ) {
-    return null;
-  }
-  if (
-    !sessionData ||
-    !sessionData.currentTeam ||
-    typeof sessionData.currentTeam.id !== "string"
-  ) {
-    return null;
-  }
+  // const sessionCookie = (await cookies()).get("session");
+  // if (!sessionCookie || !sessionCookie.value) {
+  //   return null;
+  // }
 
-  if (new Date(sessionData.expires) < new Date()) {
-    return null;
-  }
+  // const sessionData = await verifyToken(sessionCookie.value);
 
-  const result = await db
-    .select({
-      user: usersTable,
-      teamId: teamMembersTable.teamId,
-      teamRole: teamMembersTable.role,
-    })
-    .from(usersTable)
-    .leftJoin(teamMembersTable, eq(usersTable.id, teamMembersTable.userId))
-    .where(
-      and(
-        eq(usersTable.id, sessionData.user.id),
-        isNull(usersTable.deletedAt),
-        eq(teamMembersTable.teamId, sessionData.currentTeam.id)
-      )
-    )
-    .limit(1);
+  // if (
+  //   !sessionData ||
+  //   !sessionData.user ||
+  //   typeof sessionData.user.id !== "string"
+  // ) {
+  //   return null;
+  // }
+  // if (
+  //   !sessionData ||
+  //   !sessionData.currentTeam ||
+  //   typeof sessionData.currentTeam.id !== "string"
+  // ) {
+  //   return null;
+  // }
 
-  if (result.length === 0) {
-    return null;
-  }
+  // if (new Date(sessionData.expires) < new Date()) {
+  //   return null;
+  // }
+
+  // const result = await db
+  //   .select({
+  //     user: usersTable,
+  //     teamId: teamMembersTable.organizationId,
+  //     teamRole: teamMembersTable.role,
+  //   })
+  //   .from(usersTable)
+  //   .leftJoin(teamMembersTable, eq(usersTable.id, teamMembersTable.userId))
+  //   .where(
+  //     and(
+  //       eq(usersTable.id, sessionData.user.id),
+  //       isNull(usersTable.deletedAt),
+  //       eq(teamMembersTable.organizationId, sessionData.currentTeam.id)
+  //     )
+  //   )
+  //   .limit(1);
+
+  // if (result.length === 0) {
+  //   return null;
+  // }
 
   //   return user[0];
 
@@ -132,7 +127,7 @@ export async function getUserWithTeam() {
   //     .where(and(eq(usersTable.id, userId)))
   //     .limit(1);
 
-  return result[0];
+  // return result[0];
 }
 
 export async function getActivityLogs() {

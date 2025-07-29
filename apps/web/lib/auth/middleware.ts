@@ -50,6 +50,7 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
       return { error: result?.error?.errors[0]?.message };
     }
 
+    // @ts-ignore
     return action(result.data, formData, user);
   };
 }

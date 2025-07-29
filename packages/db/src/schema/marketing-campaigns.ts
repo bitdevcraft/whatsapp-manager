@@ -20,6 +20,7 @@ import {
   ComponentTypesEnum,
   MessageTemplateObject,
 } from "@workspace/wa-cloud-api";
+import { baseModel } from "./abstract/baseModel";
 
 export const marketingCampaignStatusEnum = pgEnum(
   "status",
@@ -37,7 +38,7 @@ export interface MarketingCampaignAnalytics {
 export const marketingCampaignsTable = pgTable(
   "marketing_campaigns",
   {
-    ...baseSchema,
+    ...baseModel,
     description: varchar("description", { length: 65_535 }),
     templateId: varchar("template_id")
       .references(() => templatesTable.id)

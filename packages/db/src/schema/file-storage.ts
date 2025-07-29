@@ -3,6 +3,7 @@ import { timestamps } from "../helpers/column-helper";
 import { enumToValues } from "../enums/enum-helper";
 import { relations } from "drizzle-orm";
 import { teamsTable } from "./teams";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export enum FileLocation {
   "AWS" = "aws_s3",
@@ -15,7 +16,7 @@ export const fileLocationEnum = pgEnum(
 );
 
 export const fileAttachmentsTable = pgTable("file_attachment", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  ...baseIdModel,
   fileLocation: fileLocationEnum(),
   fileSize: integer("file_size"),
   expiresIn: timestamp("expires_in"),

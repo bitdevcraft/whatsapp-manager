@@ -9,6 +9,7 @@ import {
 import { teamsTable } from "./teams";
 import { relations, sql } from "drizzle-orm";
 import { TemplateResponse } from "@workspace/wa-cloud-api";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export const templatesTable = pgTable(
   "templates",

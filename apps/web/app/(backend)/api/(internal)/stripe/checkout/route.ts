@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     const userTeam = await db
       .select({
-        teamId: teamMembersTable.teamId,
+        teamId: teamMembersTable.organizationId,
       })
       .from(teamMembersTable)
       .where(eq(teamMembersTable.userId, user[0]!.id))

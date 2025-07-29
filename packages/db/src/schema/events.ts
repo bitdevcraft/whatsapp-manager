@@ -10,12 +10,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { teamsTable } from "./teams";
 import { relations, sql } from "drizzle-orm";
+import { baseIdModel } from "./abstract/baseIdModel";
 
 export const eventsTable = pgTable(
   "events",
   {
     // Unique ID for this event
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...baseIdModel,
 
     // Which aggregate (entity) this event is for…
     aggregateType: varchar("aggregate_type", { length: 100 }).notNull(),

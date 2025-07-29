@@ -8,41 +8,11 @@ import { useQueryState } from "nuqs";
 import { ConversationContact } from "../_lib/types";
 
 export const columns: ColumnDef<ConversationContact>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //       className="translate-y-0.5"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //       className="translate-y-0.5"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  //   size: 40,
-  // },
   {
     id: "name",
     accessorKey: "name",
     header: () => <p className="text-center"></p>,
-    meta: {
-      label: "Name",
-      placeholder: "Search names...",
-      variant: "text",
-      icon: Text,
-    },
+
     cell: ({ row }) => {
       const name =
         row.original.contact.name !== ""

@@ -1,14 +1,11 @@
 "use client";
 
-import { signOut } from "@/app/(frontend)/(login)/actions";
+import { authClient } from "@/lib/auth/auth-client";
 import {
   IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
-import { User } from "@workspace/db/schema";
 
 import {
   Avatar,
@@ -30,21 +27,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { LogOut, UserRound } from "lucide-react";
+import { ChevronsUpDown, LogOut, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-export function NavUser() {
+export function NavUser({
+  user,
+}: {
+  user: {
+    id: string;
+    name: string;
+    emailVerified: boolean;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+    image?: string | null | undefined | undefined | undefined;
+  };
+}) {
   const { isMobile } = useSidebar();
-  const { data: user } = useSWR<User>("/api/user", fetcher);
   const router = useRouter();
-  async function handleSignOut() {
-    await signOut();
-    router.refresh();
-    router.push("/");
-  }
+
+  const onLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/auth/login"); // redirect to login page
+        },
+      },
+    });
+  };
 
   return (
     <SidebarMenu>
@@ -55,19 +66,17 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={""} alt={user?.name!} />
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
                 <AvatarFallback className="rounded-lg">
                   <UserRound size={15} />
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user?.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user?.email}
-                </span>
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-xs">{user.email}</span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -95,10 +104,10 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/ing/account">
+                <Link href="/ing/account">
                   <IconUserCircle />
                   Account
-                </a>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <IconCreditCard />
@@ -110,14 +119,10 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <form action={handleSignOut} className="w-full">
-              <button type="submit" className="flex w-full">
-                <DropdownMenuItem className="w-full flex-1 cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </button>
-            </form>
+            <DropdownMenuItem onSelect={onLogout}>
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
