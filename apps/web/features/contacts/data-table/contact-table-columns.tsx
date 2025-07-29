@@ -15,6 +15,14 @@ import { CalendarIcon, CircleDashed, Ellipsis, Text } from "lucide-react";
 import { Badge } from "@workspace/ui/components/badge";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { getSelectTags } from "@/features/tags/_lib/queries";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
@@ -151,13 +159,24 @@ export function getTableColumns({
       id: "actions",
       cell: ({ row }) => (
         <div className="w-full flex justify-end">
-          <Button
-            aria-label="Open menu"
-            variant="ghost"
-            className="flex size-8 p-0 data-[state=open]:bg-muted"
-          >
-            <Ellipsis className="size-4" aria-hidden="true" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label="Open menu"
+                variant="ghost"
+                className="flex size-8 p-0 data-[state=open]:bg-muted"
+              >
+                <Ellipsis className="size-4" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onSelect={() => setRowAction({ row, variant: "update" })}
+              >
+                Edit
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ),
       enableSorting: false,

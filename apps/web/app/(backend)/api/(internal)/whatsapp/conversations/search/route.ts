@@ -1,0 +1,108 @@
+import { getUserWithTeam } from "@/lib/db/queries";
+import {
+  withTenantTransaction,
+  contactsTable,
+  conversationsTable,
+} from "@workspace/db";
+import { or, ilike, sql } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+import z from "zod";
+
+export async function GET(request: NextRequest) {
+  try {
+    const userWithTeam = await getUserWithTeam();
+
+    if (!userWithTeam?.teamId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { teamId } = userWithTeam;
+
+    const { searchParams } = new URL(request.url);
+
+    const offset = parseInt(searchParams.get("offset") ?? "0", 10);
+    const searchInput = String(searchParams.get("search") ?? "");
+    const limit = 10;
+
+    if (!searchInput) {
+      return NextResponse.json(
+        {
+          data: [],
+          contacts: [],
+          previousOffset: null,
+          nextOffset: null,
+        },
+        { status: 200 }
+      );
+    }
+
+    const { contacts, conversations } = await withTenantTransaction(
+      teamId,
+      async (tx) => {
+        const contacts = await tx
+          .select()
+          .from(contactsTable)
+          .where(
+            or(
+              ilike(contactsTable.name, `%${searchInput}%`),
+              ilike(contactsTable.phone, `%${searchInput}%`)
+            )
+          )
+          .limit(limit);
+
+        const conversations = await tx.query.conversationsTable.findMany({
+          where: or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
+          orderBy: (conversationsTable, { asc }) => [
+            asc(conversationsTable.createdAt),
+          ],
+          offset,
+          limit: limit + 1,
+          with: {
+            contact: {
+              columns: {
+                id: true,
+                name: true,
+                phone: true,
+              },
+            },
+          },
+        });
+
+        return {
+          contacts,
+          conversations,
+        };
+      }
+    );
+
+    const hasNext = conversations.length > limit;
+
+    const data = hasNext ? conversations.slice(0, limit) : conversations;
+
+    const previousOffset = offset > 0 ? Math.max(0, offset - limit) : null;
+
+    const nextOffset = hasNext ? offset + limit : null;
+
+    console.log(data);
+    return NextResponse.json(
+      {
+        data,
+        contacts,
+        previousOffset,
+        nextOffset,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ errors: error.flatten() }, { status: 400 });
+    }
+
+    // 5. Log & return generic 500
+    console.error("POST /api/whatsapp/conversations/search error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

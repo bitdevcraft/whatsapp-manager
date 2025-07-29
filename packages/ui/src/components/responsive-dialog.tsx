@@ -27,7 +27,7 @@ export function ResponsiveDialog({
 }: {
   children: React.ReactNode;
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsOpen?(open: boolean): void;
   title: string;
   description?: string;
 }) {

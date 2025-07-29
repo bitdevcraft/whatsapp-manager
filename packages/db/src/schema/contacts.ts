@@ -3,6 +3,7 @@ import {
   jsonb,
   pgPolicy,
   pgTable,
+  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -13,6 +14,7 @@ import { relations, SQL, sql } from "drizzle-orm";
 import { usersTable } from "./users";
 import { Conversation, conversationsTable } from "./conversations";
 import { teamsTable } from "./teams";
+import { createOrganizationPolicies } from "../policies/workspace";
 
 export const contactsTable = pgTable(
   "contacts",
@@ -36,31 +38,7 @@ export const contactsTable = pgTable(
       .references(() => teamsTable.id),
   },
   (t) => [
-    // only allow SELECTs where team_id matches the session var
-    pgPolicy("contacts_select_tenant", {
-      for: "select",
-      to: process.env.POSTGRES_USER_ROLE!, // <-- your DB role here
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // inserts must set team_id = current_tenant
-    pgPolicy("contacts_insert_tenant", {
-      for: "insert",
-      to: process.env.POSTGRES_USER_ROLE!,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // updates only on your rows, and team_id can't be changed
-    pgPolicy("contacts_update_tenant", {
-      for: "update",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // deletes only your rows
-    pgPolicy("contacts_delete_tenant", {
-      for: "delete",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
+    ...createOrganizationPolicies("contacts", t),
     uniqueIndex("contacts_team_phone_unique").on(t.teamId, t.phone),
   ]
 );

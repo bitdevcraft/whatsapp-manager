@@ -17,6 +17,7 @@ export const conversationSearchParamsCache = createSearchParamsCache({
   createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
   unread: parseAsBoolean.withDefault(false),
   contact: parseAsString.withDefault(""),
+  search: parseAsString.withDefault(""),
 });
 
 export type GetConversationSchema = Awaited<

@@ -13,8 +13,9 @@ import { getSelectTags } from "@/features/tags/_lib/queries";
 
 interface Props {
   tags: Awaited<ReturnType<typeof getSelectTags>>;
+  initialValues?: Partial<ContactFormValues>;
 }
-export default function ContactNewDialog({ tags }: Props) {
+export default function ContactNewDialog({ tags, initialValues }: Props) {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const router = useRouter();
@@ -43,9 +44,13 @@ export default function ContactNewDialog({ tags }: Props) {
       <ResponsiveDialog
         isOpen={isAddOpen}
         setIsOpen={setIsAddOpen}
-        title="Edit Custom Message"
+        title="New Contact"
       >
-        <ContactForm onSubmit={onSubmit} tags={tags} />
+        <ContactForm
+          onSubmit={onSubmit}
+          tags={tags}
+          initialValues={initialValues}
+        />
       </ResponsiveDialog>
       <Button
         onClick={() => {

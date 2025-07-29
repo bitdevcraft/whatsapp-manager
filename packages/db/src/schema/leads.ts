@@ -10,11 +10,12 @@ import { baseSchema } from "../helpers/column-helper";
 import { relations, sql } from "drizzle-orm";
 import { usersTable } from "./users";
 import { teamsTable } from "./teams";
+import { baseModel } from "./abstract/baseModel";
 
 export const leadsTable = pgTable(
   "leads",
   {
-    ...baseSchema,
+    ...baseModel,
     phone: varchar("phone", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     interests: jsonb("interests").$type<string[]>().default([]),

@@ -76,7 +76,7 @@ async function seed() {
     .returning();
 
   await db.insert(teamMembersTable).values({
-    teamId: team!.id,
+    organizationId: team!.id,
     userId: user!.id,
     role: "owner",
   });

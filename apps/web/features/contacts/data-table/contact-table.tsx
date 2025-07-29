@@ -23,6 +23,9 @@ import { Contact } from "@workspace/db";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import UploadCSVContact from "../_components/upload-csv-form";
 import ContactNewDialog from "./contact-new-dialog";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import { ContactForm } from "./contact-form";
+import { ContactEditDialog } from "./contact-edit-dialog";
 
 interface ContactTableProps {
   promises: Promise<
@@ -78,6 +81,19 @@ export default function ContactTable({ promises }: ContactTableProps) {
 
   return (
     <div className="">
+      <ContactEditDialog
+        isOpen={rowAction?.variant === "update"}
+        setIsOpen={() => setRowAction(null)}
+        title="Edit Contact"
+        tags={tags}
+        initialValues={{
+          name: rowAction?.row.original.name,
+          email: rowAction?.row.original.email,
+          phoneNumber: rowAction?.row.original.phone,
+          tags: rowAction?.row.original.tags ?? [],
+        }}
+      />
+
       <DataTable
         table={table}
         actionBar={<ContactsTableActionBar table={table} tags={tags} />}
@@ -101,6 +117,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
           <DataTableToolbar table={table}>
             <UploadCSVContact />
             <ContactNewDialog tags={tags} />
+
             <DataTableSortList table={table} align="start" />
             <FeatureFlagsToggle />
           </DataTableToolbar>

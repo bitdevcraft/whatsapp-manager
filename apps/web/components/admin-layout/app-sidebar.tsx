@@ -30,6 +30,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import { TeamSwitcher } from "./team-switcher";
+import { Organization } from "better-auth/plugins/organization";
 
 const data = {
   user: {
@@ -89,13 +90,21 @@ const data = {
       url: "/ing/whatsapp/templates",
       icon: IconTemplate,
     },
+  ],
+  ads: [
     {
-      name: "Business Account",
-      url: "/ing/whatsapp/business-account",
-      icon: IconUserCircle,
+      name: "Ads Manager",
+      url: "/ing/ads/ads-manager",
+      icon: IconSpeakerphone,
     },
   ],
+
   management: [
+    {
+      name: "Business Account",
+      url: "/ing/business-account",
+      icon: IconUserCircle,
+    },
     {
       name: "Contacts",
       url: "/ing/contacts",
@@ -109,7 +118,22 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  teams,
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  teams: Organization[];
+  user: {
+    id: string;
+    name: string;
+    emailVerified: boolean;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+    image?: string | null | undefined | undefined | undefined;
+  };
+}) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -126,16 +150,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu> */}
-        <TeamSwitcher />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSubMain title="WhatsApp" items={data.whatsapp} />
+        <NavSubMain title="Ads" items={data.ads} />
         <NavSubMain title="Management" items={data.management} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

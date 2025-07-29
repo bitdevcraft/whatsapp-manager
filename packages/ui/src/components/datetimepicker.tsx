@@ -21,13 +21,14 @@ export interface DateTimePickerProps {
   /** optional control if not using FormProvider */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control?: Control<any>;
+  dateFormat?: string;
 }
 
 export const DateTimePicker = React.forwardRef<
   HTMLDivElement,
   DateTimePickerProps
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
->(({ name, control: controlProp }, ref) => {
+>(({ name, control: controlProp, dateFormat = "MM/dd/yyyy HH:mm" }, ref) => {
   // Attempt to use control from FormProvider or prop
   const formContext = useFormContext();
   const control = controlProp ?? formContext?.control;
@@ -72,7 +73,7 @@ export const DateTimePicker = React.forwardRef<
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {date ? (
-                  format(date, "MM/dd/yyyy HH:mm")
+                  format(date, dateFormat)
                 ) : (
                   <span>MM/DD/YYYY HH:mm</span>
                 )}

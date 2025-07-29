@@ -8,7 +8,6 @@ export * from "./list-views";
 export * from "./marketing-campaigns";
 export * from "./outbox";
 export * from "./tags";
-export * from "./team-members";
 export * from "./teams";
 export * from "./templates";
 export * from "./users";
