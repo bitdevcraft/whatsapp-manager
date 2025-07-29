@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { useQueryState } from "nuqs";
 import React from "react";
 import { useSearchStore } from "./search-store";
+import { useContactStore } from "./contact-store";
+import { SearchResult } from "./search-result";
 
 export default function ConversationMenu({ promises }: ConversationTableProps) {
   const [unread, setUnread] = useQueryState("unread", {
@@ -45,28 +47,34 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
           onChange={(e) => setQuery(e.target.value)}
         />
 
-        <React.Suspense
-          fallback={
-            <DataTableSkeleton
-              columnCount={7}
-              filterCount={2}
-              cellWidths={[
-                "10rem",
-                "30rem",
-                "10rem",
-                "10rem",
-                "6rem",
-                "6rem",
-                "6rem",
-              ]}
-              shrinkZero
-            />
-          }
-        >
-          <ScrollArea>
-            <ConversationTable promises={promises} />
-          </ScrollArea>
-        </React.Suspense>
+        {query ? (
+          <>
+            <SearchResult />
+          </>
+        ) : (
+          <React.Suspense
+            fallback={
+              <DataTableSkeleton
+                columnCount={7}
+                filterCount={2}
+                cellWidths={[
+                  "10rem",
+                  "30rem",
+                  "10rem",
+                  "10rem",
+                  "6rem",
+                  "6rem",
+                  "6rem",
+                ]}
+                shrinkZero
+              />
+            }
+          >
+            <ScrollArea>
+              <ConversationTable promises={promises} />
+            </ScrollArea>
+          </React.Suspense>
+        )}
       </Tabs>
     </div>
   );

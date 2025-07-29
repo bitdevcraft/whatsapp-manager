@@ -70,8 +70,6 @@ export default async function Home(props: IndexPageProps) {
             </div>
           </div>
         )}
-
-        <SearchResult />
       </div>
     </div>
   );

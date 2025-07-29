@@ -108,16 +108,20 @@ export function SearchResult() {
                 {data.pages.map((page) => (
                   <React.Fragment key={page.nextOffset}>
                     {page.data.map((el) => (
-                      <div key={el.id} className={cn(`flex mb-2 border`)}>
-                        <div>
-                          <p>{el.contact.name}</p>
-                          <p>{el.contact.phone}</p>
-                          <p>{el.body?.body?.text}</p>
-                          <p>
-                            {new Date(el.createdAt).toLocaleDateString()}{" "}
-                            {new Date(el.createdAt).toLocaleTimeString()}
-                          </p>
-                        </div>
+                      <div
+                        key={el.id}
+                        className={cn(`mb-2 border text-sm p-2 rounded`)}
+                      >
+                        <p>
+                          <span className="font-bold">{el.contact.name}</span>
+                          &nbsp;
+                          <span className="font-light">{el.contact.phone}</span>
+                        </p>
+                        <p>{el.body?.body?.text}</p>
+                        <p className="text-xs font-light text-right">
+                          {new Date(el.createdAt).toLocaleDateString()}&nbsp;
+                          {new Date(el.createdAt).toLocaleTimeString()}
+                        </p>
                       </div>
                     ))}
                   </React.Fragment>
