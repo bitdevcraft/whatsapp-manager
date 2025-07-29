@@ -1,0 +1,2 @@
+ALTER TABLE "conversations" ADD COLUMN "conversation_search" "tsvector" DEFAULT '' NOT NULL;--> statement-breakpoint
+CREATE INDEX "idx_conversation_search" ON "conversations" USING gin ("conversation_search");

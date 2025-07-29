@@ -267,6 +267,20 @@
       "when": 1753683668853,
       "tag": "0037_messy_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1753769207993,
+      "tag": "0038_common_quasimodo",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1753773041240,
+      "tag": "0039_lush_exodus",
+      "breakpoints": true
     }
   ]
 }

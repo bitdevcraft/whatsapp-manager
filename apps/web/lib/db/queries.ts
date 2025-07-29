@@ -11,38 +11,17 @@ import {
 import { auth } from "@workspace/auth";
 
 export async function getUser() {
-  const sessionCookie = (await cookies()).get("session");
-  if (!sessionCookie || !sessionCookie.value) {
+  const headers = await nextHeaders();
+
+  const session = await auth.api.getSession({
+    headers,
+  });
+
+  if (!session) {
     return null;
   }
 
-  const sessionData = await verifyToken(sessionCookie.value);
-
-  if (
-    !sessionData ||
-    !sessionData.user ||
-    typeof sessionData.user.id !== "string"
-  ) {
-    return null;
-  }
-
-  if (new Date(sessionData.expires) < new Date()) {
-    return null;
-  }
-
-  const user = await db
-    .select()
-    .from(usersTable)
-    .where(
-      and(eq(usersTable.id, sessionData.user.id), isNull(usersTable.deletedAt))
-    )
-    .limit(1);
-
-  if (user.length === 0) {
-    return null;
-  }
-
-  return user[0];
+  return session.user;
 }
 
 export async function getTeamByStripeCustomerId(customerId: string) {

@@ -1,4 +1,3 @@
-import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import {
   Sheet,
   SheetContent,
@@ -10,17 +9,14 @@ import { SearchParams } from "@/types";
 import { conversationSearchParamsCache } from "@/features/conversations/_lib/validations";
 import { getValidFilters } from "@workspace/ui/lib/data-table";
 import {
-  getContactConversation,
   getConversations,
+  getConversationSearch,
 } from "@/features/conversations/_lib/queries";
-import ConversationTable, {
-  ConversationTableProps,
-} from "@/features/conversations/data-table/conversation-table";
 import React from "react";
-import { DataTableSkeleton } from "@workspace/ui/components/data-table";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import ConversationMenu from "./conversation-menu";
 import Conversation from "./conversation";
+import { ScrollableChats } from "./scrollable-chats";
+import { SearchResult } from "./search-result";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
@@ -35,12 +31,13 @@ export default async function Home(props: IndexPageProps) {
   const promises = Promise.all([
     getConversations({ ...search, filters: validFilters }),
   ]);
-  const promisesConversation = Promise.all([
-    getContactConversation(search.contact),
+
+  const searchConversationPromises = Promise.all([
+    getConversationSearch(search.search),
   ]);
 
   return (
-    <div className="flex">
+    <div className="flex relative h-[90vh] gap-4">
       <div className="p-2 hidden md:flex ">
         <ConversationMenu promises={promises} />
       </div>
@@ -63,13 +60,18 @@ export default async function Home(props: IndexPageProps) {
             </SheetContent>
           </Sheet>
         </div>
-        <div className="rounded bg-[#ebe5de] bg-background">
-          <div className="bg-[url(/whatsapp-bg.png)] bg-opacity-40 ">
-            <div className="bg-muted/80 backdrop-invert backdrop-opacity-10 min-h-[87vh]">
-              <Conversation promises={promisesConversation} />
+        {search.contact && (
+          <div className="rounded bg-[#ebe5de] bg-background relative h-[90vh] flex flex-col">
+            <div className="bg-opacity-40 grow p-4">
+              <ScrollableChats id={search.contact} />
+            </div>
+            <div className="">
+              <Conversation contactId={search.contact} />
             </div>
           </div>
-        </div>
+        )}
+
+        <SearchResult />
       </div>
     </div>
   );

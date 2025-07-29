@@ -4,23 +4,28 @@ import ConversationTable, {
   ConversationTableProps,
 } from "@/features/conversations/data-table/conversation-table";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
+import { Input } from "@workspace/ui/components/input";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { useQueryState } from "nuqs";
 import React from "react";
+import { useSearchStore } from "./search-store";
 
 export default function ConversationMenu({ promises }: ConversationTableProps) {
   const [unread, setUnread] = useQueryState("unread", {
     defaultValue: "false",
     shallow: false,
   });
-  const [contact, setContact] = useQueryState("contact", {
+
+  const [_contact, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });
 
+  const { query, setQuery } = useSearchStore();
+
   return (
-    <div className="min-h-[90vh] p-4 rounded-md bg-background">
+    <div className="p-4 rounded-md bg-background">
       <Tabs
         defaultValue="all"
         className="w-full md:w-96"
@@ -33,10 +38,12 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
           <TabsTrigger value="false">All</TabsTrigger>
           <TabsTrigger value="true">Unread</TabsTrigger>
         </TabsList>
-        {/* <TabsContent value="all">
-          Make changes to your account here.
-        </TabsContent>
-        <TabsContent value="unread">Change your password here.</TabsContent> */}
+
+        <Input
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
 
         <React.Suspense
           fallback={

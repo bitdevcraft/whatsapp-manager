@@ -4,18 +4,125 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import {
   contactsTable,
   ConversationBody,
+  conversationMembersTable,
   conversationsTable,
   NewConversation,
   whatsAppBusinessAccountsTable,
 } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq, gt, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
+import z from "zod";
 
-export async function GET() {
-  const result = await getConversations();
-  return new Response(JSON.stringify(result), { status: 200 });
+export async function GET(request: NextRequest) {
+  try {
+    const userWithTeam = await getUserWithTeam();
+
+    if (!userWithTeam?.teamId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { teamId, user } = userWithTeam;
+
+    const { searchParams } = new URL(request.url);
+    const offset = parseInt(searchParams.get("offset") ?? "0", 10);
+    const unread = Boolean(searchParams.get("unread") ?? false);
+    const limit = 10;
+
+    const { batch, total } = await withTenantTransaction(teamId, async (tx) => {
+      const messages = tx
+        .select({
+          // ...getTableColumns(conversationsTable),
+          id: contactsTable.id,
+          message: conversationsTable.body,
+          createdAt: conversationsTable.createdAt,
+          contact: {
+            name: contactsTable.name,
+            phone: contactsTable.phone,
+          },
+          isUnread: sql<boolean>`
+                      (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
+                    `.as("isUnread"),
+          rn: sql<number>`row_number() over (
+                      partition by ${conversationsTable.contactId}
+                      order by ${conversationsTable.createdAt} desc
+                    )`.as("rn"),
+        })
+        .from(conversationsTable)
+        .innerJoin(
+          conversationMembersTable,
+          and(
+            eq(
+              conversationMembersTable.contactId,
+              conversationsTable.contactId
+            ),
+            eq(conversationMembersTable.userId, user.id),
+            unread
+              ? gt(
+                  conversationsTable.createdAt,
+                  conversationMembersTable.lastReadAt
+                )
+              : undefined
+          )
+        )
+        .leftJoin(
+          contactsTable,
+          eq(contactsTable.id, conversationsTable.contactId)
+        )
+        .as("sub");
+
+      const batch = await tx
+        .select()
+        .from(messages)
+        .where(eq(sql<number>`"sub"."rn"`, 1))
+        .limit(limit)
+        .offset(offset);
+
+      const total = await tx
+        .select({
+          count: count(),
+        })
+        .from(messages)
+        .where(eq(sql<number>`"sub"."rn"`, 1))
+        .execute()
+        .then((res) => res[0]?.count ?? 0);
+
+      return {
+        batch,
+        total,
+      };
+    });
+
+    const hasNext = batch.length > limit;
+
+    const data = hasNext ? batch.slice(0, limit) : batch;
+
+    const previousOffset = offset > 0 ? Math.max(0, offset - limit) : null;
+
+    const nextOffset = hasNext ? offset + limit : null;
+
+    return NextResponse.json(
+      {
+        data,
+        previousOffset,
+        nextOffset,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ errors: error.flatten() }, { status: 400 });
+    }
+
+    // 5. Log & return generic 500
+    console.error("POST /api/posts error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
