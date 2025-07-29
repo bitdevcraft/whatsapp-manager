@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Circle, Text } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { ConversationContact } from "../_lib/types";
+import { useContactStore } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/conversations/contact-store";
 
 export const columns: ColumnDef<ConversationContact>[] = [
   {
@@ -24,6 +25,8 @@ export const columns: ColumnDef<ConversationContact>[] = [
         shallow: false,
       });
 
+      const { setContactId } = useContactStore();
+
       const createdDate = row.original.createdAt
         ? new Date(row.original.createdAt)
         : new Date();
@@ -37,7 +40,10 @@ export const columns: ColumnDef<ConversationContact>[] = [
             )}
             <Button
               variant="link"
-              onClick={() => setContact(row.original.id)}
+              onClick={() => {
+                setContactId(row.original.id!);
+                setContact(row.original.id);
+              }}
               className="text-foreground font-light"
             >
               {name}
