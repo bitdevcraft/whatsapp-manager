@@ -30,7 +30,7 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
     <div className="p-4 rounded-md bg-background">
       <Tabs
         defaultValue="all"
-        className="w-full md:w-96"
+        className="w-full md:w-64"
         onValueChange={(v) => {
           setUnread(v);
           setContact("");
