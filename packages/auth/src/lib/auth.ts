@@ -4,6 +4,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { v4 as uuidv4 } from "uuid";
+
 import { getActiveOrganization } from "./get-active-organization";
 
 export const auth = betterAuth({
