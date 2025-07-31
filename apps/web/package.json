@@ -46,6 +46,7 @@
     "bullmq": "^5.54.0",
     "class-variance-authority": "^0.7.1",
     "csv-import-react": "^1.0.14",
+    "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.2",
     "facebook-nodejs-business-sdk": "^23.0.0",
     "jose": "^6.0.11",

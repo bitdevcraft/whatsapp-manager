@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^22.0.2",
+    "@types/uuid": "^10.0.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "^0.31.1",
@@ -32,7 +33,9 @@
     "@tsconfig/next": "^2.0.3",
     "@tsconfig/node-lts": "^22.0.2",
     "@tsconfig/recommended": "^1.0.10",
+    "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.2",
-    "zod": "^3.25.74"
+    "zod": "^3.25.74",
+    "uuid": "^11.1.0"
   }
 }
