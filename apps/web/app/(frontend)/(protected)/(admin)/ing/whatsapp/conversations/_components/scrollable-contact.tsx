@@ -69,47 +69,49 @@ export function ScrollableContacts() {
   }, []);
 
   console.log(messages?.length, hasNextPage);
+  if (status === "pending") {
+    return (
+      <div className="flex justify-center py-2 bg-background">
+        <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
+      </div>
+    );
+  }
 
+  if (status === "error") {
+    return <span>Error: {error.message}</span>;
+  }
   return (
     <>
-      <>
-        {status === "pending" ? (
-          <p>Loading...</p>
-        ) : status === "error" ? (
-          <span>Error: {error.message}</span>
-        ) : (
-          <div
-            id="scrollable_search_result"
-            style={{
-              height: "70vh",
-              overflow: "auto",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <InfiniteScroll
-              dataLength={messages ? messages.length : 0}
-              next={() => fetchNextPage()}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-              }}
-              hasMore={hasNextPage}
-              loader={<h4 className="text-center">Loading...</h4>}
-              scrollableTarget="scrollable_search_result"
-            >
-              {data.pages?.map((page) => (
-                <React.Fragment key={page.nextOffset}>
-                  {page.data.map((el) => (
-                    <ContactMessageItem key={el.id} item={el} />
-                  ))}
-                </React.Fragment>
+      <div
+        id="scrollable_search_result"
+        style={{
+          height: "70vh",
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <InfiniteScroll
+          dataLength={messages ? messages.length : 0}
+          next={() => fetchNextPage()}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+          hasMore={hasNextPage}
+          loader={<h4 className="text-center">Loading...</h4>}
+          scrollableTarget="scrollable_search_result"
+        >
+          {data.pages?.map((page) => (
+            <React.Fragment key={page.nextOffset}>
+              {page.data.map((el) => (
+                <ContactMessageItem key={el.id} item={el} />
               ))}
-            </InfiniteScroll>
-          </div>
-        )}
-      </>
+            </React.Fragment>
+          ))}
+        </InfiniteScroll>
+      </div>
 
       <ReactQueryDevtools />
     </>
@@ -143,7 +145,7 @@ function ContactMessageItem({
   const lastSend: string = formatMessageTimestamp(createdDate);
   return (
     <div
-      className="flex justify-between p-2 relative h-16 rounded shadow border border-muted hover:bg-muted"
+      className="flex justify-between p-2 relative h-16 border-b hover:bg-muted"
       onClick={(e) => {
         e.stopPropagation();
         setContact(item.id!);
