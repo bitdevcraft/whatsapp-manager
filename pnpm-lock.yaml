@@ -31,7 +31,13 @@ importers:
         version: 4.1.0
       drizzle-orm:
         specifier: ^0.44.2
-        version: 0.44.2(@types/pg@8.15.4)(pg@8.16.0)(postgres@3.4.7)
+        version: 0.44.2(@types/pg@8.15.4)(kysely@0.28.3)(pg@8.16.3)(postgres@3.4.7)
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
+      zod:
+        specifier: ^3.25.74
+        version: 3.25.76
     devDependencies:
       '@types/uuid':
         specifier: ^10.0.0
@@ -156,6 +162,9 @@ importers:
       csv-import-react:
         specifier: ^1.0.14
         version: 1.0.16(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rollup@4.45.1)
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       drizzle-orm:
         specifier: ^0.44.2
         version: 0.44.2(@types/pg@8.15.4)(kysely@0.28.3)(pg@8.16.3)(postgres@3.4.7)
