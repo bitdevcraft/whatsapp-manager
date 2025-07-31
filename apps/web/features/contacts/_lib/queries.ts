@@ -18,6 +18,7 @@ import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetContactSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
+import { Contact } from "@workspace/db";
 
 export async function getContacts(input: GetContactSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -129,6 +130,43 @@ export async function getContacts(input: GetContactSchema) {
     {
       revalidate: 10,
       tags: ["contacts", `contacts:${userWithTeam?.teamId}`],
+    }
+  )();
+}
+
+export async function getContactById(
+  id: string
+): Promise<{ data: Contact | undefined }> {
+  const defaultValue: { data: Contact | undefined } = { data: undefined };
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return defaultValue;
+  }
+
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const data = await withTenantTransaction(teamId, async (tx) => {
+          const contact = await tx.query.contactsTable.findFirst({
+            where: eq(contactsTable.id, id),
+          });
+
+          return contact;
+        });
+
+        return { data };
+      } catch (error) {
+        return defaultValue;
+      }
+    },
+    [id],
+    {
+      tags: [id],
+      revalidate: 1,
     }
   )();
 }

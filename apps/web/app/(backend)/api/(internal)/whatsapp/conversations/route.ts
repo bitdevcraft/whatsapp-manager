@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         .select()
         .from(messages)
         .where(eq(sql<number>`"sub"."rn"`, 1))
-        .limit(limit)
+        .limit(limit + 1)
         .offset(offset);
 
       const total = await tx

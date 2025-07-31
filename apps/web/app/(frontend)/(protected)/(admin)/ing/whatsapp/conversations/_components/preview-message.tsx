@@ -1,17 +1,26 @@
 import { ConversationBody, User } from "@workspace/db";
 import { Separator } from "@workspace/ui/components/separator";
+import { cn } from "@workspace/ui/lib/utils";
 
 export function PreviewMessage({
   input,
   date,
   user,
-}: {
+  className,
+  ...props
+}: React.ComponentProps<"div"> & {
   input: ConversationBody;
   date: Date;
   user?: User | null;
 }) {
   return (
-    <div className="border rounded max-w-md text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2">
+    <div
+      className={cn(
+        "border rounded max-w-md text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2",
+        className
+      )}
+      {...props}
+    >
       <div>{input.header?.text}</div>
       <div>{input.body?.text}</div>
       <div className="text-sm font-light text-muted">{input.footer}</div>

@@ -1,8 +1,6 @@
 "use client";
 
-import { getContactConversation } from "@/features/conversations/_lib/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ConversationBody, User } from "@workspace/db";
 import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import {
@@ -16,15 +14,14 @@ import { SendHorizonal } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Separator } from "@workspace/ui/components/separator";
 import { toast } from "sonner";
 import axios from "axios";
 import { useQueryState } from "nuqs";
 import { nanoid } from "nanoid";
-import { ScrollableChats } from "./scrollable-chats";
+import { useSearchMessageStore } from "../_store/message-store";
 
 const FormSchema = z.object({
-  text: z.string().nonempty(),
+  text: z.string().nonempty("Message should not be empty"),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -32,11 +29,14 @@ type FormValues = z.infer<typeof FormSchema>;
 export interface Props {
   contactId: string;
 }
-export default function Conversation({ contactId }: Props) {
+export default function ConversationMessage({ contactId }: Props) {
   const [reload, setReload] = useQueryState("rId", {
     defaultValue: "",
     shallow: false,
   });
+
+  const { updateRandomId, clearSearchMessageId, clearSearchString } =
+    useSearchMessageStore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -52,6 +52,10 @@ export default function Conversation({ contactId }: Props) {
         text: input.text,
       });
 
+      updateRandomId();
+      clearSearchMessageId();
+      clearSearchString();
+
       form.reset();
       setReload(nanoid());
     } catch (error) {
@@ -62,7 +66,7 @@ export default function Conversation({ contactId }: Props) {
   return (
     <Form {...form}>
       <form
-        className="bg-background p-4 flex gap-2 w-full"
+        className="bg-background flex gap-2 w-full"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField

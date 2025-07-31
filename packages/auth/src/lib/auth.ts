@@ -4,9 +4,18 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { v4 as uuidv4 } from "uuid";
+
 import { getActiveOrganization } from "./get-active-organization";
 
+import "dotenv/config";
+
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export const auth = betterAuth({
+  baseURL: process.env.BASE_URL!,
+  trustedOrigins: [process.env.BASE_URL!],
   // Database
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -26,7 +35,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url, token }, request) => {
-      console.log(`Click the link to reset your password: ${url}`);
+      await resend.emails.send({
+        from: "No-Reply <noreply@ingeniousuae.com>",
+        to: [user.email],
+        subject: "Password Reset",
+        text: `Click the link to verify your email: ${url}`,
+      });
+    },
+    onPasswordReset: async ({ user }, request) => {
+      console.log(`Password for user ${user.email} has been reset.`);
     },
   },
 
