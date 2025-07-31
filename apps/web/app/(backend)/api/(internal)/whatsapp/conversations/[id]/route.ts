@@ -2,7 +2,6 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import { conversationsTable, conversationMembersTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq, and, count } from "drizzle-orm";
-import user from "facebook-nodejs-business-sdk/src/objects/user";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -63,7 +62,6 @@ export async function GET(
       return { batch, total };
     });
 
-  
     const hasNext = batch.length > limit;
 
     const data = hasNext ? batch.slice(0, limit) : batch;
