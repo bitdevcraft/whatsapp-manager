@@ -93,7 +93,6 @@ export async function getConversations(
           async (tx) => {
             const messages = tx
               .select({
-                // ...getTableColumns(conversationsTable),
                 id: contactsTable.id,
                 message: conversationsTable.body,
                 createdAt: conversationsTable.createdAt,
