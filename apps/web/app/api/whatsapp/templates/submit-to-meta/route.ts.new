@@ -1,0 +1,243 @@
+import { NextResponse } from "next/server";
+import { eq, and, isNull } from "drizzle-orm";
+import { AppTemplateResponse, TemplateMeta } from "../../../../../src/types/template";
+import { withTenantTransaction } from "@workspace/db/tenant";
+import { getUserWithTeam } from "@/lib/db/queries";
+import WhatsApp from "@workspace/wa-cloud-api";
+import { decryptApiKey } from "@/lib/crypto";
+import { templatesTable } from "@workspace/db/schema/templates";
+
+export const runtime = 'nodejs';
+
+type TemplateSubmissionResponse = {
+  success: boolean;
+  message: string;
+  template?: {
+    id: string;
+    name: string;
+    status: string;
+    meta?: TemplateMeta;
+  };
+  error?: string;
+  details?: Record<string, unknown>;
+};
+
+export async function POST(request: Request) {
+  try {
+    // Parse request body
+    const templateData = await request.json();
+    console.log('Received template data for Meta submission:', JSON.stringify(templateData, null, 2));
+
+    // Get user and team information for tenant context
+    const userWithTeam = await getUserWithTeam();
+    
+    if (!userWithTeam?.teamId) {
+      throw new Error('User is not associated with a team');
+    }
+
+    const teamId = userWithTeam.teamId;
+    
+    // Get the existing template to update its content within tenant transaction
+    const existingTemplate = await withTenantTransaction(teamId, async (tx) => {
+      const [template] = await tx
+        .select()
+        .from(templatesTable)
+        .where(
+          and(
+            eq(templatesTable.name, templateData.name),
+            eq(templatesTable.teamId, teamId),
+            isNull(templatesTable.deletedAt)
+          )
+        )
+        .limit(1);
+      
+      if (!template) {
+        throw new Error(`Template with name ${templateData.name} not found or you don't have permission to access it`);
+      }
+      
+      return template as { id: string; content: AppTemplateResponse };
+    });
+
+    // Get WhatsApp Business Account configuration with phone number
+    const account = await withTenantTransaction(teamId, async (tx) => {
+      return await tx.query.whatsAppBusinessAccountsTable.findFirst({
+        where: (accounts, { eq }) => eq(accounts.teamId, teamId),
+        with: {
+          team: {
+            with: {
+              waBusinessPhoneNumber: true
+            }
+          }
+        }
+      });
+    });
+
+    if (!account) {
+      throw new Error('No WhatsApp Business Account found for this team');
+    }
+
+    // Get the first verified phone number
+    const phoneNumber = account.team?.waBusinessPhoneNumber?.[0];
+    if (!phoneNumber || !phoneNumber.isRegistered) {
+      throw new Error('No verified phone number found for this WhatsApp Business Account. Please register a phone number first.');
+    }
+
+    if (!account?.accessToken?.iv || !account?.accessToken?.data) {
+      throw new Error('WhatsApp Business Account not properly configured');
+    }
+
+    // Decrypt the access token
+    const accessToken = await decryptApiKey({
+      iv: account.accessToken.iv,
+      data: account.accessToken.data
+    });
+
+    // Initialize WhatsApp client
+    const whatsapp = new WhatsApp({
+      accessToken,
+      businessAcctId: account.id,
+      phoneNumberId: phoneNumber.id.toString(),
+      apiVersion: 'v19.0'
+    });
+
+    // Submit template to Meta with detailed logging
+    console.log('Submitting template to Meta with data:', JSON.stringify(templateData, null, 2));
+    
+    // Submit template to Meta
+    const metaResponse = await submitTemplateToMeta(whatsapp, templateData);
+    
+    // Update the template's content with Meta submission info
+    const updatedContent: AppTemplateResponse = {
+      ...existingTemplate.content,
+      id: existingTemplate.content.id || templateData.name,
+      meta: {
+        ...existingTemplate.content?.meta,
+        status: 'PENDING',
+        id: metaResponse.id,
+        submittedAt: new Date().toISOString(),
+      } as TemplateMeta
+    };
+
+    // Update the template in our database with the new content within tenant transaction
+    const result = await withTenantTransaction(teamId, async (tx) => {
+      const [updatedTemplate] = await tx
+        .update(templatesTable)
+        .set({
+          content: updatedContent as any, // Type assertion needed due to Drizzle type complexity
+          updatedAt: new Date(),
+          status: 'PENDING',
+          metaId: metaResponse.id
+        })
+        .where(
+          and(
+            eq(templatesTable.id, existingTemplate.id),
+            eq(templatesTable.teamId, teamId)
+          )
+        )
+        .returning();
+      
+      return updatedTemplate;
+    });
+
+    if (!result) {
+      throw new Error('Failed to update template with Meta submission info');
+    }
+
+    const response: TemplateSubmissionResponse = {
+      success: true,
+      message: 'Template submitted to Meta for approval',
+      template: {
+        id: result.id,
+        name: result.name,
+        status: result.status,
+        meta: updatedContent.meta
+      }
+    };
+
+    return NextResponse.json(response);
+
+  } catch (error: unknown) {
+    console.error('Error in template submission to Meta:', error);
+    
+    let errorMessage = 'Failed to submit template to Meta';
+    let errorDetails: Record<string, unknown> = {};
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = {
+        name: error.name,
+        message: error.message,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      };
+    } else if (typeof error === 'object' && error !== null) {
+      errorMessage = 'An unknown error occurred';
+      errorDetails = { ...error };
+    }
+    
+    const errorResponse: TemplateSubmissionResponse = {
+      success: false,
+      message: errorMessage,
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
+    };
+    
+    return NextResponse.json(errorResponse, { status: 500 });
+  }
+}
+
+async function submitTemplateToMeta(
+  whatsapp: WhatsApp,
+  templateData: any
+): Promise<{ id: string }> {
+  try {
+    const response = await whatsapp.templates.createTemplate(templateData);
+    console.log('Meta API response:', JSON.stringify(response, null, 2));
+    
+    if (!response?.id) {
+      console.error('Invalid response from Meta API:', response);
+      throw new Error('Invalid response received from Meta API');
+    }
+    
+    return { id: response.id };
+  } catch (error: any) {
+    console.error('Error submitting to Meta API:', error);
+    
+    let errorMessage = 'Failed to submit to Meta';
+    const errorDetails: Record<string, any> = {};
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      const { status, statusText, data } = error.response;
+      errorDetails.status = status;
+      errorDetails.statusText = statusText;
+      
+      if (data?.error) {
+        const apiError = data.error;
+        errorMessage = `Meta API Error: ${apiError.message || 'Unknown error'}`;
+        errorDetails.error = {
+          type: apiError.type,
+          code: apiError.code,
+          subcode: apiError.error_subcode,
+          fbtraceId: apiError.fbtrace_id
+        };
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      errorMessage = 'No response received from Meta API. Please check your internet connection.';
+      errorDetails.request = {
+        method: error.config?.method,
+        url: error.config?.url,
+        headers: error.config?.headers ? {
+          ...error.config.headers,
+          // Redact sensitive information
+          Authorization: error.config.headers.Authorization ? '[REDACTED]' : undefined,
+          'x-access-token': error.config.headers['x-access-token'] ? '[REDACTED]' : undefined
+        } : undefined
+      };
+    }
+    
+    console.error('Error details:', JSON.stringify(errorDetails, null, 2));
+    throw new Error(errorMessage);
+  }
+}
