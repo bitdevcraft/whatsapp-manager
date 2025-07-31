@@ -6,7 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Circle, Text } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { ConversationContact } from "../_lib/types";
-import { useContactStore } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/conversations/contact-store";
+import { useContactStore } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/conversations/_store/contact-store";
 
 export const columns: ColumnDef<ConversationContact>[] = [
   {

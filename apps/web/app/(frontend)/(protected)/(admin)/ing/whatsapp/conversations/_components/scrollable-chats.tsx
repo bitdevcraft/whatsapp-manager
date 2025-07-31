@@ -6,8 +6,9 @@ import { cn } from "@workspace/ui/lib/utils";
 import { PreviewMessage } from "./preview-message";
 import { Conversation } from "@workspace/db";
 import { Input } from "@workspace/ui/components/input";
-import { useContactStore } from "./contact-store";
-import { ChatInfiniteScroll } from "./_components/chat-infinite-scroll";
+import { useContactStore } from "../_store/contact-store";
+import { ChatInfiniteScroll } from "./chat-infinite-scroll";
+import { useSearchMessageStore } from "../_store/message-store";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -18,7 +19,8 @@ interface PaginatedResponse<T> {
 export function ScrollableChats() {
   const contactId = useContactStore((state) => state.contactId);
 
-  const [onLoad, setOnLoad] = React.useState<boolean>(false);
+  const { searchMessageId, setLoading, loading, searchRandomId } =
+    useSearchMessageStore();
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
@@ -32,14 +34,14 @@ export function ScrollableChats() {
     hasNextPage,
     hasPreviousPage,
   } = useInfiniteQuery<PaginatedResponse<Conversation>>({
-    queryKey: ["conversations", contactId],
+    queryKey: ["conversations", contactId, searchMessageId, searchRandomId],
     queryFn: async ({
       pageParam,
     }): Promise<PaginatedResponse<Conversation>> => {
       let url = `/api/whatsapp/conversations/${contactId}?offset=${pageParam}`;
 
-      if (onLoad) {
-        url = url.concat(`&messageId=${``}`);
+      if (loading && searchMessageId) {
+        url = url.concat(`&messageId=${searchMessageId}`);
       }
 
       if (pageParam === 0 && remaining) {
@@ -49,7 +51,7 @@ export function ScrollableChats() {
       const response = await fetch(url);
       const data = await response.json();
 
-      setOnLoad(false);
+      setLoading(false);
 
       if (data.previousOffset > 0) {
         setRemaining(data.previousOffset % 10);
@@ -91,7 +93,7 @@ export function ScrollableChats() {
         }}
       >
         <ChatInfiniteScroll
-          showMiddle={true}
+          showMiddle={!!searchMessageId}
           hasNext={hasNextPage}
           hasPrevious={hasPreviousPage}
           isReverse={true}

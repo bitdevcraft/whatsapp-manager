@@ -8,6 +8,7 @@ import { ConversationBody } from "@workspace/db/schema";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useQueryState } from "nuqs";
 import { formatMessageTimestamp } from "@/features/conversations/data-table/conversation-table-columns";
+import { useSearchMessageStore } from "../_store/message-store";
 
 interface PageResponse {
   data: {
@@ -135,6 +136,8 @@ function ContactMessageItem({
     shallow: false,
   });
 
+  const { clearSearchMessageId } = useSearchMessageStore();
+
   const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
   const lastSend: string = formatMessageTimestamp(createdDate);
   return (
@@ -143,6 +146,7 @@ function ContactMessageItem({
       onClick={(e) => {
         e.stopPropagation();
         setContact(item.id!);
+        clearSearchMessageId();
       }}
       {...props}
     >

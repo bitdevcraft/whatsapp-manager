@@ -9,8 +9,8 @@ import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { useQueryState } from "nuqs";
 import React from "react";
-import { useSearchStore } from "./search-store";
-import { useContactStore } from "./contact-store";
+import { useSearchStore } from "../_store/search-store";
+import { useContactStore } from "../_store/contact-store";
 import { SearchResult } from "./search-result";
 import { ScrollableContacts } from "./scrollable-contact";
 

@@ -7,7 +7,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import axios from "axios";
 import { ConversationWithContact, Contact } from "@workspace/db/schema";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useSearchStore } from "./search-store";
+import { useSearchStore } from "../_store/search-store";
 
 interface PageResponse {
   data: ConversationWithContact[];
