@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useQueryState } from "nuqs";
 import { formatMessageTimestamp } from "@/features/conversations/data-table/conversation-table-columns";
 import { useSearchMessageStore } from "../_store/message-store";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
 
 interface PageResponse {
   data: {
@@ -98,7 +99,7 @@ export function ScrollableContacts() {
               loader={<h4 className="text-center">Loading...</h4>}
               scrollableTarget="scrollable_search_result"
             >
-              {data.pages.map((page) => (
+              {data.pages?.map((page) => (
                 <React.Fragment key={page.nextOffset}>
                   {page.data.map((el) => (
                     <ContactMessageItem key={el.id} item={el} />
@@ -131,7 +132,7 @@ function ContactMessageItem({
     rn: number;
   };
 }) {
-  const [contact, setContact] = useQueryState("contact", {
+  const [_contact, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });
@@ -142,7 +143,7 @@ function ContactMessageItem({
   const lastSend: string = formatMessageTimestamp(createdDate);
   return (
     <div
-      className="flex justify-between p-2 relative h-16 rounded shadow border border-muted"
+      className="flex justify-between p-2 relative h-16 rounded shadow border border-muted hover:bg-muted"
       onClick={(e) => {
         e.stopPropagation();
         setContact(item.id!);

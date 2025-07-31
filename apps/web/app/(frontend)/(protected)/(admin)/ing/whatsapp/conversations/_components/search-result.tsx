@@ -8,6 +8,9 @@ import axios from "axios";
 import { ConversationWithContact, Contact } from "@workspace/db/schema";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useSearchStore } from "../_store/search-store";
+import { useContactStore } from "../_store/contact-store";
+import { useSearchMessageStore } from "../_store/message-store";
+import { useQueryState } from "nuqs";
 
 interface PageResponse {
   data: ConversationWithContact[];
@@ -18,6 +21,12 @@ interface PageResponse {
 
 export function SearchResult() {
   const search = useSearchStore((state) => state.query);
+
+  const [contact, setContact] = useQueryState("contact", {
+    defaultValue: "",
+    shallow: false,
+  });
+  const { setSearchMessageId } = useSearchMessageStore();
 
   const queryKey = ["search_result", search];
 
@@ -80,22 +89,29 @@ export function SearchResult() {
                 flexDirection: "column",
               }}
             >
-              {data.pages.map((page) => (
+              <h1 className="text-center font-semibold">Contacts</h1>
+              {data.pages?.map((page) => (
                 <React.Fragment key={page.nextOffset}>
                   {page.contacts.map((el) => (
-                    <div key={el.id} className={cn(`flex mb-2 border`)}>
-                      <div>
-                        <p>{el.name}</p>
-                        <p>{el.phone}</p>
-                        <p>
-                          {new Date(el.createdAt).toLocaleDateString()}{" "}
-                          {new Date(el.createdAt).toLocaleTimeString()}
-                        </p>
-                      </div>
+                    <div
+                      key={el.id}
+                      className={cn(`mb-2 border-b p-2 rounded hover:bg-muted`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setContact(el.id);
+                      }}
+                    >
+                      <p className="flex justify-between">
+                        <span className="font-medium text-sm">{el.name}</span>
+                        &nbsp;
+                        <span className="text-xs font-light">{el.phone}</span>
+                      </p>
                     </div>
                   ))}
                 </React.Fragment>
               ))}
+
+              <h1 className="text-center font-semibold mt-4">Messages</h1>
 
               <InfiniteScroll
                 dataLength={messages ? messages.length : 0}
@@ -110,10 +126,17 @@ export function SearchResult() {
                     {page.data.map((el) => (
                       <div
                         key={el.id}
-                        className={cn(`mb-2 border text-sm p-2 rounded`)}
+                        className={cn(
+                          `mb-2 border-b text-sm p-2 rounded hover:bg-muted`
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setContact(el.contact.id);
+                          setSearchMessageId(el.id);
+                        }}
                       >
                         <p>
-                          <span className="font-bold">{el.contact.name}</span>
+                          <span className="font-medium">{el.contact.name}</span>
                           &nbsp;
                           <span className="font-light">{el.contact.phone}</span>
                         </p>

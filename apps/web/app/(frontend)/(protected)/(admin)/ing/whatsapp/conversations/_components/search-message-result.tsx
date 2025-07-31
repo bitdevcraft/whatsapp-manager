@@ -87,12 +87,14 @@ export function SearchMessageResult() {
           loader={<h4 className="text-center">Loading...</h4>}
           scrollableTarget="scrollable_search_message_result"
         >
-          {data.pages.map((page) => (
+          {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
               {page.data.map((el) => (
                 <div
                   key={el.id}
-                  className={cn(`mb-2 border text-sm p-2 rounded`)}
+                  className={cn(
+                    `mb-2 border text-sm p-2 rounded hover:bg-muted`
+                  )}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSearchMessageId(el.id);

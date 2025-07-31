@@ -12,6 +12,7 @@ interface SearchMessageIdState {
   clearSearchMessageId: () => void;
   clearSearchString: () => void;
   setLoading: (loading: boolean) => void;
+  updateRandomId: () => void;
 }
 
 // Create the Zustand store
@@ -26,4 +27,5 @@ export const useSearchMessageStore = create<SearchMessageIdState>((set) => ({
   clearSearchMessageId: () => set(() => ({ searchMessageId: "" })),
   clearSearchString: () => set(() => ({ searchString: "" })),
   setLoading: (loading) => set(() => ({ loading })),
+  updateRandomId: () => set(() => ({ searchRandomId: nanoid() })),
 }));

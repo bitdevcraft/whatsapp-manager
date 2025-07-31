@@ -75,7 +75,7 @@ export function ScrollableChats() {
   });
 
   if (status === "pending") {
-    return <p>Loading...</p>;
+    return <div className="text-center">Loading...</div>;
   }
   if (status === "error") {
     return <span>Error: {error.message}</span>;
@@ -109,9 +109,9 @@ export function ScrollableChats() {
           loadingNext={isFetchingNextPage}
           loadingPrevious={isFetchingPreviousPage}
         >
-          {data.pages.map((page) => (
+          {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
-              {page.data.map((el: any) => (
+              {page.data?.map((el: any) => (
                 <div
                   key={el.id}
                   className={cn(
@@ -121,6 +121,9 @@ export function ScrollableChats() {
                 >
                   {el.body && (
                     <PreviewMessage
+                      className={
+                        searchMessageId === el.id ? "bg-yellow-200" : ""
+                      }
                       input={el.body}
                       date={el.createdAt}
                       user={el.user}

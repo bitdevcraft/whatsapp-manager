@@ -18,9 +18,10 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useQueryState } from "nuqs";
 import { nanoid } from "nanoid";
+import { useSearchMessageStore } from "../_store/message-store";
 
 const FormSchema = z.object({
-  text: z.string().nonempty(),
+  text: z.string().nonempty("Message should not be empty"),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -33,6 +34,9 @@ export default function ConversationMessage({ contactId }: Props) {
     defaultValue: "",
     shallow: false,
   });
+
+  const { updateRandomId, clearSearchMessageId, clearSearchString } =
+    useSearchMessageStore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -47,6 +51,10 @@ export default function ConversationMessage({ contactId }: Props) {
         contactId,
         text: input.text,
       });
+
+      updateRandomId();
+      clearSearchMessageId();
+      clearSearchString();
 
       form.reset();
       setReload(nanoid());

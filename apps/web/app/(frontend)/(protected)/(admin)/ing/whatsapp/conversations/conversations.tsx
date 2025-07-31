@@ -68,7 +68,7 @@ export function Conversations({
       }}
       className="min-h-[90vh]"
     >
-      <SidebarInset className="h-[90vh]">
+      <SidebarInset className="h-[90vh] bg-transparent">
         <div className="flex relative h-[90vh] overflow-hidden">
           <div className="hidden md:grid">
             <ConversationMenu promises={promises} />
@@ -108,7 +108,7 @@ export function Conversations({
                   <SearchSidebarTrigger />
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded bg-[#ebe5de] bg-background relative h-full">
+                  <div className="rounded bg-[#ebe5de] relative h-full">
                     <ScrollableChats />
                   </div>
                 </CardContent>
