@@ -1,6 +1,6 @@
 import React, { ReactNode, useRef, useEffect, useLayoutEffect } from "react";
 
-// Props interface for the ChatInfiniteScroll component (non-generic)
+// Props interface for the ChatInfiniteScroll component
 export interface ChatInfiniteScrollProps {
   /** If true, scroll to the middle on mount */
   showMiddle: boolean;
@@ -10,9 +10,9 @@ export interface ChatInfiniteScrollProps {
   hasPrevious: boolean;
   /** If true, render items in reverse order */
   isReverse: boolean;
-  /** Callback to load next page when scrolling down/up */
+  /** Callback to load next page */
   next: () => void;
-  /** Callback to load previous page when scrolling up/down */
+  /** Callback to load previous page */
   previous: () => void;
   /** Indicates if a next-page load is in progress */
   loadingNext?: boolean;
@@ -27,7 +27,8 @@ export interface ChatInfiniteScrollProps {
 /**
  * ChatInfiniteScroll
  * A reusable infinite scroll container for chat/message lists.
- * Maintains view position on prepend and supports loading indicators.
+ * Prevents overlapping loads, maintains view position on prepend or append,
+ * and supports loading indicators.
  */
 export function ChatInfiniteScroll({
   showMiddle,
@@ -45,17 +46,17 @@ export function ChatInfiniteScroll({
   const topSentinelRef = useRef<HTMLDivElement | null>(null);
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Track scroll metrics for prepending
+  // Track counts and scroll for prepend/append
+  const prevChildrenCountRef = useRef<number>(React.Children.count(children));
   const prevScrollHeightRef = useRef<number>(0);
   const prevScrollTopRef = useRef<number>(0);
-  const prevChildrenCountRef = useRef<number>(React.Children.count(children));
   const lastLoadPrependRef = useRef<boolean>(false);
+  const lastLoadAppendRef = useRef<boolean>(false);
 
-  // On mount or when mode changes: scroll to middle, bottom, or top
+  // Initial scroll: middle, bottom, or top
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     if (showMiddle) {
       container.scrollTop =
         (container.scrollHeight - container.clientHeight) / 2;
@@ -66,49 +67,68 @@ export function ChatInfiniteScroll({
     }
   }, [showMiddle, isReverse]);
 
-  // After render: if items were prepended, adjust scroll to maintain view
+  // After new items: adjust scroll if prepend or append occurred
   useLayoutEffect(() => {
     const container = containerRef.current;
     const currentCount = React.Children.count(children);
 
-    if (
-      container &&
-      lastLoadPrependRef.current &&
-      currentCount > prevChildrenCountRef.current
-    ) {
-      const delta = container.scrollHeight - prevScrollHeightRef.current;
-      container.scrollTop = prevScrollTopRef.current + delta;
+    if (container) {
+      if (
+        lastLoadPrependRef.current &&
+        currentCount > prevChildrenCountRef.current
+      ) {
+        // Prepend: preserve view by offsetting scrollTop
+        const delta = container.scrollHeight - prevScrollHeightRef.current;
+        container.scrollTop = prevScrollTopRef.current + delta;
+      } else if (
+        lastLoadAppendRef.current &&
+        currentCount > prevChildrenCountRef.current
+      ) {
+        // Append: keep scrollTop steady
+        container.scrollTop = prevScrollTopRef.current;
+      }
     }
 
+    // Reset trackers
     prevChildrenCountRef.current = currentCount;
     lastLoadPrependRef.current = false;
+    lastLoadAppendRef.current = false;
   }, [children]);
 
-  // Set up IntersectionObserver for sentinels
+  // IntersectionObserver for triggers
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const options = { root: container, threshold: 0.1 };
     const observer = new IntersectionObserver((entries) => {
+      // Determine callbacks and gating
       const loadOlder = isReverse ? next : previous;
       const loadNewer = isReverse ? previous : next;
-      const canLoadOlder = isReverse ? hasNext : hasPrevious;
-      const canLoadNewer = isReverse ? hasPrevious : hasNext;
+      const canLoadOlder =
+        (isReverse ? hasNext : hasPrevious) &&
+        !(isReverse ? loadingNext : loadingPrevious);
+      const canLoadNewer =
+        (isReverse ? hasPrevious : hasNext) &&
+        !(isReverse ? loadingPrevious : loadingNext);
 
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
 
-        // Prepend scenario
+        // Prepend (older) scenario: top sentinel in normal, bottom in reverse
         if (entry.target === topSentinelRef.current && canLoadOlder) {
+          prevChildrenCountRef.current = React.Children.count(children);
           prevScrollHeightRef.current = container.scrollHeight;
           prevScrollTopRef.current = container.scrollTop;
           lastLoadPrependRef.current = true;
           loadOlder();
         }
 
-        // Append scenario
+        // Append (newer) scenario
         if (entry.target === bottomSentinelRef.current && canLoadNewer) {
+          prevChildrenCountRef.current = React.Children.count(children);
+          prevScrollTopRef.current = container.scrollTop;
+          lastLoadAppendRef.current = true;
           loadNewer();
         }
       });
@@ -123,9 +143,18 @@ export function ChatInfiniteScroll({
         observer.unobserve(bottomSentinelRef.current);
       observer.disconnect();
     };
-  }, [hasNext, hasPrevious, isReverse, next, previous]);
+  }, [
+    hasNext,
+    hasPrevious,
+    isReverse,
+    loadingNext,
+    loadingPrevious,
+    next,
+    previous,
+    children,
+  ]);
 
-  // Simple spinner indicator
+  // Loading spinner
   const Spinner = () => (
     <div className="flex justify-center py-2">
       <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
@@ -138,9 +167,8 @@ export function ChatInfiniteScroll({
       className={`overflow-y-auto flex flex-col ${className}`}
       style={{ height: "100%" }}
     >
-      {/* Top sentinel */}
+      {/* Top sentinel and loader */}
       <div ref={topSentinelRef} className="w-full h-1" />
-      {/* Loading indicator at top if applicable */}
       {!isReverse && loadingPrevious && <Spinner />}
       {isReverse && loadingNext && <Spinner />}
 
@@ -151,10 +179,9 @@ export function ChatInfiniteScroll({
         {children}
       </div>
 
-      {/* Loading indicator at bottom if applicable */}
+      {/* Loader and bottom sentinel */}
       {!isReverse && loadingNext && <Spinner />}
       {isReverse && loadingPrevious && <Spinner />}
-      {/* Bottom sentinel */}
       <div ref={bottomSentinelRef} className="w-full h-1" />
     </div>
   );

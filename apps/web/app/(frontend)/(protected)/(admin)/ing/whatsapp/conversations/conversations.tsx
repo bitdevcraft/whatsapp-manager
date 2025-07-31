@@ -7,11 +7,11 @@ import {
   SheetContent,
   Sheet,
 } from "@workspace/ui/components/sheet";
-import ConversationMessage from "./conversation-message";
-import ConversationMenu from "./conversation-menu";
-import { ScrollableChats } from "./scrollable-chats";
+import ConversationMessage from "./_components/conversation-message";
+import ConversationMenu from "./_components/conversation-menu";
+import { ScrollableChats } from "./_components/scrollable-chats";
 import { Menu, Search, UserCircle, X } from "lucide-react";
-import { useContactStore } from "./contact-store";
+import { useContactStore } from "./_store/contact-store";
 import { useEffect } from "react";
 import { getContactById } from "@/features/contacts/_lib/queries";
 import React from "react";
@@ -39,6 +39,8 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
+import { useSearchMessageStore } from "./_store/message-store";
+import { SearchMessageResult } from "./_components/search-message-result";
 
 export function Conversations({
   promises,
@@ -66,7 +68,7 @@ export function Conversations({
       }}
       className="min-h-[90vh]"
     >
-      <SidebarInset className="h-[90vh]">
+      <SidebarInset className="h-[90vh] bg-transparent">
         <div className="flex relative h-[90vh] overflow-hidden">
           <div className="hidden md:grid">
             <ConversationMenu promises={promises} />
@@ -106,7 +108,7 @@ export function Conversations({
                   <SearchSidebarTrigger />
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded bg-[#ebe5de] bg-background relative h-full">
+                  <div className="rounded bg-[#ebe5de] relative h-full">
                     <ScrollableChats />
                   </div>
                 </CardContent>
@@ -126,6 +128,8 @@ export function Conversations({
 function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar } = useSidebar();
 
+  const { setSearchString, searchString } = useSearchMessageStore();
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -135,9 +139,19 @@ function SearchSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </Button>
           <p>Search Messages</p>
         </div>
-        <Input placeholder="Search in Conversation" className="mb-2" />
+        <Input
+          placeholder="Search in Conversation"
+          className="mb-2"
+          value={searchString}
+          onChange={(e) => {
+            e.stopPropagation();
+            setSearchString(e.target.value);
+          }}
+        />
       </SidebarHeader>
-      <SidebarContent className="p-4">Test</SidebarContent>
+      <SidebarContent className="p-4">
+        <SearchMessageResult />
+      </SidebarContent>
       <SidebarFooter />
     </Sidebar>
   );

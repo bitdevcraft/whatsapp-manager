@@ -6,8 +6,9 @@ import { cn } from "@workspace/ui/lib/utils";
 import { PreviewMessage } from "./preview-message";
 import { Conversation } from "@workspace/db";
 import { Input } from "@workspace/ui/components/input";
-import { useContactStore } from "./contact-store";
-import { ChatInfiniteScroll } from "./_components/chat-infinite-scroll";
+import { useContactStore } from "../_store/contact-store";
+import { ChatInfiniteScroll } from "./chat-infinite-scroll";
+import { useSearchMessageStore } from "../_store/message-store";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -18,7 +19,8 @@ interface PaginatedResponse<T> {
 export function ScrollableChats() {
   const contactId = useContactStore((state) => state.contactId);
 
-  const [onLoad, setOnLoad] = React.useState<boolean>(false);
+  const { searchMessageId, setLoading, loading, searchRandomId } =
+    useSearchMessageStore();
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
@@ -32,14 +34,14 @@ export function ScrollableChats() {
     hasNextPage,
     hasPreviousPage,
   } = useInfiniteQuery<PaginatedResponse<Conversation>>({
-    queryKey: ["conversations", contactId],
+    queryKey: ["conversations", contactId, searchMessageId, searchRandomId],
     queryFn: async ({
       pageParam,
     }): Promise<PaginatedResponse<Conversation>> => {
       let url = `/api/whatsapp/conversations/${contactId}?offset=${pageParam}`;
 
-      if (onLoad) {
-        url = url.concat(`&messageId=${``}`);
+      if (loading && searchMessageId) {
+        url = url.concat(`&messageId=${searchMessageId}`);
       }
 
       if (pageParam === 0 && remaining) {
@@ -49,7 +51,7 @@ export function ScrollableChats() {
       const response = await fetch(url);
       const data = await response.json();
 
-      setOnLoad(false);
+      setLoading(false);
 
       if (data.previousOffset > 0) {
         setRemaining(data.previousOffset % 10);
@@ -73,8 +75,13 @@ export function ScrollableChats() {
   });
 
   if (status === "pending") {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex justify-center py-2 bg-background">
+        <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
+      </div>
+    );
   }
+
   if (status === "error") {
     return <span>Error: {error.message}</span>;
   }
@@ -91,7 +98,7 @@ export function ScrollableChats() {
         }}
       >
         <ChatInfiniteScroll
-          showMiddle={true}
+          showMiddle={!!searchMessageId}
           hasNext={hasNextPage}
           hasPrevious={hasPreviousPage}
           isReverse={true}
@@ -107,9 +114,9 @@ export function ScrollableChats() {
           loadingNext={isFetchingNextPage}
           loadingPrevious={isFetchingPreviousPage}
         >
-          {data.pages.map((page) => (
+          {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
-              {page.data.map((el: any) => (
+              {page.data?.map((el: any) => (
                 <div
                   key={el.id}
                   className={cn(
@@ -119,6 +126,9 @@ export function ScrollableChats() {
                 >
                   {el.body && (
                     <PreviewMessage
+                      className={
+                        searchMessageId === el.id ? "bg-yellow-200" : ""
+                      }
                       input={el.body}
                       date={el.createdAt}
                       user={el.user}
