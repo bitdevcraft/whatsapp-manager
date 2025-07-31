@@ -64,10 +64,11 @@ export function Conversations({
         "--sidebar-width": "20rem",
         "--sidebar-width-mobile": "20rem",
       }}
+      className="min-h-[90vh]"
     >
-      <SidebarInset>
-        <div className="flex relative h-[90vh] gap-4">
-          <div className="p-2 hidden md:flex ">
+      <SidebarInset className="h-[90vh]">
+        <div className="flex relative h-[90vh] overflow-hidden">
+          <div className="hidden md:grid">
             <ConversationMenu promises={promises} />
           </div>
           <div className="flex-1 p-2">

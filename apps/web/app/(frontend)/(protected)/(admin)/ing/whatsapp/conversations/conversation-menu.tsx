@@ -12,6 +12,7 @@ import React from "react";
 import { useSearchStore } from "./search-store";
 import { useContactStore } from "./contact-store";
 import { SearchResult } from "./search-result";
+import { ScrollableContacts } from "./scrollable-contact";
 
 export default function ConversationMenu({ promises }: ConversationTableProps) {
   const [unread, setUnread] = useQueryState("unread", {
@@ -52,28 +53,31 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
             <SearchResult />
           </>
         ) : (
-          <React.Suspense
-            fallback={
-              <DataTableSkeleton
-                columnCount={7}
-                filterCount={2}
-                cellWidths={[
-                  "10rem",
-                  "30rem",
-                  "10rem",
-                  "10rem",
-                  "6rem",
-                  "6rem",
-                  "6rem",
-                ]}
-                shrinkZero
-              />
-            }
-          >
-            <ScrollArea>
-              <ConversationTable promises={promises} />
-            </ScrollArea>
-          </React.Suspense>
+          // <React.Suspense
+          //   fallback={
+          //     <DataTableSkeleton
+          //       columnCount={7}
+          //       filterCount={2}
+          //       cellWidths={[
+          //         "10rem",
+          //         "30rem",
+          //         "10rem",
+          //         "10rem",
+          //         "6rem",
+          //         "6rem",
+          //         "6rem",
+          //       ]}
+          //       shrinkZero
+          //     />
+          //   }
+          // >
+          //   <ScrollArea>
+          //     <ConversationTable promises={promises} />
+          //   </ScrollArea>
+          // </React.Suspense>
+          <div>
+            <ScrollableContacts />
+          </div>
         )}
       </Tabs>
     </div>

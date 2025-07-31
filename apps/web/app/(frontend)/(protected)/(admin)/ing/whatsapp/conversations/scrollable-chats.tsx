@@ -18,7 +18,7 @@ interface PaginatedResponse<T> {
 export function ScrollableChats() {
   const contactId = useContactStore((state) => state.contactId);
 
-  const [onLoad, setOnLoad] = React.useState<boolean>(true);
+  const [onLoad, setOnLoad] = React.useState<boolean>(false);
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
@@ -39,9 +39,7 @@ export function ScrollableChats() {
       let url = `/api/whatsapp/conversations/${contactId}?offset=${pageParam}`;
 
       if (onLoad) {
-        url = url.concat(
-          `&messageId=${`19d3b555-9f01-4dad-9319-1e80f3c89cb5`}`
-        );
+        url = url.concat(`&messageId=${``}`);
       }
 
       if (pageParam === 0 && remaining) {
