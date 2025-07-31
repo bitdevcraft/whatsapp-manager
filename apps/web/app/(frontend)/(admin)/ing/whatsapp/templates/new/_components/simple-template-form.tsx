@@ -96,9 +96,9 @@ export default function SimpleTemplateForm() {
           headers: Object.fromEntries(response.headers.entries())
         });
         
-        // Try to parse the response as JSON, but handle non-JSON responses gracefully
+        let responseText = '';
         try {
-          const responseText = await response.text();
+          responseText = await response.text();
           
           // Log the raw response text for debugging
           console.log('Raw response text:', responseText);
@@ -110,7 +110,7 @@ export default function SimpleTemplateForm() {
           console.error('Failed to parse JSON response:', {
             status: response.status,
             statusText: response.statusText,
-            responseText: responseText,
+            responseText,
             parseError
           });
           

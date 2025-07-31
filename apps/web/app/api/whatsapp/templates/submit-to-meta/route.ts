@@ -119,21 +119,27 @@ export async function POST(request: Request) {
     if (!account) {
       throw new Error('No WhatsApp Business Account found for this team');
     }
+    
+    // Ensure account is properly typed after the null check
+    const verifiedAccount = account;
 
     // Get the first verified phone number
-    const phoneNumber = account.team?.waBusinessPhoneNumber?.[0];
-    if (!phoneNumber || !phoneNumber.isRegistered) {
+    const phoneNumber = verifiedAccount.team?.waBusinessPhoneNumber?.[0];
+    if (!phoneNumber?.id || !phoneNumber.isRegistered) {
       throw new Error('No verified phone number found for this WhatsApp Business Account. Please register a phone number first.');
     }
+    
+    // At this point, we know phoneNumber is defined and has an id
+    const verifiedPhoneNumber = phoneNumber;
 
-    if (!account?.accessToken?.iv || !account?.accessToken?.data) {
+    if (!verifiedAccount.accessToken?.iv || !verifiedAccount.accessToken?.data) {
       throw new Error('WhatsApp Business Account not properly configured');
     }
 
     // Decrypt the access token
     const accessToken = await decryptApiKey({
-      iv: account.accessToken.iv,
-      data: account.accessToken.data
+      iv: verifiedAccount.accessToken.iv,
+      data: verifiedAccount.accessToken.data
     });
 
     // Create a custom Axios instance for v22.0
@@ -190,8 +196,8 @@ export async function POST(request: Request) {
       constructor() {
         super({
           accessToken,
-          businessAcctId: account.id,
-          phoneNumberId: phoneNumber.id.toString(),
+          businessAcctId: verifiedAccount.id.toString(),
+phoneNumberId: verifiedPhoneNumber.id,
           // @ts-ignore - Private property access needed to fix the issue
           httpClient: axiosInstance
         });
@@ -216,7 +222,7 @@ export async function POST(request: Request) {
         existingTemplate,
         {
           accessToken,
-          businessAccountId: account.id
+          businessAccountId: account.id.toString()
         }
       );
       console.log('Meta API response received:', JSON.stringify(result, null, 2));
@@ -266,7 +272,7 @@ export async function POST(request: Request) {
         template: {
           id: updatedTemplate.id,
           name: updatedTemplate.name,
-          status: updatedTemplate.status,
+          status: updatedContent.meta?.status || 'PENDING',
           meta: updatedContent.meta
         }
       };

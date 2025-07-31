@@ -6,7 +6,16 @@ import { templatesTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { getUserWithTeam } from "@/lib/db/queries";
-import type { TemplateResponse } from "@workspace/wa-cloud-api/features/template/types";
+import type { TemplateResponse } from "@workspace/wa-cloud-api";
+import { CategoryEnum } from "@workspace/wa-cloud-api";
+
+// Extend the TemplateResponse type to include meta
+interface AppTemplateResponse extends Omit<TemplateResponse, 'meta'> {
+  meta?: {
+    status: string;
+    createdAt: string;
+  };
+}
 
 export const runtime = 'nodejs';
 
@@ -85,12 +94,18 @@ export async function POST(request: NextRequest) {
     
     try {
             // Create the template with Meta status
-      const templateContent: TemplateResponse = {
+      // Validate and cast category to CategoryEnum
+      const category = Object.values(CategoryEnum).includes(templateData.category as CategoryEnum)
+        ? (templateData.category as CategoryEnum)
+        : CategoryEnum.Marketing; // Default to MARKETING if invalid
+
+      const templateContent: AppTemplateResponse = {
         ...templateData,
+        category, // Use validated category
         meta: {
           status: 'DRAFT',
           createdAt: new Date().toISOString()
-        } as any, // Temporary any to avoid type issues
+        },
         // Ensure required fields from TemplateResponse are included
         id: templateId,
         status: 'PENDING',
@@ -105,7 +120,7 @@ export async function POST(request: NextRequest) {
           .values({
             id: templateId,
             name: templateData.name,
-            content: templateContent as any, // Temporary any to avoid type issues
+            content: templateContent,
             teamId: userWithTeam.teamId!,
             updatedAt: new Date(),
           })
