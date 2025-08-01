@@ -40,6 +40,7 @@ Copy-Item "$RepoPath\package.json" $newRelease
 Copy-Item "$RepoPath\pnpm-lock.yaml" $newRelease
 Copy-Item "$RepoPath\pnpm-workspace.yaml" $newRelease
 Copy-Item "$RepoPath\ecosystem.config.js" $newRelease
+Copy-Item "$RepoPath\.npmrc" $newRelease
 
 $srcPkgAuth = Join-Path $RepoPath "packages\auth\dist"
 Robocopy $srcPkgAuth      "$newRelease\packages\auth\dist"      /MIR /MT:8
@@ -58,7 +59,8 @@ Robocopy $srcPkgWaCloudAPI      "$newRelease\packages\wa-cloud-api\dist"      /M
 Copy-Item "$RepoPath\packages\wa-cloud-api\package.json" "$newRelease\packages\wa-cloud-api"
 
 Push-Location "$newRelease"
-pnpm install --prod --ignore-scripts -F web
+pnpm install -F "./packages/wa-cloud-api" 
+pnpm install --prod --frozen-lockfile -F "./apps/*" 
 Pop-Location
 
 $junction = Get-Item -Path "$DeployPath\current"

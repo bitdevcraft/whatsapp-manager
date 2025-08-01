@@ -2,15 +2,14 @@ import WhatsApp, {
   MessageTypesEnum,
   WebhookMessage,
 } from "@workspace/wa-cloud-api";
+
 import { webhookHandler } from "../../config";
+import { handleButtonMessage } from "./messages/button/incoming-button";
 import { handleDocumentMessage } from "./messages/document/incoming-document";
 import { handleImageMessage } from "./messages/image/incoming-image";
 import { handleInteractiveMessage } from "./messages/interactive/incoming-interactive";
-import { handleTextMessage } from "./messages/text/incoming-text";
 import { handleMessageStatus } from "./messages/statuses/message-status";
-import { handleButtonMessage } from "./messages/button/incoming-button";
-import { db, whatsAppBusinessAccountsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { handleTextMessage } from "./messages/text/incoming-text";
 
 export function registerWebhook() {
   webhookHandler.onMessagePreProcess(
