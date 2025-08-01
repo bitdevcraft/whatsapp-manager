@@ -29,6 +29,8 @@ pnpm --filter=./apps/web deploy "$newRelease\apps\web"
 pnpm --filter=./apps/whatsapp-service deploy "$newRelease\apps\whatsapp-service"
 Pop-Location
 
+Copy-Item "$RepoPath\apps\web\.env.local" "$newRelease\apps\web"
+Copy-Item "$RepoPath\apps\whatsapp-service\.env" "$newRelease\apps\whatsapp-service"
 
 $junction = Get-Item -Path "$DeployPath\current"
 $oldRelease = (Get-Item $junction.Target).FullName

@@ -9,6 +9,10 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "dependencies": {
     "@google/genai": "^1.5.1",
     "@workspace/db": "workspace:*",
