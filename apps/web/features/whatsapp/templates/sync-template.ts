@@ -1,12 +1,17 @@
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { whatsAppBusinessAccountsTable } from "@workspace/db";
+import { Template, whatsAppBusinessAccountsTable } from "@workspace/db";
 import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import WhatsApp, { WhatsAppConfig } from "@workspace/wa-cloud-api";
+import WhatsApp, {
+  ResponsePagination,
+  TemplateResponse,
+  WhatsAppConfig,
+} from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
+import { buildConflictUpdateColumns } from "@workspace/db/lib";
 
 const waPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const waAccessToken = process.env.WHATSAPP_API_ACCESS_TOKEN;
@@ -33,8 +38,10 @@ export async function syncTemplate() {
     return;
   }
 
+  const { teamId } = userWithTeam;
+
   try {
-    await withTenantTransaction(userWithTeam?.teamId, async (tx) => {
+    await withTenantTransaction(teamId, async (tx) => {
       const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
         with: {
           team: {
@@ -43,12 +50,16 @@ export async function syncTemplate() {
             },
           },
         },
-        where: eq(whatsAppBusinessAccountsTable.teamId, userWithTeam.teamId!),
+        where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
       });
 
+      if (!account || !account.accessToken) return;
+
+      const { data, iv } = account.accessToken;
+
       const decryptAccessToken = await decryptApiKey({
-        iv: account?.accessToken?.iv!,
-        data: account?.accessToken?.data!,
+        iv,
+        data,
       });
 
       const config: WhatsAppConfig = {
@@ -59,24 +70,43 @@ export async function syncTemplate() {
 
       const whatsapp = new WhatsApp(config);
 
-      const response = await whatsapp.templates.getTemplates({});
-      for (const item of response.data) {
-        await tx
-          .insert(templatesTable)
-          .values({
-            id: item.id,
-            name: item.name,
-            content: item,
-            teamId: userWithTeam?.teamId!,
-          })
-          .onConflictDoUpdate({
-            target: [templatesTable.id],
-            set: {
-              name: item.name,
-              content: item,
-            },
-          });
+      let hasNext: boolean = true;
+      let after: string = "";
+
+      const templates: Template[] = [];
+
+      while (hasNext) {
+        const response: ResponsePagination<TemplateResponse> =
+          await whatsapp.templates.getTemplates({ after });
+
+        const tmp: Template[] = response.data.map(
+          (template) =>
+            ({
+              id: template.id,
+              name: template.name,
+              content: template,
+              teamId,
+            }) as Template
+        );
+
+        templates.push(...tmp);
+
+        if (!response.paging.next) {
+          hasNext = false;
+          break;
+        }
+
+        after = response.paging.cursors.after;
       }
+
+      // const response = await whatsapp.templates.getTemplates({});
+      await tx
+        .insert(templatesTable)
+        .values(templates)
+        .onConflictDoUpdate({
+          target: [templatesTable.id],
+          set: buildConflictUpdateColumns(templatesTable, ["name", "content"]),
+        });
     });
   } catch (error) {
     logger.error(error);
