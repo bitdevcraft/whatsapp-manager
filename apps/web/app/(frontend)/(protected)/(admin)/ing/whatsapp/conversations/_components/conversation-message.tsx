@@ -8,6 +8,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { SendHorizonal } from "lucide-react";
@@ -19,6 +20,28 @@ import axios from "axios";
 import { useQueryState } from "nuqs";
 import { nanoid } from "nanoid";
 import { useSearchMessageStore } from "../_store/message-store";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
+import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
+
+import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { Contact, Template } from "@workspace/db/schema";
+import {
+  MultiStepForm,
+  MultiStepFormStep,
+} from "@/components/forms/multi-step-form";
+import {
+  TemplateSendValue,
+  templateSendSchema,
+} from "@/types/validations/template-schema";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
@@ -27,9 +50,15 @@ const FormSchema = z.object({
 type FormValues = z.infer<typeof FormSchema>;
 
 export interface Props {
-  contactId: string;
+  contact: Contact;
+  lastMessageDate?: Date;
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
-export default function ConversationMessage({ contactId }: Props) {
+export default function ConversationMessage({
+  contact,
+  lastMessageDate,
+  templates,
+}: Props) {
   const [reload, setReload] = useQueryState("rId", {
     defaultValue: "",
     shallow: false,
@@ -48,7 +77,7 @@ export default function ConversationMessage({ contactId }: Props) {
   const onSubmit = async (input: FormValues) => {
     try {
       await axios.post("/api/whatsapp/conversations", {
-        contactId,
+        contactId: contact.id,
         text: input.text,
       });
 
@@ -62,6 +91,41 @@ export default function ConversationMessage({ contactId }: Props) {
       toast.error("Error Sending");
     }
   };
+
+  const [templateDialog, setTemplateDialog] = React.useState<boolean>(false);
+
+  if (
+    !lastMessageDate ||
+    (lastMessageDate && !isWithinLast24Hours(lastMessageDate))
+  ) {
+    return (
+      <div className="w-full">
+        <ResponsiveDialog
+          isOpen={templateDialog}
+          title={"Message Template"}
+          setIsOpen={setTemplateDialog}
+        >
+          <TemplateMessage
+            contact={contact}
+            templates={templates}
+            setIsOpen={setTemplateDialog}
+          />
+        </ResponsiveDialog>
+        <div className="flex gap-2 w-full">
+          <Textarea
+            className="flex-1"
+            disabled
+            placeholder="24-hr window time is done. Please send a message using a template"
+          />
+
+          <Button onClick={() => setTemplateDialog(true)}>
+            Send Template
+            <SendHorizonal />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -85,5 +149,149 @@ export default function ConversationMessage({ contactId }: Props) {
         </Button>
       </form>
     </Form>
+  );
+}
+
+function isWithinLast24Hours(createdAt: Date | string): boolean {
+  const created =
+    typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+  const now = Date.now();
+  const diffMs = now - created.getTime();
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  return diffMs >= 0 && diffMs <= oneDayMs;
+}
+
+function TemplateMessage({
+  contact,
+  templates,
+  setIsOpen,
+}: {
+  contact: Contact;
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
+  setIsOpen: (state: boolean) => void;
+}) {
+  const form = useForm<TemplateSendValue>({
+    resolver: zodResolver(templateSendSchema),
+    defaultValues: {
+      template: {
+        template: "",
+        messageTemplate: {
+          name: "",
+          language: {
+            policy: "deterministic",
+            code: LanguagesEnum.English,
+          },
+          components: [],
+        },
+      },
+      phone: contact.phone,
+      contactId: contact.id,
+      templateId: "",
+    },
+  });
+
+  const [selectedTemplate, setSelectedTemplate] =
+    React.useState<Template | null>(null);
+
+  const defaultMessageTemplate = React.useMemo(() => {
+    return selectedTemplate
+      ? transformTemplateResponseToFormValues(selectedTemplate.content!)
+      : undefined;
+  }, [selectedTemplate]);
+
+  // Patch messageTemplate values when template changes
+  React.useEffect(() => {
+    if (defaultMessageTemplate) {
+      form.setValue("template.messageTemplate", defaultMessageTemplate);
+    }
+    const templateId = form.getValues().template.template;
+
+    if (templateId) {
+      const match = templates.templates.find((t: any) => t.id === templateId);
+      setSelectedTemplate(match ?? null);
+    }
+  }, [defaultMessageTemplate, form, templates.templates]);
+
+  const { setSearchMessageId } = useSearchMessageStore();
+
+  const onSubmit = async (data: TemplateSendValue) => {
+    try {
+      await axios.post("/api/whatsapp/conversations/send-template", {
+        ...data,
+        templateId: selectedTemplate?.id,
+      });
+
+      toast.success("Sent");
+    } catch (error: any) {
+      toast.error(`Error : ${error.message}`);
+    }
+
+    setIsOpen(false);
+    setSearchMessageId("");
+  };
+
+  return (
+    <div>
+      <MultiStepForm
+        className={"space-y-10"}
+        schema={templateSendSchema}
+        form={form}
+        onSubmit={onSubmit}
+      >
+        <MultiStepFormStep name="templates">
+          <Form {...form}>
+            <div className={"flex flex-col gap-4"}>
+              <FormField
+                name="template.template"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Template</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          const match = templates.templates.find(
+                            (t) => t.id === value
+                          );
+                          setSelectedTemplate(match ?? null);
+                        }}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {templates.templates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {selectedTemplate && (
+                <MessageTemplateForm
+                  form={form}
+                  namePrefix="template.messageTemplate"
+                  initialTemplate={selectedTemplate.content!}
+                  preview
+                />
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button type="submit" variant="outline">
+                  Send
+                </Button>
+              </div>
+            </div>
+          </Form>
+        </MultiStepFormStep>
+      </MultiStepForm>
+    </div>
   );
 }

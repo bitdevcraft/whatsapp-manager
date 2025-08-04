@@ -1,20 +1,14 @@
 "use client";
 
-import ConversationTable, {
-  ConversationTableProps,
-} from "@/features/conversations/data-table/conversation-table";
-import { DataTableSkeleton } from "@workspace/ui/components/data-table";
 import { Input } from "@workspace/ui/components/input";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { useQueryState } from "nuqs";
 import React from "react";
 import { useSearchStore } from "../_store/search-store";
-import { useContactStore } from "../_store/contact-store";
 import { SearchResult } from "./search-result";
 import { ScrollableContacts } from "./scrollable-contact";
 
-export default function ConversationMenu({ promises }: ConversationTableProps) {
+export default function ConversationMenu() {
   const [unread, setUnread] = useQueryState("unread", {
     defaultValue: "false",
     shallow: false,
@@ -53,28 +47,6 @@ export default function ConversationMenu({ promises }: ConversationTableProps) {
             <SearchResult />
           </>
         ) : (
-          // <React.Suspense
-          //   fallback={
-          //     <DataTableSkeleton
-          //       columnCount={7}
-          //       filterCount={2}
-          //       cellWidths={[
-          //         "10rem",
-          //         "30rem",
-          //         "10rem",
-          //         "10rem",
-          //         "6rem",
-          //         "6rem",
-          //         "6rem",
-          //       ]}
-          //       shrinkZero
-          //     />
-          //   }
-          // >
-          //   <ScrollArea>
-          //     <ConversationTable promises={promises} />
-          //   </ScrollArea>
-          // </React.Suspense>
           <div>
             <ScrollableContacts />
           </div>

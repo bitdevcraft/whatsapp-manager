@@ -9,9 +9,17 @@ import { ConversationsTableActionBar } from "./conversation-table-action-bar";
 import { columns } from "@/features/conversations/data-table/conversation-table-columns";
 import { getConversations } from "@/features/conversations/_lib/queries";
 import { useTitle } from "@/components/provider/title-provider";
+import { getSelectTemplates } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/new/_components/queries";
+import { getContactById } from "@/features/contacts/_lib/queries";
 
 export interface ConversationTableProps {
-  promises: Promise<[Awaited<ReturnType<typeof getConversations>>]>;
+  promises: Promise<
+    [
+      Awaited<ReturnType<typeof getConversations>>,
+      Awaited<ReturnType<typeof getSelectTemplates>>,
+      Awaited<ReturnType<typeof getContactById>>,
+    ]
+  >;
 }
 export default function ConversationTable({
   promises,

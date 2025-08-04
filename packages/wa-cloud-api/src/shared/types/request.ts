@@ -45,7 +45,8 @@ export interface Paging {
         before: string;
         after: string;
     };
-    next: string;
+    next?: string;
+    previous?: string;
 }
 
 export declare class RequesterClass {

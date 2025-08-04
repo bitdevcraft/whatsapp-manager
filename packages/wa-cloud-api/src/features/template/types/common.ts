@@ -174,6 +174,8 @@ export type TemplateResponse = {
 
 export type TemplateGetParams = {
     limit?: number;
+    after?: string;
+    before?: string;
     name?: string;
     language?: LanguagesEnum;
     category?: CategoryEnum;

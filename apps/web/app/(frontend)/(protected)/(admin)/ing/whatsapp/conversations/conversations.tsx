@@ -41,28 +41,32 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { useSearchMessageStore } from "./_store/message-store";
 import { SearchMessageResult } from "./_components/search-message-result";
+import { getSelectTemplates } from "../marketing-campaigns/new/_components/queries";
+import { getConversations } from "@/features/conversations/get-conversations";
 
-export function Conversations({
-  promises,
-  contactPromise,
-  searchContact,
-}: ConversationTableProps & {
+interface Props {
+  promises: Promise<
+    [
+      Awaited<ReturnType<typeof getSelectTemplates>>,
+      Awaited<ReturnType<typeof getContactById>>,
+    ]
+  >;
   searchContact: string | null;
-  contactPromise: Promise<Awaited<ReturnType<typeof getContactById>>>;
-}) {
+}
+export function Conversations({ promises, searchContact }: Props) {
   const { contactId, setContactId } = useContactStore();
 
-  const contact = React.use(contactPromise);
+  const [templates, contact] = React.use(promises);
 
   useEffect(() => {
     if (searchContact) setContactId(searchContact);
-  }, [searchContact]);
+  }, [searchContact, setContactId]);
 
   return (
     <SidebarProvider
       defaultOpen={false}
       style={{
-        // @ts-ignore
+        // @ts-expect-error object-literal
         "--sidebar-width": "20rem",
         "--sidebar-width-mobile": "20rem",
       }}
@@ -71,7 +75,7 @@ export function Conversations({
       <SidebarInset className="h-[90vh] bg-transparent">
         <div className="flex relative h-[90vh] overflow-hidden">
           <div className="hidden md:grid">
-            <ConversationMenu promises={promises} />
+            <ConversationMenu />
           </div>
           <div className="flex-1 p-2">
             <div className="">
@@ -87,7 +91,7 @@ export function Conversations({
                 </SheetTrigger>
                 <SheetContent side="left" className="flex md:hidden">
                   <div className="pt-10 px-2">
-                    <ConversationMenu promises={promises} />
+                    <ConversationMenu />
                   </div>
                 </SheetContent>
               </Sheet>
@@ -108,12 +112,16 @@ export function Conversations({
                   <SearchSidebarTrigger />
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded bg-[#ebe5de] relative h-full">
+                  <div className="rounded relative h-full">
                     <ScrollableChats />
                   </div>
                 </CardContent>
                 <CardFooter className="absolute bottom-6 w-full">
-                  <ConversationMessage contactId={contactId} />
+                  <ConversationMessage
+                    contact={contact.data}
+                    lastMessageDate={contact.conversation?.createdAt}
+                    templates={templates}
+                  />
                 </CardFooter>
               </Card>
             )}

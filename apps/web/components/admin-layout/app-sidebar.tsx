@@ -155,7 +155,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSubMain title="WhatsApp" items={data.whatsapp} />
-        <NavSubMain title="Ads" items={data.ads} />
+        {/* <NavSubMain title="Ads" items={data.ads} /> */}
         <NavSubMain title="Management" items={data.management} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

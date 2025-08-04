@@ -112,8 +112,6 @@ export function ScrollableContacts() {
           ))}
         </InfiniteScroll>
       </div>
-
-      <ReactQueryDevtools />
     </>
   );
 }
