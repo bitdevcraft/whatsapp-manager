@@ -18,7 +18,7 @@ import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetContactSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { Contact } from "@workspace/db";
+import { Contact, Conversation, conversationsTable } from "@workspace/db";
 
 export async function getContacts(input: GetContactSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -134,10 +134,14 @@ export async function getContacts(input: GetContactSchema) {
   )();
 }
 
-export async function getContactById(
-  id: string
-): Promise<{ data: Contact | undefined }> {
-  const defaultValue: { data: Contact | undefined } = { data: undefined };
+export async function getContactById(id: string): Promise<{
+  data: Contact | undefined;
+  conversation: Conversation | undefined;
+}> {
+  const defaultValue: {
+    data: Contact | undefined;
+    conversation: Conversation | undefined;
+  } = { data: undefined, conversation: undefined };
 
   const userWithTeam = await getUserWithTeam();
 
@@ -150,16 +154,30 @@ export async function getContactById(
   return await unstable_cache(
     async () => {
       try {
-        const data = await withTenantTransaction(teamId, async (tx) => {
-          const contact = await tx.query.contactsTable.findFirst({
-            where: eq(contactsTable.id, id),
-          });
+        const { contact, conversation } = await withTenantTransaction(
+          teamId,
+          async (tx) => {
+            const contact = await tx.query.contactsTable.findFirst({
+              where: eq(contactsTable.id, id),
+            });
 
-          return contact;
-        });
+            const conversation = await tx.query.conversationsTable.findFirst({
+              where: and(
+                eq(conversationsTable.contactId, id),
+                eq(conversationsTable.direction, "inbound")
+              ),
+              orderBy: (conversationsTable, { desc }) => [
+                desc(conversationsTable.createdAt),
+              ],
+            });
 
-        return { data };
+            return { contact, conversation };
+          }
+        );
+
+        return { data: contact, conversation };
       } catch (error) {
+        console.error(error);
         return defaultValue;
       }
     },

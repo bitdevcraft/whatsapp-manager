@@ -2,18 +2,20 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
 import { unstable_cache } from "@/lib/unstable-cache";
 import {
-  tagsTable,
   templatesTable,
   whatsAppBusinessAccountPhoneNumbersTable,
   withTenantTransaction,
 } from "@workspace/db";
+import { Template } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function getSelectTemplates() {
+export async function getSelectTemplates(): Promise<{ templates: Template[] }> {
   const userWithTeam = await getUserWithTeam();
 
+  const defaultValue: { templates: Template[] } = { templates: [] };
+
   if (!userWithTeam?.teamId) {
-    return { templates: [] };
+    return defaultValue;
   }
 
   const { teamId } = userWithTeam;
@@ -36,7 +38,7 @@ export async function getSelectTemplates() {
         return { templates };
       } catch (error) {
         logger.error(error);
-        return { templates: [] };
+        return defaultValue;
       }
     },
     [`templates:select:${teamId}`],
