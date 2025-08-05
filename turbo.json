@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "globalEnv": [
+    "BASE_URL",
     "ENCRYPTION_KEY",
     "DATABASE_URL",
     "DB_NAME",
@@ -30,7 +31,11 @@
     "CLOUD_API_ACCESS_TOKEN",
     "WA_PHONE_NUMBER_ID",
     "WA_BUSINESS_ACCOUNT_ID",
-    "WEBHOOK_VERIFICATION_TOKEN"
+    "WEBHOOK_VERIFICATION_TOKEN",
+    "AWS_REGION",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_BUCKET_NAME"
   ],
   "tasks": {
     "build": {
