@@ -1,14 +1,14 @@
 export enum NotificationEvent {
+  WhatsAppBulkMessageOutgoingFailed = "whatsapp_bulk_message_outgoing_failed",
   WhatsAppBulkMessageOutgoingProcessing = "whatsapp_bulk_message_outgoing_processing",
   WhatsAppBulkMessageOutgoingSuccess = "whatsapp_bulk_message_outgoing_success",
-  WhatsAppBulkMessageOutgoingFailed = "whatsapp_bulk_message_outgoing_failed",
   WhatsAppMessageReceived = "whatsapp_message_received",
 }
 
 export enum NotificationRelatedObject {
-  MarketingCampaign = "marketing-campaigns",
-  Conversation = "conversations",
   Contact = "contacts",
+  Conversation = "conversations",
+  MarketingCampaign = "marketing-campaigns",
   Template = "templates",
 }
 
