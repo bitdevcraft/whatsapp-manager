@@ -38,7 +38,7 @@ export const useForgotPasswordMutation = () => {
     ): Promise<ForgotPasswordResponse> => {
       const { data, error } = await authClient.requestPasswordReset({
         email: payload.email, // required
-        redirectTo: "http://localhost:3001/auth/reset-password",
+        redirectTo: "http://localhost:3031/auth/reset-password",
       });
 
       if (error) throw new Error(error.message);

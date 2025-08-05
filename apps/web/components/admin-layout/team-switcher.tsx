@@ -22,11 +22,13 @@ import { Organization } from "better-auth/plugins/organization";
 import { authClient } from "@/lib/auth/auth-client";
 import { useOrganization } from "../organization-provider";
 import { Badge } from "@workspace/ui/components/badge";
+import { useRouter } from "next/navigation";
 
 export function TeamSwitcher({ teams }: { teams: Organization[] }) {
   const { isMobile } = useSidebar();
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
 
+  const router = useRouter();
   const { organizations, activeOrganization, setActiveOrganization } =
     useOrganization();
 
@@ -37,6 +39,7 @@ export function TeamSwitcher({ teams }: { teams: Organization[] }) {
   const onChange = async (team: Organization) => {
     setActiveTeam(team);
     setActiveOrganization(team.id);
+    router.replace("/");
   };
 
   return (

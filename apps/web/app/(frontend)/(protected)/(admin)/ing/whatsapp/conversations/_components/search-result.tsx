@@ -71,92 +71,93 @@ export function SearchResult() {
 
   console.log(messages?.length, hasNextPage);
 
+  if (!search) return null;
+
+  if (status === "pending") {
+    return (
+      <div className="flex justify-center py-2 bg-background">
+        <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return <span>Error: {error.message}</span>;
+  }
+
   return (
     <>
-      {search ? (
-        <>
-          {status === "pending" ? (
-            <p>Loading...</p>
-          ) : status === "error" ? (
-            <span>Error: {error.message}</span>
-          ) : (
-            <div
-              id="scrollable_search_result"
-              style={{
-                height: "70vh",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <h1 className="text-center font-semibold">Contacts</h1>
-              {data.pages?.map((page) => (
-                <React.Fragment key={page.nextOffset}>
-                  {page.contacts.map((el) => (
-                    <div
-                      key={el.id}
-                      className={cn(`mb-2 border-b p-2 rounded hover:bg-muted`)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setContact(el.id);
-                      }}
-                    >
-                      <p className="flex justify-between">
-                        <span className="font-medium text-sm">{el.name}</span>
-                        &nbsp;
-                        <span className="text-xs font-light">{el.phone}</span>
-                      </p>
-                    </div>
-                  ))}
-                </React.Fragment>
-              ))}
-
-              <h1 className="text-center font-semibold mt-4">Messages</h1>
-
-              <InfiniteScroll
-                dataLength={messages ? messages.length : 0}
-                next={() => fetchNextPage()}
-                style={{ display: "flex", flexDirection: "column" }}
-                hasMore={hasNextPage}
-                loader={<h4 className="text-center">Loading...</h4>}
-                scrollableTarget="scrollable_search_result"
+      <div
+        id="scrollable_search_result"
+        style={{
+          height: "70vh",
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <h1 className="text-center font-semibold">Contacts</h1>
+        {data.pages?.map((page) => (
+          <React.Fragment key={page.nextOffset}>
+            {page.contacts.map((el) => (
+              <div
+                key={el.id}
+                className={cn(`mb-2 border-b p-2 rounded hover:bg-muted`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setContact(el.id);
+                }}
               >
-                {data.pages.map((page) => (
-                  <React.Fragment key={page.nextOffset}>
-                    {page.data.map((el) => (
-                      <div
-                        key={el.id}
-                        className={cn(
-                          `mb-2 border-b text-sm p-2 rounded hover:bg-muted`
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setContact(el.contact.id);
-                          setSearchMessageId(el.id);
-                        }}
-                      >
-                        <p>
-                          <span className="font-medium">{el.contact.name}</span>
-                          &nbsp;
-                          <span className="font-light">{el.contact.phone}</span>
-                        </p>
-                        <p>{el.body?.body?.text}</p>
-                        <p className="text-xs font-light text-right">
-                          {new Date(el.createdAt).toLocaleDateString()}&nbsp;
-                          {new Date(el.createdAt).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </InfiniteScroll>
-            </div>
-          )}
-        </>
-      ) : (
-        <></>
-      )}
-      <ReactQueryDevtools />
+                <p className="flex justify-between">
+                  <span className="font-medium text-sm">{el.name}</span>
+                  &nbsp;
+                  <span className="text-xs font-light">{el.phone}</span>
+                </p>
+              </div>
+            ))}
+          </React.Fragment>
+        ))}
+
+        <h1 className="text-center font-semibold mt-4">Messages</h1>
+
+        <InfiniteScroll
+          dataLength={messages ? messages.length : 0}
+          next={() => fetchNextPage()}
+          style={{ display: "flex", flexDirection: "column" }}
+          hasMore={hasNextPage}
+          loader={<h4 className="text-center">Loading...</h4>}
+          scrollableTarget="scrollable_search_result"
+        >
+          {data.pages.map((page) => (
+            <React.Fragment key={page.nextOffset}>
+              {page.data.map((el) => (
+                <div
+                  key={el.id}
+                  className={cn(
+                    `mb-2 border-b text-sm p-2 rounded hover:bg-muted`
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setContact(el.contact.id);
+                    setSearchMessageId(el.id);
+                  }}
+                >
+                  <p>
+                    <span className="font-medium">{el.contact.name}</span>
+                    &nbsp;
+                    <span className="font-light">{el.contact.phone}</span>
+                  </p>
+                  <p>{el.body?.body?.text}</p>
+                  <p className="text-xs font-light text-right">
+                    {new Date(el.createdAt).toLocaleDateString()}&nbsp;
+                    {new Date(el.createdAt).toLocaleTimeString()}
+                  </p>
+                </div>
+              ))}
+            </React.Fragment>
+          ))}
+        </InfiniteScroll>
+      </div>
     </>
   );
 }

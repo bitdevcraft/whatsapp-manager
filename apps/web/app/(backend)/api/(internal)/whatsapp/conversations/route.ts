@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log(userWithTeam);
     const { teamId, user } = userWithTeam;
 
     const { searchParams } = new URL(request.url);
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
               conversationMembersTable.contactId,
               conversationsTable.contactId
             ),
-            eq(conversationMembersTable.userId, user.id),
+            // eq(conversationMembersTable.userId, user.id),
             unread
               ? gt(
                   conversationsTable.createdAt,

@@ -281,6 +281,13 @@
       "when": 1753773041240,
       "tag": "0039_lush_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1754310671690,
+      "tag": "0040_glossy_medusa",
+      "breakpoints": true
     }
   ]
 }

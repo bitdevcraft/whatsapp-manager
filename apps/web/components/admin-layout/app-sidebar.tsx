@@ -65,7 +65,7 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "/ing/account",
+      url: "/ing/account/general",
       icon: IconSettings,
     },
   ],
@@ -98,12 +98,12 @@ const data = {
       icon: IconSpeakerphone,
     },
   ],
-
   management: [
     {
       name: "Business Account",
       url: "/ing/business-account",
       icon: IconUserCircle,
+      access: "business",
     },
     {
       name: "Contacts",
@@ -137,19 +137,6 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        {/* <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconBrandWhatsappFilled className="!size-5" />
-                <span className="text-base font-semibold">WAPP</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu> */}
         <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>

@@ -9,12 +9,8 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { BannerList } from "@workspace/ui/components/banner";
 import { Toaster } from "sonner";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
-import Script from "next/script";
 import AuthenticateWaba from "./_components/authenticate-waba";
 import { SocketProvider } from "@/components/provider/socket-provider";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import Notification from "./notification";
 import { auth } from "@workspace/auth";
@@ -39,6 +35,8 @@ export default async function Layout({
     const pathname = headers.get("x-current-path");
     redirect(`/auth/login?path=${pathname}`);
   }
+
+  
 
   return (
     <div>

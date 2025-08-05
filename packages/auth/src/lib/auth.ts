@@ -3,19 +3,25 @@ import * as schema from "@workspace/db/schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
+import { Resend } from "resend";
 import { v4 as uuidv4 } from "uuid";
 
 import { getActiveOrganization } from "./get-active-organization";
+import { ac, admin, member, owner } from "./permissions";
 
 import "dotenv/config";
-
-import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
+  advanced: {
+    database: {
+      generateId: () => uuidv4(),
+    },
+  },
+
   baseURL: process.env.BASE_URL!,
-  trustedOrigins: [process.env.BASE_URL!],
+
   // Database
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -30,39 +36,6 @@ export const auth = betterAuth({
       verification: schema.userVerificationsTable,
     },
   }),
-
-  // Auth
-  emailAndPassword: {
-    enabled: true,
-    sendResetPassword: async ({ user, url, token }, request) => {
-      await resend.emails.send({
-        from: "No-Reply <noreply@ingeniousuae.com>",
-        to: [user.email],
-        subject: "Password Reset",
-        text: `Click the link to verify your email: ${url}`,
-      });
-    },
-    onPasswordReset: async ({ user }, request) => {
-      console.log(`Password for user ${user.email} has been reset.`);
-    },
-  },
-
-  // Plugins
-  plugins: [organization()],
-
-  // Session
-  session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // Cache duration in seconds
-    },
-  },
-
-  advanced: {
-    database: {
-      generateId: () => uuidv4(),
-    },
-  },
 
   databaseHooks: {
     session: {
@@ -84,9 +57,9 @@ export const auth = betterAuth({
         after: async (user) => {
           await auth.api.createOrganization({
             body: {
-              name: `${user.name ?? "User"}'s Organization`,
-              slug: `${user.id}`,
               metadata: { personal: true },
+              name: `${user.name}'s Organization`,
+              slug: user.id,
               userId: user.id,
             },
           });
@@ -94,4 +67,54 @@ export const auth = betterAuth({
       },
     },
   },
+
+  // Auth
+  emailAndPassword: {
+    enabled: true,
+    onPasswordReset: async ({ user }, request) => {
+      console.log(`Password for user ${user.email} has been reset.`);
+    },
+    sendResetPassword: async ({ user, url, token }, request) => {
+      await resend.emails.send({
+        from: "No-Reply <noreply@ingeniousuae.com>",
+        subject: "Password Reset",
+        text: `Click the link to verify your email: ${url}`,
+        to: [user.email],
+      });
+    },
+  },
+
+  // Plugins
+  plugins: [
+    organization({
+      ac,
+      roles: {
+        admin,
+        member,
+        owner,
+      },
+      async sendInvitationEmail(data) {
+        const inviteLink = `${process.env.BASE_URL!}/accept-invitation/${data.id}`;
+        await resend.emails.send({
+          from: "No-Reply <noreply@ingeniousuae.com>",
+          subject: "Team Invitation",
+          text: `You are invited by ${data.inviter.user.name}. Click the link to verify your email: ${inviteLink}`,
+          to: [data.email],
+        });
+      },
+    }),
+  ],
+
+  // Session
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // Cache duration in seconds
+    },
+  },
+
+  trustedOrigins: [
+    process.env.BASE_URL!,
+    `${process.env.BASE_URL!}/auth/reset-password`,
+  ],
 });

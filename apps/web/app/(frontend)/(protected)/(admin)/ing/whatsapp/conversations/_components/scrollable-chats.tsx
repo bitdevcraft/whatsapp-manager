@@ -110,7 +110,7 @@ export function ScrollableChats() {
             console.log("prev");
             fetchPreviousPage();
           }}
-          className="bg-gray-50 p-4"
+          className=" p-4"
           loadingNext={isFetchingNextPage}
           loadingPrevious={isFetchingPreviousPage}
         >

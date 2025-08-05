@@ -143,6 +143,8 @@ export async function getContactById(id: string): Promise<{
     conversation: Conversation | undefined;
   } = { data: undefined, conversation: undefined };
 
+  if (!id) return defaultValue;
+
   const userWithTeam = await getUserWithTeam();
 
   if (!userWithTeam?.teamId) {

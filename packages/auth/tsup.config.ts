@@ -5,6 +5,7 @@ export default defineConfig({
   dts: true,
   entry: {
     index: "src/index.ts",
+    permissions: "src/lib/permissions.ts",
   },
   format: ["cjs", "esm"],
   sourcemap: true,

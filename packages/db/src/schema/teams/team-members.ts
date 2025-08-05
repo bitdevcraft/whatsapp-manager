@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
-import { usersTable } from "../users";
+import { User, usersTable } from "../users";
 import { teamsTable } from "../teams";
 import { relations } from "drizzle-orm";
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -33,3 +33,7 @@ export const teamMembersRelations = relations(teamMembersTable, ({ one }) => ({
     references: [teamsTable.id],
   }),
 }));
+
+export type TeamMemberDetail = TeamMember & {
+  user: User;
+};
