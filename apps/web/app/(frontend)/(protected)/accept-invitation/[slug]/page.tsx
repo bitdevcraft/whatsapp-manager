@@ -1,9 +1,11 @@
 import { authClient } from "@/lib/auth/auth-client";
 import { auth } from "@workspace/auth";
 import { headers as nextHeaders } from "next/headers";
+import InvitationExpired from "./invitation-expired";
+import InvitationSuccess from "./invitation-success";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export default async function Page({ params }: Props) {
@@ -18,9 +20,9 @@ export default async function Page({ params }: Props) {
       },
       headers,
     });
-  } catch (error) {
-    return <div>Invitation Invalid</div>;
+  } catch (error: any) {
+    return <InvitationExpired />;
   }
 
-  return <div>Invitation Accepted</div>;
+  return <InvitationSuccess />;
 }
