@@ -9,6 +9,7 @@ import { Input } from "@workspace/ui/components/input";
 import { useContactStore } from "../_store/contact-store";
 import { ChatInfiniteScroll } from "./chat-infinite-scroll";
 import { useSearchMessageStore } from "../_store/message-store";
+import { parseAsString, useQueryState } from "nuqs";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -22,6 +23,8 @@ export function ScrollableChats() {
   const { searchMessageId, setLoading, loading, searchRandomId } =
     useSearchMessageStore();
 
+  const [rId, setRid] = useQueryState("rId", parseAsString);
+
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
     status,
@@ -34,7 +37,13 @@ export function ScrollableChats() {
     hasNextPage,
     hasPreviousPage,
   } = useInfiniteQuery<PaginatedResponse<Conversation>>({
-    queryKey: ["conversations", contactId, searchMessageId, searchRandomId],
+    queryKey: [
+      "conversations",
+      contactId,
+      searchMessageId,
+      searchRandomId,
+      rId,
+    ],
     queryFn: async ({
       pageParam,
     }): Promise<PaginatedResponse<Conversation>> => {
