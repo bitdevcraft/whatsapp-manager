@@ -360,22 +360,9 @@ async function submitTemplateToMeta(
 // Prepare template data for Meta API v22.0 - exactly matching Meta's example
 const template = {
   name: templateData.content.name,
-  language: templateData.content.language || 'en', // Use the template's language or default to 'en'
+  language: templateData.content.language || 'en',
   category: templateData.content.category || 'MARKETING',
-  components: [
-    {
-      type: 'BODY',
-      text: templateData.content.components?.find((c: any) => c.type === 'BODY')?.text || 'Sample text',
-      example: {
-        body_text_named_params: [  // Note: Using named params format
-          {
-            example: "world",  // Sample value
-            param_name: "name"  // Parameter name from the template text
-          }
-        ]
-      }
-    }
-  ]
+  components: templateData.content.components || []
 };
   console.log('Sending template to Meta API:', JSON.stringify(template, null, 2));
 
