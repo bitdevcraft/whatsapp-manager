@@ -39,4 +39,8 @@ export async function POST(request: Request) {
       status: 400,
     });
   }
+
+  return new Response("", {
+    status: 200,
+  });
 }
