@@ -33,7 +33,6 @@ export async function POST() {
       [Campaign.Fields.daily_budget]: 500,
     });
 
-    console.log(response);
     return new Response("", { status: 200 });
   } catch (error) {
     return new Response("", { status: 500 });

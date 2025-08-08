@@ -30,7 +30,6 @@ export function SearchMessageResult() {
       `/api/whatsapp/conversations/search-message?offset=${pageParam}&search=${searchString}&contactId=${contactId}`
     );
 
-    console.log(response.data);
     return await response.data;
   };
 
@@ -61,8 +60,6 @@ export function SearchMessageResult() {
   const messages = data?.pages.reduce((acc: any, page) => {
     return [...acc, ...page.data];
   }, []);
-
-  console.log(messages?.length, hasNextPage);
 
   if (!searchString) return null;
   if (status === "pending") return <p>Loading...</p>;

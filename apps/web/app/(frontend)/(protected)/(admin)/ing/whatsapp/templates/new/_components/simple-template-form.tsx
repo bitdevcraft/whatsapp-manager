@@ -51,19 +51,6 @@ export default function SimpleTemplateForm() {
     let responseData: any;
     
     try {
-      console.log('Submitting to Meta with data:', JSON.stringify({
-        name: templateData.name,
-        category: templateData.content?.category,
-        language: templateData.content?.language,
-        components: templateData.content?.components?.map((c: any) => ({
-          type: c.type,
-          text: c.text ? `${c.text.substring(0, 50)}${c.text.length > 50 ? '...' : ''}` : null,
-          format: c.format,
-          example: c.example
-        })),
-        // Don't log the full content as it might be large
-        content: typeof templateData.content === 'object' ? '[Content object]' : templateData.content
-      }, null, 2));
       
       // Store the start time for request duration tracking
       const startTime = Date.now();
@@ -89,19 +76,12 @@ export default function SimpleTemplateForm() {
         clearTimeout(timeoutId);
         
         // Log the raw response for debugging
-        console.log(`Meta submission response (${response.status}):`, {
-          url: apiUrl,
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
         
         let responseText = '';
         try {
           responseText = await response.text();
           
           // Log the raw response text for debugging
-          console.log('Raw response text:', responseText);
           
           // Try to parse as JSON
           responseData = responseText ? JSON.parse(responseText) : {};
@@ -128,12 +108,6 @@ export default function SimpleTemplateForm() {
         }
         
         // Log the successful response with timing information
-        console.log('Meta submission response:', {
-          status: response.status,
-          statusText: response.statusText,
-          duration: `${Date.now() - startTime}ms`,
-          data: responseData
-        });
         
         if (!response.ok) {
           // Extract error message from different possible response formats
@@ -262,7 +236,6 @@ export default function SimpleTemplateForm() {
       }
       
       const savedTemplate = await saveResponse.json();
-      console.log('Template saved successfully, submitting to Meta...', savedTemplate);
       
       if (!savedTemplate || !savedTemplate.id) {
         throw new Error('Failed to save template to database');

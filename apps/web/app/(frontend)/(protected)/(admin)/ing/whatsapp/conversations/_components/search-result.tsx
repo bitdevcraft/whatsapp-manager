@@ -37,7 +37,6 @@ export function SearchResult() {
       `/api/whatsapp/conversations/search?offset=${pageParam}&search=${search}`
     );
 
-    console.log(response.data);
     return await response.data;
   };
 
@@ -69,7 +68,6 @@ export function SearchResult() {
     return [...acc, ...page.data];
   }, []);
 
-  console.log(messages?.length, hasNextPage);
 
   if (!search) return null;
 

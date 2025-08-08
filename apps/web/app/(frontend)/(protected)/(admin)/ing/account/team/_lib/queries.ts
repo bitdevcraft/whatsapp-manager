@@ -29,7 +29,6 @@ export async function getMember() {
 
         return data;
       } catch (error) {
-        console.log(error);
         return defaultValue;
       }
     },
