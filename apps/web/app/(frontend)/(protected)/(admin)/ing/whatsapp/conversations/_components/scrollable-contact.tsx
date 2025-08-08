@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { QueryFunctionContext, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  QueryFunctionContext,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { ConversationBody } from "@workspace/db/schema";
@@ -83,7 +87,7 @@ export function ScrollableContacts() {
   return (
     <>
       <div
-        id="scrollable_search_result"
+        id="scrollable_contact"
         style={{
           height: "70vh",
           overflow: "auto",
@@ -101,7 +105,7 @@ export function ScrollableContacts() {
           }}
           hasMore={hasNextPage}
           loader={<h4 className="text-center">Loading...</h4>}
-          scrollableTarget="scrollable_search_result"
+          scrollableTarget="scrollable_contact"
         >
           {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
@@ -132,10 +136,27 @@ function ContactMessageItem({
     rn: number;
   };
 }) {
-  const [_contact, setContact] = useQueryState("contact", {
+  const [contact, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });
+
+  const queryClient = useQueryClient();
+
+  const onRead = async () => {
+    try {
+      await axios.post("/api/whatsapp/conversations/members", {
+        contactId: contact,
+        markAsRead: true,
+      });
+    } catch (error: any) {
+      //
+    }
+
+    queryClient.invalidateQueries({
+      queryKey: ["conversation_contacts"], // prefix
+    });
+  };
 
   const { clearSearchMessageId } = useSearchMessageStore();
 
@@ -148,6 +169,7 @@ function ContactMessageItem({
         e.stopPropagation();
         setContact(item.id!);
         clearSearchMessageId();
+        onRead();
       }}
       {...props}
     >
