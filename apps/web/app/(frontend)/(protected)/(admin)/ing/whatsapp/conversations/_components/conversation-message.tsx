@@ -42,6 +42,7 @@ import {
   TemplateSendValue,
   templateSendSchema,
 } from "@/types/validations/template-schema";
+import { useQueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
@@ -59,10 +60,12 @@ export default function ConversationMessage({
   lastMessageDate,
   templates,
 }: Props) {
-  const [reload, setReload] = useQueryState("rId", {
-    defaultValue: "",
-    shallow: false,
-  });
+  // const [reload, setReload] = useQueryState("rId", {
+  //   defaultValue: "",
+  //   shallow: false,
+  // });
+
+  const queryClient = useQueryClient();
 
   const { updateRandomId, clearSearchMessageId, clearSearchString } =
     useSearchMessageStore();
@@ -86,7 +89,11 @@ export default function ConversationMessage({
       clearSearchString();
 
       form.reset();
-      setReload(nanoid());
+
+      queryClient.invalidateQueries({
+        queryKey: ["conversations", contact.id], // prefix
+      });
+      // setReload(nanoid());
     } catch (error) {
       toast.error("Error Sending");
     }
@@ -170,6 +177,8 @@ function TemplateMessage({
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
   setIsOpen: (state: boolean) => void;
 }) {
+  const queryClient = useQueryClient();
+
   const form = useForm<TemplateSendValue>({
     resolver: zodResolver(templateSendSchema),
     defaultValues: {
@@ -228,6 +237,10 @@ function TemplateMessage({
 
     setIsOpen(false);
     setSearchMessageId("");
+
+    queryClient.invalidateQueries({
+      queryKey: ["conversations", contact.id], // prefix
+    });
   };
 
   return (

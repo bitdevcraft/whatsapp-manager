@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/ui/lib/utils";
 import { PreviewMessage } from "./preview-message";
-import { Conversation } from "@workspace/db";
-import { Input } from "@workspace/ui/components/input";
+import { Conversation } from "@workspace/db/schema";
 import { useContactStore } from "../_store/contact-store";
 import { ChatInfiniteScroll } from "./chat-infinite-scroll";
 import { useSearchMessageStore } from "../_store/message-store";
-import { parseAsString, useQueryState } from "nuqs";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -23,7 +21,7 @@ export function ScrollableChats() {
   const { searchMessageId, setLoading, loading, searchRandomId } =
     useSearchMessageStore();
 
-  const [rId, setRid] = useQueryState("rId", parseAsString);
+  // const [rId, setRid] = useQueryState("rId", parseAsString);
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
@@ -42,7 +40,7 @@ export function ScrollableChats() {
       contactId,
       searchMessageId,
       searchRandomId,
-      rId,
+      // rId,
     ],
     queryFn: async ({
       pageParam,
