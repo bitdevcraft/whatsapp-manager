@@ -94,7 +94,6 @@ export async function getAdAccount() {
           AdAccount.Fields.tos_accepted,
         ]);
 
-        console.log(JSON.stringify(data, null, 2));
 
         return { data };
       } catch (error) {

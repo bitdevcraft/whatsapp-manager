@@ -110,11 +110,11 @@ export function ScrollableChats() {
           hasPrevious={hasPreviousPage}
           isReverse={true}
           next={() => {
-            console.log("next");
+     ;
             fetchNextPage();
           }}
           previous={() => {
-            console.log("prev");
+         
             fetchPreviousPage();
           }}
           className=" p-4"

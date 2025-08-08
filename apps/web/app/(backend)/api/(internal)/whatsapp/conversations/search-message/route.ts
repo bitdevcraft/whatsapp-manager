@@ -70,7 +70,6 @@ export async function GET(request: NextRequest) {
 
     const nextOffset = hasNext ? offset + limit : null;
 
-    console.log(data);
     return NextResponse.json(
       {
         data,

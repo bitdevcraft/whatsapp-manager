@@ -40,7 +40,6 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
     onSubmit(data);
   }
 
-  console.log(form.getValues().tags);
 
   return (
     <Form {...form}>

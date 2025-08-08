@@ -34,7 +34,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   );
 
   useEffect(() => {
-    console.log(process.env.NEXT_PUBLIC_WEB_SOCKET);
     const socketInstance: Socket<SocketEventPayloads> = io(
       process.env.NEXT_PUBLIC_WEB_SOCKET,
       {

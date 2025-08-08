@@ -41,7 +41,7 @@ export function ScrollableContacts() {
       `/api/whatsapp/conversations?offset=${pageParam}`
     );
 
-    console.log(response.data);
+
     return await response.data;
   };
 
@@ -72,7 +72,7 @@ export function ScrollableContacts() {
     return [...acc, ...page.data];
   }, []);
 
-  console.log(messages?.length, hasNextPage);
+
   if (status === "pending") {
     return (
       <div className="flex justify-center py-2 bg-background">
