@@ -9,6 +9,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+interface ButtonForm {
+  type: 'URL' | 'PHONE_NUMBER' | 'QUICK_REPLY';
+  text: string;
+  url?: string;
+  phone_number?: string;
+}
+
 interface SimpleTemplateFormValues {
   name: string;
   category: CategoryEnum;
@@ -17,6 +24,7 @@ interface SimpleTemplateFormValues {
     code: LanguagesEnum;
   };
   body: string;
+  buttons: ButtonForm[];
 }
 
 export default function SimpleTemplateForm() {
@@ -33,12 +41,14 @@ export default function SimpleTemplateForm() {
         policy: "deterministic",
         code: LanguagesEnum.English
       },
-      body: ""
+      body: "",
+      buttons: []
     },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [buttons, setButtons] = useState<ButtonForm[]>([]);
   const router = useRouter();
 
   const formatTemplateName = (name: string): string => {
@@ -51,19 +61,6 @@ export default function SimpleTemplateForm() {
     let responseData: any;
     
     try {
-      console.log('Submitting to Meta with data:', JSON.stringify({
-        name: templateData.name,
-        category: templateData.content?.category,
-        language: templateData.content?.language,
-        components: templateData.content?.components?.map((c: any) => ({
-          type: c.type,
-          text: c.text ? `${c.text.substring(0, 50)}${c.text.length > 50 ? '...' : ''}` : null,
-          format: c.format,
-          example: c.example
-        })),
-        // Don't log the full content as it might be large
-        content: typeof templateData.content === 'object' ? '[Content object]' : templateData.content
-      }, null, 2));
       
       // Store the start time for request duration tracking
       const startTime = Date.now();
@@ -89,19 +86,12 @@ export default function SimpleTemplateForm() {
         clearTimeout(timeoutId);
         
         // Log the raw response for debugging
-        console.log(`Meta submission response (${response.status}):`, {
-          url: apiUrl,
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
         
         let responseText = '';
         try {
           responseText = await response.text();
           
           // Log the raw response text for debugging
-          console.log('Raw response text:', responseText);
           
           // Try to parse as JSON
           responseData = responseText ? JSON.parse(responseText) : {};
@@ -128,12 +118,6 @@ export default function SimpleTemplateForm() {
         }
         
         // Log the successful response with timing information
-        console.log('Meta submission response:', {
-          status: response.status,
-          statusText: response.statusText,
-          duration: `${Date.now() - startTime}ms`,
-          data: responseData
-        });
         
         if (!response.ok) {
           // Extract error message from different possible response formats
@@ -234,17 +218,31 @@ export default function SimpleTemplateForm() {
       // Format the template name
       const formattedName = formatTemplateName(data.name);
 
+      // Prepare components array
+      const components: any[] = [
+        {
+          type: 'BODY',
+          text: data.body
+        }
+      ];
+      if (buttons.length > 0) {
+        components.push({
+          type: 'BUTTONS',
+          buttons: buttons.map(btn => ({
+            type: btn.type,
+            text: btn.text,
+            ...(btn.type === 'URL' && btn.url ? { url: btn.url } : {}),
+            ...(btn.type === 'PHONE_NUMBER' && btn.phone_number ? { phone_number: btn.phone_number } : {})
+          }))
+        });
+      }
+
       const templateData = {
         name: formattedName,
         category: data.category,
         language: data.language.code, // Use just the language code
         parameter_format: 'POSITIONAL', // Default to POSITIONAL for simple templates
-        components: [
-          {
-            type: 'BODY',
-            text: data.body
-          }
-        ]
+        components
       };
 
       // First save to our database
@@ -262,7 +260,6 @@ export default function SimpleTemplateForm() {
       }
       
       const savedTemplate = await saveResponse.json();
-      console.log('Template saved successfully, submitting to Meta...', savedTemplate);
       
       if (!savedTemplate || !savedTemplate.id) {
         throw new Error('Failed to save template to database');
@@ -357,6 +354,27 @@ export default function SimpleTemplateForm() {
     { value: CategoryEnum.Authentication, label: 'Authentication' },
   ];
 
+  // Button types for Meta
+  const BUTTON_TYPES = [
+    { value: 'URL', label: 'Website URL' },
+    { value: 'PHONE_NUMBER', label: 'Phone Number' },
+    { value: 'QUICK_REPLY', label: 'Quick Reply' },
+  ];
+
+  const handleAddButton = () => {
+    if (buttons.length < 3) {
+      setButtons([...buttons, { type: 'QUICK_REPLY', text: '' }]);
+    }
+  };
+
+  const handleRemoveButton = (idx: number) => {
+    setButtons(buttons.filter((_, i) => i !== idx));
+  };
+
+  const handleButtonChange = (idx: number, field: keyof ButtonForm, value: string) => {
+    setButtons(buttons.map((btn, i) => i === idx ? { ...btn, [field]: value } : btn));
+  };
+
   return (
     <form 
       onSubmit={handleSubmit(onSubmit, onError)} 
@@ -447,6 +465,71 @@ export default function SimpleTemplateForm() {
           {errors.body && (
             <p className="text-sm text-red-500">{errors.body.message}</p>
           )}
+        </div>
+
+        {/* Buttons Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Buttons</Label>
+            <Button type="button" onClick={handleAddButton} disabled={buttons.length >= 3} size="sm" variant="outline">
+              + Add Button
+            </Button>
+          </div>
+          {buttons.length === 0 && <p className="text-xs text-gray-500">You can add up to 3 buttons.</p>}
+          {buttons.map((btn, idx) => (
+            <div key={idx} className="p-3 border rounded mb-2 bg-gray-50">
+              <div className="flex gap-2 items-center mb-2">
+                <Label className="w-24">Type</Label>
+                <select
+                  value={btn.type}
+                  onChange={e => handleButtonChange(idx, 'type', e.target.value)}
+                  className="border rounded px-2 py-1"
+                  disabled={isSubmitting}
+                >
+                  {BUTTON_TYPES.map(type => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </select>
+                <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveButton(idx)} disabled={isSubmitting}>
+                  &times;
+                </Button>
+              </div>
+              <div className="flex gap-2 items-center mb-2">
+                <Label className="w-24">Text</Label>
+                <Input
+                  value={btn.text}
+                  onChange={e => handleButtonChange(idx, 'text', e.target.value)}
+                  placeholder="Button text"
+                  className="flex-1"
+                  disabled={isSubmitting}
+                />
+              </div>
+              {btn.type === 'URL' && (
+                <div className="flex gap-2 items-center mb-2">
+                  <Label className="w-24">URL</Label>
+                  <Input
+                    value={btn.url || ''}
+                    onChange={e => handleButtonChange(idx, 'url', e.target.value)}
+                    placeholder="https://example.com"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
+              {btn.type === 'PHONE_NUMBER' && (
+                <div className="flex gap-2 items-center mb-2">
+                  <Label className="w-24">Phone</Label>
+                  <Input
+                    value={btn.phone_number || ''}
+                    onChange={e => handleButtonChange(idx, 'phone_number', e.target.value)}
+                    placeholder="+1234567890"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

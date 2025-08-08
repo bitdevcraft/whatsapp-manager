@@ -13,7 +13,6 @@ export default async function AuthLayout({
     headers,
   });
 
-  console.log(session);
 
   if (session) {
     redirect(`/ing/dashboard`);

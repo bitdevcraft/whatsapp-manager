@@ -172,10 +172,6 @@ export async function GET(
 
     const nextOffset = hasNext ? offset + limit : null;
 
-    console.log({
-      previousOffset,
-      nextOffset,
-    });
     return NextResponse.json(
       {
         data,

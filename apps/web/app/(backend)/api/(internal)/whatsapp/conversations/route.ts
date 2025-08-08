@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log(userWithTeam);
     const { teamId, user } = userWithTeam;
 
     const { searchParams } = new URL(request.url);

@@ -54,16 +54,10 @@ export async function getCampaignsDetails() {
           limit: 10,
         });
 
-        campaigns.forEach((c, i) =>
-          console.log(i, JSON.stringify(c._data.name, null, 2))
-        );
 
-        // console.log(JSON.parse(JSON.stringify(campaigns)));
 
         return returnError;
       } catch (error) {
-        console.log(error);
-        console.log("ERror");
         return returnError;
       }
     },

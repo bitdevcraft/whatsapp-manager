@@ -27,10 +27,6 @@ export async function POST(request: Request) {
   try {
     // Parse request body
     const templateData = await request.json();
-    console.log(
-      "Received template data for Meta submission:",
-      JSON.stringify(templateData, null, 2)
-    );
 
     // Get user and team information for tenant context
     const userWithTeam = await getUserWithTeam();
@@ -74,13 +70,6 @@ export async function POST(request: Request) {
       }
 
       if (!template) {
-        // If still not found, create a new template entry
-        console.log("Template not found, creating new entry:", {
-          templateId: templateData.id,
-          templateName: templateData.name,
-          teamId,
-          timestamp: new Date().toISOString(),
-        });
 
         const newTemplate = {
           id: templateData.id,
@@ -98,12 +87,7 @@ export async function POST(request: Request) {
       return template;
     });
 
-    console.log("Found existing template for update:", {
-      id: existingTemplate.id,
-      name: templateData.name,
-      teamId,
-      timestamp: new Date().toISOString(),
-    });
+
 
     // Get WhatsApp Business Account configuration with phone number
     const account = await withTenantTransaction(teamId, async (tx) => {
@@ -163,23 +147,14 @@ export async function POST(request: Request) {
 
     // Add request interceptor to log requests
     axiosInstance.interceptors.request.use((request) => {
-      console.log("Sending request to Meta API:", {
-        method: request.method,
-        url: request.url,
-        headers: request.headers,
-        data: request.data,
-      });
+
       return request;
     });
 
     // Add response interceptor to log responses
     axiosInstance.interceptors.response.use(
       (response) => {
-        console.log("Received response from Meta API:", {
-          status: response.status,
-          statusText: response.statusText,
-          data: response.data,
-        });
+
         return response;
       },
       (error) => {
@@ -215,27 +190,17 @@ export async function POST(request: Request) {
     })();
 
     // Submit template to Meta
-    console.log(
-      "Submitting template to Meta with data:",
-      JSON.stringify(existingTemplate, null, 2)
-    );
-    console.log("WhatsApp client config:", {
-      businessAcctId: account.id,
-      phoneNumberId: phoneNumber.id,
-      accessToken: accessToken ? "[REDACTED]" : "MISSING",
-    });
+
+
 
     try {
-      console.log("Calling submitTemplateToMeta...");
+
       // Pass the required configuration directly
       const result = await submitTemplateToMeta(whatsapp, existingTemplate, {
         accessToken,
         businessAccountId: account.id.toString(),
       });
-      console.log(
-        "Meta API response received:",
-        JSON.stringify(result, null, 2)
-      );
+
 
       if (!result?.id) {
         throw new Error("Invalid response from Meta API: Missing template ID");
@@ -376,34 +341,14 @@ async function submitTemplateToMeta(
   // Prepare template data for Meta API v22.0 - exactly matching Meta's example
   const template = {
     name: templateData.content.name,
-    language: templateData.content.language || "en", // Use the template's language or default to 'en'
+    language: templateData.content.language || "en",
     category: templateData.content.category || "MARKETING",
-    components: [
-      {
-        type: "BODY",
-        text:
-          templateData.content.components?.find((c: any) => c.type === "BODY")
-            ?.text || "Sample text",
-        example: {
-          body_text_named_params: [
-            // Note: Using named params format
-            {
-              example: "world", // Sample value
-              param_name: "name", // Parameter name from the template text
-            },
-          ],
-        },
-      },
-    ],
+    components: templateData.content.components || [],
   };
-  console.log(
-    "Sending template to Meta API:",
-    JSON.stringify(template, null, 2)
-  );
+
 
   try {
     const url = `https://graph.facebook.com/v22.0/${businessAccountId}/message_templates`;
-    console.log("Making direct POST request to:", url);
 
     const response = await axios.post(url, template, {
       headers: {
@@ -414,7 +359,7 @@ async function submitTemplateToMeta(
       timeout: 30000,
     });
 
-    console.log("Meta API response:", JSON.stringify(response.data, null, 2));
+
 
     if (!response.data || !response.data.id) {
       throw new Error("Invalid response from Meta API: Missing template ID");
