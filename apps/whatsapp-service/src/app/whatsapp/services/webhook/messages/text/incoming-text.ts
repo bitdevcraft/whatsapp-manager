@@ -1,19 +1,8 @@
+import { ConversationBody } from "@workspace/db";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
-import { askAi } from "@/utils/gemini";
-import { cmdMessageHandler } from "./incoming-text-cmd";
-import {
-  contactsTable,
-  ConversationBody,
-  conversationsTable,
-  db,
-  NewContact,
-  NewConversation,
-  whatsAppBusinessAccountPhoneNumbersTable,
-  whatsAppBusinessAccountsTable,
-  withTenantTransaction,
-} from "@workspace/db";
-import { eq, or } from "drizzle-orm";
+
 import { insertConversation } from "../action";
+import { cmdMessageHandler } from "./incoming-text-cmd";
 
 export async function handleTextMessage(
   client: WhatsApp,
@@ -34,7 +23,7 @@ export async function handleTextMessage(
     await insertConversation(body, message);
 
     if (handler) {
-      handler(client, message);
+      await handler(client, message);
       return;
     }
 

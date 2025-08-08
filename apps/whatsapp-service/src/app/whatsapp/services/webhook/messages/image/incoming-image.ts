@@ -1,5 +1,6 @@
 import { ConversationBody } from "@workspace/db";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
+
 import { insertConversation } from "../action";
 
 export async function handleImageMessage(
@@ -8,10 +9,10 @@ export async function handleImageMessage(
 ) {
   const body: ConversationBody = {
     body: {
-      text: message.image?.caption,
       media: {
         id: message.image?.id,
       },
+      text: message.image?.caption,
     },
   };
 

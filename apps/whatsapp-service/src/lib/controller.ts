@@ -1,13 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/controllers/base.controller.ts
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 export class BaseController {
   public handle(
-    handler: (
-      req: Request,
-      res: Response,
-      next: NextFunction
-    ) => Promise<any> | any
+    handler: (req: Request, res: Response, next: NextFunction) => Promise<any>
   ) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {

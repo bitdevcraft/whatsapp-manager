@@ -1,9 +1,10 @@
 import "dotenv/config";
 
-import { initSocket } from "@/socket";
+import { setupBulkMessagesOutgoingWorker } from "@/jobs/processors/bulk-messages-outgoing.processor";
 import { setupWorker } from "@/jobs/processors/example.processor";
 import { createServer } from "@/lib/express";
-import { setupBulkMessagesOutgoingWorker } from "@/jobs/processors/bulk-messages-outgoing.processor";
+import { initSocket } from "@/socket";
+
 import { setupBulkMessagesWorker } from "./jobs/processors/bulk-messages.processor";
 
 const port = process.env.PORT || 4000;

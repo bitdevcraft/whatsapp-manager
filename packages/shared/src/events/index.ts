@@ -1,2 +1,2 @@
-export * from "./whatsapp";
 export * from "./notifications";
+export * from "./whatsapp";

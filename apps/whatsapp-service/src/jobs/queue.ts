@@ -1,6 +1,7 @@
-import { Queue } from "bullmq";
-import { redisConnection } from "@/lib/redis";
 import { WhatsAppEvents } from "@workspace/shared";
+import { Queue } from "bullmq";
+
+import { redisConnection } from "@/lib/redis";
 
 export const waEventQueue = new Queue(
   WhatsAppEvents.ProcessingBulkMessagesOutgoing,
@@ -8,5 +9,3 @@ export const waEventQueue = new Queue(
     connection: redisConnection,
   }
 );
-
-

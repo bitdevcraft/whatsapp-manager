@@ -1,14 +1,15 @@
 import { OpenAI } from "openai";
+
+import {
+  type ConversationMessageType,
+  OpenAiConversationRoleEnum,
+} from "../types";
 import {
   cacheData,
   computeCacheKey,
   getCachedData,
   getConversationContextCacheKey,
 } from "./cache";
-import {
-  OpenAiConversationRoleEnum,
-  type ConversationMessageType,
-} from "../types";
 
 const openAiApiKey = process.env.OPEN_AI_API_KEY;
 const organizationId = process.env.OPEN_AI_ORG_ID;
@@ -20,8 +21,8 @@ if (!openAiApiKey || !organizationId || !projectId) {
 
 const OpenApiClient = new OpenAI({
   apiKey: openAiApiKey,
-  project: projectId,
   organization: organizationId,
+  project: projectId,
 });
 
 export async function askAi(
@@ -45,13 +46,13 @@ export async function askAi(
       const chatCompletion = await OpenApiClient.chat.completions.create({
         messages: [
           {
-            role: "system",
             content: `You are an intelligent assistant helping a user with their queries. You can provide information, answer questions, and help the user complete tasks. 
 You are required to give very to the point and very clear answers to the user queries.
 Also, you can reveal your identity, ack like a human, and provide information about the product.
 Never ever accept that you are an AI or a chatbot or an intelligent assistant.`,
+            role: "system",
           },
-          ...(context ? context : []),
+          ...(context ?? []),
           {
             role: "user",
             content: message,
@@ -65,21 +66,22 @@ Never ever accept that you are an AI or a chatbot or an intelligent assistant.`,
     }
 
     await cacheData({
-      key: contextCacheKey,
       data: [
-        ...(context ? context : []),
+        ...(context ?? []),
         {
-          role: OpenAiConversationRoleEnum.User,
           content: message,
+          role: OpenAiConversationRoleEnum.User,
         },
         {
-          role: OpenAiConversationRoleEnum.Ai,
           content: response,
+          role: OpenAiConversationRoleEnum.Ai,
         },
       ],
+      key: contextCacheKey,
     });
     return response;
   } catch (error) {
+    console.error(error);
     return "Sorry, I am not able to understand that.";
   }
 }

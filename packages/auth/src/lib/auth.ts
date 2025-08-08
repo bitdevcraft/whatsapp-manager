@@ -1,8 +1,8 @@
-import { db } from "@workspace/db";
+import { ActivityType, db, NewActivityLog } from "@workspace/db";
 import * as schema from "@workspace/db/schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization } from "better-auth/plugins";
+import { createAuthMiddleware, organization } from "better-auth/plugins";
 import { Resend } from "resend";
 import { v4 as uuidv4 } from "uuid";
 
@@ -82,6 +82,52 @@ export const auth = betterAuth({
         to: [user.email],
       });
     },
+  },
+
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      // Execute before processing the request
+      console.log("Request path:", ctx.path);
+
+      /**
+       * /sign-out
+       * /sign-in
+       * /sign-up
+       * /update-user
+       * /reset-password
+       * /change-password
+       * /organization/invite-member
+       * /organization/accept-invitation
+       */
+      let activity: string = "";
+
+      if (ctx.path.startsWith("/sign-up")) {
+        activity = ActivityType.SIGN_UP;
+      }
+      if (ctx.path.startsWith("/sign-out")) {
+        activity = ActivityType.SIGN_OUT;
+      }
+      if (ctx.path.startsWith("/sign-up")) {
+        activity = ActivityType.SIGN_UP;
+      }
+      if (ctx.path.startsWith("/update-user")) {
+        activity = ActivityType.UPDATE_ACCOUNT;
+      }
+      if (ctx.path === "/reset-password" || ctx.path === "/change-password") {
+        activity = ActivityType.UPDATE_PASSWORD;
+      }
+      if (ctx.path.startsWith("/organization/invite-member")) {
+        activity = ActivityType.INVITE_TEAM_MEMBER;
+      }
+      if (ctx.path.startsWith("/organization/accept-invitation")) {
+        activity = ActivityType.ACCEPT_INVITATION;
+      }
+
+      const newActivityLog: NewActivityLog = {
+        teamId: "",
+        action: "",
+      };
+    }),
   },
 
   // Plugins

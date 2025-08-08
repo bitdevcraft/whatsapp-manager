@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-objects */
 import WhatsApp, {
   ComponentTypesEnum,
   InteractiveTypesEnum,
@@ -6,17 +7,18 @@ import WhatsApp, {
   WebhookMessage,
 } from "@workspace/wa-cloud-api";
 
-type CmdMessageHandlerMap = {
-  [key: string]: (client: WhatsApp, message: WebhookMessage) => void;
-};
+type CmdMessageHandlerMap = Record<
+  string,
+  (client: WhatsApp, message: WebhookMessage) => Promise<void>
+>;
 
 export const cmdMessageHandler: CmdMessageHandlerMap = {
-  "\\hi": cmdHelloMessage,
   "\\hello": cmdHelloMessage,
   "\\help": cmdHelpMessage,
+  "\\hi": cmdHelloMessage,
   "\\info": cmdInfoMessage,
-  "\\template": cmdTemplateMessage,
   "\\interactive": cmdInteractiveMessage,
+  "\\template": cmdTemplateMessage,
 };
 
 export async function cmdHelloMessage(
@@ -56,41 +58,6 @@ Our phone: ${message.displayPhoneNumber}`,
   });
 }
 
-export async function cmdTemplateMessage(
-  client: WhatsApp,
-  message: WebhookMessage
-) {
-  try {
-    await client.messages.template({
-      to: message.from,
-      body: {
-        name: "smaple_template", // Replace with your approved template name
-        language: {
-          code: LanguagesEnum.English_US,
-          policy: "deterministic",
-        },
-        components: [
-          {
-            type: ComponentTypesEnum.Body,
-            parameters: [
-              {
-                type: ParametersTypesEnum.Text,
-                text: message.profileName || "customer",
-              },
-            ],
-          },
-        ],
-      },
-    });
-  } catch (error) {
-    console.error("Template error:", error);
-    await client.messages.text({
-      body: "Sorry, couldn't send template. Ensure you have an approved template configured.",
-      to: message.from,
-    });
-  }
-}
-
 export async function cmdInteractiveMessage(
   client: WhatsApp,
   message: WebhookMessage
@@ -122,4 +89,39 @@ export async function cmdInteractiveMessage(
       },
     },
   });
+}
+
+export async function cmdTemplateMessage(
+  client: WhatsApp,
+  message: WebhookMessage
+) {
+  try {
+    await client.messages.template({
+      body: {
+        name: "smaple_template", // Replace with your approved template name
+        language: {
+          code: LanguagesEnum.English_US,
+          policy: "deterministic",
+        },
+        components: [
+          {
+            type: ComponentTypesEnum.Body,
+            parameters: [
+              {
+                type: ParametersTypesEnum.Text,
+                text: message.profileName || "customer",
+              },
+            ],
+          },
+        ],
+      },
+      to: message.from,
+    });
+  } catch (error) {
+    console.error("Template error:", error);
+    await client.messages.text({
+      body: "Sorry, couldn't send template. Ensure you have an approved template configured.",
+      to: message.from,
+    });
+  }
 }

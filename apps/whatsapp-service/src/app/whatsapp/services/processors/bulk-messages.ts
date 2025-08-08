@@ -1,9 +1,3 @@
-import { waClientRegistry } from "@/instance";
-import { waEventQueue } from "@/jobs/queue";
-import { decryptApiKey } from "@/lib/crypto";
-import { getEnv } from "@/lib/env";
-import { BulkMessageQueue } from "@/types/bulk-message";
-import { cleanToDigitsOnly } from "@/utils/clean-data";
 import {
   contactsTable,
   marketingCampaignsTable,
@@ -15,9 +9,13 @@ import WhatsApp, {
   MessageTemplateObject,
 } from "@workspace/wa-cloud-api";
 import { eq, sql } from "drizzle-orm";
-import { monotonicFactory } from "ulid";
 
-const ulid = monotonicFactory();
+import { waClientRegistry } from "@/instance";
+import { waEventQueue } from "@/jobs/queue";
+import { decryptApiKey } from "@/lib/crypto";
+import { getEnv } from "@/lib/env";
+import { BulkMessageQueue } from "@/types/bulk-message";
+import { cleanToDigitsOnly } from "@/utils/clean-data";
 
 export async function processOutgoingMarketingCampaign(
   marketingId: string,
@@ -40,20 +38,20 @@ export async function processOutgoingMarketingCampaign(
         },
       });
 
-      if (!data || !data.team.waBusinessAccount[0])
+      if (!data?.team.waBusinessAccount[0])
         return {
-          encryptedApiKey: null,
-          phoneNumberId: "",
           businessAcctId: "",
-          webhookVerificationToken: "",
           contacts: [],
+          encryptedApiKey: null,
           messageTemplate: null,
+          phoneNumberId: "",
+          webhookVerificationToken: "",
         };
 
       const where =
         data.tags && data.tags.length > 0
           ? sql`${contactsTable.tags} ?| ARRAY[${sql.join(
-              data?.tags?.map((v) => sql`${v}`),
+              data.tags.map((v) => sql`${v}`),
               sql`, `
             )}]`
           : undefined;
@@ -77,18 +75,20 @@ export async function processOutgoingMarketingCampaign(
         })
         .where(eq(marketingCampaignsTable.id, marketingId));
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const encryptedApiKey = data.team.waBusinessAccount[0]?.accessToken;
       const phoneNumberId = data.phoneNumber;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const businessAcctId = data.team.waBusinessAccount[0]?.id;
       const webhookVerificationToken = getEnv("WEBHOOK_VERIFICATION_TOKEN");
 
       return {
-        encryptedApiKey,
-        phoneNumberId,
         businessAcctId,
-        webhookVerificationToken,
         contacts,
+        encryptedApiKey,
         messageTemplate: data.messageTemplate,
+        phoneNumberId,
+        webhookVerificationToken,
       };
     });
 
@@ -96,14 +96,14 @@ export async function processOutgoingMarketingCampaign(
     if (!data.messageTemplate) return false;
 
     const apiKey = decryptApiKey({
-      iv: data.encryptedApiKey.iv,
       data: data.encryptedApiKey.data,
+      iv: data.encryptedApiKey.iv,
     });
 
     const config = {
       accessToken: apiKey,
-      phoneNumberId: Number(data.phoneNumberId),
       businessAcctId: String(data.businessAcctId),
+      phoneNumberId: Number(data.phoneNumberId),
       webhookVerificationToken: getEnv("WEBHOOK_VERIFICATION_TOKEN"),
     };
 
@@ -113,13 +113,13 @@ export async function processOutgoingMarketingCampaign(
 
     const messageTemplate: BulkMessageQueue[] = data.contacts.map((contact) => {
       const temp: BulkMessageQueue = {
+        marketingCampaignId: marketingId,
         registryId,
         teamId: tenantId,
         template: {
-          body: data.messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
+          body: data.messageTemplate as MessageTemplateObject<ComponentTypesEnum>,
           to: contact,
         },
-        marketingCampaignId: marketingId,
         userId,
       };
 
@@ -127,12 +127,13 @@ export async function processOutgoingMarketingCampaign(
     });
 
     await waEventQueue.addBulk(
-      messageTemplate.map((r, i) => ({
-        name: `${WhatsAppEvents.ProcessingBulkMessagesOutgoing}:${tenantId}`,
+      messageTemplate.map((r) => ({
         data: r,
+        name: `${WhatsAppEvents.ProcessingBulkMessagesOutgoing}:${tenantId}`,
       }))
     );
   } catch (error) {
+    console.error(error);
     return false;
   }
 }

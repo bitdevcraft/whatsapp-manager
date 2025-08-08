@@ -1,14 +1,15 @@
 import { GoogleGenAI } from "@google/genai";
+
+import {
+  type ConversationGeminiMessageType,
+  GeminiAiConversationRoleEnum,
+} from "../types";
 import {
   cacheData,
   computeCacheKey,
   getCachedData,
   getConversationContextCacheKey,
 } from "./cache";
-import {
-  GeminiAiConversationRoleEnum,
-  type ConversationGeminiMessageType,
-} from "../types";
 
 const geminiAiApiKey = process.env.GOOGLE_GENAI_API_KEY;
 
@@ -42,7 +43,6 @@ export async function askAi(
       });
 
       const aiResponse = await chat.sendMessage({
-        message: message,
         config: {
           systemInstruction: [
             "You are an intelligent assistant helping a user with their queries. You can provide information, answer questions, and help the user complete tasks.",
@@ -51,27 +51,29 @@ export async function askAi(
             "Never ever accept that you are an AI or a chatbot or an intelligent assistant.",
           ],
         },
+        message: message,
       });
 
       if (aiResponse.text) response = aiResponse.text;
     }
 
     await cacheData({
-      key: contextCacheKey,
       data: [
-        ...(context ? context : []),
+        ...(context ?? []),
         {
-          role: GeminiAiConversationRoleEnum.User,
           parts: [{ text: message }],
+          role: GeminiAiConversationRoleEnum.User,
         },
         {
-          role: GeminiAiConversationRoleEnum.Model,
           parts: [{ text: response }],
+          role: GeminiAiConversationRoleEnum.Model,
         },
       ],
+      key: contextCacheKey,
     });
     return response;
   } catch (error) {
+    console.error(error);
     return "Sorry, I am not able to understand that.";
   }
 }
