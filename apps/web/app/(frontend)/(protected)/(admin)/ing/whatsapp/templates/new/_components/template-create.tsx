@@ -34,11 +34,11 @@ import { toast } from "sonner";
  * --------------------------- */
 const toSnake = (s: string) =>
   s
-    .trim()
     .replace(/\s+/g, "_")
     .replace(/([a-z])([A-Z])/g, "$1_$2")
     .replace(/[^a-zA-Z0-9_]/g, "")
-    .toLowerCase();
+    .toLowerCase()
+    .trim();
 
 // {{1}} {{2}} ... → [1,2,...] (unique, sorted)
 function parsePositional(text: string | undefined): number[] {
@@ -56,9 +56,7 @@ function parseNamed(text: string | undefined): string[] {
   const re = /\{\{\s*([^\s{}]+)\s*\}\}/g;
   const names: string[] = [];
   let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) {
-    names.push(m[1]!);
-  }
+  while ((m = re.exec(text))) names.push(m[1]!);
   return Array.from(new Set(names));
 }
 
@@ -106,10 +104,7 @@ export default function TemplateCreateForm({
   const { control, handleSubmit, watch, setValue, getValues } = form;
 
   // Only allow adding BUTTONS; HEADER/BODY/FOOTER are fixed
-  const componentsFA = useFieldArray({
-    control,
-    name: "components",
-  });
+  const componentsFA = useFieldArray({ control, name: "components" });
 
   // Helper: find current indices for header/body/footer to be robust even if BUTTONS are inserted
   const findIndexByType = (t: "HEADER" | "BODY" | "FOOTER" | "BUTTONS") => {
@@ -153,7 +148,141 @@ export default function TemplateCreateForm({
       bodyIdx >= 0 ? (`components.${bodyIdx}.text` as any) : (undefined as any),
   }) as string | undefined;
 
-  // Sync examples whenever relevant inputs change
+  /* -----------------------------
+   * syncExamples — instant updates
+   * --------------------------- */
+  const syncExamples = React.useCallback(
+    ({
+      headerTextOverride,
+      bodyTextOverride,
+    }: { headerTextOverride?: string; bodyTextOverride?: string } = {}) => {
+      const hIdx = findIndexByType("HEADER");
+      const bIdx = findIndexByType("BODY");
+      if (hIdx < 0 || bIdx < 0) return;
+
+      const pf = getValues("parameter_format");
+      const hFormat = getValues(`components.${hIdx}.format`) as
+        | "TEXT"
+        | "IMAGE"
+        | undefined;
+
+      const hText = headerTextOverride ?? getValues(`components.${hIdx}.text`);
+      const bText = bodyTextOverride ?? getValues(`components.${bIdx}.text`);
+
+      // Clear non-applicable branches first
+      if (hFormat !== "TEXT") {
+        setValue(`components.${hIdx}.example.header_text`, undefined, {
+          shouldDirty: true,
+        });
+        setValue(
+          `components.${hIdx}.example.header_text_named_params`,
+          undefined,
+          { shouldDirty: true }
+        );
+      }
+      setValue(`components.${bIdx}.example.body_text`, undefined, {
+        shouldDirty: true,
+      });
+      setValue(`components.${bIdx}.example.body_text_named_params`, undefined, {
+        shouldDirty: true,
+      });
+
+      if (pf === "POSITIONAL") {
+        // HEADER positional (only if TEXT)
+        if (hFormat === "TEXT") {
+          const nums = parsePositional(hText);
+          const current = getValues(
+            `components.${hIdx}.example.header_text`
+          ) as string[] | undefined;
+          const next =
+            nums.length === 0
+              ? undefined
+              : Array.from(
+                  { length: nums.length },
+                  (_, i) => current?.[i] ?? ""
+                );
+          setValue(`components.${hIdx}.example.header_text`, next, {
+            shouldDirty: true,
+          });
+          setValue(
+            `components.${hIdx}.example.header_text_named_params`,
+            undefined,
+            { shouldDirty: true }
+          );
+        }
+
+        // BODY positional → one row: [["", "", ...]]
+        const numsB = parsePositional(bText);
+        const currentB = getValues(`components.${bIdx}.example.body_text`) as
+          | string[][]
+          | undefined;
+        const prevRow = currentB?.[0] ?? [];
+        const row =
+          numsB.length === 0
+            ? undefined
+            : [
+                Array.from(
+                  { length: numsB.length },
+                  (_, i) => prevRow?.[i] ?? ""
+                ),
+              ];
+        setValue(`components.${bIdx}.example.body_text`, row, {
+          shouldDirty: true,
+        });
+        setValue(
+          `components.${bIdx}.example.body_text_named_params`,
+          undefined,
+          { shouldDirty: true }
+        );
+      } else {
+        // NAMED
+        if (hFormat === "TEXT") {
+          const names = parseNamed(hText);
+          const current = (getValues(
+            `components.${hIdx}.example.header_text_named_params`
+          ) || []) as Array<{ param_name: string; example: string }>;
+          const map = new Map(current.map((o) => [o.param_name, o.example]));
+          const next =
+            names.length === 0
+              ? undefined
+              : names.map((n) => ({
+                  param_name: n,
+                  example: map.get(n) ?? "",
+                }));
+          setValue(
+            `components.${hIdx}.example.header_text_named_params`,
+            next,
+            { shouldDirty: true }
+          );
+          setValue(`components.${hIdx}.example.header_text`, undefined, {
+            shouldDirty: true,
+          });
+        }
+
+        const namesB = parseNamed(bText);
+        const currentB = (getValues(
+          `components.${bIdx}.example.body_text_named_params`
+        ) || []) as Array<{ param_name: string; example: string }>;
+        const mapB = new Map(currentB.map((o) => [o.param_name, o.example]));
+        const nextB =
+          namesB.length === 0
+            ? undefined
+            : namesB.map((n) => ({
+                param_name: n,
+                example: mapB.get(n) ?? "",
+              }));
+        setValue(`components.${bIdx}.example.body_text_named_params`, nextB, {
+          shouldDirty: true,
+        });
+        setValue(`components.${bIdx}.example.body_text`, undefined, {
+          shouldDirty: true,
+        });
+      }
+    },
+    [getValues, setValue] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // Keep effect as a safety net for format changes, plus header single-var rule
   React.useEffect(() => {
     // If header isn't TEXT, clear header examples
     if (headerIdx >= 0 && headerFormat !== "TEXT") {
@@ -167,26 +296,24 @@ export default function TemplateCreateForm({
       );
     }
 
+    // Enforce: only 1 {{...}} in header
     if (
       headerIdx >= 0 &&
       headerFormat === "TEXT" &&
       typeof headerText === "string"
     ) {
-      // match any {{...}} (no newline), non-greedy
       const all = headerText.match(/\{\{[^{}\n]*\}\}/g) || [];
       if (all.length > 1) {
-        // remove the last placeholder occurrence
-        const last = all[all.length - 1];
-        const lastIndex = headerText.lastIndexOf(last!);
+        const last = all[all.length - 1]!;
+        const lastIndex = headerText.lastIndexOf(last);
         if (lastIndex >= 0) {
           const fixed =
             headerText.slice(0, lastIndex) +
-            headerText.slice(lastIndex + last!.length);
+            headerText.slice(lastIndex + last.length);
           setValue(`components.${headerIdx}.text`, fixed, {
             shouldDirty: true,
             shouldValidate: true,
           });
-          // optional heads-up
           toast.warning(
             "Only one {{…}} variable allowed in header. Removed the extra one."
           );
@@ -194,133 +321,8 @@ export default function TemplateCreateForm({
       }
     }
 
-    // Clear all body examples first if format changes type
-    if (bodyIdx >= 0) {
-      setValue(`components.${bodyIdx}.example.body_text`, undefined, {
-        shouldDirty: true,
-      });
-      setValue(
-        `components.${bodyIdx}.example.body_text_named_params`,
-        undefined,
-        { shouldDirty: true }
-      );
-    }
-
-    // Nothing to do without header/body indices
-    if (headerIdx < 0 || bodyIdx < 0) return;
-
-    // POSITIONAL mode
-    if (parameterFormat === "POSITIONAL") {
-      // HEADER TEXT positional only when header format is TEXT
-      if (headerFormat === "TEXT") {
-        const nums = parsePositional(headerText);
-        // header_text: string[] with length = nums.length
-        const current = getValues(
-          `components.${headerIdx}.example.header_text`
-        ) as string[] | undefined;
-        const next =
-          nums.length === 0
-            ? undefined
-            : Array.from({ length: nums.length }, (_, i) => current?.[i] ?? "");
-        setValue(`components.${headerIdx}.example.header_text`, next, {
-          shouldDirty: true,
-        });
-        // Clear the NAMED version
-        setValue(
-          `components.${headerIdx}.example.header_text_named_params`,
-          undefined,
-          {
-            shouldDirty: true,
-          }
-        );
-      } else {
-        // header not text → clear
-        setValue(`components.${headerIdx}.example.header_text`, undefined, {
-          shouldDirty: true,
-        });
-      }
-
-      // BODY positional
-      const numsB = parsePositional(bodyText);
-      const currentB = getValues(`components.${bodyIdx}.example.body_text`) as
-        | string[][]
-        | undefined;
-      // We maintain exactly one example row (index 0)
-      const prevRow = currentB?.[0] ?? [];
-      const row =
-        numsB.length === 0
-          ? undefined
-          : [
-              Array.from(
-                { length: numsB.length },
-                (_, i) => prevRow?.[i] ?? ""
-              ),
-            ];
-      setValue(`components.${bodyIdx}.example.body_text`, row, {
-        shouldDirty: true,
-      });
-      // Clear the NAMED version
-      setValue(
-        `components.${bodyIdx}.example.body_text_named_params`,
-        undefined,
-        {
-          shouldDirty: true,
-        }
-      );
-    }
-
-    // NAMED mode
-    if (parameterFormat === "NAMED") {
-      // HEADER named (only if TEXT)
-      if (headerFormat === "TEXT") {
-        const names = parseNamed(headerText);
-        const current = (getValues(
-          `components.${headerIdx}.example.header_text_named_params`
-        ) || []) as Array<{ param_name: string; example: string }>;
-        const map = new Map(current.map((o) => [o.param_name, o.example]));
-        const next =
-          names.length === 0
-            ? undefined
-            : names.map((n) => ({ param_name: n, example: map.get(n) ?? "" }));
-        setValue(
-          `components.${headerIdx}.example.header_text_named_params`,
-          next,
-          {
-            shouldDirty: true,
-          }
-        );
-        // Clear positional version
-        setValue(`components.${headerIdx}.example.header_text`, undefined, {
-          shouldDirty: true,
-        });
-      } else {
-        setValue(
-          `components.${headerIdx}.example.header_text_named_params`,
-          undefined,
-          {
-            shouldDirty: true,
-          }
-        );
-      }
-
-      // BODY named
-      const namesB = parseNamed(bodyText);
-      const currentB = (getValues(
-        `components.${bodyIdx}.example.body_text_named_params`
-      ) || []) as Array<{ param_name: string; example: string }>;
-      const mapB = new Map(currentB.map((o) => [o.param_name, o.example]));
-      const nextB =
-        namesB.length === 0
-          ? undefined
-          : namesB.map((n) => ({ param_name: n, example: mapB.get(n) ?? "" }));
-      setValue(`components.${bodyIdx}.example.body_text_named_params`, nextB, {
-        shouldDirty: true,
-      });
-      // Clear positional version
-      setValue(`components.${bodyIdx}.example.body_text`, undefined, {
-        shouldDirty: true,
-      });
-    }
+    // Sync based on current values (handles parameter_format / format changes)
+    syncExamples();
   }, [
     parameterFormat,
     headerFormat,
@@ -328,28 +330,16 @@ export default function TemplateCreateForm({
     bodyText,
     headerIdx,
     bodyIdx,
-    getValues,
     setValue,
+    syncExamples,
   ]);
 
   const mutation = useMutation({
     mutationFn: async (payload: TemplateCreateValue) => {
-      //   const res = await fetch("/api/submit", {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify(payload),
-      //   });
-      //   if (!res.ok) {
-      //     const err = await res.json().catch(() => ({}));
-      //     throw new Error(err?.error || "Request failed");
-      //   }
-      //   return (await res.json()) as { ok: boolean };
       console.log(payload);
     },
-    onSuccess: () => {
-      toast.success("Saved");
-    },
-    onError: (error: unknown) => {
+    onSuccess: () => toast.success("Saved"),
+    onError: (error: unknown) =>
       toast.error(
         <div>
           <p>Error</p>
@@ -357,8 +347,7 @@ export default function TemplateCreateForm({
             {error instanceof Error ? error.message : "Something went wrong."}
           </p>
         </div>
-      );
-    },
+      ),
   });
 
   const onSubmit = (values: TemplateCreateValue) => mutation.mutate(values);
@@ -518,7 +507,7 @@ export default function TemplateCreateForm({
                               React.useRef<HTMLInputElement>(null);
 
                             const onAddVariable = () => {
-                              const pf = parameterFormat; // "POSITIONAL" | "NAMED"
+                              const pf = parameterFormat;
                               const current = String(field.value ?? "");
 
                               // Header rule: only ONE variable allowed
@@ -532,20 +521,19 @@ export default function TemplateCreateForm({
                               }
 
                               if (pf === "POSITIONAL") {
-                                const idxNum = 1; // enforce always {{1}} for header
-                                const insertion = `{{${idxNum}}}`;
+                                const insertion = `{{1}}`;
                                 const next = insertAtCursor(
                                   inputRef.current,
                                   current,
                                   insertion
                                 );
                                 field.onChange(next);
+                                syncExamples({ headerTextOverride: next }); // instant
                                 return;
                               }
 
                               // NAMED → insert {{}} and place cursor inside braces
                               const insertion = `{{}}`;
-                              // caret should land between the braces -> +2 from start
                               const start =
                                 (inputRef.current?.selectionStart ??
                                   String(current).length) + 2;
@@ -556,6 +544,7 @@ export default function TemplateCreateForm({
                                 start
                               );
                               field.onChange(next);
+                              syncExamples({ headerTextOverride: next }); // instant
                             };
 
                             return (
@@ -563,9 +552,33 @@ export default function TemplateCreateForm({
                                 <FormLabel>Header Text</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="e.g. Hello {{1}} or Hello {{name}}"
                                     {...field}
-                                    ref={inputRef}
+                                    ref={(el) => {
+                                      field.ref(el);
+                                      inputRef.current = el;
+                                    }}
+                                    placeholder="e.g. Hello {{1}} or Hello {{name}}"
+                                    onChange={(e) => {
+                                      let val = e.target.value as string;
+                                      // enforce "only one variable"
+                                      const allVars =
+                                        val.match(/\{\{[^{}\n]*\}\}/g) || [];
+                                      if (allVars.length > 1) {
+                                        const last =
+                                          allVars[allVars.length - 1]!;
+                                        const lastIndex = val.lastIndexOf(last);
+                                        if (lastIndex >= 0) {
+                                          val =
+                                            val.slice(0, lastIndex) +
+                                            val.slice(lastIndex + last.length);
+                                          toast.warning(
+                                            "Only one {{…}} variable allowed in header. Removed the extra one."
+                                          );
+                                        }
+                                      }
+                                      field.onChange(val);
+                                      syncExamples({ headerTextOverride: val }); // instant
+                                    }}
                                   />
                                 </FormControl>
                                 <div className="mt-1 flex justify-end">
@@ -609,7 +622,7 @@ export default function TemplateCreateForm({
                             const current = String(field.value ?? "");
 
                             if (pf === "POSITIONAL") {
-                              const nextIndex = nextPositionalIndex(current); // {{1}}, {{2}}, ...
+                              const nextIndex = nextPositionalIndex(current);
                               const insertion = `{{${nextIndex}}}`;
                               const next = insertAtCursor(
                                 inputRef.current,
@@ -617,6 +630,7 @@ export default function TemplateCreateForm({
                                 insertion
                               );
                               field.onChange(next);
+                              syncExamples({ bodyTextOverride: next }); // instant
                               return;
                             }
 
@@ -632,6 +646,7 @@ export default function TemplateCreateForm({
                               start
                             );
                             field.onChange(next);
+                            syncExamples({ bodyTextOverride: next }); // instant
                           };
 
                           return (
@@ -639,9 +654,17 @@ export default function TemplateCreateForm({
                               <FormLabel>Body Text</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="e.g. Dear {{1}} or Dear {{name}}"
                                   {...field}
-                                  ref={inputRef}
+                                  ref={(el) => {
+                                    field.ref(el);
+                                    inputRef.current = el;
+                                  }}
+                                  placeholder="e.g. Dear {{1}} or Dear {{name}}"
+                                  onChange={(e) => {
+                                    const val = e.target.value as string;
+                                    field.onChange(val);
+                                    syncExamples({ bodyTextOverride: val }); // instant
+                                  }}
                                 />
                               </FormControl>
                               <div className="mt-1 flex justify-end">
@@ -722,9 +745,7 @@ function HeaderAutoExamples({
   index: number;
   parameterFormat: "POSITIONAL" | "NAMED";
 }) {
-  // POSITIONAL → header_text: string[]
   if (parameterFormat === "POSITIONAL") {
-    // Render inputs for header_text[i] if present
     return (
       <AutoArrayInputs
         control={control}
@@ -733,7 +754,6 @@ function HeaderAutoExamples({
       />
     );
   }
-  // NAMED → header_text_named_params: { param_name, example }[]
   return (
     <AutoNamedParamsInputs
       control={control}
@@ -753,7 +773,6 @@ function BodyAutoExamples({
   parameterFormat: "POSITIONAL" | "NAMED";
 }) {
   if (parameterFormat === "POSITIONAL") {
-    // body_text: string[][], show row 0 only
     return (
       <AutoMatrixRowInputs
         control={control}
@@ -762,7 +781,6 @@ function BodyAutoExamples({
       />
     );
   }
-  // NAMED
   return (
     <AutoNamedParamsInputs
       control={control}
@@ -783,14 +801,10 @@ function AutoArrayInputs({
   label,
 }: {
   control: any;
-  baseName: string; // e.g., components.0.example.header_text
+  baseName: string;
   label: string;
 }) {
-  // We don't need useFieldArray here; RHF can bind array indices directly.
-  // Render a small dynamic list until undefined
   const [len, setLen] = React.useState(0);
-
-  // Track length by peeking at form values on each render
   React.useEffect(() => {
     const v = control._formValues;
     const parts = baseName.split(".");
@@ -801,12 +815,9 @@ function AutoArrayInputs({
     }
     setLen(Array.isArray(cur) ? cur.length : 0);
   });
-
   return (
     <div className="space-y-2">
-      {len === 0 ? (
-        <></>
-      ) : (
+      {len === 0 ? null : (
         <div className="grid gap-2">
           <div className="text-sm">{label}</div>
           {Array.from({ length: len }).map((_, i) => (
@@ -833,7 +844,7 @@ function AutoArrayInputs({
 
 function AutoMatrixRowInputs({
   control,
-  baseName, // e.g. components.1.example.body_text.0
+  baseName,
   label,
 }: {
   control: any;
@@ -841,7 +852,6 @@ function AutoMatrixRowInputs({
   label: string;
 }) {
   const [len, setLen] = React.useState(0);
-
   React.useEffect(() => {
     const v = control._formValues;
     const parts = baseName.split(".");
@@ -852,12 +862,9 @@ function AutoMatrixRowInputs({
     }
     setLen(Array.isArray(cur) ? cur.length : 0);
   });
-
   return (
     <div className="space-y-2">
-      {len === 0 ? (
-        <></>
-      ) : (
+      {len === 0 ? null : (
         <div className="grid gap-2">
           <div className="text-sm">{label}</div>
           {Array.from({ length: len }).map((_, i) => (
@@ -884,7 +891,7 @@ function AutoMatrixRowInputs({
 
 function AutoNamedParamsInputs({
   control,
-  baseName, // e.g. components.0.example.header_text_named_params
+  baseName,
   label,
 }: {
   control: any;
@@ -892,7 +899,6 @@ function AutoNamedParamsInputs({
   label: string;
 }) {
   const [len, setLen] = React.useState(0);
-
   React.useEffect(() => {
     const v = control._formValues;
     const parts = baseName.split(".");
@@ -903,12 +909,9 @@ function AutoNamedParamsInputs({
     }
     setLen(Array.isArray(cur) ? cur.length : 0);
   });
-
   return (
     <div className="space-y-2">
-      {len === 0 ? (
-        <></>
-      ) : (
+      {len === 0 ? null : (
         <div className="space-y-2">
           <div className="text-sm">{label}</div>
           {Array.from({ length: len }).map((_, i) => (
