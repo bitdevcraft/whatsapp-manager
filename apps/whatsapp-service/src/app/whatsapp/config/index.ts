@@ -1,5 +1,6 @@
-import { getEnv } from "@/lib/env";
 import { WebhookHandler } from "@workspace/wa-cloud-api";
+
+import { getEnv } from "@/lib/env";
 
 const config = {
   accessToken: getEnv("CLOUD_API_ACCESS_TOKEN"),

@@ -1,11 +1,12 @@
-import { ioInstance } from "@/socket";
-import { conversationsTable, conversationStatusEnum, db } from "@workspace/db";
+import { conversationsTable, db } from "@workspace/db";
 import {
   NotificationEvent,
   NotificationRelatedObject,
 } from "@workspace/shared";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
+
+import { ioInstance } from "@/socket";
 
 export async function handleMessageStatus(
   client: WhatsApp,
@@ -32,9 +33,9 @@ export async function handleMessageStatus(
       payload: {
         message: "Conversation Status Update",
       },
-      teamId: conv.teamId,
       relatedId: conv.id,
       relatedObject: NotificationRelatedObject.Conversation,
+      teamId: conv.teamId,
     });
 
   if (conv.marketingCampaignId)
@@ -44,8 +45,8 @@ export async function handleMessageStatus(
         payload: {
           message: "Conversation Status Update",
         },
-        teamId: conv.teamId,
         relatedId: conv.marketingCampaignId,
         relatedObject: NotificationRelatedObject.MarketingCampaign,
+        teamId: conv.teamId,
       });
 }

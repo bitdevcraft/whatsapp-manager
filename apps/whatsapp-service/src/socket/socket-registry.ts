@@ -1,6 +1,17 @@
 export class SocketRegistry {
   private userSocketMap = new Map<string, string>();
 
+  getSocketId(userId: string): string | undefined {
+    return this.userSocketMap.get(userId);
+  }
+
+  getUserId(socketId: string): string | undefined {
+    for (const [userId, sid] of this.userSocketMap.entries()) {
+      if (sid === socketId) return userId;
+    }
+    return undefined;
+  }
+
   register(userId: string, socketId: string): void {
     this.userSocketMap.set(userId, socketId);
   }
@@ -12,16 +23,5 @@ export class SocketRegistry {
         break;
       }
     }
-  }
-
-  getSocketId(userId: string): string | undefined {
-    return this.userSocketMap.get(userId);
-  }
-
-  getUserId(socketId: string): string | undefined {
-    for (const [userId, sid] of this.userSocketMap.entries()) {
-      if (sid === socketId) return userId;
-    }
-    return undefined;
   }
 }

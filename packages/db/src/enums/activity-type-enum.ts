@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-enums */
 export enum ActivityType {
   SIGN_UP = "SIGN_UP",
   SIGN_IN = "SIGN_IN",

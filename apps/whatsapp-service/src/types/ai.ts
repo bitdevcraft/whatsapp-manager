@@ -1,21 +1,21 @@
-export enum OpenAiConversationRoleEnum {
-  User = "user",
-  Ai = "assistant",
-}
-
 export enum GeminiAiConversationRoleEnum {
-  User = "user",
   Ai = "assistant",
   Model = "model",
+  User = "user",
 }
 
-export type ConversationMessageType = {
-  role: OpenAiConversationRoleEnum;
+export enum OpenAiConversationRoleEnum {
+  Ai = "assistant",
+  User = "user",
+}
+
+export interface ConversationGeminiMessageType {
+  parts: { text: string }[];
+  role: GeminiAiConversationRoleEnum;
+}
+
+export interface ConversationMessageType {
   content: string;
   parts: { text: string }[];
-};
-
-export type ConversationGeminiMessageType = {
-  role: GeminiAiConversationRoleEnum;
-  parts: { text: string }[];
-};
+  role: OpenAiConversationRoleEnum;
+}

@@ -1,5 +1,6 @@
 import { ConversationBody } from "@workspace/db";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
+
 import { insertConversation } from "../action";
 
 export async function handleDocumentMessage(
@@ -8,10 +9,10 @@ export async function handleDocumentMessage(
 ) {
   const body: ConversationBody = {
     body: {
-      text: message.document?.filename,
       media: {
         id: message.document?.id,
       },
+      text: message.document?.filename,
     },
   };
 

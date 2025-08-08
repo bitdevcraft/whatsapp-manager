@@ -1,4 +1,3 @@
-import { ioInstance } from "@/socket";
 import {
   contactsTable,
   ConversationBody,
@@ -16,6 +15,8 @@ import {
 import { WebhookMessage } from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
 
+import { ioInstance } from "@/socket";
+
 export async function insertConversation(
   body: ConversationBody,
   message: WebhookMessage
@@ -29,13 +30,14 @@ export async function insertConversation(
   }
 
   const conversation: NewConversation = {
-    teamId: account.teamId,
-    content: message,
-    wamid: message.id,
-    success: true,
-    repliedTo: message.originalData?.context?.id,
-    direction: "inbound",
     body,
+    content: message,
+    direction: "inbound",
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    repliedTo: message.originalData?.context?.id ?? null,
+    success: true,
+    teamId: account.teamId,
+    wamid: message.id,
   };
 
   const data = await withTenantTransaction(account.teamId, async (tx) => {
@@ -45,29 +47,30 @@ export async function insertConversation(
 
     if (!contact) {
       const temp: NewContact = {
-        teamId: account.teamId,
-        phone: message.from,
         email: "",
         message: "",
-        name: message.profileName ?? "",
+        name: message.profileName,
+        phone: message.from,
+        teamId: account.teamId,
       };
       contact = (await tx.insert(contactsTable).values(temp).returning())[0];
     }
 
     conversation.contactId = contact?.id;
 
-    return await tx.insert(conversationsTable).values(conversation).returning();
+    await tx.insert(conversationsTable).values(conversation).returning();
+    return contact?.id;
   });
 
-  if (data[0])
+  if (data)
     ioInstance
       .to(`team:${account.teamId}`)
       .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
         payload: {
           message: "New Message Received",
         },
+        relatedId: data,
+        relatedObject: NotificationRelatedObject.Contact,
         teamId: account.teamId,
-        relatedId: data[0].id,
-        relatedObject: NotificationRelatedObject.Conversation,
       });
 }

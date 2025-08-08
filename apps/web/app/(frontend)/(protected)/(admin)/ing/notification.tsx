@@ -1,6 +1,7 @@
 "use client";
 
 import { useSocket } from "@/components/provider/socket-provider";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   NotificationEvent,
   NotificationRelatedObject,
@@ -14,10 +15,12 @@ import { toast } from "sonner";
 export default function Notification() {
   const { socket } = useSocket();
 
-  const [reload, setReload] = useQueryState("rId", {
-    defaultValue: "",
-    shallow: false,
-  });
+  // const [reload, setReload] = useQueryState("rId", {
+  //   defaultValue: "",
+  //   shallow: false,
+  // });
+
+  const queryClient = useQueryClient();
 
   const revalidateTagApi = async (
     relatedObject: string,
@@ -41,7 +44,13 @@ export default function Notification() {
         tags,
       });
 
-      setReload(nanoid());
+      if (relatedObject === NotificationRelatedObject.Contact) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversations", id], // prefix
+        });
+      }
+
+      // setReload(nanoid());
     } catch (error) {
       console.error(error);
     }

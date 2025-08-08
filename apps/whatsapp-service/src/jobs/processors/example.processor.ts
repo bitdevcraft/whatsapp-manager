@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Worker } from "bullmq";
+
 import { redisConnection } from "@/lib/redis";
-import { ioInstance } from "@/socket";
 import { socketRegistry } from "@/socket";
 
 export function setupWorker() {
