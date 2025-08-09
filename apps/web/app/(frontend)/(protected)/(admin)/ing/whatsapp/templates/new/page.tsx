@@ -1,7 +1,8 @@
 // apps/web/app/(frontend)/(admin)/ing/whatsapp/templates/new/page.tsx
 "use client";
 
-import SimpleTemplateForm from './_components/simple-template-form';
+import SimpleTemplateForm from "./_components/simple-template-form";
+import TemplateCreateForm from "./_components/template-create";
 
 export default function NewTemplatePage() {
   return (
@@ -20,9 +21,11 @@ export default function NewTemplatePage() {
           </p>
         </div>
       </div>
-      
-      <div className="rounded-lg border p-6">
-        <SimpleTemplateForm />
+
+      <div className="rounded-lg border p-6 bg-background/60">
+        {/* <SimpleTemplateForm /> */}
+        {/* <TemplateCreatorPage /> */}
+        <TemplateCreateForm />
       </div>
     </div>
   );

@@ -8,40 +8,59 @@ import { v4 as uuidv4 } from "uuid";
 import { getUserWithTeam } from "@/lib/db/queries";
 import type { TemplateResponse } from "@workspace/wa-cloud-api";
 import { CategoryEnum } from "@workspace/wa-cloud-api";
+import { revalidateTag } from "next/cache";
 
 // Extend the TemplateResponse type to include meta
-interface AppTemplateResponse extends Omit<TemplateResponse, 'meta'> {
+interface AppTemplateResponse extends Omit<TemplateResponse, "meta"> {
   meta?: {
     status: string;
     createdAt: string;
   };
 }
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const sync = searchParams.get("sync");
 
+  const userWithTeam = await getUserWithTeam();
+  if (!userWithTeam?.teamId) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Unauthorized: No team found",
+        details: "User is not associated with a team",
+      }),
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
   try {
     const result = await getTemplates(!!sync);
-    return new NextResponse(JSON.stringify(result), { 
+
+    revalidateTag(`templates:select:${userWithTeam?.teamId}`);
+    return new NextResponse(JSON.stringify(result), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   } catch (error) {
     console.error("Error fetching templates:", error);
     return new NextResponse(
-      JSON.stringify({ 
+      JSON.stringify({
         error: "Failed to fetch templates",
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
-      { 
+      {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }
     );
@@ -54,14 +73,14 @@ export async function POST(request: NextRequest) {
     const userWithTeam = await getUserWithTeam();
     if (!userWithTeam?.teamId) {
       return new NextResponse(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Unauthorized: No team found",
-          details: "User is not associated with a team"
+          details: "User is not associated with a team",
         }),
-        { 
+        {
           status: 401,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -70,20 +89,23 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     let templateData;
     try {
-      templateData = (await request.json()) as Omit<TemplateResponse, 'id' | 'status' | 'category'> & {
+      templateData = (await request.json()) as Omit<
+        TemplateResponse,
+        "id" | "status" | "category"
+      > & {
         name: string;
         category: string;
       };
     } catch (parseError) {
       return new NextResponse(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Invalid request body",
-          details: "Failed to parse JSON payload"
+          details: "Failed to parse JSON payload",
         }),
-        { 
+        {
           status: 400,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -91,11 +113,13 @@ export async function POST(request: NextRequest) {
 
     // Generate a new template ID
     const templateId = `template_${uuidv4()}`;
-    
+
     try {
-            // Create the template with Meta status
+      // Create the template with Meta status
       // Validate and cast category to CategoryEnum
-      const category = Object.values(CategoryEnum).includes(templateData.category as CategoryEnum)
+      const category = Object.values(CategoryEnum).includes(
+        templateData.category as CategoryEnum
+      )
         ? (templateData.category as CategoryEnum)
         : CategoryEnum.Marketing; // Default to MARKETING if invalid
 
@@ -103,57 +127,60 @@ export async function POST(request: NextRequest) {
         ...templateData,
         category, // Use validated category
         meta: {
-          status: 'DRAFT',
-          createdAt: new Date().toISOString()
+          status: "DRAFT",
+          createdAt: new Date().toISOString(),
         },
         // Ensure required fields from TemplateResponse are included
         id: templateId,
-        status: 'PENDING',
-        parameter_format: templateData.parameter_format || 'NAMED',
-        components: templateData.components || []
+        status: "PENDING",
+        parameter_format: templateData.parameter_format || "NAMED",
+        components: templateData.components || [],
       };
 
       // Create the template in the database
-      const [newTemplate] = await withTenantTransaction(userWithTeam.teamId, async (tx) => {
-        return tx
-          .insert(templatesTable)
-          .values({
-            id: templateId,
-            name: templateData.name,
-            content: templateContent,
-            teamId: userWithTeam.teamId!,
-            updatedAt: new Date(),
-          })
-          .returning();
-      });
+      const [newTemplate] = await withTenantTransaction(
+        userWithTeam.teamId,
+        async (tx) => {
+          return tx
+            .insert(templatesTable)
+            .values({
+              id: templateId,
+              name: templateData.name,
+              content: templateContent,
+              teamId: userWithTeam.teamId!,
+              updatedAt: new Date(),
+            })
+            .returning();
+        }
+      );
 
-      return new NextResponse(JSON.stringify(newTemplate), { 
+      return new NextResponse(JSON.stringify(newTemplate), {
         status: 201,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
     } catch (dbError) {
       console.error("Database error creating template:", dbError);
       return new NextResponse(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Failed to create template",
-          details: dbError instanceof Error ? dbError.message : 'Unknown error' 
-        }), 
+          details: dbError instanceof Error ? dbError.message : "Unknown error",
+        }),
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Unexpected error in template creation:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: "Internal server error",
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
-      { 
+      {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }
     );
