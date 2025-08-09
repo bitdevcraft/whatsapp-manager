@@ -149,6 +149,14 @@ export default function TemplateCreateForm({
       bodyIdx >= 0 ? (`components.${bodyIdx}.text` as any) : (undefined as any),
   }) as string | undefined;
 
+  const componentsWatch = useWatch({
+    control,
+    name: "components",
+  }) as Array<any>;
+  const hasButtons =
+    Array.isArray(componentsWatch) &&
+    componentsWatch.some((c) => c?.type === "BUTTONS");
+
   /* -----------------------------
    * syncExamples — instant updates
    * --------------------------- */
@@ -377,6 +385,10 @@ export default function TemplateCreateForm({
 
   // Only allow adding BUTTONS
   const addButtons = () => {
+    const comps = getValues("components");
+    if (Array.isArray(comps) && comps.some((c: any) => c?.type === "BUTTONS")) {
+      return; // already have one → do nothing
+    }
     componentsFA.append({ type: "BUTTONS", buttons: [] } as any);
   };
 
@@ -765,9 +777,11 @@ export default function TemplateCreateForm({
           </div>
           <div className="flex flex-wrap gap-2">
             {/* Only Buttons can be added */}
-            <Button type="button" variant="secondary" onClick={addButtons}>
-              Add Buttons
-            </Button>
+            {!hasButtons && (
+              <Button type="button" variant="secondary" onClick={addButtons}>
+                Add Buttons
+              </Button>
+            )}
           </div>
         </div>
 

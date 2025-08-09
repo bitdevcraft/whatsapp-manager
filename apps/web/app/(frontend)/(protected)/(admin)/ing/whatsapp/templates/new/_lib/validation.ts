@@ -112,6 +112,7 @@ export const TemplateCreateSchema = z.object({
   category: CategoryType,
   parameter_format: ParameterFormatType,
   components: ComponentSchema,
+  language: z.nativeEnum(LanguagesEnum),
 });
 
 export type TemplateCreateValue = z.infer<typeof TemplateCreateSchema>;
@@ -136,4 +137,5 @@ export const defaultValue: TemplateCreateValue = {
   category: "MARKETING",
   components: [headerValue, bodyValue, footerValue],
   parameter_format: "POSITIONAL",
+  language: LanguagesEnum.English,
 };
