@@ -28,6 +28,7 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { toast } from "sonner";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
 
 /* -----------------------------
  * Utilities
@@ -337,6 +338,16 @@ export default function TemplateCreateForm({
   const mutation = useMutation({
     mutationFn: async (payload: TemplateCreateValue) => {
       console.log(payload);
+      const res = await fetch("/api/whatsapp/templates/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "Request failed");
+      }
+      return await res.json();
     },
     onSuccess: () => toast.success("Saved"),
     onError: (error: unknown) =>
@@ -356,6 +367,13 @@ export default function TemplateCreateForm({
   const parameterFormatOptions = ["POSITIONAL", "NAMED"] as const;
   const headerFormatOptions = ["TEXT", "IMAGE"] as const;
   const buttonTypeOptions = ["QUICK_REPLY", "URL", "PHONE_NUMBER"] as const;
+  const languageOptions = React.useMemo(
+    () =>
+      Object.values(LanguagesEnum).filter(
+        (v): v is LanguagesEnum => typeof v === "string"
+      ),
+    []
+  );
 
   // Only allow adding BUTTONS
   const addButtons = () => {
@@ -398,6 +416,35 @@ export default function TemplateCreateForm({
                     </SelectTrigger>
                     <SelectContent>
                       {categoryOptions.map((opt) => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="language"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Language</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(v) => field.onChange(v)}
+                    defaultValue={field.value as unknown as string | undefined}
+                    value={field.value as unknown as string | undefined}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((opt) => (
                         <SelectItem key={opt} value={opt}>
                           {opt}
                         </SelectItem>
