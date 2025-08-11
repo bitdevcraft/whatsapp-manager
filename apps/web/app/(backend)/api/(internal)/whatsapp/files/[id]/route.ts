@@ -43,6 +43,13 @@ export async function POST(
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
+      with: {
+        team: {
+          with: {
+            waBusinessPhoneNumber: true,
+          },
+        },
+      },
       where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
     });
 
