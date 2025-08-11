@@ -70,7 +70,7 @@ interface MultiSelectProps
     value: string;
     /** Optional icon component to display alongside the option. */
     icon?: React.ComponentType<{ className?: string }>;
-  }[];
+  }[]; 
 
   /**
    * Callback function triggered when the selected values change.
