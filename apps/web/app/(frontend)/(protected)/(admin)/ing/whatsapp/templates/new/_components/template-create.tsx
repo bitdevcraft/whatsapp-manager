@@ -1,8 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  useWatch,
+  Controller,
+  ControllerRenderProps,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import { useMutation } from "@tanstack/react-query";
 import {
   TemplateCreateSchema,
@@ -29,6 +36,19 @@ import {
 } from "@workspace/ui/components/select";
 import { toast } from "sonner";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import axios from "axios";
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadItem,
+  FileUploadItemDelete,
+  FileUploadItemMetadata,
+  FileUploadItemPreview,
+  FileUploadList,
+  FileUploadTrigger,
+} from "@workspace/ui/components/data-importer/file-upload";
+import { Upload, X } from "lucide-react";
+import { pruneObject } from "@/utils/prune";
 
 /* -----------------------------
  * Utilities
@@ -99,7 +119,7 @@ export default function TemplateCreateForm({
   const form = useForm<TemplateCreateValue>({
     resolver: zodResolver(TemplateCreateSchema),
     defaultValues: { ...defaultValue, ...initialValues },
-    mode: "onSubmit",
+    mode: "onChange",
   });
 
   const { control, handleSubmit, watch, setValue, getValues } = form;
@@ -189,6 +209,7 @@ export default function TemplateCreateForm({
           { shouldDirty: true }
         );
       }
+
       setValue(`components.${bIdx}.example.body_text`, undefined, {
         shouldDirty: true,
       });
@@ -291,6 +312,50 @@ export default function TemplateCreateForm({
     [getValues, setValue] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  /**
+   * File Upload
+   */
+
+  const [fileRecord, setFileRecord] = React.useState<Record<string, File>>({});
+
+  const onFileReject = React.useCallback((file: File, message: string) => {
+    toast(message, {
+      description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`,
+    });
+  }, []);
+
+  const onFileUpload = async (
+    data: File[],
+    field: ControllerRenderProps<
+      TemplateCreateValue,
+      `components.${number}.example.header_handle.${number}`
+    >
+  ) => {
+    const file = data[0];
+    if (!file) return;
+
+    setFileRecord((prev) => ({
+      ...prev,
+      [field.name]: file,
+    }));
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await axios.post(`/api/whatsapp/files`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const { h } = response.data;
+
+      field.onChange(h);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   // Keep effect as a safety net for format changes, plus header single-var rule
   React.useEffect(() => {
     // If header isn't TEXT, clear header examples
@@ -345,17 +410,18 @@ export default function TemplateCreateForm({
 
   const mutation = useMutation({
     mutationFn: async (payload: TemplateCreateValue) => {
-      console.log(payload);
-      const res = await fetch("/api/whatsapp/templates/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const cleanPayload = pruneObject(payload, {
+        removeEmptyObjects: true,
+        removeEmptyArrays: true,
+        trimStrings: true,
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Request failed");
-      }
-      return await res.json();
+
+      const result = await axios.post(
+        "/api/whatsapp/templates/create",
+        cleanPayload
+      );
+
+      return result.data;
     },
     onSuccess: () => toast.success("Saved"),
     onError: (error: unknown) =>
@@ -393,204 +459,378 @@ export default function TemplateCreateForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
-        {/* name */}
-        <FormField
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="snake_case_name"
-                  {...field}
-                  onChange={(e) => field.onChange(toSnake(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-4 flex-col md:flex-row">
-          {/* category */}
-          <Controller
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+          noValidate
+        >
+          {/* name */}
+          <FormField
             control={control}
-            name="category"
+            name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    placeholder="snake_case_name"
+                    {...field}
+                    onChange={(e) => field.onChange(toSnake(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <Controller
-            control={control}
-            name="language"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Language</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={(v) => field.onChange(v)}
-                    defaultValue={field.value as unknown as string | undefined}
-                    value={field.value as unknown as string | undefined}
+          <div className="flex gap-4 flex-col md:flex-row">
+            {/* category */}
+            <Controller
+              control={control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              control={control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Language</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(v) => field.onChange(v)}
+                      defaultValue={
+                        field.value as unknown as string | undefined
+                      }
+                      value={field.value as unknown as string | undefined}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languageOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* parameter_format */}
+            <Controller
+              control={control}
+              name="parameter_format"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Parameter Format</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {parameterFormatOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          {/* Components Header */}
+          <div className="space-y-3">
+            {componentsFA.fields.length === 0 && (
+              <p className="text-sm text-muted-foreground">No components.</p>
+            )}
+            <div className="space-y-4">
+              {componentsFA.fields.map((comp, idx) => {
+                const type = watch(`components.${idx}.type`) as
+                  | "HEADER"
+                  | "BODY"
+                  | "FOOTER"
+                  | "BUTTONS";
+                return (
+                  <div
+                    key={comp.id}
+                    className="rounded-lg border p-3 space-y-3"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {languageOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* parameter_format */}
-          <Controller
-            control={control}
-            name="parameter_format"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Parameter Format</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {parameterFormatOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Components Header */}
-        <div className="space-y-3">
-          {componentsFA.fields.length === 0 && (
-            <p className="text-sm text-muted-foreground">No components.</p>
-          )}
-
-          <div className="space-y-4">
-            {componentsFA.fields.map((comp, idx) => {
-              const type = watch(`components.${idx}.type`) as
-                | "HEADER"
-                | "BODY"
-                | "FOOTER"
-                | "BUTTONS";
-
-              return (
-                <div key={comp.id} className="rounded-lg border p-3 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">{type}</div>
-                    {/* Remove button ONLY for BUTTONS */}
-                    {type === "BUTTONS" && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => componentsFA.remove(idx)}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* HEADER */}
-                  {type === "HEADER" && (
-                    <>
-                      <Controller
-                        control={control}
-                        name={`components.${idx}.format`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Header Format</FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value}
-                                onValueChange={field.onChange}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select format" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {headerFormatOptions.map((opt) => (
-                                    <SelectItem key={opt} value={opt}>
-                                      {opt}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-medium">{type}</div>
+                      {/* Remove button ONLY for BUTTONS */}
+                      {type === "BUTTONS" && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => componentsFA.remove(idx)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    {/* HEADER */}
+                    {type === "HEADER" && (
+                      <>
+                        <Controller
+                          control={control}
+                          name={`components.${idx}.format`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Header Format</FormLabel>
+                              <FormControl>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select format" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {headerFormatOptions.map((opt) => (
+                                      <SelectItem key={opt} value={opt}>
+                                        {opt}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {watch(`components.${idx}.format`) === "TEXT" && (
+                          <FormField
+                            control={control}
+                            name={`components.${idx}.text`}
+                            render={({ field }) => {
+                              const inputRef =
+                                React.useRef<HTMLInputElement>(null);
+                              const onAddVariable = () => {
+                                const pf = parameterFormat;
+                                const current = String(field.value ?? "");
+                                // Header rule: only ONE variable allowed
+                                const allVars =
+                                  current.match(/\{\{[^{}\n]*}}/g) || [];
+                                if (allVars.length >= 1) {
+                                  toast.warning(
+                                    "Header can contain only one variable."
+                                  );
+                                  return;
+                                }
+                                if (pf === "POSITIONAL") {
+                                  const insertion = `{{1}}`;
+                                  const next = insertAtCursor(
+                                    inputRef.current,
+                                    current,
+                                    insertion
+                                  );
+                                  field.onChange(next);
+                                  syncExamples({ headerTextOverride: next }); // instant
+                                  return;
+                                }
+                                // NAMED → insert {{}} and place cursor inside braces
+                                const insertion = `{{}}`;
+                                const start =
+                                  (inputRef.current?.selectionStart ??
+                                    String(current).length) + 2;
+                                const next = insertAtCursor(
+                                  inputRef.current,
+                                  current,
+                                  insertion,
+                                  start
+                                );
+                                field.onChange(next);
+                                syncExamples({ headerTextOverride: next }); // instant
+                              };
+                              return (
+                                <FormItem>
+                                  <FormLabel>Header Text</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      ref={(el) => {
+                                        field.ref(el);
+                                        inputRef.current = el;
+                                      }}
+                                      placeholder="e.g. Hello {{1}} or Hello {{name}}"
+                                      onChange={(e) => {
+                                        let val = e.target.value as string;
+                                        // enforce "only one variable"
+                                        const allVars =
+                                          val.match(/\{\{[^{}\n]*}}/g) || [];
+                                        if (allVars.length > 1) {
+                                          const last =
+                                            allVars[allVars.length - 1]!;
+                                          const lastIndex =
+                                            val.lastIndexOf(last);
+                                          if (lastIndex >= 0) {
+                                            val =
+                                              val.slice(0, lastIndex) +
+                                              val.slice(
+                                                lastIndex + last.length
+                                              );
+                                            toast.warning(
+                                              "Only one {{…}} variable allowed in header. Removed the extra one."
+                                            );
+                                          }
+                                        }
+                                        field.onChange(val);
+                                        syncExamples({
+                                          headerTextOverride: val,
+                                        }); // instant
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <div className="mt-1 flex justify-end">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={onAddVariable}
+                                      className="border"
+                                    >
+                                      Add Variable
+                                    </Button>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
                         )}
-                      />
-
-                      {watch(`components.${idx}.format`) === "TEXT" && (
+                        {watch(`components.${idx}.format`) === "IMAGE" && (
+                          <FormField
+                            control={control}
+                            name={`components.${idx}.example.header_handle.0`}
+                            render={({ field }) => {
+                              return (
+                                <FormItem>
+                                  <FormLabel>Image</FormLabel>
+                                  <FormControl>
+                                    {/* <Input {...field} placeholder="Enter text" /> */}
+                                    <FileUpload
+                                      {...field}
+                                      maxSize={5 * 1024 * 1024}
+                                      className="w-full max-w-md mx-auto"
+                                      value={Object.values(fileRecord)}
+                                      onValueChange={(files) =>
+                                        onFileUpload(files, field)
+                                      }
+                                      onFileReject={onFileReject}
+                                    >
+                                      <FileUploadDropzone>
+                                        <div className="flex flex-col items-center gap-1 text-center">
+                                          <div className="flex items-center justify-center rounded-full border p-2.5">
+                                            <Upload className="size-6 text-muted-foreground" />
+                                          </div>
+                                          <p className="font-medium text-sm">
+                                            Drag & drop files here
+                                          </p>
+                                          <p className="text-muted-foreground text-xs">
+                                            Or click to browse (max 2 files, up
+                                            to 5MB each)
+                                          </p>
+                                        </div>
+                                        <FileUploadTrigger asChild>
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-2 w-fit"
+                                          >
+                                            Browse files
+                                          </Button>
+                                        </FileUploadTrigger>
+                                      </FileUploadDropzone>
+                                      <FileUploadList>
+                                        {Object.values(fileRecord).map(
+                                          (file, index) => (
+                                            <FileUploadItem
+                                              key={index}
+                                              value={file}
+                                            >
+                                              <FileUploadItemPreview />
+                                              <FileUploadItemMetadata />
+                                              <FileUploadItemDelete asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="size-7"
+                                                >
+                                                  <X />
+                                                </Button>
+                                              </FileUploadItemDelete>
+                                            </FileUploadItem>
+                                          )
+                                        )}
+                                      </FileUploadList>
+                                    </FileUpload>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        )}
+                        {/* Auto examples (read-only structure, editable values) */}
+                        <HeaderAutoExamples
+                          control={control}
+                          index={idx}
+                          parameterFormat={parameterFormat}
+                        />
+                      </>
+                    )}
+                    {/* BODY */}
+                    {type === "BODY" && (
+                      <>
                         <FormField
                           control={control}
                           name={`components.${idx}.text`}
                           render={({ field }) => {
                             const inputRef =
                               React.useRef<HTMLInputElement>(null);
-
                             const onAddVariable = () => {
                               const pf = parameterFormat;
                               const current = String(field.value ?? "");
-
-                              // Header rule: only ONE variable allowed
-                              const allVars =
-                                current.match(/\{\{[^{}\n]*\}\}/g) || [];
-                              if (allVars.length >= 1) {
-                                toast.warning(
-                                  "Header can contain only one variable."
-                                );
-                                return;
-                              }
-
                               if (pf === "POSITIONAL") {
-                                const insertion = `{{1}}`;
+                                const nextIndex = nextPositionalIndex(current);
+                                const insertion = `{{${nextIndex}}}`;
                                 const next = insertAtCursor(
                                   inputRef.current,
                                   current,
                                   insertion
                                 );
                                 field.onChange(next);
-                                syncExamples({ headerTextOverride: next }); // instant
+                                syncExamples({ bodyTextOverride: next }); // instant
                                 return;
                               }
-
                               // NAMED → insert {{}} and place cursor inside braces
                               const insertion = `{{}}`;
                               const start =
@@ -603,12 +843,11 @@ export default function TemplateCreateForm({
                                 start
                               );
                               field.onChange(next);
-                              syncExamples({ headerTextOverride: next }); // instant
+                              syncExamples({ bodyTextOverride: next }); // instant
                             };
-
                             return (
                               <FormItem>
-                                <FormLabel>Header Text</FormLabel>
+                                <FormLabel>Body Text</FormLabel>
                                 <FormControl>
                                   <Input
                                     {...field}
@@ -616,27 +855,11 @@ export default function TemplateCreateForm({
                                       field.ref(el);
                                       inputRef.current = el;
                                     }}
-                                    placeholder="e.g. Hello {{1}} or Hello {{name}}"
+                                    placeholder="e.g. Dear {{1}} or Dear {{name}}"
                                     onChange={(e) => {
-                                      let val = e.target.value as string;
-                                      // enforce "only one variable"
-                                      const allVars =
-                                        val.match(/\{\{[^{}\n]*\}\}/g) || [];
-                                      if (allVars.length > 1) {
-                                        const last =
-                                          allVars[allVars.length - 1]!;
-                                        const lastIndex = val.lastIndexOf(last);
-                                        if (lastIndex >= 0) {
-                                          val =
-                                            val.slice(0, lastIndex) +
-                                            val.slice(lastIndex + last.length);
-                                          toast.warning(
-                                            "Only one {{…}} variable allowed in header. Removed the extra one."
-                                          );
-                                        }
-                                      }
+                                      const val = e.target.value as string;
                                       field.onChange(val);
-                                      syncExamples({ headerTextOverride: val }); // instant
+                                      syncExamples({ bodyTextOverride: val }); // instant
                                     }}
                                   />
                                 </FormControl>
@@ -656,140 +879,52 @@ export default function TemplateCreateForm({
                             );
                           }}
                         />
-                      )}
-
-                      {/* Auto examples (read-only structure, editable values) */}
-                      <HeaderAutoExamples
-                        control={control}
-                        index={idx}
-                        parameterFormat={parameterFormat}
-                      />
-                    </>
-                  )}
-
-                  {/* BODY */}
-                  {type === "BODY" && (
-                    <>
+                        <BodyAutoExamples
+                          control={control}
+                          index={idx}
+                          parameterFormat={parameterFormat}
+                        />
+                      </>
+                    )}
+                    {/* FOOTER */}
+                    {type === "FOOTER" && (
                       <FormField
                         control={control}
                         name={`components.${idx}.text`}
-                        render={({ field }) => {
-                          const inputRef = React.useRef<HTMLInputElement>(null);
-
-                          const onAddVariable = () => {
-                            const pf = parameterFormat;
-                            const current = String(field.value ?? "");
-
-                            if (pf === "POSITIONAL") {
-                              const nextIndex = nextPositionalIndex(current);
-                              const insertion = `{{${nextIndex}}}`;
-                              const next = insertAtCursor(
-                                inputRef.current,
-                                current,
-                                insertion
-                              );
-                              field.onChange(next);
-                              syncExamples({ bodyTextOverride: next }); // instant
-                              return;
-                            }
-
-                            // NAMED → insert {{}} and place cursor inside braces
-                            const insertion = `{{}}`;
-                            const start =
-                              (inputRef.current?.selectionStart ??
-                                String(current).length) + 2;
-                            const next = insertAtCursor(
-                              inputRef.current,
-                              current,
-                              insertion,
-                              start
-                            );
-                            field.onChange(next);
-                            syncExamples({ bodyTextOverride: next }); // instant
-                          };
-
-                          return (
-                            <FormItem>
-                              <FormLabel>Body Text</FormLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  ref={(el) => {
-                                    field.ref(el);
-                                    inputRef.current = el;
-                                  }}
-                                  placeholder="e.g. Dear {{1}} or Dear {{name}}"
-                                  onChange={(e) => {
-                                    const val = e.target.value as string;
-                                    field.onChange(val);
-                                    syncExamples({ bodyTextOverride: val }); // instant
-                                  }}
-                                />
-                              </FormControl>
-                              <div className="mt-1 flex justify-end">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={onAddVariable}
-                                  className="border"
-                                >
-                                  Add Variable
-                                </Button>
-                              </div>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Footer Text</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Footer text" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      <BodyAutoExamples
-                        control={control}
-                        index={idx}
-                        parameterFormat={parameterFormat}
-                      />
-                    </>
-                  )}
-
-                  {/* FOOTER */}
-                  {type === "FOOTER" && (
-                    <FormField
-                      control={control}
-                      name={`components.${idx}.text`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Footer Text</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Footer text" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* BUTTONS */}
-                  {type === "BUTTONS" && (
-                    <ButtonsArray control={control} compIndex={idx} />
-                  )}
-                </div>
-              );
-            })}
+                    )}
+                    {/* BUTTONS */}
+                    {type === "BUTTONS" && (
+                      <ButtonsArray control={control} compIndex={idx} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {/* Only Buttons can be added */}
+              {!hasButtons && (
+                <Button type="button" variant="secondary" onClick={addButtons}>
+                  Add Buttons
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {/* Only Buttons can be added */}
-            {!hasButtons && (
-              <Button type="button" variant="secondary" onClick={addButtons}>
-                Add Buttons
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Loading…" : "Submit"}
-        </Button>
-      </form>
-    </Form>
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "Loading…" : "Submit"}
+          </Button>
+        </form>
+      </Form>
+    </>
   );
 }
 

@@ -48,8 +48,6 @@ export function S3FileUploader({
             fields: Record<string, string>;
           };
 
-          console.log(url);
-
           return {
             method: "POST",
             url,
