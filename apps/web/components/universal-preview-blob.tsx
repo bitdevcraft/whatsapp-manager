@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // /components/universal-preview-blob.tsx
 "use client";
 
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useObjectURL } from "@/lib/use-object-url";
-import { usePanZoom } from "@/lib/use-pan-zoom";
+import { useObjectURL } from "@/hooks/use-object-url";
+import { usePanZoom } from "@/hooks/use-pan-zoom";
 
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -136,6 +137,7 @@ export function UniversalPreviewBlob({
     };
   }, [src, onError]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRetry = () => {
     // changing src refires effect; trigger by toggling query param (cache is no-store anyway)
     // Simpler: just re-run by setting state to initial; use a dummy param to force rerun
@@ -522,7 +524,9 @@ function parseContentDispositionFilename(header: string): string | undefined {
     if (quoted) return quoted.trim();
     const unquoted = header.match(/filename\s*=\s*([^;]+)/i)?.[1];
     if (unquoted) return unquoted.trim();
-  } catch {}
+  } catch {
+    /* empty */
+  }
   return undefined;
 }
 

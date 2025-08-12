@@ -64,7 +64,7 @@ export const columns: ColumnDef<Tag>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => (
+    cell: () => (
       <div className="w-full flex justify-end">
         <Button
           aria-label="Open menu"

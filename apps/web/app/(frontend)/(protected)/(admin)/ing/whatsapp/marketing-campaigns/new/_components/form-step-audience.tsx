@@ -18,18 +18,12 @@ import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib
 import * as React from "react";
 import { getSelectTags } from "@/features/tags/_lib/queries";
 
-const tagsList = [
-  { value: "real-estate", label: "Real Estate" },
-  { value: "vip", label: "VIP" },
-  { value: "social-media", label: "Social Media" },
-];
-
 interface AudienceStepFormProps {
   tags: Awaited<ReturnType<typeof getSelectTags>>;
 }
 
 function AudienceStep({ tags }: AudienceStepFormProps) {
-  const { form, nextStep, prevStep } =
+  const { form, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
   const { control } = form;

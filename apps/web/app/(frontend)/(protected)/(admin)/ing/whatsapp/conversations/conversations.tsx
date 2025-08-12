@@ -1,6 +1,5 @@
 "use client";
 
-import { ConversationTableProps } from "@/features/conversations/data-table/conversation-table";
 import { Button } from "@workspace/ui/components/button";
 import {
   SheetTrigger,
@@ -10,7 +9,7 @@ import {
 import ConversationMessage from "./_components/conversation-message";
 import ConversationMenu from "./_components/conversation-menu";
 import { ScrollableChats } from "./_components/scrollable-chats";
-import { Menu, Search, UserCircle, X } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { useContactStore } from "./_store/contact-store";
 import { useEffect } from "react";
 import { getContactById } from "@/features/contacts/_lib/queries";
@@ -31,18 +30,15 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
 import { useSearchMessageStore } from "./_store/message-store";
 import { SearchMessageResult } from "./_components/search-message-result";
 import { getSelectTemplates } from "../marketing-campaigns/new/_components/queries";
-import { getConversations } from "@/features/conversations/get-conversations";
 
 interface Props {
   promises: Promise<

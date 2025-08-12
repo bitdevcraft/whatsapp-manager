@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  IconBell,
-  IconCirclePlusFilled,
-  IconMail,
-  type Icon,
-} from "@tabler/icons-react";
+import { IconBell, IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
 
 import { Button } from "@workspace/ui/components/button";
 import {

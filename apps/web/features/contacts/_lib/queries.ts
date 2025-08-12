@@ -1,18 +1,6 @@
 import { unstable_cache } from "@/lib/unstable-cache";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  lte,
-  sql,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
 import { contactsTable } from "@workspace/db/schema/contacts";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetContactSchema } from "./validations";

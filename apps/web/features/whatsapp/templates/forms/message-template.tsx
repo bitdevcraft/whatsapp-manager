@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useMemo } from "react";
@@ -26,7 +27,6 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
-import { ComponentButtonParameter } from "./message-template-component-button-parameter";
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
 import { logger } from "@/lib/logger";
 
@@ -75,7 +75,6 @@ export function MessageTemplateForm({
       setValue(`${namePrefix}.language.code`, defaultValues.language.code);
 
       replace(defaultValues.components);
-
 
       form.reset({
         ...form.getValues(),

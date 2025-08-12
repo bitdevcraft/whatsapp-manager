@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { IconBrandWhatsapp } from "@tabler/icons-react";
@@ -20,8 +21,8 @@ interface FacebookLoginProps {
 
 const FacebookLogin: React.FC<FacebookLoginProps> = ({
   appId,
-  onLoginSuccess = (response: any) => {},
-  onLoginFailure = (error: string) => {},
+  onLoginSuccess = () => {},
+  onLoginFailure = () => {},
 }) => {
   const [fbLoaded, setFbLoaded] = useState(false);
   const loginResponseRef = useRef<EmbedSignUpLoginSuccess | null>(null);
@@ -42,7 +43,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         auth,
       };
 
-      const response = await axios
+      await axios
         .post("/api/whatsapp/business-account", data)
         .then(() => {
           onLoginSuccess("");
@@ -56,11 +57,10 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
 
   // Dynamically load the Facebook SDK client-side only
   useEffect(() => {
-    // @ts-ignore
     if (typeof window !== "undefined") {
-      // @ts-ignore
+      // @ts-expect-error doesn't exist
       window.fbAsyncInit = () => {
-        // @ts-ignore
+        // @ts-expect-error doesn't exist
         window.FB.init({
           appId,
           cookie: true,
@@ -69,7 +69,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         });
         // Resolve the promise when the SDK is loaded
         // resolve();
-        // @ts-ignore
+        // @ts-expect-error doesn't exist
         window.FB.AppEvents.logPageView();
       };
       setFbLoaded(true);
@@ -106,9 +106,9 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   }, []);
 
   const handleLogin = () => {
-    // @ts-ignore
+    // @ts-expect-error doesn't exist
     if (typeof window !== "undefined" && window.FB) {
-      // @ts-ignore
+      // @ts-expect-error doesn't exist
       window.FB.login(
         (response: any) => {
           if (response.authResponse) {

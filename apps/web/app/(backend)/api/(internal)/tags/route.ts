@@ -1,8 +1,7 @@
 import { TagsFormValues } from "@/features/tags/_lib/schema";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { db } from "@workspace/db/config";
-import { tagsTable, NewTag } from "@workspace/db/schema";
+import { tagsTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { NextResponse } from "next/server";
 import { getTags } from "@/features/tags/_lib/actions";
@@ -50,6 +49,7 @@ export async function POST(request: Request) {
     );
 
     return new Response(JSON.stringify(data), { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     logger.error(error.message);
     return new Response(JSON.stringify(error), {

@@ -1,4 +1,3 @@
-import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
 import MarketingCampaignForm from "./_components/marketing-campaign-form";
 import {
   getSelectPhoneNumber,

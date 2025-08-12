@@ -3,11 +3,10 @@
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { toast } from "sonner";
-import { contactsTable, tagsTable } from "@workspace/db/schema";
+import { contactsTable } from "@workspace/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { revalidateTag, unstable_noStore } from "next/cache";
 import { getErrorMessage } from "@/lib/handle-error";
-import { unstable_cache } from "@/lib/unstable-cache";
 
 export async function deleteContact(input: { id: string }) {
   unstable_noStore();

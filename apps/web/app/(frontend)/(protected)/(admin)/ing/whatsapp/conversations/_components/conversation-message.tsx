@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,8 +18,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import axios from "axios";
-import { useQueryState } from "nuqs";
-import { nanoid } from "nanoid";
 import { useSearchMessageStore } from "../_store/message-store";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
@@ -60,11 +59,6 @@ export default function ConversationMessage({
   lastMessageDate,
   templates,
 }: Props) {
-  // const [reload, setReload] = useQueryState("rId", {
-  //   defaultValue: "",
-  //   shallow: false,
-  // });
-
   const queryClient = useQueryClient();
 
   const { updateRandomId, clearSearchMessageId, clearSearchString } =
@@ -93,7 +87,7 @@ export default function ConversationMessage({
       queryClient.invalidateQueries({
         queryKey: ["conversations", contact.id], // prefix
       });
-      // setReload(nanoid());
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Error Sending");
     }

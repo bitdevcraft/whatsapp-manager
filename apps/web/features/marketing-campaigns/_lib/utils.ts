@@ -1,4 +1,3 @@
-import { MarketingCampaign, MarketingCampaignStatusEnum } from "@workspace/db";
 import {
   CheckCircle2,
   CircleIcon,
@@ -11,6 +10,7 @@ import {
 
 export function getMarketingCampaignStatusIcon(status: string) {
   if (!status) return CircleIcon;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const statusIcons: any = {
     pending: Timer,
     processing: LoaderCircle,

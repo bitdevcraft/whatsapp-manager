@@ -1,16 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useTitle } from "@/components/provider/title-provider";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Contact, MarketingCampaign, Template } from "@workspace/db/schema";
+import { Template } from "@workspace/db/schema";
 import { Badge } from "@workspace/ui/components/badge";
 import { Progress } from "@workspace/ui/components/progress";
 import {
   Calendar,
   Check,
-  Send,
   SendHorizontal,
   SquareArrowOutUpRight,
   Tag,
@@ -39,8 +38,6 @@ interface Props {
 }
 
 export default function MarketingCampaignDashboard({ promises }: Props) {
-  const setTitle = useTitle();
-
   const { id } = useParams();
 
   const [
@@ -307,32 +304,6 @@ function CampaignAnalytics({
           Overall engagement
         </p>
       </div>
-    </div>
-  );
-}
-
-function ContactsTable({
-  contacts,
-}: {
-  contacts: { name: string; phone: string; id: string }[] | null;
-}) {
-  return (
-    <div className="rounded border p-4 grid gap-4">
-      <h3 className="text-secondary-foreground text-sm font-semibold">
-        Contacts
-      </h3>
-      {contacts && (
-        <ScrollArea className="h-72 w-48 rounded-md border">
-          <div className="p-4">
-            {contacts.map((el, i) => (
-              <React.Fragment key={i}>
-                <div>{el.name}</div>
-                <Separator className="my-2" />
-              </React.Fragment>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
     </div>
   );
 }

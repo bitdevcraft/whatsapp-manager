@@ -1,8 +1,5 @@
 // app/api/projects/route.ts
-import { getUserWithTeam } from "@/lib/db/queries";
-import { conversationsTable, NewConversation } from "@workspace/db";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { nanoid } from "nanoid";
+
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -18,9 +15,9 @@ export async function GET(request: NextRequest) {
   }));
 
   // 3. calculate pagination cursors
-  // @ts-ignore
+  // @ts-expect-error undefined
   const nextId = cursor < 20 ? data[pageSize - 1].id + 1 : null;
-  // @ts-ignore
+  // @ts-expect-error undefined
   const previousId = cursor > -20 ? data[0].id - pageSize : null;
 
   // 4. simulate a small delay (optional)

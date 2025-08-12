@@ -1,19 +1,15 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { db } from "@workspace/db/config";
 import {
   and,
   asc,
   count,
   desc,
   eq,
-  gt,
   gte,
   ilike,
-  inArray,
   isNotNull,
   lte,
   ne,
-  sql,
 } from "drizzle-orm";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetMarketingCampaignSchema } from "./validations";
@@ -262,6 +258,7 @@ export async function getMarketingCampaignById(id: string) {
           engagement: 0,
           contacts,
         };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return {
           data: null,

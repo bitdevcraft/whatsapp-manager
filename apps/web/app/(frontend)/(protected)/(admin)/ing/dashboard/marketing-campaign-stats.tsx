@@ -15,7 +15,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@workspace/ui/components/chart";
-import { TrendingUp } from "lucide-react";
 import React from "react";
 import { XAxis, YAxis, Bar, BarChart } from "recharts";
 

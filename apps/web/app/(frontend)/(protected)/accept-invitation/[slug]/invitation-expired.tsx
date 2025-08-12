@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardContent,
 } from "@workspace/ui/components/card";
-import { AlertCircle, ArrowLeft, Mail } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function InvitationExpired() {
   return (

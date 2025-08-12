@@ -21,10 +21,11 @@ export default function TagNewDialog() {
         description: "Successful",
       });
       router.refresh();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(
         <div>
-          <p>Tags can't be created. Please check with the support.</p>
+          <p>Tags can&apos;t be created. Please check with the support.</p>
           <p className="font-light">{error.response.statusText}</p>
         </div>
       );

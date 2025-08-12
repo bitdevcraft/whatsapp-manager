@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  createStepSchema,
   MultiStepForm,
   MultiStepFormContextProvider,
   MultiStepFormHeader,
@@ -10,7 +9,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Stepper } from "@workspace/ui/components/stepper";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import TemplateStep from "./form-step-template";
 import AudienceStep from "./form-step-audience";
 import DetailsStep from "./form-step-details";
@@ -25,7 +23,6 @@ import { useRouter } from "next/navigation";
 
 import axios from "axios";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
-import { logger } from "@/lib/logger";
 import { getSelectPhoneNumber, getSelectTemplates } from "./queries";
 import { getSelectTags } from "@/features/tags/_lib/queries";
 
@@ -90,6 +87,7 @@ export default function MarketingCampaignForm({
       });
 
       router.push(`/ing/whatsapp/marketing-campaigns/${response.data.data.id}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error("Unsuccessful", {
         description: `Please reach out the admin with this issue: ${error.message}`,

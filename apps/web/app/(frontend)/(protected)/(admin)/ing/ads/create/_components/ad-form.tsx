@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -249,7 +248,7 @@ export function AdForm() {
               <Select
                 defaultValue={budgetType}
                 onValueChange={(v) => {
-                  // @ts-ignore
+                  // @ts-expect-error not
                   setBudgetType(v);
                   if (v === "daily_budget")
                     form.setValue("adSet.lifetime_budget", undefined);
@@ -342,7 +341,9 @@ export function AdForm() {
                       <SelectContent className="h-96 text-center">
                         {Array.from({ length: 48 }, (_, i) => i + 18).map(
                           (age) => (
-                            <SelectItem value={`${age}`}>{age}</SelectItem>
+                            <SelectItem key={age} value={`${age}`}>
+                              {age}
+                            </SelectItem>
                           )
                         )}
                       </SelectContent>
@@ -368,7 +369,9 @@ export function AdForm() {
                       <SelectContent className="h-96 text-center">
                         {Array.from({ length: 48 }, (_, i) => i + 18).map(
                           (age) => (
-                            <SelectItem value={`${age}`}>{age}</SelectItem>
+                            <SelectItem key={age} value={`${age}`}>
+                              {age}
+                            </SelectItem>
                           )
                         )}
                       </SelectContent>

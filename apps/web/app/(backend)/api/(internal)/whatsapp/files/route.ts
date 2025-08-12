@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
@@ -224,9 +225,4 @@ export async function GET(request: Request) {
       status: 500,
     });
   }
-}
-
-async function blobToBytes(blob: Blob): Promise<Uint8Array> {
-  const arrayBuffer = await blob.arrayBuffer();
-  return new Uint8Array(arrayBuffer);
 }

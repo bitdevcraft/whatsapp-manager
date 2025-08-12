@@ -1,11 +1,7 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@workspace/ui/components/avatar";
+import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import {
   Card,
   CardContent,

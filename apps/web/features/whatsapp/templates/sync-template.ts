@@ -2,7 +2,6 @@ import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
 import { Template, whatsAppBusinessAccountsTable } from "@workspace/db";
-import { db } from "@workspace/db/config";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, {
@@ -20,12 +19,6 @@ const waBusinessAccountId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
 if (!waPhoneNumberId || !waAccessToken || !waBusinessAccountId) {
   throw new Error("Environment not defined!");
 }
-
-// const whatsapp = new WhatsApp({
-//   phoneNumberId: Number(waPhoneNumberId),
-//   accessToken: waAccessToken,
-//   businessAcctId: waBusinessAccountId,
-// });
 
 export async function syncTemplate() {
   const userWithTeam = await getUserWithTeam();

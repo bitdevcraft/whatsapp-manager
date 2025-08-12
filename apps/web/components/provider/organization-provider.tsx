@@ -9,7 +9,7 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import { CubeLoader } from "./loaders/cube-loader";
+import { CubeLoader } from "../loaders/cube-loader";
 
 // shape of our context value
 interface OrgContextValue {

@@ -6,9 +6,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { cn } from "@workspace/ui/lib/utils";
 import axios from "axios";
 import { ConversationWithContact, Contact } from "@workspace/db/schema";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useSearchStore } from "../_store/search-store";
-import { useContactStore } from "../_store/contact-store";
 import { useSearchMessageStore } from "../_store/message-store";
 import { useQueryState } from "nuqs";
 
@@ -22,7 +20,7 @@ interface PageResponse {
 export function SearchResult() {
   const search = useSearchStore((state) => state.query);
 
-  const [contact, setContact] = useQueryState("contact", {
+  const [, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });
@@ -42,32 +40,22 @@ export function SearchResult() {
 
   const initialPageParam = 0;
 
-  const {
-    status,
-    data,
-    error,
-    isFetching,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
-    fetchNextPage,
-    fetchPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-  } = useInfiniteQuery<PageResponse>({
-    queryKey,
-    queryFn,
-    initialPageParam,
-    getPreviousPageParam: (firstPage) => {
-      return firstPage.previousOffset ?? undefined;
-    },
-    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
-    meta: { search },
-  });
+  const { status, data, error, fetchNextPage, hasNextPage } =
+    useInfiniteQuery<PageResponse>({
+      queryKey,
+      queryFn,
+      initialPageParam,
+      getPreviousPageParam: (firstPage) => {
+        return firstPage.previousOffset ?? undefined;
+      },
+      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+      meta: { search },
+    });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messages = data?.pages.reduce((acc: any, page) => {
     return [...acc, ...page.data];
   }, []);
-
 
   if (!search) return null;
 

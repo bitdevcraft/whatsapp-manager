@@ -19,7 +19,6 @@ import { Button } from "@workspace/ui/components/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useTitle } from "@/components/provider/title-provider";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { MarketingCampaignWithTemplate } from "@workspace/db";
@@ -41,7 +40,7 @@ export default function MarketingCampaignTable({
 
   const pathname = usePathname();
 
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
+  const { enableAdvancedFilter } = useFeatureFlags();
 
   const [{ data, pageCount }] = React.use(promises);
 

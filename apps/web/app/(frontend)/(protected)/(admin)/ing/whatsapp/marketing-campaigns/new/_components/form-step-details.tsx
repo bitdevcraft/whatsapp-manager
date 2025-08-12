@@ -13,7 +13,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
 import { Checkbox } from "@workspace/ui/components/checkbox"; // or Switch, if you prefer
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import { getSelectPhoneNumber } from "./queries";
 import {
@@ -29,7 +29,7 @@ interface DetailsStepFormProps {
 }
 
 export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
-  const { form, prevStep, nextStep, isStepValid } =
+  const { form, nextStep, isStepValid } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
   const { control } = form;
 

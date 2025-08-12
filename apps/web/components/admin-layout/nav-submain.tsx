@@ -12,7 +12,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import Link from "next/link";
 import React from "react";
-import { useOrganization } from "../organization-provider";
+import { useOrganization } from "../provider/organization-provider";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function NavSubMain({

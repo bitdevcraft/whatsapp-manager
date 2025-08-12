@@ -4,24 +4,16 @@ import { ColumnDef } from "@tanstack/react-table";
 import { WhatsAppBusinessAccountPhoneNumber } from "@workspace/db";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
 import {
   CalendarIcon,
   CheckCircle2Icon,
-  CircleDashed,
   Ellipsis,
   Text,
   XCircle,
 } from "lucide-react";
-import { Badge } from "@workspace/ui/components/badge";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 import {
   DropdownMenu,
   DropdownMenuContent,

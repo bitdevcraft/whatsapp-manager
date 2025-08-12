@@ -35,28 +35,19 @@ export function SearchMessageResult() {
 
   const initialPageParam = 0;
 
-  const {
-    status,
-    data,
-    error,
-    isFetching,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
-    fetchNextPage,
-    fetchPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-  } = useInfiniteQuery<PageResponse>({
-    queryKey,
-    queryFn,
-    initialPageParam,
-    getPreviousPageParam: (firstPage) => {
-      return firstPage.previousOffset ?? undefined;
-    },
-    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
-    meta: { searchString },
-  });
+  const { status, data, error, fetchNextPage, hasNextPage } =
+    useInfiniteQuery<PageResponse>({
+      queryKey,
+      queryFn,
+      initialPageParam,
+      getPreviousPageParam: (firstPage) => {
+        return firstPage.previousOffset ?? undefined;
+      },
+      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+      meta: { searchString },
+    });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messages = data?.pages.reduce((acc: any, page) => {
     return [...acc, ...page.data];
   }, []);
