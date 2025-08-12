@@ -1,6 +1,7 @@
 import {
     BusinessProfileApi,
     EncryptionApi,
+    FileUploadApi,
     FlowApi,
     MediaApi,
     MessagesApi,
@@ -23,6 +24,7 @@ export declare class WhatsAppClass {
     readonly twoStepVerification: TwoStepVerificationApi;
     readonly registration: RegistrationApi;
     readonly media: MediaApi;
+    readonly fileUpload: FileUploadApi;
     readonly waba: WabaApi;
     readonly flow: FlowApi;
     readonly businessProfile: BusinessProfileApi;

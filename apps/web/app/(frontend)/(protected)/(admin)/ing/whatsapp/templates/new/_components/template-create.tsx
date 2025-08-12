@@ -10,7 +10,7 @@ import {
   ControllerRenderProps,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { DevTool } from "@hookform/devtools";
 import { useMutation } from "@tanstack/react-query";
 import {
   TemplateCreateSchema,
@@ -928,6 +928,7 @@ export default function TemplateCreateForm({
           </Button>
         </form>
       </Form>
+      <DevTool control={control} />
     </>
   );
 }
