@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { eq, and, isNull } from "drizzle-orm";
 import axios from "axios";
@@ -70,7 +71,6 @@ export async function POST(request: Request) {
       }
 
       if (!template) {
-
         const newTemplate = {
           id: templateData.id,
           name: templateData.name,
@@ -86,8 +86,6 @@ export async function POST(request: Request) {
 
       return template;
     });
-
-
 
     // Get WhatsApp Business Account configuration with phone number
     const account = await withTenantTransaction(teamId, async (tx) => {
@@ -147,14 +145,12 @@ export async function POST(request: Request) {
 
     // Add request interceptor to log requests
     axiosInstance.interceptors.request.use((request) => {
-
       return request;
     });
 
     // Add response interceptor to log responses
     axiosInstance.interceptors.response.use(
       (response) => {
-
         return response;
       },
       (error) => {
@@ -181,26 +177,22 @@ export async function POST(request: Request) {
           accessToken,
           businessAcctId: verifiedAccount.id.toString(),
           phoneNumberId: verifiedPhoneNumber.id,
-          // @ts-ignore - Private property access needed to fix the issue
+          // @ts-expect-error - Private property access needed to fix the issue
           httpClient: axiosInstance,
         });
-        // @ts-ignore - Override private property
+        // @ts-expect-error - Override private property
         this.baseUrl = "https://graph.facebook.com/v22.0";
       }
     })();
 
     // Submit template to Meta
 
-
-
     try {
-
       // Pass the required configuration directly
       const result = await submitTemplateToMeta(whatsapp, existingTemplate, {
         accessToken,
         businessAccountId: account.id.toString(),
       });
-
 
       if (!result?.id) {
         throw new Error("Invalid response from Meta API: Missing template ID");
@@ -346,7 +338,6 @@ async function submitTemplateToMeta(
     components: templateData.content.components || [],
   };
 
-
   try {
     const url = `https://graph.facebook.com/v22.0/${businessAccountId}/message_templates`;
 
@@ -358,8 +349,6 @@ async function submitTemplateToMeta(
       },
       timeout: 30000,
     });
-
-
 
     if (!response.data || !response.data.id) {
       throw new Error("Invalid response from Meta API: Missing template ID");

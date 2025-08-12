@@ -34,7 +34,7 @@ type OrganizationPayload = z.infer<typeof OrganizationSchema>;
 const useCreateOrganization = () => {
   return useMutation({
     mutationFn: async (payload: OrganizationPayload) => {
-      const { data, error } = await authClient.organization.create({
+      const { error } = await authClient.organization.create({
         name: payload.name,
         slug: payload.slug,
       });
@@ -49,7 +49,7 @@ export function CreateOrganizationForm() {
 
   const createOrganization = useCreateOrganization();
   const onSubmit: SubmitHandler<OrganizationPayload> = async (data) => {
-    const { data: orgData, error } = await authClient.organization.checkSlug({
+    const { error } = await authClient.organization.checkSlug({
       slug: data.slug,
     });
 
@@ -91,7 +91,7 @@ export function CreateOrganizationForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organization's Name</FormLabel>
+                  <FormLabel>Organization&apos;s Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

@@ -15,6 +15,7 @@ import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = [
   "update-status",
   "update-priority",

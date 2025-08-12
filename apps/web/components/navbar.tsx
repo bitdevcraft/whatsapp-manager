@@ -1,12 +1,7 @@
 import Image from "next/image";
 import { NavbarMenu } from "./navbar-menu";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
+
 import { Button } from "@workspace/ui/components/button";
 export default function Navbar() {
   return (

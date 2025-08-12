@@ -9,11 +9,9 @@ import {
 import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { ConversationBody } from "@workspace/db/schema";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useQueryState } from "nuqs";
-import { formatMessageTimestamp } from "@/features/conversations/data-table/conversation-table-columns";
 import { useSearchMessageStore } from "../_store/message-store";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { formatMessageTimestamp } from "@/utils/format-message-timestamp";
 
 interface PageResponse {
   data: {
@@ -41,37 +39,26 @@ export function ScrollableContacts() {
       `/api/whatsapp/conversations?offset=${pageParam}`
     );
 
-
     return await response.data;
   };
 
   const initialPageParam = 0;
 
-  const {
-    status,
-    data,
-    error,
-    isFetching,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
-    fetchNextPage,
-    fetchPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-  } = useInfiniteQuery<PageResponse>({
-    queryKey,
-    queryFn,
-    initialPageParam,
-    getPreviousPageParam: (firstPage) => {
-      return firstPage.previousOffset ?? undefined;
-    },
-    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
-  });
+  const { status, data, error, fetchNextPage, hasNextPage } =
+    useInfiniteQuery<PageResponse>({
+      queryKey,
+      queryFn,
+      initialPageParam,
+      getPreviousPageParam: (firstPage) => {
+        return firstPage.previousOffset ?? undefined;
+      },
+      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+    });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messages = data?.pages.reduce((acc: any, page) => {
     return [...acc, ...page.data];
   }, []);
-
 
   if (status === "pending") {
     return (
@@ -149,7 +136,8 @@ function ContactMessageItem({
         contactId: contact,
         markAsRead: true,
       });
-    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
       //
     }
 

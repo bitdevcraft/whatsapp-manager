@@ -8,6 +8,7 @@ export default function UploadCSVContact() {
     try {
       await axios.post("/api/contacts", data);
       toast.success("Contacts Inserted");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to Insert");
     }

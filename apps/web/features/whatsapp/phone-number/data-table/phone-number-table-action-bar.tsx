@@ -1,34 +1,20 @@
 "use client";
 
-import { type Contact, contactsTable } from "@workspace/db/schema/contacts";
-import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
-import { CheckCircle2, Download, Trash2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
 
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@workspace/ui/data-table";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
-import {
-  deleteContacts,
-  updateContacts,
-} from "@/features/contacts/_lib/actions";
-import { logger } from "@/lib/logger";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 import { WhatsAppBusinessAccountPhoneNumber } from "@workspace/db";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = ["update-tags", "update-priority", "export", "delete"] as const;
 
 type Action = (typeof actions)[number];
@@ -49,25 +35,6 @@ export function WhatsAppBusinessAccountPhoneNumberActionBar({
     [isPending, currentAction]
   );
 
-  const onContactUpdate = React.useCallback(
-    ({ field, value }: { field: "tags" | "priority"; value: string }) => {
-      setCurrentAction(field === "tags" ? "update-tags" : "update-priority");
-      startTransition(async () => {
-        // const { error } = await updateContacts({
-        //   ids: rows.map((row) => row.original.id),
-        //   [field]: value,
-        // });
-
-        // if (error) {
-        //   toast.error(error);
-        //   return;
-        // }
-        toast.success("Tasks updated");
-      });
-    },
-    [rows]
-  );
-
   const onTaskExport = React.useCallback(() => {
     setCurrentAction("export");
     startTransition(() => {
@@ -81,17 +48,9 @@ export function WhatsAppBusinessAccountPhoneNumberActionBar({
   const onTaskDelete = React.useCallback(() => {
     setCurrentAction("delete");
     startTransition(async () => {
-      // const { error } = await deleteContacts({
-      //   ids: rows.map((row) => row.original.id),
-      // });
-
-      // if (error) {
-      //   toast.error(error);
-      //   return;
-      // }
       table.toggleAllRowsSelected(false);
     });
-  }, [rows, table]);
+  }, [table]);
 
   return (
     <DataTableActionBar table={table} visible={rows.length > 0}>

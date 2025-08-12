@@ -9,12 +9,12 @@ import { SearchResult } from "./search-result";
 import { ScrollableContacts } from "./scrollable-contact";
 
 export default function ConversationMenu() {
-  const [unread, setUnread] = useQueryState("unread", {
+  const [, setUnread] = useQueryState("unread", {
     defaultValue: "false",
     shallow: false,
   });
 
-  const [_contact, setContact] = useQueryState("contact", {
+  const [, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });

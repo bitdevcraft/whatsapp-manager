@@ -13,16 +13,13 @@ import {
   FormMessage,
   FormDescription,
 } from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@workspace/ui/components/input-otp";
 import { Button } from "@workspace/ui/components/button";
-import { TagsFormSchema, TagsFormValues } from "@/features/tags/_lib/schema";
 import z from "zod";
-import { toast } from "sonner";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -43,16 +40,6 @@ export function InputOTPForm({ onSubmit }: Props) {
       pin: "",
     },
   });
-
-  //   function onSubmit(data: FormValue) {
-  //     toast("You submitted the following values", {
-  //       description: (
-  //         <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-  //           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-  //         </pre>
-  //       ),
-  //     });
-  //   }
 
   return (
     <Form {...form}>

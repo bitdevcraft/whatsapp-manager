@@ -1,25 +1,10 @@
 import { ChartAreaInteractive } from "@/app/(frontend)/(protected)/(admin)/ing/dashboard/chart-area-interactive";
 import { SectionCards } from "@/app/(frontend)/(protected)/(admin)/ing/dashboard/section-cards";
 
-import FacebookLogin from "@/components/facebook-login";
 import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import { dashboardSearchParams } from "@/features/dashboard/_lib/validations";
-import { logger } from "@/lib/logger";
 import { SearchParams } from "@/types";
-import { banner } from "@workspace/ui/components/banner";
-import { registerBanner } from "@workspace/ui/components/banner/banner-registry";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
-import axios from "axios";
-import Script from "next/script";
 import React from "react";
-import MarketingCampaignDashboard from "../whatsapp/marketing-campaigns/[id]/marketing-campaign-dashboard";
 import MarketingCampaignStats from "./marketing-campaign-stats";
 import DeliveryStatus from "./delivery-status";
 

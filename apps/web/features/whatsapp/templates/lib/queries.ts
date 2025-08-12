@@ -1,18 +1,5 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { db } from "@workspace/db/config";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  lte,
-  sql,
-} from "drizzle-orm";
+import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetTemplateSchema } from "./validations";
@@ -110,6 +97,7 @@ export async function getTemplates(input: GetTemplateSchema) {
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return { data: [], pageCount: 0 };
       }
@@ -211,6 +199,7 @@ export async function getAllTemplates(input: GetTemplateSchema) {
 
         const pageCount = Math.ceil(total / input.perPage);
         return { data, pageCount };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return { data: [], pageCount: 0 };
       }

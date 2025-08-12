@@ -15,10 +15,10 @@ import { toast } from "sonner";
 export default function Notification() {
   const { socket } = useSocket();
 
-  // const [reload, setReload] = useQueryState("rId", {
-  //   defaultValue: "",
-  //   shallow: false,
-  // });
+  const [, setReload] = useQueryState("rId", {
+    defaultValue: "",
+    shallow: false,
+  });
 
   const queryClient = useQueryClient();
 
@@ -50,7 +50,7 @@ export default function Notification() {
         });
       }
 
-      // setReload(nanoid());
+      setReload(nanoid());
     } catch (error) {
       console.error(error);
     }

@@ -8,7 +8,7 @@ import {
 } from "nuqs/server";
 import { z } from "zod";
 
-// …and pull out `foo`, leaving everything else in `restParams`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { name, ...restParams } =
   createBaseSearchParams<WhatsAppBusinessAccountPhoneNumber>();
 

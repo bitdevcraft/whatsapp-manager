@@ -16,14 +16,12 @@ export async function POST() {
       });
     }
 
-    const { teamId } = userWithTeam;
-
     const ad_account_id = "698225195907162";
     const api = FacebookAdsApi.init(process.env.WHATSAPP_API_ACCESS_TOKEN!);
 
     const account = new AdAccount(`act_${ad_account_id}`, api);
 
-    const response = account.createCampaign([Campaign.Fields.id], {
+    account.createCampaign([Campaign.Fields.id], {
       [Campaign.Fields.name]: "Page likes campaign",
       [Campaign.Fields.status]: Campaign.Status.paused,
       [Campaign.Fields.objective]: Campaign.Objective.outcome_leads,
@@ -34,6 +32,7 @@ export async function POST() {
     });
 
     return new Response("", { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new Response("", { status: 500 });
   }

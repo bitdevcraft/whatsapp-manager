@@ -1,29 +1,12 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { db } from "@workspace/db/config";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  getTableColumns,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  lte,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, count, eq, gt, ilike, or, sql } from "drizzle-orm";
 import { conversationsTable } from "@workspace/db/schema/conversations";
-import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetConversationSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { logger } from "@/lib/logger";
 import { contactsTable, conversationMembersTable } from "@workspace/db";
 import { ConversationContact } from "./types";
-import { revalidateTag } from "next/cache";
 
 export async function getConversations(
   input: GetConversationSchema
@@ -42,51 +25,6 @@ export async function getConversations(
           return { data: [], pageCount: 0 };
         }
         const offset = (input.page - 1) * input.perPage;
-        const advancedTable = input.filterFlag === "advancedFilters";
-
-        const advancedWhere = filterColumns({
-          table: conversationsTable,
-          filters: input.filters,
-          joinOperator: input.joinOperator,
-        });
-
-        const where = advancedTable
-          ? advancedWhere
-          : and(
-              input.createdAt.length > 0
-                ? and(
-                    input.createdAt[0]
-                      ? gte(
-                          conversationsTable.createdAt,
-                          (() => {
-                            const date = new Date(input.createdAt[0]);
-                            date.setHours(0, 0, 0, 0);
-                            return date;
-                          })()
-                        )
-                      : undefined,
-                    input.createdAt[1]
-                      ? lte(
-                          conversationsTable.createdAt,
-                          (() => {
-                            const date = new Date(input.createdAt[1]);
-                            date.setHours(23, 59, 59, 999);
-                            return date;
-                          })()
-                        )
-                      : undefined
-                  )
-                : undefined
-            );
-
-        const orderBy =
-          input.sort.length > 0
-            ? input.sort.map((item) =>
-                item.desc
-                  ? desc(conversationsTable[item.id])
-                  : asc(conversationsTable[item.id])
-              )
-            : [asc(conversationsTable.createdAt)];
 
         const { data, total } = await withTenantTransaction(
           teamId,
@@ -178,7 +116,7 @@ export async function getConversationSearch(searchInput: string) {
     return defaultValue;
   }
 
-  const { teamId, user } = userWithTeam;
+  const { teamId } = userWithTeam;
 
   return unstable_cache(
     async () => {
@@ -211,6 +149,7 @@ export async function getConversationSearch(searchInput: string) {
         );
 
         return { contacts, conversations };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return defaultValue;
       }
@@ -260,6 +199,7 @@ export async function getContactConversation(contact: string) {
         });
 
         return data;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return [];
       }

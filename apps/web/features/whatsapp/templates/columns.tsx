@@ -1,6 +1,5 @@
 "use client";
 
-import { logger } from "@/lib/logger";
 import { ColumnDef } from "@tanstack/react-table";
 import { Template } from "@workspace/db/schema/templates";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
@@ -14,16 +13,4 @@ export const columns: ColumnDef<Template>[] = [
       <DataTableColumnHeader column={column} title="Name" />
     ),
   },
-  // {
-  //   id: "actions",
-  //   header: "Actions",
-  //   cell: ({ row }) => (
-  //     <button
-  //       onClick={() => logger.log("Edit", row.original.id)}
-  //       className="text-blue-600"
-  //     >
-  //       Edit
-  //     </button>
-  //   ),
-  // },
 ];

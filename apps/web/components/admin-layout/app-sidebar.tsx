@@ -2,10 +2,7 @@
 
 import * as React from "react";
 import {
-  IconAd,
-  IconBrandWhatsappFilled,
   IconDashboard,
-  IconInnerShadowTop,
   IconMessages,
   IconSettings,
   IconSpeakerphone,
@@ -24,9 +21,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import { TeamSwitcher } from "./team-switcher";

@@ -1,9 +1,5 @@
 import { getUserWithTeam } from "@/lib/db/queries";
-import {
-  withTenantTransaction,
-  contactsTable,
-  conversationsTable,
-} from "@workspace/db";
+import { withTenantTransaction, contactsTable } from "@workspace/db";
 import { or, ilike, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";

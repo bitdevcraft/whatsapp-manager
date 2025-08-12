@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getUserWithTeam } from "@/lib/db/queries";
 import { conversationsTable, conversationMembersTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { eq, and, count, lt, gt, ne, desc, asc } from "drizzle-orm";
+import { eq, and, count, lt, gt, ne } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -43,8 +44,9 @@ export async function GET(
       afterCount = limit / 2;
     }
 
-    const { batch, total, beforeTotal, afterTotal } =
-      await withTenantTransaction(teamId, async (tx) => {
+    const { batch, beforeTotal } = await withTenantTransaction(
+      teamId,
+      async (tx) => {
         const batch: any[] = [];
         let beforeTotal = 0;
         let afterTotal = 0;
@@ -157,7 +159,8 @@ export async function GET(
           );
 
         return { batch, total, beforeTotal, afterTotal };
-      });
+      }
+    );
 
     const hasNext = batch.length > limit;
 

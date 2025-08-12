@@ -1,9 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { marketingCampaignsTable } from "@workspace/db";
-import {
-  MarketingCampaign,
-  MarketingCampaignWithTemplate,
-} from "@workspace/db/schema/marketing-campaigns";
+import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";

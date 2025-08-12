@@ -1,4 +1,3 @@
-import { getConversations } from "@/features/conversations/get-conversations";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import {
@@ -24,14 +23,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { teamId, user } = userWithTeam;
+    const { teamId } = userWithTeam;
 
     const { searchParams } = new URL(request.url);
     const offset = parseInt(searchParams.get("offset") ?? "0", 10);
     const unread = Boolean(searchParams.get("unread") ?? false);
     const limit = 10;
 
-    const { batch, total } = await withTenantTransaction(teamId, async (tx) => {
+    const { batch } = await withTenantTransaction(teamId, async (tx) => {
       const messages = tx
         .select({
           // ...getTableColumns(conversationsTable),
@@ -236,6 +235,7 @@ export async function POST(request: Request) {
 
     revalidateTag(`conversations:${teamId}:${contactId}`);
     return new Response(JSON.stringify(response), { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new Response(null, { status: 400 });
   }

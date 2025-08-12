@@ -1,5 +1,3 @@
-import axios from "axios";
-
 interface BodyProps {
   code: string;
 }
@@ -15,10 +13,10 @@ export async function POST(request: Request) {
       client_secret: process.env.META_CLIENT_SECRET,
       code: body.code,
       grant_type: "authorization_code",
-      redirect_uri: "https://wa-ing.centcapio.cc/",
+      redirect_uri: process.env.NEXT_PUBLIC_WEB_URL,
     }),
     headers: { "Content-Type": "application/json" },
   });
-  const data = await response.json();
+  await response.json();
   return new Response("", { status: 200 });
 }

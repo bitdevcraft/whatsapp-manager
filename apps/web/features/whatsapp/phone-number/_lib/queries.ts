@@ -1,18 +1,6 @@
 import { unstable_cache } from "@/lib/unstable-cache";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  lte,
-  sql,
-} from "drizzle-orm";
+import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
 import { whatsAppBusinessAccountPhoneNumbersTable } from "@workspace/db";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { getUserWithTeam } from "@/lib/db/queries";

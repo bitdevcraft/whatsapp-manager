@@ -34,6 +34,7 @@ export async function POST(request: Request) {
           )
         );
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new Response("", {
       status: 400,

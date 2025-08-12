@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // utils/prune.ts
 type NonNullish<T> = T extends null | undefined ? never : T;
 

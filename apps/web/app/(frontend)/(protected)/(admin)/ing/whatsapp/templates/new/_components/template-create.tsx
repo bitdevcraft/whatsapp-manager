@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -103,7 +104,9 @@ function insertAtCursor(
     try {
       el.setSelectionRange(nextPos, nextPos);
       el.focus();
-    } catch {}
+    } catch {
+      /* empty */
+    }
   });
   return newValue;
 }
@@ -440,7 +443,6 @@ export default function TemplateCreateForm({
   const categoryOptions = ["MARKETING", "UTILITY", "AUTHENTICATION"] as const;
   const parameterFormatOptions = ["POSITIONAL", "NAMED"] as const;
   const headerFormatOptions = ["TEXT", "IMAGE"] as const;
-  const buttonTypeOptions = ["QUICK_REPLY", "URL", "PHONE_NUMBER"] as const;
   const languageOptions = React.useMemo(
     () =>
       Object.values(LanguagesEnum).filter(
@@ -632,6 +634,7 @@ export default function TemplateCreateForm({
                             name={`components.${idx}.text`}
                             render={({ field }) => {
                               const inputRef =
+                                // eslint-disable-next-line react-hooks/rules-of-hooks
                                 React.useRef<HTMLInputElement>(null);
                               const onAddVariable = () => {
                                 const pf = parameterFormat;
@@ -815,6 +818,7 @@ export default function TemplateCreateForm({
                           name={`components.${idx}.text`}
                           render={({ field }) => {
                             const inputRef =
+                              // eslint-disable-next-line react-hooks/rules-of-hooks
                               React.useRef<HTMLInputElement>(null);
                             const onAddVariable = () => {
                               const pf = parameterFormat;

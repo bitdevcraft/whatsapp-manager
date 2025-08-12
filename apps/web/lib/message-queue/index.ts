@@ -10,7 +10,7 @@ const redisOptions = {
 
 // 2) Define the queue with sane defaults
 const defaultJobOptions: JobsOptions = {
-  removeOnComplete: { age: 3600 }, // keep success history 1 h
+  removeOnComplete: { age: 3600 }, // keep success history 1h
   removeOnFail: false, // keep failures
   attempts: 3, // retry up to 3×
   backoff: { type: "exponential", delay: 1000 },

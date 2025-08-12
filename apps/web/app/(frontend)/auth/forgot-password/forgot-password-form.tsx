@@ -28,7 +28,6 @@ import Link from "next/link";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Input } from "@workspace/ui/components/input";
-import axios from "axios";
 import { authClient } from "@/lib/auth/auth-client";
 
 export const useForgotPasswordMutation = () => {

@@ -260,6 +260,7 @@ export async function POST(request: Request) {
     return new Response("", {
       status: 200,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return new Response("", {
       status: 400,
