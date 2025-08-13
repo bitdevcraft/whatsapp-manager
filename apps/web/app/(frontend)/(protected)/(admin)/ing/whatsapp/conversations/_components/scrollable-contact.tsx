@@ -165,7 +165,7 @@ function ContactMessageItem({
         {item.isUnread && (
           <div className="rounded-full size-2 bg-primary absolute top-2 left-2"></div>
         )}
-        {item.contact.name}
+        {item.contact.name || item.contact.phone}
       </div>
       <p className="font-light text-xs">{lastSend}</p>
     </div>

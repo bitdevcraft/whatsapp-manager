@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
     const result = await getTemplates(!!sync);
 
     revalidateTag(`templates:select:${userWithTeam?.teamId}`);
+    revalidateTag(`templates:${userWithTeam?.teamId}`);
+
     return new NextResponse(JSON.stringify(result), {
       status: 200,
       headers: {

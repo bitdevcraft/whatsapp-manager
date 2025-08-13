@@ -1,38 +1,28 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
-import { Contact } from "@workspace/db/schema/contacts";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@workspace/ui/components/popover";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
-import { CalendarIcon, CircleDashed, Ellipsis, Text } from "lucide-react";
-import { Badge } from "@workspace/ui/components/badge";
-import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { getSelectTags } from "@/features/tags/_lib/queries";
+import { CalendarIcon, Ellipsis, Text } from "lucide-react";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { DataTableRowAction } from "@workspace/ui/types/data-table";
+import { Template } from "@workspace/db/schema";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<Contact> | null>
+    React.SetStateAction<DataTableRowAction<Template> | null>
   >;
-  tags: Awaited<ReturnType<typeof getSelectTags>>;
 }
 
 export function getTableColumns({
   setRowAction,
-  tags,
-}: TableColumnsProps): ColumnDef<Contact>[] {
+}: TableColumnsProps): ColumnDef<Template>[] {
   return [
     {
       id: "select",
@@ -71,77 +61,26 @@ export function getTableColumns({
         variant: "text",
         icon: Text,
       },
-      enableColumnFilter: true,
-    },
-
-    {
-      id: "phone",
-      accessorKey: "phone",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Phone" />
-      ),
-      meta: {
-        label: "Phone",
-        placeholder: "Search phone...",
-        variant: "text",
-        icon: Text,
-      },
-      enableColumnFilter: true,
-    },
-    {
-      id: "tags",
-      accessorKey: "tags",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Tags" />
-      ),
-      cell: ({ cell }) => {
-        const tags = cell.getValue<string[]>() || [];
-
-        const visibleTags = tags.slice(0, 3);
-        const hiddenTagCount = tags.length - visibleTags.length;
-
+      cell: ({ row }) => {
         return (
-          <Popover>
-            <PopoverTrigger asChild>
-              <div className="flex flex-wrap gap-1 cursor-pointer">
-                {visibleTags.map((tag, idx) => (
-                  <Badge key={idx} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
-                {hiddenTagCount > 0 && (
-                  <Badge variant="outline">+{hiddenTagCount} more</Badge>
-                )}
-              </div>
-            </PopoverTrigger>
-            <PopoverContent className="max-w-xs">
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag, idx) => (
-                  <Badge key={idx} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+          <Link href={`/ing/whatsapp/template/${row.id}`}>
+            <p>{row.original.name}</p>
+          </Link>
         );
       },
-      meta: {
-        label: "Tags",
-        variant: "multiSelectArray",
-        options: tags,
-        icon: CircleDashed,
-      },
       enableColumnFilter: true,
     },
     {
-      id: "email",
-      accessorKey: "email",
+      id: "content",
+      accessorKey: "content",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" />
+        <DataTableColumnHeader column={column} title="Status" />
       ),
+      cell: ({ row }) => {
+        return <>{row.original.content?.status}</>;
+      },
       meta: {
-        label: "Email",
+        label: "Status",
       },
     },
     {
@@ -174,7 +113,7 @@ export function getTableColumns({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
-                onSelect={() => setRowAction({ row, variant: "update" })}
+                onSelect={() => setRowAction({ row, variant: "edit" })}
               >
                 Edit
               </DropdownMenuItem>

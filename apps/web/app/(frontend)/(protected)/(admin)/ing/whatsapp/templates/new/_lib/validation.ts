@@ -1,26 +1,6 @@
 import { CategoryEnum, LanguagesEnum } from "@workspace/wa-cloud-api";
 import { z } from "zod";
 
-export const ButtonSchema = z.object({
-  type: z.enum(["URL", "PHONE_NUMBER", "QUICK_REPLY"] as const),
-  text: z.string(),
-  url: z.string().optional(),
-  phone_number: z.string().optional(),
-});
-
-export const SimpleTemplateSchema = z.object({
-  name: z.string().min(3, { message: "Must be 3 or more characters long" }),
-  category: z.nativeEnum(CategoryEnum),
-  language: z.object({
-    policy: z.string(),
-    code: z.nativeEnum(LanguagesEnum),
-  }),
-  body: z.string().min(5),
-  buttons: z.array(ButtonSchema),
-});
-
-export type SimpleTemplateValues = z.infer<typeof SimpleTemplateSchema>;
-
 const ButtonType = z.union([
   z.literal("QUICK_REPLY"),
   z.literal("URL"),
@@ -82,16 +62,15 @@ const FooterComponentSchema = z.object({
   text: z.string(),
 });
 
+const ButtonSchema = z.object({
+  type: ButtonType,
+  text: z.string().min(3),
+  url: z.string().url().optional(),
+  phone_number: z.string().optional(),
+});
 const ButtonComponentSchema = z.object({
   type: z.literal("BUTTONS"),
-  buttons: z.array(
-    z.object({
-      type: ButtonType,
-      text: z.string(),
-      url: z.string().optional(),
-      phone_number: z.string().optional(),
-    })
-  ),
+  buttons: z.array(ButtonSchema),
 });
 
 const ComponentSchema = z.array(
