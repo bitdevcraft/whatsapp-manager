@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export enum NotificationEvent {
   WhatsAppBulkMessageOutgoingFailed = "whatsapp_bulk_message_outgoing_failed",
   WhatsAppBulkMessageOutgoingProcessing = "whatsapp_bulk_message_outgoing_processing",
@@ -12,30 +13,30 @@ export enum NotificationRelatedObject {
   Template = "templates",
 }
 
-interface NotificationPayload {
-  jobId?: string | null;
-  payload: {
-    message: string;
-    data?: Record<string, any>;
-  };
-  error?: Error;
-  userId?: string;
-  teamId: string;
-  relatedId: string;
-  relatedObject: NotificationRelatedObject;
-}
-
 export interface SocketEventPayloads {
+  [NotificationEvent.WhatsAppBulkMessageOutgoingFailed]: (
+    data: NotificationPayload
+  ) => void;
   [NotificationEvent.WhatsAppBulkMessageOutgoingProcessing]: (
     data: NotificationPayload
   ) => void;
   [NotificationEvent.WhatsAppBulkMessageOutgoingSuccess]: (
     data: NotificationPayload
   ) => void;
-  [NotificationEvent.WhatsAppBulkMessageOutgoingFailed]: (
-    data: NotificationPayload
-  ) => void;
   [NotificationEvent.WhatsAppMessageReceived]: (
     data: NotificationPayload
   ) => void;
+}
+
+interface NotificationPayload {
+  error?: Error;
+  jobId?: null | string;
+  payload: {
+    data?: Record<string, any>;
+    message: string;
+  };
+  relatedId: string;
+  relatedObject: NotificationRelatedObject;
+  teamId: string;
+  userId?: string;
 }
