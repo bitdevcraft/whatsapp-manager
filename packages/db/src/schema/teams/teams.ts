@@ -1,6 +1,6 @@
-import { relations, sql } from "drizzle-orm";
-import { baseSchema } from "../../helpers/column-helper";
-import { bigint, integer, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { bigint, pgTable, text, varchar } from "drizzle-orm/pg-core";
+
 import { baseModel } from "../abstract/baseModel";
 import { activityLogsTable } from "../activity-logs";
 import { contactsTable } from "../contacts";
@@ -20,26 +20,26 @@ import { TeamMember, teamMembersTable } from "./team-members";
 
 export const teamsTable = pgTable("teams", {
   ...baseModel,
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripeProductId: text("stripe_product_id"),
-  planName: varchar("plan_name", { length: 50 }),
-  subscriptionStatus: varchar("subscription_status", { length: 20 }),
+  currentFileStorageSize: bigint("current_file_storage_size", {
+    mode: "number",
+  }).default(0),
   maxFileStorageSize: bigint("max_file_storage_size", {
     mode: "number",
   }).default(
     // 2 Gb
     2 * 1024 * 1024 * 1024
   ),
-  currentFileStorageSize: bigint("current_file_storage_size", {
-    mode: "number",
-  }).default(0),
-  slug: text("slug"),
   metadata: text("metadata"),
+  planName: varchar("plan_name", { length: 50 }),
+  slug: text("slug"),
+  stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeProductId: text("stripe_product_id"),
+  stripeSubscriptionId: text("stripe_subscription_id").unique(),
+  subscriptionStatus: varchar("subscription_status", { length: 20 }),
 });
 
-export type Team = typeof teamsTable.$inferSelect;
 export type NewTeam = typeof teamsTable.$inferInsert;
+export type Team = typeof teamsTable.$inferSelect;
 
 export const teamsRelations = relations(teamsTable, ({ many }) => ({
   activityLogs: many(activityLogsTable),
@@ -60,6 +60,6 @@ export const teamsRelations = relations(teamsTable, ({ many }) => ({
 
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
-    user: Pick<User, "id" | "name" | "email">;
+    user: Pick<User, "email" | "id" | "name">;
   })[];
 };

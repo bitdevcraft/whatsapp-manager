@@ -1,10 +1,10 @@
 export enum MarketingCampaignStatusEnum {
+  Disabled = "disabled",
+  Draft = "draft",
+  Failed = "failed",
   Pending = "pending",
   Processing = "processing",
   Success = "success",
-  Failed = "failed",
-  Disabled = "disabled",
-  Draft = "draft",
 }
 
 export enum MessageStatus {

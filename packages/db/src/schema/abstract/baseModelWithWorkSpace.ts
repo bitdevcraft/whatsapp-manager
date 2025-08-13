@@ -1,7 +1,7 @@
-import { text, uuid } from "drizzle-orm/pg-core";
+import { uuid } from "drizzle-orm/pg-core";
 
-import { baseModel } from "./baseModel";
 import { teamsTable } from "../teams";
+import { baseModel } from "./baseModel";
 
 export const baseModelWithWorkspace = {
   ...baseModel,

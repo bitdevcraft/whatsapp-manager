@@ -1,33 +1,34 @@
-import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { usersTable } from "./users";
 import { relations } from "drizzle-orm";
+import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+
 import { baseIdModel } from "./abstract/baseIdModel";
 import { teamsTable } from "./teams";
+import { usersTable } from "./users";
 
 export const invitationsTable = pgTable("invitations", {
   ...baseIdModel,
-  teamId: uuid("team_id")
-    .notNull()
-    .references(() => teamsTable.id),
   email: varchar("email", { length: 255 }).notNull(),
-  role: varchar("role", { length: 50 }).notNull(),
+  invitedAt: timestamp("invited_at").notNull().defaultNow(),
   invitedBy: uuid("invited_by")
     .notNull()
     .references(() => usersTable.id),
-  invitedAt: timestamp("invited_at").notNull().defaultNow(),
+  role: varchar("role", { length: 50 }).notNull(),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
+  teamId: uuid("team_id")
+    .notNull()
+    .references(() => teamsTable.id),
 });
 
 export type Invitation = typeof invitationsTable.$inferSelect;
 export type NewInvitation = typeof invitationsTable.$inferInsert;
 
 export const invitationsRelations = relations(invitationsTable, ({ one }) => ({
-  team: one(teamsTable, {
-    fields: [invitationsTable.teamId],
-    references: [teamsTable.id],
-  }),
   invitedBy: one(usersTable, {
     fields: [invitationsTable.invitedBy],
     references: [usersTable.id],
+  }),
+  team: one(teamsTable, {
+    fields: [invitationsTable.teamId],
+    references: [teamsTable.id],
   }),
 }));

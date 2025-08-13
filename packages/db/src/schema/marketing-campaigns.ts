@@ -1,26 +1,22 @@
-import { baseSchema } from "../helpers/column-helper";
+import { relations } from "drizzle-orm";
 import {
-  varchar,
+  boolean,
+  integer,
+  jsonb,
   pgEnum,
   pgTable,
   timestamp,
   uuid,
-  jsonb,
-  boolean,
-  integer,
-  pgPolicy,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./users";
+
 import { enumToValues } from "../enums/enum-helper";
 import { MarketingCampaignStatusEnum } from "../enums/status-enum";
-import { Template, templatesTable } from "./templates";
-import { relations, sql } from "drizzle-orm";
-import { teamsTable } from "./teams";
-import {
-  ComponentTypesEnum,
-  MessageTemplateObject,
-} from "@workspace/wa-cloud-api";
+import { createOrganizationPolicies } from "../policies/workspace";
 import { baseModel } from "./abstract/baseModel";
+import { teamsTable } from "./teams";
+import { Template, templatesTable } from "./templates";
+import { usersTable } from "./users";
 
 export const marketingCampaignStatusEnum = pgEnum(
   "status",
@@ -28,84 +24,57 @@ export const marketingCampaignStatusEnum = pgEnum(
 );
 
 export interface MarketingCampaignAnalytics {
-  totalRecipients?: number;
+  engagement?: number;
   messageSent?: number;
   openRate?: number;
   replyRate?: number;
-  engagement?: number;
+  totalRecipients?: number;
 }
 
 export const marketingCampaignsTable = pgTable(
   "marketing_campaigns",
   {
     ...baseModel,
-    description: varchar("description", { length: 65_535 }),
-    templateId: varchar("template_id")
-      .references(() => templatesTable.id)
-      .notNull(),
-    scheduleAt: timestamp("schedule_at"),
-    processedAt: timestamp("processed_at"),
-    completedAt: timestamp("completed_at"),
-    status: marketingCampaignStatusEnum(),
-    enableTracking: boolean("enable_tracking").default(false),
-    phoneNumber: varchar("phone_number", { length: 15 }),
-    createdBy: uuid("created_by").references(() => usersTable.id),
-    payload: jsonb("payload"),
-    messageTemplate: jsonb("message_template"),
-    tags: jsonb("tags").$type<string[]>(),
-    recipients: jsonb("recipients").$type<string[]>(),
     analytics: jsonb("analytics").$type<MarketingCampaignAnalytics>(),
-    totalRecipients: integer("total_recipients"),
+    completedAt: timestamp("completed_at"),
+    createdBy: uuid("created_by").references(() => usersTable.id),
+    description: varchar("description", { length: 65_535 }),
+    enableTracking: boolean("enable_tracking").default(false),
+    messageTemplate: jsonb("message_template"),
+    payload: jsonb("payload"),
+    phoneNumber: varchar("phone_number", { length: 15 }),
+    processedAt: timestamp("processed_at"),
+    recipients: jsonb("recipients").$type<string[]>(),
+    scheduleAt: timestamp("schedule_at"),
+    status: marketingCampaignStatusEnum(),
+    tags: jsonb("tags").$type<string[]>(),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
+    templateId: varchar("template_id")
+      .references(() => templatesTable.id)
+      .notNull(),
+    totalRecipients: integer("total_recipients"),
   },
-  (t) => [
-    // only allow SELECTs where team_id matches the session var
-    pgPolicy("marketing_campaigns_select_tenant", {
-      for: "select",
-      to: process.env.POSTGRES_USER_ROLE!, // <-- your DB role here
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // inserts must set team_id = current_tenant
-    pgPolicy("marketing_campaigns_insert_tenant", {
-      for: "insert",
-      to: process.env.POSTGRES_USER_ROLE!,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // updates only on your rows, and team_id can't be changed
-    pgPolicy("marketing_campaigns_update_tenant", {
-      for: "update",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // deletes only your rows
-    pgPolicy("marketing_campaigns_delete_tenant", {
-      for: "delete",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-  ]
+  (t) => [...createOrganizationPolicies("marketing_campaigns", t)]
 );
 
 export const marketingCampaignRelations = relations(
   marketingCampaignsTable,
   ({ one }) => ({
-    template: one(templatesTable, {
-      fields: [marketingCampaignsTable.templateId],
-      references: [templatesTable.id],
-    }),
     team: one(teamsTable, {
       fields: [marketingCampaignsTable.teamId],
       references: [teamsTable.id],
+    }),
+    template: one(templatesTable, {
+      fields: [marketingCampaignsTable.templateId],
+      references: [templatesTable.id],
     }),
   })
 );
 
 export type MarketingCampaign = typeof marketingCampaignsTable.$inferSelect;
-export type NewMarketingCampaign = typeof marketingCampaignsTable.$inferInsert;
-
 export type MarketingCampaignWithTemplate = MarketingCampaign & {
   template: Template;
 };
+export type NewMarketingCampaign = typeof marketingCampaignsTable.$inferInsert;

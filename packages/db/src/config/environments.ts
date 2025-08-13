@@ -1,45 +1,46 @@
-type Environment = "development" | "test" | "staging" | "production";
+type Environment = "development" | "production" | "staging" | "test";
 
 interface EnvironmentConfig {
   database: {
-    ssl: boolean;
-    maxConnections: number;
     idleTimeout: number;
+    maxConnections: number;
+    ssl: boolean;
   };
 }
 
 const configurations: Record<Environment, EnvironmentConfig> = {
   development: {
     database: {
-      ssl: false,
-      maxConnections: 10,
       idleTimeout: 30,
-    },
-  },
-  test: {
-    database: {
+      maxConnections: 10,
       ssl: false,
-      maxConnections: 5,
-      idleTimeout: 10,
-    },
-  },
-  staging: {
-    database: {
-      ssl: false,
-      maxConnections: 20,
-      idleTimeout: 60,
     },
   },
   production: {
     database: {
-      ssl: false,
-      maxConnections: 50,
       idleTimeout: 120,
+      maxConnections: 50,
+      ssl: false,
+    },
+  },
+  staging: {
+    database: {
+      idleTimeout: 60,
+      maxConnections: 20,
+      ssl: false,
+    },
+  },
+  test: {
+    database: {
+      idleTimeout: 10,
+      maxConnections: 5,
+      ssl: false,
     },
   },
 };
 
 export function getConfig(): EnvironmentConfig {
-  const env = (process.env.NODE_ENV || "development") as Environment;
+  const env = (process.env.NODE_ENV ?? "development") as Environment;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return configurations[env] || configurations.development;
 }
