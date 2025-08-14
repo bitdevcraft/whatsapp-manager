@@ -35,6 +35,8 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
   const dataTemp = {
     totalContacts: 0,
     totalNewContacts: 0,
+    totalMessagesSent: 0,
+    totalReplies: 0,
     openRate: 0,
     replyRate: 0,
     messagesDeliveredPerDay: [],
@@ -55,6 +57,8 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
         const {
           totalContacts,
           totalNewContacts,
+          totalMessagesSent,
+          totalReplies,
           openRate,
           replyRate,
           marketingCampaignStatus,
@@ -71,6 +75,24 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
                 contactsTable.createdAt,
                 input.dateRange
               )
+            )
+          );
+
+          // Count total messages sent (outbound messages)
+          const totalMessagesSent = await tx.$count(
+            conversationsTable,
+            and(
+              eq(conversationsTable.teamId, teamId),
+              eq(conversationsTable.direction, "outbound")
+            )
+          );
+
+          // Count total replies (inbound messages)
+          const totalReplies = await tx.$count(
+            conversationsTable,
+            and(
+              eq(conversationsTable.teamId, teamId),
+              eq(conversationsTable.direction, "inbound")
             )
           );
 
@@ -168,6 +190,8 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
           return {
             totalContacts,
             totalNewContacts,
+            totalMessagesSent,
+            totalReplies,
             openRate,
             replyRate,
             marketingCampaignStatus,
@@ -178,6 +202,8 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
         return {
           totalContacts,
           totalNewContacts,
+          totalMessagesSent,
+          totalReplies,
           openRate,
           replyRate,
           messagesDeliveredPerDay: [],
