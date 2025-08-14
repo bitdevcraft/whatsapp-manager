@@ -13,7 +13,14 @@ export const CategoryType = z.union([
   z.literal("UTILITY"),
   z.literal("AUTHENTICATION"),
 ]);
-export const HeaderType = z.union([z.literal("TEXT"), z.literal("IMAGE")]);
+
+export const HeaderType = z.union([
+  z.literal("TEXT"),
+  z.literal("IMAGE"),
+  z.literal("VIDEO"),
+  z.literal("DOCUMENT"),
+  z.literal("PRODUCT"),
+]);
 export const ParameterFormatType = z.union([
   z.literal("POSITIONAL"),
   z.literal("NAMED"),
@@ -132,6 +139,8 @@ export const BaseCreateSchema = z.object({
   parameter_format: ParameterFormatType,
   language: z.nativeEnum(LanguagesEnum),
 });
+
+export type BaseCreateValue = z.infer<typeof BaseCreateSchema>;
 
 /* Normal template (kept for completeness) */
 export const ComponentSchema = z.array(
