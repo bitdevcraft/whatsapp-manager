@@ -1,38 +1,37 @@
+import { relations, SQL, sql } from "drizzle-orm";
 import {
   boolean,
   jsonb,
-  pgPolicy,
   pgTable,
-  text,
   timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+
 import { baseSchema } from "../helpers/column-helper";
-import { relations, SQL, sql } from "drizzle-orm";
-import { usersTable } from "./users";
+import { createOrganizationPolicies } from "../policies/workspace";
 import { Conversation, conversationsTable } from "./conversations";
 import { teamsTable } from "./teams";
-import { createOrganizationPolicies } from "../policies/workspace";
+import { usersTable } from "./users";
 
 export const contactsTable = pgTable(
   "contacts",
   {
     ...baseSchema,
-    phone: varchar("phone", { length: 255 }).notNull(),
+    assignedTo: uuid("assigned_to").references(() => usersTable.id),
+    email: varchar("email", { length: 255 }).notNull(),
+    interests: jsonb("interests").$type<string[]>().default([]),
+    lastMessageDate: timestamp("last_message_date"),
+    message: varchar("message", { length: 2048 }).notNull(),
     normalizedPhone: varchar("normalized_phone", {
       length: 255,
     }).generatedAlwaysAs(
       (): SQL => sql`regexp_replace(${contactsTable.phone}, '\\D', '', 'g')`
     ),
-    email: varchar("email", { length: 255 }).notNull(),
-    interests: jsonb("interests").$type<string[]>().default([]),
-    message: varchar("message", { length: 2048 }).notNull(),
     optIn: boolean("opt_in").default(true),
-    assignedTo: uuid("assigned_to").references(() => usersTable.id),
+    phone: varchar("phone", { length: 255 }).notNull(),
     tags: jsonb("tags").$type<string[]>().default([]),
-    lastMessageDate: timestamp("last_message_date"),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
@@ -44,7 +43,7 @@ export const contactsTable = pgTable(
 );
 
 // Relations
-export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
+export const contactsRelations = relations(contactsTable, ({ many, one }) => ({
   assigned_to: one(usersTable, {
     fields: [contactsTable.assignedTo],
     references: [usersTable.id],
@@ -57,8 +56,8 @@ export const contactsRelations = relations(contactsTable, ({ one, many }) => ({
 }));
 
 export type Contact = typeof contactsTable.$inferSelect;
-export type NewContact = typeof contactsTable.$inferInsert;
-
 export type ContactConversation = Contact & {
   conversations: Conversation[];
 };
+
+export type NewContact = typeof contactsTable.$inferInsert;

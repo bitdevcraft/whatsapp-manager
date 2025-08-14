@@ -1,12 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
 
-import { getSelectTags } from "@/features/tags/_lib/queries";
-
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
-import { Check, Cross, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -59,7 +58,7 @@ export function CloneMarketingCampaign({
     } catch (error: any) {
       toast.error(
         <div>
-          <p>Campaign can't be clone. Please check with the support.</p>
+          <p>Campaign can&apos;t be clone. Please check with the support.</p>
           <p className="font-light">{error.response.statusText}</p>
         </div>
       );

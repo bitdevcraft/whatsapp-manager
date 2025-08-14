@@ -1,7 +1,7 @@
 import { auth } from "@workspace/auth";
 import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
-import { OrganizationProvider } from "@/components/organization-provider";
+import { OrganizationProvider } from "@/components/provider/organization-provider";
 import { CreateOrganizationForm } from "./(admin)/ing/organization/create/create-organization-form";
 
 export default async function Layout({

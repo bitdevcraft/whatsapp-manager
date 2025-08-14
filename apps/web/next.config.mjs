@@ -14,6 +14,9 @@ const nextConfig = {
     "facebook.com",
     "*.facebook.com",
   ],
+  images: {
+    remotePatterns: [new URL("https://lookaside.fbsbx.com/*")],
+  },
   // experimental: {
   //   nodeMiddleware: true,
   // },

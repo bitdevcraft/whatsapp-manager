@@ -1,29 +1,20 @@
 "use client";
 
-import { type Contact, contactsTable } from "@workspace/db/schema/contacts";
-import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
-import { ArrowUp, CheckCircle2, Download, Trash2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
 
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@workspace/ui/data-table";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
 import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = [
   "update-status",
   "update-priority",

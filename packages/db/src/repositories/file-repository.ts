@@ -1,10 +1,11 @@
 import { eq, sql } from "drizzle-orm";
+
+import { teamsTable } from "../schema";
 import {
   FileAttachment,
   fileAttachmentsTable,
   NewFileAttachment,
 } from "../schema/file-storage";
-import { teamsTable } from "../schema";
 import { withTenantTransaction } from "../tenant";
 
 export function createFileRepository() {
@@ -26,7 +27,7 @@ export function createFileRepository() {
         return undefined;
       }
 
-      const { teamId, fileSize } = inserted;
+      const { fileSize, teamId } = inserted;
       await tx
         .update(teamsTable)
         .set({
@@ -50,11 +51,11 @@ export function createFileRepository() {
     teamId: string,
     attachmentId: string
   ): Promise<void> {
-    return await withTenantTransaction(teamId, async (tx) => {
+    await withTenantTransaction(teamId, async (tx) => {
       const attachment = await tx
         .select({
-          teamId: fileAttachmentsTable.teamId,
           fileSize: fileAttachmentsTable.fileSize,
+          teamId: fileAttachmentsTable.teamId,
         })
         .from(fileAttachmentsTable)
         .where(eq(fileAttachmentsTable.id, attachmentId))
@@ -65,7 +66,7 @@ export function createFileRepository() {
         return;
       }
 
-      const { teamId, fileSize } = attachment;
+      const { fileSize, teamId } = attachment;
       await tx
         .delete(fileAttachmentsTable)
         .where(eq(fileAttachmentsTable.id, attachmentId));
@@ -84,7 +85,7 @@ export function createFileRepository() {
   }
 
   return {
-    insertFileAttachment,
     deleteFileAttachment,
+    insertFileAttachment,
   };
 }

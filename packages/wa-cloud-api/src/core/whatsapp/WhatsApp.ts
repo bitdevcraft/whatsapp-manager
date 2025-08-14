@@ -16,6 +16,7 @@ import WabaApi from '@features/waba';
 import { importConfig } from '@shared/config/importConfig';
 import Requester from '@shared/http/request';
 import { WhatsAppClass } from './types';
+import FileUploadApi from '@features/fileUpload';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -36,6 +37,7 @@ export default class WhatsApp implements WhatsAppClass {
     readonly twoStepVerification: TwoStepVerificationApi;
     readonly registration: RegistrationApi;
     readonly media: MediaApi;
+    readonly fileUpload: FileUploadApi;
     readonly waba: WabaApi;
     readonly flow: FlowApi;
     readonly businessProfile: BusinessProfileApi;
@@ -59,6 +61,7 @@ export default class WhatsApp implements WhatsAppClass {
         this.twoStepVerification = new TwoStepVerificationApi(this.config, this.requester);
         this.registration = new RegistrationApi(this.config, this.requester);
         this.media = new MediaApi(this.config, this.requester);
+        this.fileUpload = new FileUploadApi(this.config, this.requester);
         this.waba = new WabaApi(this.config, this.requester);
         this.flow = new FlowApi(this.config, this.requester);
         this.businessProfile = new BusinessProfileApi(this.config, this.requester);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getUserWithTeam } from "./db/queries";
 
 // lib/httpLogger.ts

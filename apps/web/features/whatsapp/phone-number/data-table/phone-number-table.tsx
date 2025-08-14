@@ -7,7 +7,6 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
-  DataTableFilterMenu,
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
@@ -15,19 +14,17 @@ import {
 import { WhatsAppBusinessAccountPhoneNumberActionBar } from "./phone-number-table-action-bar";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { useTitle } from "@/components/provider/title-provider";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { WhatsAppBusinessAccountPhoneNumber } from "@workspace/db";
 import { getTableColumns } from "./phone-number-table-columns";
 import { getWhatsAppBusinessAccountPhoneNumber } from "../_lib/queries";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
 import { InputOTPForm } from "./phone-number-register-form";
-import { TagsFormValues } from "@/features/tags/_lib/schema";
 import axios from "axios";
 import { toast } from "sonner";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import { Button } from "@workspace/ui/components/button";
-import { RefreshCcw, RefreshCw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface WhatsAppBusinessAccountPhoneNumberTableProps {
@@ -47,7 +44,7 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
     setTitle("Business Account");
   }, [setTitle]);
 
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
+  const { enableAdvancedFilter } = useFeatureFlags();
 
   const [{ data, pageCount }] = React.use(promises);
 
@@ -87,16 +84,14 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
     phoneNumberId: string
   ) => {
     try {
-      const response = await axios.post(
-        "/api/whatsapp/business-account/registration/register",
-        {
-          pin: data.pin,
-          phoneNumberId,
-        }
-      );
+      await axios.post("/api/whatsapp/business-account/registration/register", {
+        pin: data.pin,
+        phoneNumberId,
+      });
       router.refresh();
 
       toast.success("Registered Successfully");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Error Encountered, please check with admin");
     }
@@ -104,7 +99,7 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
 
   const setup2FAPin = async (data: { pin: string }, phoneNumberId: string) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         "/api/whatsapp/business-account/registration/setup-2FA",
         {
           pin: data.pin,
@@ -113,17 +108,17 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
       );
       toast.success("Registered Successfully");
       router.refresh();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Error Encountered, please check with admin");
     }
   };
   const getPhoneNumbers = async () => {
     try {
-      const response = await axios.get(
-        "/api/whatsapp/business-account/get-phone-numbers"
-      );
+      await axios.get("/api/whatsapp/business-account/get-phone-numbers");
       toast.success("Registered Successfully");
       router.refresh();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Error Encountered, please check with admin");
     }

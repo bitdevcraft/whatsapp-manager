@@ -1,4 +1,4 @@
-import { text, uuid } from "drizzle-orm/pg-core";
+import { uuid } from "drizzle-orm/pg-core";
 
 import { usersTable } from "../users";
 import { baseModel } from "./baseModel";

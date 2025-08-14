@@ -1,5 +1,4 @@
 import { getMarketingCampaigns } from "@/features/marketing-campaigns/_lib/queries";
-import ContactTable from "@/features/contacts/data-table/contact-table";
 import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
 import { getValidFilters } from "@workspace/ui/lib/data-table";

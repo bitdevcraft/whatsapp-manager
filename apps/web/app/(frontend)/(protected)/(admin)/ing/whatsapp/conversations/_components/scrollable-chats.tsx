@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -110,11 +111,9 @@ export function ScrollableChats() {
           hasPrevious={hasPreviousPage}
           isReverse={true}
           next={() => {
-     ;
             fetchNextPage();
           }}
           previous={() => {
-         
             fetchPreviousPage();
           }}
           className=" p-4"

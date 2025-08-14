@@ -3,7 +3,6 @@ import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
 import { unstable_cache } from "@/lib/unstable-cache";
 import {
-  WhatsAppBusinessAccountDetails,
   whatsAppBusinessAccountsTable,
   withTenantTransaction,
 } from "@workspace/db";
@@ -38,6 +37,7 @@ export async function getWhatsAppBusinessAccountDetails() {
         });
 
         return data;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return null;
       }
@@ -87,13 +87,13 @@ export async function getAdAccount() {
         const adAccount = new AdAccount(`act_${account.adAccountId}`, adsApi);
 
         const {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           _data: { accessToken, _debug, _showHeader, locale, ...data },
         } = await adAccount.read([
           AdAccount.Fields.account_id,
           AdAccount.Fields.name,
           AdAccount.Fields.tos_accepted,
         ]);
-
 
         return { data };
       } catch (error) {

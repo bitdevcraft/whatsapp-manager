@@ -1,25 +1,25 @@
+import { sql } from "drizzle-orm";
 import {
   index,
   pgTable,
   primaryKey,
-  text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+
+import { contactsTable } from "./contacts";
 import { teamsTable } from "./teams";
 import { usersTable } from "./users";
-import { sql } from "drizzle-orm";
-import { contactsTable } from "./contacts";
 
 export const conversationMembersTable = pgTable(
   "conversation_members",
   {
-    teamId: uuid("team_id").references(() => teamsTable.id),
     contactId: uuid("contact_id").references(() => contactsTable.id),
-    userId: uuid("user_id").references(() => usersTable.id),
     lastReadAt: timestamp("last_read_at", { mode: "date" }).default(
       sql`'1970-01-01'`
     ),
+    teamId: uuid("team_id").references(() => teamsTable.id),
+    userId: uuid("user_id").references(() => usersTable.id),
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.contactId] }),

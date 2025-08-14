@@ -12,7 +12,7 @@ const config = getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../dict/${locale}.json`)).default,
+    messages: (await import(`./dict/${locale}.json`)).default,
   };
 });
 

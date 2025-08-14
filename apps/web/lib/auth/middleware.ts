@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 
 import { getTeamForUser, getUser } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
-import { TeamDataWithMembers, User } from "@workspace/db/schema";
+import { TeamDataWithMembers } from "@workspace/db/schema";
+import { User } from "better-auth";
 
 export type ActionState = {
   error?: string;
@@ -50,7 +52,6 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
       return { error: result?.error?.errors[0]?.message };
     }
 
-    // @ts-ignore
     return action(result.data, formData, user);
   };
 }

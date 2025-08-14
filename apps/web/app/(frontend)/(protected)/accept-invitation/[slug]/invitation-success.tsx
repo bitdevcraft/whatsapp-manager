@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardContent,
 } from "@workspace/ui/components/card";
-import { CheckCircle, ArrowRight, Users, Folder } from "lucide-react";
+import { CheckCircle, ArrowRight, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function InvitationSuccess() {
@@ -20,8 +20,8 @@ export default function InvitationSuccess() {
           <div className="space-y-2">
             <CardTitle className="text-xl">Welcome to the Team!</CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              You've successfully joined the team. You now have access to all
-              team projects and resources based on your assigned role.
+              You&apos;ve successfully joined the team. You now have access to
+              all team projects and resources based on your assigned role.
             </CardDescription>
           </div>
         </CardHeader>

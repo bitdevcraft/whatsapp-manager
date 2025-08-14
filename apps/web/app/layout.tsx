@@ -2,7 +2,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import "@workspace/ui/globals.css";
 import { Providers } from "@/components/provider/theme-provider";
-import { SocketProvider } from "@/components/provider/socket-provider";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 

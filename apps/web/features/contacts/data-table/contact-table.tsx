@@ -7,7 +7,6 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
-  DataTableFilterMenu,
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
@@ -23,8 +22,6 @@ import { Contact } from "@workspace/db";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import UploadCSVContact from "../_components/upload-csv-form";
 import ContactNewDialog from "./contact-new-dialog";
-import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { ContactForm } from "./contact-form";
 import { ContactEditDialog } from "./contact-edit-dialog";
 
 interface ContactTableProps {
@@ -43,7 +40,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
     setTitle("Contacts");
   }, [setTitle]);
 
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
+  const { enableAdvancedFilter } = useFeatureFlags();
 
   const [{ data, pageCount }, tags] = React.use(promises);
 
@@ -69,7 +66,6 @@ export default function ContactTable({ promises }: ContactTableProps) {
       columnPinning: { right: ["actions"] },
       pagination: { pageSize: 10, pageIndex: 1 },
       columnVisibility: {
-        phone: false,
         email: false,
         createdAt: false,
       },

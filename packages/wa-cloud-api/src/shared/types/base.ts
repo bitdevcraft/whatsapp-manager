@@ -22,12 +22,24 @@ export class BaseAPI implements BaseClass {
         LOGGER.log('Initialized with HTTPSClient');
     }
 
-    protected sendJson<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T> {
-        return this.client.getJson<T>(method, endpoint, timeout, body);
+    protected sendJson<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T> {
+        return this.client.getJson<T>(method, endpoint, timeout, body, additionalHeaders);
     }
 
-    protected sendFormData<T>(method: HttpMethodsEnum, endpoint: string, timeout: number, body?: any): Promise<T> {
-        return this.client.sendFormData<T>(method, endpoint, timeout, body);
+    protected sendFormData<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T> {
+        return this.client.sendFormData<T>(method, endpoint, timeout, body, additionalHeaders);
     }
 
     protected sendUrlEncodedForm<T>(
@@ -35,7 +47,8 @@ export class BaseAPI implements BaseClass {
         endpoint: string,
         timeout: number,
         body?: any,
+        additionalHeaders?: Record<string, string>,
     ): Promise<T> {
-        return this.client.sendUrlEncodedForm<T>(method, endpoint, timeout, body);
+        return this.client.sendUrlEncodedForm<T>(method, endpoint, timeout, body, additionalHeaders);
     }
 }

@@ -1,0 +1,238 @@
+"use client";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button } from "@workspace/ui/components/button";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import { ErrorSummary } from "./helpers";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+
+export function ButtonsArray({
+  prefix,
+  index,
+}: {
+  prefix?: string;
+  index: number;
+}) {
+  const { trigger, control } = useFormContext(); // ✅ revalidation hook
+
+  const base = prefix
+    ? (`${prefix}.components.${index}` as const)
+    : (`components.${index}` as const);
+
+  const fa = useFieldArray({
+    control,
+    name: `${base}.buttons` as const,
+  });
+
+  const types = ["QUICK_REPLY", "URL", "PHONE_NUMBER"] as const;
+
+  const canAdd = fa.fields.length < 2; // UI guard: at most 2
+  const handleAdd = () => {
+    if (!canAdd) return;
+    fa.append({ type: "QUICK_REPLY", text: "" });
+    void trigger(`${base}.buttons` as any); // 🔁 show superRefine errors immediately
+  };
+
+  const handleRemove = (i: number) => {
+    // UI guard: keep at least 1
+    if (fa.fields.length <= 1) return;
+    fa.remove(i);
+    void trigger(`${base}.buttons` as any);
+  };
+
+  return (
+    <div className="space-y-2">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Buttons</span>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleAdd}
+          disabled={!canAdd}
+        >
+          Add Button
+        </Button>
+      </div>
+
+      {/* 🔴 Clear, full-width summary for all buttons-level errors */}
+      <ErrorSummary name={`${base}.buttons`} />
+
+      {fa.fields.length === 0 && (
+        <p className="text-xs text-muted-foreground">No buttons.</p>
+      )}
+
+      <div className="space-y-3">
+        {fa.fields.map((f, i) => (
+          <ButtonRow
+            key={f.id}
+            base={base}
+            index={i}
+            total={fa.fields.length}
+            remove={() => handleRemove(i)}
+            types={types}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ButtonRow({
+  base,
+  index,
+  total,
+  remove,
+  types,
+}: {
+  base: string;
+  index: number;
+  total: number;
+  remove: () => void;
+  types: readonly ["QUICK_REPLY", "URL", "PHONE_NUMBER"];
+}) {
+  const { setValue, trigger, control } = useFormContext();
+
+  const typePath = `${base}.buttons.${index}.type` as const;
+  const typeValue = useWatch({ control, name: typePath }) as
+    | "QUICK_REPLY"
+    | "URL"
+    | "PHONE_NUMBER"
+    | undefined;
+
+  const onTypeChange = (v: "QUICK_REPLY" | "URL" | "PHONE_NUMBER") => {
+    // Update type
+    setValue(typePath as any, v, { shouldDirty: true, shouldValidate: false });
+
+    // Clear irrelevant fields to satisfy per-button rules
+    const urlPath = `${base}.buttons.${index}.url` as const;
+    const phonePath = `${base}.buttons.${index}.phone_number` as const;
+    if (v === "URL") {
+      setValue(phonePath as any, undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    } else if (v === "PHONE_NUMBER") {
+      setValue(urlPath as any, undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    } else {
+      setValue(urlPath as any, undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+      setValue(phonePath as any, undefined, {
+        shouldDirty: true,
+        shouldValidate: false,
+      });
+    }
+
+    // Re-validate the buttons signature (count/types/order)
+    void trigger(`${base}.buttons` as any);
+  };
+
+  return (
+    <div className="grid grid-cols-1 gap-2 rounded-md border p-2">
+      {/* Type */}
+      <FormField
+        control={control}
+        name={typePath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Type</FormLabel>
+            <FormControl>
+              <Select value={field.value} onValueChange={onTypeChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {types.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Text */}
+      <FormField
+        control={control}
+        name={`${base}.buttons.${index}.text`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Text</FormLabel>
+            <FormControl>
+              <Input placeholder="Button text" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* URL only when URL type */}
+      {typeValue === "URL" && (
+        <FormField
+          control={control}
+          name={`${base}.buttons.${index}.url`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://…" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      {/* Phone only when PHONE_NUMBER type */}
+      {typeValue === "PHONE_NUMBER" && (
+        <FormField
+          control={control}
+          name={`${base}.buttons.${index}.phone_number`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="+971 5x xxx xxxx" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={remove}
+          disabled={total <= 1} // UI guard: keep ≥ 1 button
+        >
+          Remove
+        </Button>
+      </div>
+    </div>
+  );
+}

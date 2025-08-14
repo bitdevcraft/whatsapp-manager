@@ -1,8 +1,9 @@
 import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { baseModel } from "../abstract/baseModel";
-import { teamsTable } from "./teams";
 import { usersTable } from "../users";
+import { teamsTable } from "./teams";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { name, ...model } = baseModel;
 
 export const teamInvitationsTable = pgTable("team_invitations", {

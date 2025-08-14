@@ -1,6 +1,6 @@
 "use client";
 
-import { type Contact, contactsTable } from "@workspace/db/schema/contacts";
+import { type Contact } from "@workspace/db/schema/contacts";
 import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
 import { CheckCircle2, Download, Trash2, XCircle } from "lucide-react";
@@ -25,10 +25,9 @@ import {
   removeContactTags,
   updateContacts,
 } from "@/features/contacts/_lib/actions";
-import { logger } from "@/lib/logger";
 import { getSelectTags } from "@/features/tags/_lib/queries";
-// import { deleteTasks, updateTasks } from "../_lib/actions";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = [
   "update-tags",
   "update-priority",
@@ -77,7 +76,7 @@ export function ContactsTableActionBar({
   );
 
   const onContactRemoveTag = React.useCallback(
-    ({ field, value }: { field: "tags" | "priority"; value: string }) => {
+    ({ value }: { field: "tags" | "priority"; value: string }) => {
       setCurrentAction("remove-tags");
       startTransition(async () => {
         const { error } = await removeContactTags({

@@ -9,7 +9,6 @@ import {
   withTenantTransaction,
 } from "@workspace/db";
 import {
-  Conversation,
   ConversationBody,
   NewConversation,
   whatsAppBusinessAccountsTable,
@@ -91,7 +90,7 @@ export async function POST(request: NextRequest) {
     const conversationBody: ConversationBody = {};
 
     if (template?.content) {
-      const { parameter_format, components } = template.content;
+      const { components } = template.content;
 
       components.forEach((component) => {
         switch (component.type) {

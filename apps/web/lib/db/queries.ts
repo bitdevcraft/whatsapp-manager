@@ -1,6 +1,5 @@
-import { desc, and, eq, isNull } from "drizzle-orm";
-import { cookies, headers as nextHeaders } from "next/headers";
-import { verifyToken } from "@/lib/auth/session";
+import { desc, eq } from "drizzle-orm";
+import { headers as nextHeaders } from "next/headers";
 import { db } from "@workspace/db/config";
 import {
   activityLogsTable,
@@ -67,67 +66,6 @@ export async function getUserWithTeam() {
     user: session.user,
     teamId: session.session.activeOrganizationId,
   };
-
-  // const sessionCookie = (await cookies()).get("session");
-  // if (!sessionCookie || !sessionCookie.value) {
-  //   return null;
-  // }
-
-  // const sessionData = await verifyToken(sessionCookie.value);
-
-  // if (
-  //   !sessionData ||
-  //   !sessionData.user ||
-  //   typeof sessionData.user.id !== "string"
-  // ) {
-  //   return null;
-  // }
-  // if (
-  //   !sessionData ||
-  //   !sessionData.currentTeam ||
-  //   typeof sessionData.currentTeam.id !== "string"
-  // ) {
-  //   return null;
-  // }
-
-  // if (new Date(sessionData.expires) < new Date()) {
-  //   return null;
-  // }
-
-  // const result = await db
-  //   .select({
-  //     user: usersTable,
-  //     teamId: teamMembersTable.organizationId,
-  //     teamRole: teamMembersTable.role,
-  //   })
-  //   .from(usersTable)
-  //   .leftJoin(teamMembersTable, eq(usersTable.id, teamMembersTable.userId))
-  //   .where(
-  //     and(
-  //       eq(usersTable.id, sessionData.user.id),
-  //       isNull(usersTable.deletedAt),
-  //       eq(teamMembersTable.organizationId, sessionData.currentTeam.id)
-  //     )
-  //   )
-  //   .limit(1);
-
-  // if (result.length === 0) {
-  //   return null;
-  // }
-
-  //   return user[0];
-
-  //   const result = await db
-  //     .select({
-  //       user: usersTable,
-  //       teamId: teamMembersTable.teamId,
-  //     })
-  //     .from(usersTable)
-  //     .leftJoin(teamMembersTable, eq(usersTable.id, teamMembersTable.userId))
-  //     .where(and(eq(usersTable.id, userId)))
-  //     .limit(1);
-
-  // return result[0];
 }
 
 export async function getActivityLogs() {

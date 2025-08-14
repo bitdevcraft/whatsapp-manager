@@ -4,7 +4,6 @@ import { contactsTable, NewContact } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/index";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import { revalidateTag } from "next/cache";
-import { NextResponse } from "next/server";
 
 export async function GET() {
   const result = await getContacts();

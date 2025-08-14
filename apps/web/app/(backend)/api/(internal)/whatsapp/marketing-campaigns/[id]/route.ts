@@ -1,7 +1,6 @@
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db/config";
-import { marketingCampaignsTable, templatesTable } from "@workspace/db/schema";
+import { marketingCampaignsTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
@@ -44,6 +43,7 @@ export async function GET(
       }
     );
     return new Response(JSON.stringify(data), { status: 200 });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new Response("", { status: 400 });
   }
@@ -120,6 +120,7 @@ export async function POST(
     return new Response(JSON.stringify(result), {
       status: RESPONSE_CODE.SUCCESS,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return new Response("", {
       status: RESPONSE_CODE.BAD_REQUEST,

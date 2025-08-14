@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Button } from "@workspace/ui/components/button";
-import axios from "axios";
 import { useEffect, useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -36,7 +35,7 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
     null
   );
 
-  const { form, nextStep, isStepValid, prevStep } =
+  const { form, nextStep, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
 
   // Memoize transformed default values
@@ -54,6 +53,7 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
     const templateId = form.getValues().template.template;
 
     if (templateId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const match = templates.templates.find((t: any) => t.id === templateId);
       setSelectedTemplate(match ?? null);
     }

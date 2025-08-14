@@ -1,9 +1,9 @@
 import { integer, pgEnum, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
-import { timestamps } from "../helpers/column-helper";
+
 import { enumToValues } from "../enums/enum-helper";
-import { relations } from "drizzle-orm";
-import { teamsTable } from "./teams";
+import { timestamps } from "../helpers/column-helper";
 import { baseIdModel } from "./abstract/baseIdModel";
+import { teamsTable } from "./teams";
 
 export enum FileLocation {
   "AWS" = "aws_s3",
@@ -17,9 +17,9 @@ export const fileLocationEnum = pgEnum(
 
 export const fileAttachmentsTable = pgTable("file_attachment", {
   ...baseIdModel,
+  expiresIn: timestamp("expires_in"),
   fileLocation: fileLocationEnum(),
   fileSize: integer("file_size"),
-  expiresIn: timestamp("expires_in"),
   teamId: uuid("team_id")
     .notNull()
     .references(() => teamsTable.id),

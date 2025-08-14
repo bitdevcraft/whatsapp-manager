@@ -1,9 +1,7 @@
 import { getTemplates } from "@/features/whatsapp/templates/get-template";
-import { db } from "@workspace/db/config";
 import { NextRequest, NextResponse } from "next/server";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { templatesTable } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { getUserWithTeam } from "@/lib/db/queries";
 import type { TemplateResponse } from "@workspace/wa-cloud-api";
@@ -44,6 +42,8 @@ export async function GET(request: NextRequest) {
     const result = await getTemplates(!!sync);
 
     revalidateTag(`templates:select:${userWithTeam?.teamId}`);
+    revalidateTag(`templates:${userWithTeam?.teamId}`);
+
     return new NextResponse(JSON.stringify(result), {
       status: 200,
       headers: {
@@ -96,7 +96,8 @@ export async function POST(request: NextRequest) {
         name: string;
         category: string;
       };
-    } catch (parseError) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
       return new NextResponse(
         JSON.stringify({
           error: "Invalid request body",

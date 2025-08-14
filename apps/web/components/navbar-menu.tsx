@@ -11,7 +11,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@workspace/ui/components/navigation-menu";
 import { cn } from "@workspace/ui/lib/utils";
 

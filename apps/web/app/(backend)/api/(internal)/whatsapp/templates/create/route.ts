@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     const response = await whatsapp.templates.createTemplate(body);
 
-    return new Response("", { status: 200 });
+    return new Response(JSON.stringify(response), { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(JSON.stringify({ errors: error.flatten() }), {
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     // 5. Log & return generic 500
     console.error("POST /api/posts error:", error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    return new Response(JSON.stringify({ error }), {
       status: 500,
     });
   }

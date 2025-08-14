@@ -1,14 +1,11 @@
 import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
 import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { db } from "@workspace/db/config";
 import {
   marketingCampaignsTable,
   NewMarketingCampaign,
-  templatesTable,
 } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { IJobMessageOutgoing, WhatsAppEvents } from "@workspace/shared";
 import { revalidateTag } from "next/cache";
@@ -91,6 +88,7 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify(result), {
       status: RESPONSE_CODE.SUCCESS,
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return new Response("", { status: RESPONSE_CODE.BAD_REQUEST });
   }

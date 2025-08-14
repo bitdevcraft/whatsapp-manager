@@ -29,7 +29,7 @@ export default function TagsTable({ promises }: TagTableProps) {
     setTitle("Tags");
   }, [setTitle]);
 
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags();
+  const { enableAdvancedFilter } = useFeatureFlags();
 
   const [{ data, pageCount }] = React.use(promises);
 

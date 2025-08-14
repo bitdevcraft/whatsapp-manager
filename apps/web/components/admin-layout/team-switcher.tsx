@@ -19,8 +19,7 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Organization } from "better-auth/plugins/organization";
-import { authClient } from "@/lib/auth/auth-client";
-import { useOrganization } from "../organization-provider";
+import { useOrganization } from "../provider/organization-provider";
 import { Badge } from "@workspace/ui/components/badge";
 import { useRouter } from "next/navigation";
 

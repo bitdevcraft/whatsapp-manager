@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -90,7 +91,10 @@ export function ComponentParametersArray({
       );
 
       field.onChange(response.data.id);
-    } catch (error) {}
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      /* empty */
+    }
   };
 
   // ✅ Watch all types at once outside the loop
@@ -152,67 +156,94 @@ export function ComponentParametersArray({
             {(type === ParametersTypesEnum.Image ||
               type === ParametersTypesEnum.Video ||
               type === ParametersTypesEnum.Document) && (
-              <FormField
-                control={control}
-                name={`${name}.${i}.${String(type).toLowerCase()}.id`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Text</FormLabel>
-                    <FormControl>
-                      {/* <Input {...field} placeholder="Enter text" /> */}
-
-                      <FileUpload
-                        {...field}
-                        maxSize={5 * 1024 * 1024}
-                        className="w-full max-w-md mx-auto"
-                        value={Object.values(fileRecord)}
-                        onValueChange={(files) => onFileUpload(files, field)}
-                        onFileReject={onFileReject}
-                      >
-                        <FileUploadDropzone>
-                          <div className="flex flex-col items-center gap-1 text-center">
-                            <div className="flex items-center justify-center rounded-full border p-2.5">
-                              <Upload className="size-6 text-muted-foreground" />
+              <>
+                <FormField
+                  control={control}
+                  name={`${name}.${i}.${String(type).toLowerCase()}.id`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Text</FormLabel>
+                      <FormControl>
+                        {/* <Input {...field} placeholder="Enter text" /> */}
+                        <FileUpload
+                          {...field}
+                          maxSize={5 * 1024 * 1024}
+                          className="w-full max-w-md mx-auto"
+                          value={Object.values(fileRecord)}
+                          onValueChange={(files) => onFileUpload(files, field)}
+                          onFileReject={onFileReject}
+                        >
+                          <FileUploadDropzone>
+                            <div className="flex flex-col items-center gap-1 text-center">
+                              <div className="flex items-center justify-center rounded-full border p-2.5">
+                                <Upload className="size-6 text-muted-foreground" />
+                              </div>
+                              <p className="font-medium text-sm">
+                                Drag & drop files here
+                              </p>
+                              <p className="text-muted-foreground text-xs">
+                                Or click to browse (max 2 files, up to 5MB each)
+                              </p>
                             </div>
-                            <p className="font-medium text-sm">
-                              Drag & drop files here
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              Or click to browse (max 2 files, up to 5MB each)
-                            </p>
-                          </div>
-                          <FileUploadTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-2 w-fit"
-                            >
-                              Browse files
-                            </Button>
-                          </FileUploadTrigger>
-                        </FileUploadDropzone>
-                        <FileUploadList>
-                          {Object.values(fileRecord).map((file, index) => (
-                            <FileUploadItem key={index} value={file}>
-                              <FileUploadItemPreview />
-                              <FileUploadItemMetadata />
-                              <FileUploadItemDelete asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-7"
-                                >
-                                  <X />
-                                </Button>
-                              </FileUploadItemDelete>
-                            </FileUploadItem>
-                          ))}
-                        </FileUploadList>
-                      </FileUpload>
-                    </FormControl>
-                  </FormItem>
+                            <FileUploadTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 w-fit"
+                              >
+                                Browse files
+                              </Button>
+                            </FileUploadTrigger>
+                          </FileUploadDropzone>
+                          <FileUploadList>
+                            {Object.values(fileRecord).map((file, index) => (
+                              <FileUploadItem key={index} value={file}>
+                                <FileUploadItemPreview />
+                                <FileUploadItemMetadata />
+                                <FileUploadItemDelete asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7"
+                                  >
+                                    <X />
+                                  </Button>
+                                </FileUploadItemDelete>
+                              </FileUploadItem>
+                            ))}
+                          </FileUploadList>
+                        </FileUpload>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name={`${name}.${i}.${String(type).toLowerCase()}.caption`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Caption</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                {type === ParametersTypesEnum.Document && (
+                  <FormField
+                    control={control}
+                    name={`${name}.${i}.${String(type).toLowerCase()}.filename`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>FileName</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </>
             )}
 
             {type === ParametersTypesEnum.Currency && (
