@@ -2,8 +2,9 @@ import Stripe from "stripe";
 import { handleSubscriptionChange, stripe } from "@/lib/payments/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { env } from "@/env/server";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
   const payload = await request.text();

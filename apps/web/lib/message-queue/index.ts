@@ -1,10 +1,11 @@
+import { env } from "@/env/server";
 import { Queue, JobsOptions } from "bullmq";
 
 // 1) Redis connection options (must have maxRetriesPerRequest=null)
 const redisOptions = {
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
+  host: env.REDIS_HOST,
+  port: Number(env.REDIS_PORT),
+  password: env.REDIS_PASSWORD,
   maxRetriesPerRequest: null,
 };
 

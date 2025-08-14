@@ -26,6 +26,7 @@ import axios from "axios";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
+import { env } from "@/env/server";
 
 export async function GET() {
   const userWithTeam = await getUserWithTeam();
@@ -93,8 +94,8 @@ export async function POST(request: Request) {
     const response = await axios.post<EmbedSignUpExchangeToken>(
       url,
       {
-        client_id: process.env.META_APP_ID,
-        client_secret: process.env.META_CLIENT_SECRET,
+        client_id: env.M4D_APP_ID,
+        client_secret: env.META_CLIENT_SECRET,
         code: code,
         grant_type: "authorization_code",
       },
@@ -104,7 +105,6 @@ export async function POST(request: Request) {
     );
 
     const config = {
-      // accessToken: process.env.WHATSAPP_API_ACCESS_TOKEN!,
       accessToken: response.data.access_token,
       phoneNumberId: Number(business.phone_number_id),
       businessAcctId: business.waba_id,

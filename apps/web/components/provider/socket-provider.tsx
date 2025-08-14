@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/env/client";
 import { SocketEventPayloads } from "@workspace/shared";
 import React, {
   createContext,
@@ -35,7 +36,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
 
   useEffect(() => {
     const socketInstance: Socket<SocketEventPayloads> = io(
-      process.env.NEXT_PUBLIC_WEB_SOCKET,
+      env.NEXT_PUBLIC_WEB_SOCKET,
       {
         path: "/socket.io",
         query: {
