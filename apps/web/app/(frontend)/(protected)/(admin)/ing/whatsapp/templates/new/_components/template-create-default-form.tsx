@@ -2,7 +2,12 @@
 "use client";
 
 import * as React from "react";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  useWatch,
+  useFormContext,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DevTool } from "@hookform/devtools";
 import { useMutation } from "@tanstack/react-query";
@@ -490,7 +495,6 @@ export default function TemplateCreateForm({
               {componentsFA.fields.map((comp, idx) => (
                 <ComponentItem
                   key={comp.id}
-                  control={control}
                   index={idx}
                   parameterFormat={parameterFormat}
                   syncExamples={syncExamples}
@@ -517,12 +521,10 @@ export default function TemplateCreateForm({
 }
 
 function ComponentItem({
-  control,
   index,
   parameterFormat,
   syncExamples,
 }: {
-  control: any;
   index: number;
   parameterFormat: "POSITIONAL" | "NAMED";
   syncExamples: (opts?: {
@@ -530,6 +532,8 @@ function ComponentItem({
     bodyTextOverride?: string;
   }) => void;
 }) {
+  const { control } = useFormContext();
+
   const type = useWatch({
     control,
     name: `components.${index}.type` as const,
@@ -553,28 +557,23 @@ function ComponentItem({
       {type === "BODY" && (
         <>
           <BodyEditor
-            control={control}
             index={index}
             parameterFormat={parameterFormat}
             syncExamples={syncExamples}
           />
-          <BodyAutoExamples
-            control={control}
-            index={index}
-            parameterFormat={parameterFormat}
-          />
+          <BodyAutoExamples index={index} parameterFormat={parameterFormat} />
         </>
       )}
 
       {type === "FOOTER" && (
         <>
-          <FooterEditor control={control} index={index} />
+          <FooterEditor index={index} />
         </>
       )}
 
       {type === "BUTTONS" && (
         <>
-          <ButtonsArray control={control} index={index} />
+          <ButtonsArray index={index} />
         </>
       )}
     </div>

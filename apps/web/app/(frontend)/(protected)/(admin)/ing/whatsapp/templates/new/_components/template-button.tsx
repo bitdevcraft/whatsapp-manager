@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -19,15 +21,13 @@ import {
 } from "@workspace/ui/components/select";
 
 export function ButtonsArray({
-  control,
   prefix,
   index,
 }: {
-  control: any;
   prefix?: string;
   index: number;
 }) {
-  const { trigger } = useFormContext(); // ✅ revalidation hook
+  const { trigger, control } = useFormContext(); // ✅ revalidation hook
 
   const base = prefix
     ? (`${prefix}.components.${index}` as const)
@@ -80,7 +80,6 @@ export function ButtonsArray({
         {fa.fields.map((f, i) => (
           <ButtonRow
             key={f.id}
-            control={control}
             base={base}
             index={i}
             total={fa.fields.length}
@@ -94,21 +93,19 @@ export function ButtonsArray({
 }
 
 function ButtonRow({
-  control,
   base,
   index,
   total,
   remove,
   types,
 }: {
-  control: any;
   base: string;
   index: number;
   total: number;
   remove: () => void;
   types: readonly ["QUICK_REPLY", "URL", "PHONE_NUMBER"];
 }) {
-  const { setValue, trigger } = useFormContext();
+  const { setValue, trigger, control } = useFormContext();
 
   const typePath = `${base}.buttons.${index}.type` as const;
   const typeValue = useWatch({ control, name: typePath }) as

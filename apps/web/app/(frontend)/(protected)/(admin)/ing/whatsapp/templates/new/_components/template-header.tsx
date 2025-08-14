@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWatch } from "react-hook-form";
 import { HeaderEditor } from "./template-header-editor";
 import { HeaderAutoExamples } from "./template-header-examples";
@@ -29,27 +30,19 @@ export function HeaderField({
         <div className="text-sm font-medium">HEADER</div>
       </div>
 
-      <HeaderFormatOption control={control} index={index} />
+      <HeaderFormatOption index={index} />
 
       {format === "TEXT" && (
         <HeaderEditor
-          control={control}
           index={index}
           parameterFormat={parameterFormat}
           syncExamples={syncExamples}
         />
       )}
       {format === "IMAGE" && (
-        <HeaderFileField
-          control={control}
-          name={`components.${index}.example.header_handle.0`}
-        />
+        <HeaderFileField name={`components.${index}.example.header_handle.0`} />
       )}
-      <HeaderAutoExamples
-        control={control}
-        index={index}
-        parameterFormat={parameterFormat}
-      />
+      <HeaderAutoExamples index={index} parameterFormat={parameterFormat} />
     </div>
   );
 }

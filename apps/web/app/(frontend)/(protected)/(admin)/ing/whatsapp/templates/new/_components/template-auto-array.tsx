@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FormField,
   FormItem,
@@ -7,16 +9,17 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
+import { useFormContext } from "react-hook-form";
 
 export function AutoArrayInputs({
-  control,
   baseName,
   label,
 }: {
-  control: any;
   baseName: string;
   label: string;
 }) {
+  const { control } = useFormContext();
+
   const [len, setLen] = React.useState(0);
   React.useEffect(() => {
     const v = control._formValues;

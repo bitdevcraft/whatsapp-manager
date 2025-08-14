@@ -12,16 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { useFormContext } from "react-hook-form";
 
 const headerFormatOptions = ["TEXT", "IMAGE"] as const;
 
-export function HeaderFormatOption({
-  control,
-  index,
-}: {
-  control: any;
-  index: number;
-}) {
+export function HeaderFormatOption({ index }: { index: number }) {
+  const { control } = useFormContext();
+
   return (
     <FormField
       control={control}

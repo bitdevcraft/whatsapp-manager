@@ -10,20 +10,20 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
 import { toast } from "sonner";
-import type { ControllerRenderProps } from "react-hook-form";
+import { useFormContext, type ControllerRenderProps } from "react-hook-form";
 import { insertAtCursor } from "../_lib/utils";
 
 export function HeaderEditor({
-  control,
   index,
   parameterFormat,
   syncExamples,
 }: {
-  control: any;
   index: number;
   parameterFormat: "POSITIONAL" | "NAMED";
   syncExamples: (opts?: { headerTextOverride?: string }) => void;
 }) {
+  const { control } = useFormContext();
+
   return (
     <FormField
       control={control}

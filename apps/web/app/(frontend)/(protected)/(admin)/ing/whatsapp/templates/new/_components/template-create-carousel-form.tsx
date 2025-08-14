@@ -310,7 +310,6 @@ export default function TemplateCreateForm({
             {componentsFA.fields.map((comp, idx) => (
               <ComponentItem
                 key={comp.id}
-                control={control}
                 index={idx}
                 parameterFormat={parameterFormat}
                 syncExamples={syncExamples}
@@ -332,16 +331,16 @@ export default function TemplateCreateForm({
  * --------------------------- */
 
 function ComponentItem({
-  control,
   index,
   parameterFormat,
   syncExamples,
 }: {
-  control: any;
   index: number;
   parameterFormat: "POSITIONAL" | "NAMED";
   syncExamples: (opts?: { bodyTextOverride?: string }) => void;
 }) {
+  const { control } = useFormContext();
+
   const type = useWatch({
     control,
     name: `components.${index}.type` as const,
@@ -356,22 +355,15 @@ function ComponentItem({
       {type === "BODY" && (
         <>
           <BodyEditor
-            control={control}
             index={index}
             parameterFormat={parameterFormat}
             syncExamples={syncExamples}
           />
-          <BodyAutoExamples
-            control={control}
-            index={index}
-            parameterFormat={parameterFormat}
-          />
+          <BodyAutoExamples index={index} parameterFormat={parameterFormat} />
         </>
       )}
 
-      {type === "CAROUSEL" && (
-        <CarouselArray control={control} compIndex={index} />
-      )}
+      {type === "CAROUSEL" && <CarouselArray compIndex={index} />}
     </div>
   );
 }
@@ -380,14 +372,9 @@ function ComponentItem({
  * Carousel: Cards & Components
  * --------------------------- */
 
-function CarouselArray({
-  control,
-  compIndex,
-}: {
-  control: any;
-  compIndex: number;
-}) {
-  const { getValues, trigger } = useFormContext<TemplateCarouselCreateValue>();
+function CarouselArray({ compIndex }: { compIndex: number }) {
+  const { getValues, trigger, control } =
+    useFormContext<TemplateCarouselCreateValue>();
 
   const fa = useFieldArray({
     control,
@@ -540,7 +527,6 @@ function CardComponentRenderer({
   if (type === "HEADER") {
     return (
       <HeaderFileField
-        control={control}
         name={`components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.example.header_handle.0`}
       />
     );
@@ -549,7 +535,6 @@ function CardComponentRenderer({
   if (type === "BUTTONS") {
     return (
       <ButtonsArray
-        control={control}
         prefix={`components.${compIndex}.cards.${cardIndex}`}
         index={cardCompIndex}
       />

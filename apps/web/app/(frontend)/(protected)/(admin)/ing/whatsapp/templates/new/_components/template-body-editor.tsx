@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Button } from "@workspace/ui/components/button";
@@ -10,20 +11,20 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
-import type { ControllerRenderProps } from "react-hook-form";
+import { useFormContext, type ControllerRenderProps } from "react-hook-form";
 import { nextPositionalIndex, insertAtCursor } from "../_lib/utils";
 
 export function BodyEditor({
-  control,
   index,
   parameterFormat,
   syncExamples,
 }: {
-  control: any;
   index: number;
   parameterFormat: "POSITIONAL" | "NAMED";
   syncExamples: (opts?: { bodyTextOverride?: string }) => void;
 }) {
+  const { control } = useFormContext();
+
   return (
     <FormField
       control={control}

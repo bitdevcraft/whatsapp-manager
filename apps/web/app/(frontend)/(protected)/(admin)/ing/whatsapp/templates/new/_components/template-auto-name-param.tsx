@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FormField,
@@ -7,17 +9,17 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useWatch } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 export function AutoNamedParamsInputs({
-  control,
   baseName,
   label,
 }: {
-  control: any;
   baseName: string; // e.g. components.X.example.body_text_named_params
   label: string;
 }) {
+  const { control } = useFormContext();
+
   const params = useWatch({
     control,
     name: baseName as any,

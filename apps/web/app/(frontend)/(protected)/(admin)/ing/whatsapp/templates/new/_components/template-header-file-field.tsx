@@ -20,14 +20,11 @@ import {
 import { Upload } from "lucide-react";
 import React from "react";
 import { onHeaderFileUpload, onFileReject } from "../_lib/upload-helpers";
+import { useFormContext } from "react-hook-form";
 
-export function HeaderFileField({
-  control,
-  name,
-}: {
-  control: any;
-  name: string;
-}) {
+export function HeaderFileField({ name }: { name: string }) {
+  const { control } = useFormContext();
+
   const [files, setFiles] = React.useState<File[]>([]);
 
   return (

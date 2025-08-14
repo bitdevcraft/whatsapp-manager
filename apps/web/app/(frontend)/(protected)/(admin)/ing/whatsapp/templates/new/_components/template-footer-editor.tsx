@@ -7,14 +7,11 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { useFormContext } from "react-hook-form";
 
-export function FooterEditor({
-  control,
-  index,
-}: {
-  control: any;
-  index: number;
-}) {
+export function FooterEditor({ index }: { index: number }) {
+  const { control } = useFormContext();
+
   return (
     <FormField
       control={control}
