@@ -8,14 +8,18 @@ import {
   useWatch,
   Controller,
   ControllerRenderProps,
+  FieldValues,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DevTool } from "@hookform/devtools";
 import { useMutation } from "@tanstack/react-query";
 import {
+  TemplateCarouselCreateSchema,
+  TemplateCarouselCreateValue,
   TemplateCreateSchema,
   type TemplateCreateValue,
   defaultValue,
+  templateCarouselDefault,
 } from "../_lib/validation";
 
 import {
@@ -48,7 +52,7 @@ import {
   FileUploadList,
   FileUploadTrigger,
 } from "@workspace/ui/components/data-importer/file-upload";
-import { Upload, X } from "lucide-react";
+import { Trash, Upload, X } from "lucide-react";
 import { pruneObject } from "@/utils/prune";
 import { clean } from "better-auth/react";
 
@@ -118,11 +122,11 @@ function insertAtCursor(
 export default function TemplateCreateForm({
   initialValues,
 }: {
-  initialValues?: Partial<TemplateCreateValue>;
+  initialValues?: Partial<TemplateCarouselCreateValue>;
 }) {
-  const form = useForm<TemplateCreateValue>({
-    resolver: zodResolver(TemplateCreateSchema),
-    defaultValues: { ...defaultValue, ...initialValues },
+  const form = useForm<TemplateCarouselCreateValue>({
+    resolver: zodResolver(TemplateCarouselCreateSchema),
+    defaultValues: { ...templateCarouselDefault, ...initialValues },
     mode: "onChange",
   });
 
@@ -148,24 +152,7 @@ export default function TemplateCreateForm({
 
   // Watchers for auto-examples
   const parameterFormat = watch("parameter_format");
-  const headerIdx = findIndexByType("HEADER");
   const bodyIdx = findIndexByType("BODY");
-
-  const headerFormat = useWatch({
-    control,
-    name:
-      headerIdx >= 0
-        ? (`components.${headerIdx}.format` as any)
-        : (undefined as any),
-  }) as "TEXT" | "IMAGE" | undefined;
-
-  const headerText = useWatch({
-    control,
-    name:
-      headerIdx >= 0
-        ? (`components.${headerIdx}.text` as any)
-        : (undefined as any),
-  }) as string | undefined;
 
   const bodyText = useWatch({
     control,
@@ -185,34 +172,13 @@ export default function TemplateCreateForm({
    * syncExamples — instant updates
    * --------------------------- */
   const syncExamples = React.useCallback(
-    ({
-      headerTextOverride,
-      bodyTextOverride,
-    }: { headerTextOverride?: string; bodyTextOverride?: string } = {}) => {
-      const hIdx = findIndexByType("HEADER");
+    ({ bodyTextOverride }: { bodyTextOverride?: string } = {}) => {
       const bIdx = findIndexByType("BODY");
-      if (hIdx < 0 || bIdx < 0) return;
+      if (bIdx < 0) return;
 
       const pf = getValues("parameter_format");
-      const hFormat = getValues(`components.${hIdx}.format`) as
-        | "TEXT"
-        | "IMAGE"
-        | undefined;
 
-      const hText = headerTextOverride ?? getValues(`components.${hIdx}.text`);
       const bText = bodyTextOverride ?? getValues(`components.${bIdx}.text`);
-
-      // Clear non-applicable branches first
-      if (hFormat !== "TEXT") {
-        setValue(`components.${hIdx}.example.header_text`, undefined, {
-          shouldDirty: true,
-        });
-        setValue(
-          `components.${hIdx}.example.header_text_named_params`,
-          undefined,
-          { shouldDirty: true }
-        );
-      }
 
       setValue(`components.${bIdx}.example.body_text`, undefined, {
         shouldDirty: true,
@@ -222,29 +188,6 @@ export default function TemplateCreateForm({
       });
 
       if (pf === "POSITIONAL") {
-        // HEADER positional (only if TEXT)
-        if (hFormat === "TEXT") {
-          const nums = parsePositional(hText);
-          const current = getValues(
-            `components.${hIdx}.example.header_text`
-          ) as string[] | undefined;
-          const next =
-            nums.length === 0
-              ? undefined
-              : Array.from(
-                  { length: nums.length },
-                  (_, i) => current?.[i] ?? ""
-                );
-          setValue(`components.${hIdx}.example.header_text`, next, {
-            shouldDirty: true,
-          });
-          setValue(
-            `components.${hIdx}.example.header_text_named_params`,
-            undefined,
-            { shouldDirty: true }
-          );
-        }
-
         // BODY positional → one row: [["", "", ...]]
         const numsB = parsePositional(bText);
         const currentB = getValues(`components.${bIdx}.example.body_text`) as
@@ -269,30 +212,6 @@ export default function TemplateCreateForm({
           { shouldDirty: true }
         );
       } else {
-        // NAMED
-        if (hFormat === "TEXT") {
-          const names = parseNamed(hText);
-          const current = (getValues(
-            `components.${hIdx}.example.header_text_named_params`
-          ) || []) as Array<{ param_name: string; example: string }>;
-          const map = new Map(current.map((o) => [o.param_name, o.example]));
-          const next =
-            names.length === 0
-              ? undefined
-              : names.map((n) => ({
-                  param_name: n,
-                  example: map.get(n) ?? "",
-                }));
-          setValue(
-            `components.${hIdx}.example.header_text_named_params`,
-            next,
-            { shouldDirty: true }
-          );
-          setValue(`components.${hIdx}.example.header_text`, undefined, {
-            shouldDirty: true,
-          });
-        }
-
         const namesB = parseNamed(bText);
         const currentB = (getValues(
           `components.${bIdx}.example.body_text_named_params`
@@ -362,86 +281,17 @@ export default function TemplateCreateForm({
 
   // Keep effect as a safety net for format changes, plus header single-var rule
   React.useEffect(() => {
-    // If header isn't TEXT, clear header examples
-    if (headerIdx >= 0 && headerFormat !== "TEXT") {
-      setValue(`components.${headerIdx}.example.header_text`, undefined, {
-        shouldDirty: true,
-      });
-      setValue(
-        `components.${headerIdx}.example.header_text_named_params`,
-        undefined,
-        { shouldDirty: true }
-      );
-    }
-
-    // Enforce: only 1 {{...}} in header
-    if (
-      headerIdx >= 0 &&
-      headerFormat === "TEXT" &&
-      typeof headerText === "string"
-    ) {
-      const all = headerText.match(/\{\{[^{}\n]*\}\}/g) || [];
-      if (all.length > 1) {
-        const last = all[all.length - 1]!;
-        const lastIndex = headerText.lastIndexOf(last);
-        if (lastIndex >= 0) {
-          const fixed =
-            headerText.slice(0, lastIndex) +
-            headerText.slice(lastIndex + last.length);
-          setValue(`components.${headerIdx}.text`, fixed, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          toast.warning(
-            "Only one {{…}} variable allowed in header. Removed the extra one."
-          );
-        }
-      }
-    }
-
-    // Sync based on current values (handles parameter_format / format changes)
     syncExamples();
-  }, [
-    parameterFormat,
-    headerFormat,
-    headerText,
-    bodyText,
-    headerIdx,
-    bodyIdx,
-    setValue,
-    syncExamples,
-  ]);
+  }, [syncExamples]);
 
   const mutation = useMutation({
-    mutationFn: async (payload: TemplateCreateValue) => {
+    mutationFn: async (payload: TemplateCarouselCreateValue) => {
       const cleanPayload = pruneObject(payload, {
         removeEmptyObjects: true,
         removeEmptyArrays: true,
         removeEmptyStrings: true,
         trimStrings: true,
       });
-
-      const indexOfType = (type: string) =>
-        cleanPayload.components.findIndex((c) => c.type === type);
-
-      const hIdx = indexOfType("HEADER");
-
-      if (
-        hIdx !== -1 &&
-        !Object.hasOwn(cleanPayload.components[hIdx]!, "text") &&
-        !Object.hasOwn(cleanPayload.components[hIdx]!, "example")
-      ) {
-        cleanPayload.components.splice(hIdx, 1);
-      }
-
-      const fIdx = indexOfType("FOOTER");
-
-      if (
-        fIdx !== -1 &&
-        !Object.hasOwn(cleanPayload.components[fIdx]!, "text")
-      ) {
-        cleanPayload.components.splice(fIdx, 1);
-      }
 
       const result = await axios.post(
         "/api/whatsapp/templates/create",
@@ -464,7 +314,8 @@ export default function TemplateCreateForm({
     },
   });
 
-  const onSubmit = (values: TemplateCreateValue) => mutation.mutate(values);
+  const onSubmit = (values: TemplateCarouselCreateValue) =>
+    mutation.mutate(values);
 
   const categoryOptions = ["MARKETING", "UTILITY", "AUTHENTICATION"] as const;
   const parameterFormatOptions = ["POSITIONAL", "NAMED"] as const;
@@ -605,7 +456,8 @@ export default function TemplateCreateForm({
                   | "HEADER"
                   | "BODY"
                   | "FOOTER"
-                  | "BUTTONS";
+                  | "BUTTONS"
+                  | "CAROUSEL";
                 return (
                   <div
                     key={comp.id}
@@ -624,218 +476,7 @@ export default function TemplateCreateForm({
                         </Button>
                       )}
                     </div>
-                    {/* HEADER */}
-                    {type === "HEADER" && (
-                      <>
-                        <Controller
-                          control={control}
-                          name={`components.${idx}.format`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Header Format</FormLabel>
-                              <FormControl>
-                                <Select
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select format" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {headerFormatOptions.map((opt) => (
-                                      <SelectItem key={opt} value={opt}>
-                                        {opt}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        {watch(`components.${idx}.format`) === "TEXT" && (
-                          <FormField
-                            control={control}
-                            name={`components.${idx}.text`}
-                            render={({ field }) => {
-                              const inputRef =
-                                // eslint-disable-next-line react-hooks/rules-of-hooks
-                                React.useRef<HTMLInputElement>(null);
-                              const onAddVariable = () => {
-                                const pf = parameterFormat;
-                                const current = String(field.value ?? "");
-                                // Header rule: only ONE variable allowed
-                                const allVars =
-                                  current.match(/\{\{[^{}\n]*}}/g) || [];
-                                if (allVars.length >= 1) {
-                                  toast.warning(
-                                    "Header can contain only one variable."
-                                  );
-                                  return;
-                                }
-                                if (pf === "POSITIONAL") {
-                                  const insertion = `{{1}}`;
-                                  const next = insertAtCursor(
-                                    inputRef.current,
-                                    current,
-                                    insertion
-                                  );
-                                  field.onChange(next);
-                                  syncExamples({ headerTextOverride: next }); // instant
-                                  return;
-                                }
-                                // NAMED → insert {{}} and place cursor inside braces
-                                const insertion = `{{}}`;
-                                const start =
-                                  (inputRef.current?.selectionStart ??
-                                    String(current).length) + 2;
-                                const next = insertAtCursor(
-                                  inputRef.current,
-                                  current,
-                                  insertion,
-                                  start
-                                );
-                                field.onChange(next);
-                                syncExamples({ headerTextOverride: next }); // instant
-                              };
-                              return (
-                                <FormItem>
-                                  <FormLabel>Header Text</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      ref={(el) => {
-                                        field.ref(el);
-                                        inputRef.current = el;
-                                      }}
-                                      placeholder="e.g. Hello {{1}} or Hello {{name}}"
-                                      onChange={(e) => {
-                                        let val = e.target.value as string;
-                                        // enforce "only one variable"
-                                        const allVars =
-                                          val.match(/\{\{[^{}\n]*}}/g) || [];
-                                        if (allVars.length > 1) {
-                                          const last =
-                                            allVars[allVars.length - 1]!;
-                                          const lastIndex =
-                                            val.lastIndexOf(last);
-                                          if (lastIndex >= 0) {
-                                            val =
-                                              val.slice(0, lastIndex) +
-                                              val.slice(
-                                                lastIndex + last.length
-                                              );
-                                            toast.warning(
-                                              "Only one {{…}} variable allowed in header. Removed the extra one."
-                                            );
-                                          }
-                                        }
-                                        field.onChange(val);
-                                        syncExamples({
-                                          headerTextOverride: val,
-                                        }); // instant
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div className="mt-1 flex justify-end">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={onAddVariable}
-                                      className="border"
-                                    >
-                                      Add Variable
-                                    </Button>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        )}
-                        {watch(`components.${idx}.format`) === "IMAGE" && (
-                          <FormField
-                            control={control}
-                            name={`components.${idx}.example.header_handle.0`}
-                            render={({ field }) => {
-                              return (
-                                <FormItem>
-                                  <FormLabel>Image</FormLabel>
-                                  <FormControl>
-                                    {/* <Input {...field} placeholder="Enter text" /> */}
-                                    <FileUpload
-                                      {...field}
-                                      maxSize={5 * 1024 * 1024}
-                                      className="w-full max-w-md mx-auto"
-                                      value={Object.values(fileRecord)}
-                                      onValueChange={(files) =>
-                                        onFileUpload(files, field)
-                                      }
-                                      onFileReject={onFileReject}
-                                    >
-                                      <FileUploadDropzone>
-                                        <div className="flex flex-col items-center gap-1 text-center">
-                                          <div className="flex items-center justify-center rounded-full border p-2.5">
-                                            <Upload className="size-6 text-muted-foreground" />
-                                          </div>
-                                          <p className="font-medium text-sm">
-                                            Drag & drop files here
-                                          </p>
-                                          <p className="text-muted-foreground text-xs">
-                                            Or click to browse (max 2 files, up
-                                            to 5MB each)
-                                          </p>
-                                        </div>
-                                        <FileUploadTrigger asChild>
-                                          <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="mt-2 w-fit"
-                                          >
-                                            Browse files
-                                          </Button>
-                                        </FileUploadTrigger>
-                                      </FileUploadDropzone>
-                                      <FileUploadList>
-                                        {Object.values(fileRecord).map(
-                                          (file, index) => (
-                                            <FileUploadItem
-                                              key={index}
-                                              value={file}
-                                            >
-                                              <FileUploadItemPreview />
-                                              <FileUploadItemMetadata />
-                                              <FileUploadItemDelete asChild>
-                                                <Button
-                                                  variant="ghost"
-                                                  size="icon"
-                                                  className="size-7"
-                                                >
-                                                  <X />
-                                                </Button>
-                                              </FileUploadItemDelete>
-                                            </FileUploadItem>
-                                          )
-                                        )}
-                                      </FileUploadList>
-                                    </FileUpload>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        )}
-                        {/* Auto examples (read-only structure, editable values) */}
-                        <HeaderAutoExamples
-                          control={control}
-                          index={idx}
-                          parameterFormat={parameterFormat}
-                        />
-                      </>
-                    )}
+
                     {/* BODY */}
                     {type === "BODY" && (
                       <>
@@ -916,37 +557,13 @@ export default function TemplateCreateForm({
                         />
                       </>
                     )}
-                    {/* FOOTER */}
-                    {type === "FOOTER" && (
-                      <FormField
-                        control={control}
-                        name={`components.${idx}.text`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Footer Text</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Footer text" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                    {/* BUTTONS */}
-                    {type === "BUTTONS" && (
-                      <ButtonsArray control={control} compIndex={idx} />
+
+                    {type === "CAROUSEL" && (
+                      <CarouselArray control={control} compIndex={idx} />
                     )}
                   </div>
                 );
               })}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {/* Only Buttons can be added */}
-              {!hasButtons && (
-                <Button type="button" variant="secondary" onClick={addButtons}>
-                  Add Buttons
-                </Button>
-              )}
             </div>
           </div>
           <Button type="submit" disabled={mutation.isPending}>
@@ -1180,10 +797,13 @@ function AutoNamedParamsInputs({
   );
 }
 
-/* -----------------------------
- * Buttons array (manual add/remove OK)
- * --------------------------- */
-function ButtonsArray({
+/**
+ * Carousel Array
+ * @param param0
+ * @returns
+ */
+
+function CarouselArray({
   control,
   compIndex,
 }: {
@@ -1192,7 +812,243 @@ function ButtonsArray({
 }) {
   const fa = useFieldArray({
     control,
-    name: `components.${compIndex}.buttons`,
+    name: `components.${compIndex}.cards`,
+  });
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Cards</span>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() =>
+            fa.append({
+              components: [
+                {
+                  type: "HEADER",
+                  format: "IMAGE",
+                  example: {
+                    header_handle: [""],
+                  },
+                },
+                { type: "BUTTONS", buttons: [] },
+              ],
+            })
+          }
+        >
+          Add Card
+        </Button>
+      </div>
+
+      {fa.fields.length === 0 && (
+        <p className="text-xs text-muted-foreground">No Carousel.</p>
+      )}
+      <div className="space-y-3">
+        {fa.fields.map((f, idx) => {
+          return (
+            <div key={idx} className="border p-2 rounded relative">
+              <CarouseComponentArray
+                control={control}
+                compIndex={compIndex}
+                cardIndex={idx}
+              />
+              <div className="absolute top-2 right-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => fa.remove(idx)}
+                  size="sm"
+                >
+                  <Trash />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CarouseComponentArray({
+  control,
+  compIndex,
+  cardIndex,
+}: {
+  control: any;
+  compIndex: number;
+  cardIndex: number;
+}) {
+  const prefix = `components.${compIndex}.cards.${cardIndex}.components`;
+  const [fileRecord, setFileRecord] = React.useState<Record<string, File>>({});
+
+  const fa = useFieldArray({
+    control,
+    name: prefix,
+  });
+
+  const onFileReject = React.useCallback((file: File, message: string) => {
+    toast(message, {
+      description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`,
+    });
+  }, []);
+
+  const onFileUpload = async (
+    data: File[],
+    field: ControllerRenderProps<
+      FieldValues,
+      `components.${number}.cards.${number}.components.${number}.example.header_handle.${number}`
+    >
+  ) => {
+    const file = data[0];
+    if (!file) return;
+
+    setFileRecord((prev) => ({
+      ...prev,
+      [field.name]: file,
+    }));
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await axios.post(`/api/whatsapp/files`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const { h } = response.data;
+
+      field.onChange(h);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {fa.fields.length === 0 && (
+        <p className="text-xs text-muted-foreground">No Carousel.</p>
+      )}
+      <div className="space-y-3">
+        {fa.fields.map((f, idx) => {
+          const typePath = `${prefix}.${idx}.type` as const;
+          const type = control._getWatch(typePath) as
+            | "HEADER"
+            | "BODY"
+            | "FOOTER"
+            | "BUTTONS";
+
+          return (
+            <div key={idx}>
+              {/* HEADER */}
+              {type === "HEADER" && (
+                <>
+                  <FormField
+                    control={control}
+                    name={`components.${compIndex}.cards.${cardIndex}.components.${idx}.example.header_handle.0`}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Image</FormLabel>
+                          <FormControl>
+                            {/* <Input {...field} placeholder="Enter text" /> */}
+                            <FileUpload
+                              {...field}
+                              maxSize={5 * 1024 * 1024}
+                              className="w-full max-w-md mx-auto"
+                              value={Object.values(fileRecord)}
+                              onValueChange={(files) =>
+                                onFileUpload(files, field)
+                              }
+                              onFileReject={onFileReject}
+                            >
+                              <FileUploadDropzone>
+                                <div className="flex flex-col items-center gap-1 text-center">
+                                  <div className="flex items-center justify-center rounded-full border p-2.5">
+                                    <Upload className="size-6 text-muted-foreground" />
+                                  </div>
+                                  <p className="font-medium text-sm">
+                                    Drag & drop files here
+                                  </p>
+                                  <p className="text-muted-foreground text-xs">
+                                    Or click to browse (max 2 files, up to 5MB
+                                    each)
+                                  </p>
+                                </div>
+                                <FileUploadTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2 w-fit"
+                                  >
+                                    Browse files
+                                  </Button>
+                                </FileUploadTrigger>
+                              </FileUploadDropzone>
+                              <FileUploadList>
+                                {Object.values(fileRecord).map(
+                                  (file, index) => (
+                                    <FileUploadItem key={index} value={file}>
+                                      <FileUploadItemPreview />
+                                      <FileUploadItemMetadata />
+                                      <FileUploadItemDelete asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="size-7"
+                                        >
+                                          <X />
+                                        </Button>
+                                      </FileUploadItemDelete>
+                                    </FileUploadItem>
+                                  )
+                                )}
+                              </FileUploadList>
+                            </FileUpload>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                </>
+              )}
+              {type === "BODY" && <></>}
+              {type === "BUTTONS" && (
+                <CarouselButtonsArray
+                  control={control}
+                  compIndex={compIndex}
+                  cardIndex={cardIndex}
+                  cardCompIndex={idx}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* -----------------------------
+ * Buttons array (manual add/remove OK)
+ * --------------------------- */
+function CarouselButtonsArray({
+  control,
+  compIndex,
+  cardIndex,
+  cardCompIndex,
+}: {
+  control: any;
+  compIndex: number;
+  cardIndex: number;
+  cardCompIndex: number;
+}) {
+  const fa = useFieldArray({
+    control,
+    name: `components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.buttons`,
   });
 
   const types = ["QUICK_REPLY", "URL", "PHONE_NUMBER"] as const;
@@ -1216,7 +1072,8 @@ function ButtonsArray({
 
       <div className="space-y-3">
         {fa.fields.map((f, i) => {
-          const typePath = `components.${compIndex}.buttons.${i}.type` as const;
+          const typePath =
+            `components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.buttons.${i}.type` as const;
           const typeValue = control._getWatch(typePath);
 
           return (

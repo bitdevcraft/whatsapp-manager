@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     // 5. Log & return generic 500
     console.error("POST /api/posts error:", error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    return new Response(JSON.stringify({ error }), {
       status: 500,
     });
   }

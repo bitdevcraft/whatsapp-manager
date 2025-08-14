@@ -1,20 +1,21 @@
-import { CategoryEnum, LanguagesEnum } from "@workspace/wa-cloud-api";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
 import { z } from "zod";
 
-const ButtonType = z.union([
+export const ButtonType = z.union([
   z.literal("QUICK_REPLY"),
   z.literal("URL"),
   z.literal("PHONE_NUMBER"),
 ]);
 
-const CategoryType = z.union([
+export const CategoryType = z.union([
   z.literal("MARKETING"),
   z.literal("UTILITY"),
   z.literal("AUTHENTICATION"),
 ]);
 
 const HeaderType = z.union([z.literal("TEXT"), z.literal("IMAGE")]);
-const ParameterFormatType = z.union([
+
+export const ParameterFormatType = z.union([
   z.literal("POSITIONAL"),
   z.literal("NAMED"),
 ]);
@@ -68,10 +69,26 @@ const ButtonSchema = z.object({
   url: z.string().url().optional(),
   phone_number: z.string().optional(),
 });
+
 const ButtonComponentSchema = z.object({
   type: z.literal("BUTTONS"),
   buttons: z.array(ButtonSchema),
 });
+
+const BaseCreateSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Required")
+    .max(512)
+    .regex(/^[a-z0-9_]+$/, "snake_case, lowercase only"),
+  category: CategoryType,
+  parameter_format: ParameterFormatType,
+  language: z.nativeEnum(LanguagesEnum),
+});
+
+/**
+ * Normal Template
+ */
 
 const ComponentSchema = z.array(
   z.union([
@@ -82,16 +99,8 @@ const ComponentSchema = z.array(
   ])
 );
 
-export const TemplateCreateSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Required")
-    .max(512)
-    .regex(/^[a-z0-9_]+$/, "snake_case, lowercase only"),
-  category: CategoryType,
-  parameter_format: ParameterFormatType,
+export const TemplateCreateSchema = BaseCreateSchema.extend({
   components: ComponentSchema,
-  language: z.nativeEnum(LanguagesEnum),
 });
 
 export type TemplateCreateValue = z.infer<typeof TemplateCreateSchema>;
@@ -117,4 +126,52 @@ export const defaultValue: TemplateCreateValue = {
   components: [headerValue, bodyValue, footerValue],
   parameter_format: "POSITIONAL",
   language: LanguagesEnum.English,
+};
+
+/**
+ * Carousel Template
+ */
+
+const CarouselCardSchema = z.object({
+  components: z.array(z.union([HeaderComponentSchema, ButtonComponentSchema])),
+});
+
+const CarouselComponentSchema = z.object({
+  type: z.literal("CAROUSEL"),
+  cards: z.array(CarouselCardSchema),
+});
+
+export const TemplateCarouselCreateSchema = BaseCreateSchema.extend({
+  components: z.array(z.union([BodyComponentSchema, CarouselComponentSchema])),
+});
+
+export type TemplateCarouselCreateValue = z.infer<
+  typeof TemplateCarouselCreateSchema
+>;
+
+export const templateCarouselDefault: TemplateCarouselCreateValue = {
+  name: "",
+  category: "MARKETING",
+  parameter_format: "POSITIONAL",
+  language: LanguagesEnum.English,
+  components: [
+    { type: "BODY", text: "" },
+    {
+      type: "CAROUSEL",
+      cards: [
+        {
+          components: [
+            {
+              type: "HEADER",
+              format: "IMAGE",
+              example: {
+                header_handle: [""],
+              },
+            },
+            { type: "BUTTONS", buttons: [] },
+          ],
+        },
+      ],
+    },
+  ],
 };

@@ -27,6 +27,16 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@workspace/ui/lib/utils";
+import { parseAsString, useQueryState } from "nuqs";
+import { nanoid } from "nanoid";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 
 const useTemplateSync = () => {
   return useMutation({
@@ -55,11 +65,12 @@ interface Props {
 }
 export default function TemplateTable({ promises }: Props) {
   const setTitle = useTitle();
-  const pathname = usePathname();
 
   useEffect(() => {
     setTitle("Templates");
   }, [setTitle]);
+
+  const [, setRId] = useQueryState("rId", parseAsString);
 
   const { enableAdvancedFilter } = useFeatureFlags();
 
@@ -95,7 +106,9 @@ export default function TemplateTable({ promises }: Props) {
 
   const onTemplateSync = () => {
     templateSync.mutate(undefined, {
-      onSuccess: () => {},
+      onSuccess: () => {
+        setRId(nanoid());
+      },
     });
   };
 
@@ -114,12 +127,9 @@ export default function TemplateTable({ promises }: Props) {
               throttleMs={throttleMs}
               align="end"
             />
-            <Link href={`${pathname}/new`}>
-              <Button size="sm" variant="outline">
-                <Plus />
-                New
-              </Button>
-            </Link>
+
+            <NewTemplate />
+
             <Button size="sm" variant="outline" onClick={onTemplateSync}>
               <RefreshCcw />
             </Button>
@@ -128,12 +138,7 @@ export default function TemplateTable({ promises }: Props) {
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
-            <Link href={`${pathname}/new`}>
-              <Button size="sm" variant="default">
-                <Plus />
-                New
-              </Button>
-            </Link>
+            <NewTemplate />
             <Button
               size="sm"
               variant="outline"
@@ -152,5 +157,28 @@ export default function TemplateTable({ promises }: Props) {
         )}
       </DataTable>
     </div>
+  );
+}
+
+function NewTemplate() {
+  const pathname = usePathname();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="default">
+          <Plus />
+          New
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem asChild>
+          <Link href={`${pathname}/new/default`}>Default</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`${pathname}/new/carousel`}>Carousel</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

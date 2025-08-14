@@ -21,6 +21,7 @@
     "@workspace/wa-cloud-api": "workspace:*",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
+    "drizzle-zod": "^0.8.3",
     "pg": "^8.16.0",
     "postgres": "^3.4.7"
   },

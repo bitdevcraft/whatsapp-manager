@@ -1,7 +1,7 @@
 import { createBaseSearchParams } from "@/lib/validations";
 import { Template } from "@workspace/db/schema/templates";
 import { getSortingStateParser } from "@workspace/ui/lib/parsers";
-import { createSearchParamsCache, parseAsArrayOf } from "nuqs/server";
+import { createSearchParamsCache, parseAsArrayOf, parseAsString } from "nuqs/server";
 import { z } from "zod";
 
 export const templateSearchParamsCache = createSearchParamsCache({
@@ -10,6 +10,7 @@ export const templateSearchParamsCache = createSearchParamsCache({
     { id: "createdAt", desc: true },
   ]),
   createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
+  rId: parseAsString.withDefault(""),
 });
 
 export type GetTemplateSchema = Awaited<
