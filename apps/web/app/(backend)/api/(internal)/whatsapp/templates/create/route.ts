@@ -60,8 +60,6 @@ export async function POST(request: Request) {
 
     const response = await whatsapp.templates.createTemplate(body);
 
-    console.log(response);
-
     return new Response("", { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {

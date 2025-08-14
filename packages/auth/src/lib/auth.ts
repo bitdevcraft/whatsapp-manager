@@ -87,7 +87,6 @@ export const auth = betterAuth({
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
       // Execute before processing the request
-      console.log("Request path:", ctx.path);
 
       /**
        * /sign-out
