@@ -283,7 +283,6 @@ function TemplateMessage({
 
               {selectedTemplate && (
                 <MessageTemplateForm
-                  form={form}
                   namePrefix="template.messageTemplate"
                   initialTemplate={selectedTemplate.content!}
                   preview

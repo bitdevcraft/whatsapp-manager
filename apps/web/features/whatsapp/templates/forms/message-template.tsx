@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { useFieldArray, useFormContext, UseFormReturn } from "react-hook-form";
 import {
   ButtonPositionEnum,
   ComponentTypesEnum,
@@ -31,19 +31,17 @@ import { transformTemplateResponseToFormValues } from "./message-template-action
 import { logger } from "@/lib/logger";
 
 type Props = {
-  form: UseFormReturn<any>;
   namePrefix: string;
   initialTemplate?: TemplateResponse;
   preview?: boolean;
 };
 
 export function MessageTemplateForm({
-  form,
   namePrefix,
   initialTemplate,
   preview = false,
 }: Props) {
-  const { control, setValue, watch } = form;
+  const { control, setValue, watch, reset, getValues } = useFormContext();
 
   logger.log("watched lang code", watch(`${namePrefix}.language.code`));
 
@@ -76,8 +74,8 @@ export function MessageTemplateForm({
 
       replace(defaultValues.components);
 
-      form.reset({
-        ...form.getValues(),
+      reset({
+        ...getValues(),
       });
     }
   }, [initialTemplate, namePrefix, setValue, replace, defaultValues]);
