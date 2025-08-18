@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import {
+  IconBell,
+  IconCirclePlusFilled,
   IconDashboard,
   IconMessages,
   IconSettings,
@@ -21,10 +23,15 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import { TeamSwitcher } from "./team-switcher";
 import { Organization } from "better-auth/plugins/organization";
+import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
 
 const data = {
   user: {
@@ -135,7 +142,26 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavSubMain title="WhatsApp" items={data.whatsapp} />
+        <NavSubMain
+          title="WhatsApp"
+          items={data.whatsapp}
+          actionMenu={
+            <SidebarMenu>
+              <SidebarMenuItem className="flex items-center gap-2">
+                <SidebarMenuButton
+                  tooltip="Quick Create"
+                  className="border-2"
+                  asChild
+                >
+                  <Link href={"/ing/whatsapp/marketing-campaigns/new"}>
+                    <IconCirclePlusFilled />
+                    <span>Create Campaign</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          }
+        ></NavSubMain>
         {/* <NavSubMain title="Ads" items={data.ads} /> */}
         <NavSubMain title="Management" items={data.management} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />

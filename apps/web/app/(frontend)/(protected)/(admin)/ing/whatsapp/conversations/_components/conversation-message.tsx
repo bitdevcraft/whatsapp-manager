@@ -40,7 +40,7 @@ import {
 import {
   TemplateSendValue,
   templateSendSchema,
-} from "@/types/validations/template-schema";
+} from "@/types/validations/templates/template-send-schema";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({

@@ -81,6 +81,7 @@ export const ParameterSchema = z.union([
   VideoParametersObjectSchema,
 ]);
 
+
 // Component Schemas for Header, Body, Footer
 const HeaderComponentSchema = z.object({
   type: z.literal(ComponentTypesEnum.Header),

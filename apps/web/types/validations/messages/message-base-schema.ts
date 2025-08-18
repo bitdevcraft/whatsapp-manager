@@ -25,3 +25,4 @@ export const BaseMessageSchema = z.object({
   to: z.string(),
   type: MessageTypes,
 });
+

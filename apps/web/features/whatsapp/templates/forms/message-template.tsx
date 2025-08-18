@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useFieldArray, useFormContext, UseFormReturn } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   ButtonPositionEnum,
   ComponentTypesEnum,
@@ -28,7 +28,8 @@ import {
 } from "@workspace/ui/components/select";
 import { ComponentParametersArray } from "./message-template-component-parameter-array";
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
-import { logger } from "@/lib/logger";
+import { TranslateTemplateResponseToMessageTemplate } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/new/_components/template-form/message-template-actions";
+import React from "react";
 
 type Props = {
   namePrefix: string;
@@ -41,22 +42,25 @@ export function MessageTemplateForm({
   initialTemplate,
   preview = false,
 }: Props) {
-  const { control, setValue, watch, reset, getValues } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
 
-  logger.log("watched lang code", watch(`${namePrefix}.language.code`));
+  const values = React.useMemo(
+    () => (initialTemplate ? { ...initialTemplate } : undefined),
+    [initialTemplate]
+  );
 
-  const defaultValues = useMemo(() => {
-    return initialTemplate
-      ? transformTemplateResponseToFormValues(initialTemplate)
-      : {
-          name: "",
-          language: {
-            policy: "deterministic",
-            code: LanguagesEnum.English,
-          },
-          components: [],
-        };
-  }, [initialTemplate]);
+  const defaultValue = React.useCallback(() => {
+    if (values) return TranslateTemplateResponseToMessageTemplate(values);
+
+    return {
+      name: "",
+      language: {
+        policy: "deterministic",
+        code: LanguagesEnum.English,
+      },
+      components: [],
+    };
+  }, [values]);
 
   const componentsPath = `${namePrefix}.components` as const;
 
@@ -65,20 +69,10 @@ export function MessageTemplateForm({
     name: componentsPath,
   });
 
-  // 🔁 When template changes, replace all values & trigger re-render
   useEffect(() => {
-    if (initialTemplate) {
-      setValue(`${namePrefix}.name`, defaultValues.name);
-
-      setValue(`${namePrefix}.language.code`, defaultValues.language.code);
-
-      replace(defaultValues.components);
-
-      reset({
-        ...getValues(),
-      });
-    }
-  }, [initialTemplate, namePrefix, setValue, replace, defaultValues]);
+    setValue(namePrefix, defaultValue());
+    replace(defaultValue().components);
+  }, [defaultValue, namePrefix, replace, setValue]);
 
   const componentTypes = Object.values(ComponentTypesEnum);
   const languageOptions = Object.values(LanguagesEnum);
@@ -221,8 +215,7 @@ export function MessageTemplateForm({
                   Remove
                 </Button>
               </div>
-
-              {fieldType === ComponentTypesEnum.Button ? (
+              {fieldType === ComponentTypesEnum.Button && (
                 <>
                   <FormField
                     control={control}
@@ -290,13 +283,13 @@ export function MessageTemplateForm({
                     )}
                   />
                 </>
-              ) : (
-                <ComponentParametersArray
-                  name={`${componentsPath}.${index}.parameters`}
-                  control={control}
-                  preview={preview}
-                />
               )}
+              
+              <ComponentParametersArray
+                name={`${componentsPath}.${index}.parameters`}
+                control={control}
+                preview={preview}
+              />
             </div>
           );
         })}

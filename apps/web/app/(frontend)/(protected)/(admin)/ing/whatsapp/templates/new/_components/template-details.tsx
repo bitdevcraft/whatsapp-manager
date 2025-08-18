@@ -19,7 +19,7 @@ import { Input } from "@workspace/ui/components/input";
 import { useFormContext } from "react-hook-form";
 import React from "react";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
-import { BaseCreateValue } from "../_lib/validation";
+import { BaseCreateValue } from "@/types/validations/templates/template-schema";
 
 export function TemplateDetails() {
   const { control } = useFormContext<BaseCreateValue>();

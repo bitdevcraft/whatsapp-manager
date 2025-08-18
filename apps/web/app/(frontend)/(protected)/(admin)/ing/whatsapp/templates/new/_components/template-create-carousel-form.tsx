@@ -17,7 +17,7 @@ import {
   TemplateCarouselCreateSchema,
   TemplateCarouselCreateValue,
   templateCarouselDefault,
-} from "../_lib/validation";
+} from "@/types/validations/templates/template-schema";
 
 import { Form } from "@workspace/ui/components/form";
 import { Button } from "@workspace/ui/components/button";

@@ -1,6 +1,6 @@
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { templateSendSchema } from "@/types/validations/template-schema";
+import { templateSendSchema } from "@/types/validations/templates/template-send-schema";
 import {
   baseConversation,
   conversationsTable,
