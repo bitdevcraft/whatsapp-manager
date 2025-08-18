@@ -101,58 +101,6 @@ export async function POST(request: Request) {
       status: 500,
     });
   }
-  // const APP_ID = process.env.META_APP_ID;
-  // const FB_API = "https://graph.facebook.com/v23.0";
-
-  // // 1) INIT upload session: /{app_id}/uploads
-  // const initUrl = new URL(`${FB_API}/${APP_ID}/uploads`);
-  // initUrl.searchParams.set("file_name", fileName);
-  // initUrl.searchParams.set("file_length", fileLength);
-  // initUrl.searchParams.set("file_type", fileType);
-  // initUrl.searchParams.set("access_token", decryptedToken);
-
-  // const initRes = await fetch(initUrl.toString(), { method: "POST" });
-  // if (!initRes.ok) {
-  //   const err = await initRes.text();
-  //   return NextResponse.json(
-  //     { step: "init", error: err },
-  //     { status: initRes.status }
-  //   );
-  // }
-  // const initData = await initRes.json(); // { id: "upload:<UPLOAD_SESSION_ID>" }
-  // const uploadId: string = initData.id;
-
-  // // 2) UPLOAD bytes to /v23.0/upload:<UPLOAD_SESSION_ID>
-  // const uploadUrl = `${FB_API}/${uploadId}`;
-
-  // const upRes = await fetch(uploadUrl, {
-  //   method: "POST",
-  //   headers: {
-  //     Authorization: `OAuth ${decryptedToken}`,
-  //     file_offset: "0",
-  //     // Content-Type not required for raw binary; Graph accepts octet-stream
-  //     "Content-Type": "application/octet-stream",
-  //   },
-  //   body: bytes,
-  // });
-
-  // const text = await upRes.text();
-
-  // if (!upRes.ok) {
-  //   return NextResponse.json(
-  //     { step: "upload", error: text },
-  //     { status: upRes.status }
-  //   );
-  // }
-
-  // // Typically returns JSON with a handle key, often `h`
-  // // Example: { "h": "4::aW..." }
-  // let result: any;
-  // try {
-  //   result = JSON.parse(text);
-  // } catch {
-  //   result = { raw: text };
-  // }
 }
 
 export async function GET(request: Request) {

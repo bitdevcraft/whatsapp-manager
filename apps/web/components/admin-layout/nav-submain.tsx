@@ -18,6 +18,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 export function NavSubMain({
   title = "Others",
   items,
+  actionMenu,
 }: {
   title?: string;
   items: {
@@ -26,6 +27,7 @@ export function NavSubMain({
     icon: Icon;
     access?: string;
   }[];
+  actionMenu?: React.ReactNode;
 }) {
   const { activeOrganization } = useOrganization();
 
@@ -55,6 +57,7 @@ export function NavSubMain({
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      {actionMenu}
       <SidebarMenu>
         {items.map((item, i) => (
           <div key={i}>

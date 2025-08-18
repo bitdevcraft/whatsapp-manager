@@ -22,7 +22,7 @@ export function HeaderField({
   const format = useWatch({
     control,
     name: `components.${index}.format` as const,
-  }) as "IMAGE" | "TEXT";
+  }) as "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT" | "LOCATION" | "PRODUCT";
 
   return (
     <div className="rounded-lg border p-3 space-y-3">
@@ -39,7 +39,7 @@ export function HeaderField({
           syncExamples={syncExamples}
         />
       )}
-      {format === "IMAGE" && (
+      {(format === "IMAGE" || format === "VIDEO" || format === "DOCUMENT") && (
         <HeaderFileField name={`components.${index}.example.header_handle.0`} />
       )}
       <HeaderAutoExamples index={index} parameterFormat={parameterFormat} />

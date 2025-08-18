@@ -14,7 +14,13 @@ import {
 } from "@workspace/ui/components/select";
 import { useFormContext } from "react-hook-form";
 
-const headerFormatOptions = ["TEXT", "IMAGE"] as const;
+const headerFormatOptions = [
+  "TEXT",
+  "IMAGE",
+  "VIDEO",
+  "DOCUMENT",
+  "PRODUCT",
+] as const;
 
 export function HeaderFormatOption({ index }: { index: number }) {
   const { control } = useFormContext();

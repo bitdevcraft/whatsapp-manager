@@ -180,9 +180,9 @@ function ButtonRow({
         name={`${base}.buttons.${index}.text`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Text</FormLabel>
+            <FormLabel>Label</FormLabel>
             <FormControl>
-              <Input placeholder="Button text" {...field} />
+              <Input placeholder="Button Label" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -7,8 +7,9 @@ import {
 } from "@/lib/db/queries";
 import { Team } from "@workspace/db/schema";
 import { logger } from "../logger";
+import { env } from "@/env/server";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+export const stripe = new Stripe(env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-06-30.basil",
 });
 
@@ -34,8 +35,8 @@ export async function createCheckoutSession({
       },
     ],
     mode: "subscription",
-    success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.BASE_URL}/pricing`,
+    success_url: `${env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${env.BASE_URL}/pricing`,
     customer: team.stripeCustomerId || undefined,
     client_reference_id: user.id.toString(),
     allow_promotion_codes: true,
@@ -110,7 +111,7 @@ export async function createCustomerPortalSession(team: Team) {
 
   return stripe.billingPortal.sessions.create({
     customer: team.stripeCustomerId,
-    return_url: `${process.env.BASE_URL}/dashboard`,
+    return_url: `${env.BASE_URL}/dashboard`,
     configuration: configuration.id,
   });
 }

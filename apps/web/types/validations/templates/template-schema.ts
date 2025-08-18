@@ -13,49 +13,60 @@ export const CategoryType = z.union([
   z.literal("UTILITY"),
   z.literal("AUTHENTICATION"),
 ]);
-export const HeaderType = z.union([z.literal("TEXT"), z.literal("IMAGE")]);
+
+export const HeaderType = z.union([
+  z.literal("TEXT"),
+  z.literal("IMAGE"),
+  z.literal("VIDEO"),
+  z.literal("DOCUMENT"),
+  z.literal("PRODUCT"),
+]);
 export const ParameterFormatType = z.union([
   z.literal("POSITIONAL"),
   z.literal("NAMED"),
 ]);
+
+export const HeaderExampleSchema = z.object({
+  header_text: z.array(z.string()).optional(),
+  header_text_named_params: z
+    .array(
+      z.object({
+        param_name: z.string(),
+        example: z.string(),
+      })
+    )
+    .optional(),
+  header_handle: z.array(z.string()).optional(),
+});
+
+export type HeaderExampleValue = z.infer<typeof HeaderExampleSchema>;
+
+export const BodyExampleSchema = z.object({
+  body_text: z.array(z.array(z.string())).optional(),
+  body_text_named_params: z
+    .array(
+      z.object({
+        param_name: z.string(),
+        example: z.string(),
+      })
+    )
+    .optional(),
+});
+
+export type BodyExampleValue = z.infer<typeof BodyExampleSchema>;
 
 /* Components */
 export const HeaderComponentSchema = z.object({
   type: z.literal("HEADER"),
   format: HeaderType,
   text: z.string().optional(),
-  example: z
-    .object({
-      header_text: z.array(z.string()).optional(),
-      header_text_named_params: z
-        .array(
-          z.object({
-            param_name: z.string(),
-            example: z.string(),
-          })
-        )
-        .optional(),
-      header_handle: z.array(z.string()).optional(),
-    })
-    .optional(),
+  example: HeaderExampleSchema.optional(),
 });
 
 export const BodyComponentSchema = z.object({
   type: z.literal("BODY"),
   text: z.string(),
-  example: z
-    .object({
-      body_text: z.array(z.array(z.string())).optional(),
-      body_text_named_params: z
-        .array(
-          z.object({
-            param_name: z.string(),
-            example: z.string(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
+  example: BodyExampleSchema.optional(),
 });
 
 export const FooterComponentSchema = z.object({
@@ -132,6 +143,8 @@ export const BaseCreateSchema = z.object({
   parameter_format: ParameterFormatType,
   language: z.nativeEnum(LanguagesEnum),
 });
+
+export type BaseCreateValue = z.infer<typeof BaseCreateSchema>;
 
 /* Normal template (kept for completeness) */
 export const ComponentSchema = z.array(

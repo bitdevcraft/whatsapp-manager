@@ -93,6 +93,7 @@ export enum ComponentTypesEnum {
     Body = 'BODY',
     Button = 'BUTTON',
     Footer = 'FOOTER',
+    Carousel = 'CAROUSEL',
 }
 
 export enum WabaConfigEnum {

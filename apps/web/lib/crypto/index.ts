@@ -1,8 +1,10 @@
 // lib/crypto.ts
 
+import { env } from "@/env/server";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Expect ENCRYPTION_KEY as a 64-char hex string (32 bytes)
-const KEY_HEX = process.env.ENCRYPTION_KEY!;
+const KEY_HEX = env.ENCRYPTION_KEY!;
 if (!KEY_HEX || !/^[0-9a-f]{64}$/i.test(KEY_HEX)) {
   throw new Error(
     "ENCRYPTION_KEY must be a 32-byte hex string (64 hex characters)"
