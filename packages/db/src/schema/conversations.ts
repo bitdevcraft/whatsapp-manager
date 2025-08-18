@@ -1,25 +1,25 @@
-import { timestamps } from "../helpers/column-helper";
+import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   customType,
   index,
   jsonb,
   pgEnum,
-  pgPolicy,
   pgTable,
   text,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { contactsTable } from "./contacts";
-import { relations, SQL, sql } from "drizzle-orm";
+
 import { enumToValues } from "../enums/enum-helper";
-import { teamsTable } from "./teams";
-import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
-import { marketingCampaignsTable } from "./marketing-campaigns";
-import { usersTable } from "./users";
-import { baseIdModel } from "./abstract/baseIdModel";
+import { timestamps } from "../helpers/column-helper";
 import { createOrganizationPolicies } from "../policies/workspace";
+import { baseIdModel } from "./abstract/baseIdModel";
+import { contactsTable } from "./contacts";
+import { marketingCampaignsTable } from "./marketing-campaigns";
+import { teamsTable } from "./teams";
+import { usersTable } from "./users";
 
 export const conversationStatusEnum = pgEnum(
   "message_status",
@@ -27,28 +27,28 @@ export const conversationStatusEnum = pgEnum(
 );
 
 export interface baseConversation {
-  text?: string;
   media?: {
-    url?: string;
-    id?: string;
     caption?: string;
+    id?: string;
+    url?: string;
   };
+  text?: string;
 }
 
 export interface ConversationBody {
-  header?: baseConversation;
   body?: baseConversation;
-  footer?: string;
-  location?: {
-    longitude: number;
-    latitude: number;
-    name?: string;
-    address?: string;
-  };
   buttons?: {
-    type: string;
     text?: string;
+    type: string;
   }[];
+  footer?: string;
+  header?: baseConversation;
+  location?: {
+    address?: string;
+    latitude: number;
+    longitude: number;
+    name?: string;
+  };
 }
 
 export const tsvector = customType<{
@@ -63,27 +63,27 @@ export const conversationsTable = pgTable(
   "conversations",
   {
     ...baseIdModel,
-    content: jsonb("content"),
-    from: uuid("from"),
+    body: jsonb("body").$type<ConversationBody>(),
     contactId: uuid("contact_id").references(() => contactsTable.id),
+    content: jsonb("content"),
+    direction: varchar("direction", {
+      enum: ["inbound", "outbound"],
+      length: 30,
+    }),
+    from: uuid("from"),
     isMarketingCampaign: boolean("is_marketing_campaign"),
     marketingCampaignId: uuid("marketing_campaign_id").references(
       () => marketingCampaignsTable.id
     ),
-    success: boolean("success"),
-    waResponse: jsonb("wa_response"),
-    wamid: text("wamid").unique(),
     repliedTo: text("replied_to"),
     status: conversationStatusEnum(),
-    body: jsonb("body").$type<ConversationBody>(),
-    direction: varchar("direction", {
-      length: 30,
-      enum: ["inbound", "outbound"],
-    }),
-    userId: uuid("user_id").references(() => usersTable.id),
+    success: boolean("success"),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
+    userId: uuid("user_id").references(() => usersTable.id),
+    wamid: text("wamid").unique(),
+    waResponse: jsonb("wa_response"),
     ...timestamps,
     conversationSearch: tsvector("conversation_search").notNull().default(""),
   },
@@ -99,7 +99,7 @@ export const conversationsTable = pgTable(
 
 export const conversationsRelations = relations(
   conversationsTable,
-  ({ one, many }) => ({
+  ({ many, one }) => ({
     contact: one(contactsTable, {
       fields: [conversationsTable.contactId],
       references: [contactsTable.id],
@@ -107,6 +107,11 @@ export const conversationsRelations = relations(
     marketingCampaign: one(marketingCampaignsTable, {
       fields: [conversationsTable.marketingCampaignId],
       references: [marketingCampaignsTable.id],
+    }),
+    relatedConversations: many(conversationsTable),
+    repliedConversation: one(conversationsTable, {
+      fields: [conversationsTable.repliedTo],
+      references: [conversationsTable.wamid],
     }),
     team: one(teamsTable, {
       fields: [conversationsTable.teamId],
@@ -116,21 +121,16 @@ export const conversationsRelations = relations(
       fields: [conversationsTable.userId],
       references: [usersTable.id],
     }),
-    repliedConversation: one(conversationsTable, {
-      fields: [conversationsTable.repliedTo],
-      references: [conversationsTable.wamid],
-    }),
-    relatedConversations: many(conversationsTable),
   })
 );
 
 export type Conversation = typeof conversationsTable.$inferSelect;
-export type NewConversation = typeof conversationsTable.$inferInsert;
-
 export type ConversationWithContact = Conversation & {
   contact: {
     id: string;
-    name: string | null;
+    name: null | string;
     phone: string;
   };
 };
+
+export type NewConversation = typeof conversationsTable.$inferInsert;

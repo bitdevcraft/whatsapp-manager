@@ -285,11 +285,8 @@ function CampaignAnalytics({
         </p>
       </div>
       <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
-        <h3 className="text-muted-foreground ">Reply Rate</h3>
-        <p className="text-3xl font-semibold">
-          {replyRate}&nbsp;
-          <span className="text-xl font-light text-muted-foreground">%</span>
-        </p>
+        <h3 className="text-muted-foreground ">Reply </h3>
+        <p className="text-3xl font-semibold">{replyRate}&nbsp;</p>
         <p className="text-xs font-light text-muted-foreground">
           Received responses
         </p>

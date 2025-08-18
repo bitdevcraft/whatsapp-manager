@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
-import { ColumnBaseConfig, ColumnDataType, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { ExtraConfigColumn, pgPolicy } from "drizzle-orm/pg-core";
 
 // 1) Build a generic Organization‐policy factory
 export function createOrganizationPolicies<
   T extends {
-    teamId: ExtraConfigColumn<ColumnBaseConfig<ColumnDataType, string>>;
+    teamId: ExtraConfigColumn;
   },
 >(tableName: string, t: T) {
   const ROLE = process.env.POSTGRES_USER_ROLE!;

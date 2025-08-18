@@ -40,7 +40,7 @@ import {
 import {
   TemplateSendValue,
   templateSendSchema,
-} from "@/types/validations/template-schema";
+} from "@/types/validations/templates/template-send-schema";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FormSchema = z.object({
@@ -283,7 +283,6 @@ function TemplateMessage({
 
               {selectedTemplate && (
                 <MessageTemplateForm
-                  form={form}
                   namePrefix="template.messageTemplate"
                   initialTemplate={selectedTemplate.content!}
                   preview

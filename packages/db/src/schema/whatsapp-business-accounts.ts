@@ -1,80 +1,46 @@
-import {
-  bigint,
-  integer,
-  jsonb,
-  pgPolicy,
-  pgTable,
-  serial,
-  text,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
-import { Team, teamsTable } from "./teams";
-import { relations, sql } from "drizzle-orm";
-import { timestamps } from "../helpers/column-helper";
-import { WhatsAppBusinessAccountPhoneNumber } from "./whatsapp-business-account-phone-numbers";
+import { relations } from "drizzle-orm";
+import { bigint, jsonb, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 
-export interface WhatsAppBusinessAuthAccountResponse {
-  data: string;
-  iv: string;
-  expiresIn?: Date | null;
-  userId?: string | null;
-}
+import { timestamps } from "../helpers/column-helper";
+import { createOrganizationPolicies } from "../policies/workspace";
+import { Team, teamsTable } from "./teams";
+import { WhatsAppBusinessAccountPhoneNumber } from "./whatsapp-business-account-phone-numbers";
 
 export interface WhatsAppBusinessAccountAccessToken {
   data: string;
   iv: string;
-  tokenType?: string | null;
+  tokenType?: null | string;
+}
+
+export interface WhatsAppBusinessAuthAccountResponse {
+  data: string;
+  expiresIn?: Date | null;
+  iv: string;
+  userId?: null | string;
 }
 
 export const whatsAppBusinessAccountsTable = pgTable(
   "whatsapp_business_accounts",
   {
-    id: bigint({ mode: "number" }).primaryKey().notNull(),
-    name: varchar("name", { length: 255 }),
-    currency: varchar("currency", { length: 255 }),
-    ownerBusinessId: varchar("owner_business_id", { length: 255 }),
-    ownerBusinessName: varchar("owner_business_name", { length: 255 }),
-    businessId: varchar("business_id", { length: 255 }),
-    phoneNumberId: varchar("phone_number_id", { length: 255 }),
-    wabaId: varchar("waba_id", { length: 255 }).unique(),
+    accessToken:
+      jsonb("auth_token").$type<WhatsAppBusinessAccountAccessToken>(),
     adAccountId: varchar("ad_account_id", { length: 255 }),
     authResponse:
       jsonb("auth_response").$type<WhatsAppBusinessAuthAccountResponse>(),
-    accessToken:
-      jsonb("auth_token").$type<WhatsAppBusinessAccountAccessToken>(),
+    businessId: varchar("business_id", { length: 255 }),
+    currency: varchar("currency", { length: 255 }),
+    id: bigint({ mode: "number" }).primaryKey().notNull(),
+    name: varchar("name", { length: 255 }),
+    ownerBusinessId: varchar("owner_business_id", { length: 255 }),
+    ownerBusinessName: varchar("owner_business_name", { length: 255 }),
+    phoneNumberId: varchar("phone_number_id", { length: 255 }),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
+    wabaId: varchar("waba_id", { length: 255 }).unique(),
     ...timestamps,
   },
-  (t) => [
-    // only allow SELECTs where team_id matches the session var
-    pgPolicy("whatsapp_business_accounts_select_tenant", {
-      for: "select",
-      to: process.env.POSTGRES_USER_ROLE!, // <-- your DB role here
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // inserts must set team_id = current_tenant
-    pgPolicy("whatsapp_business_accounts_insert_tenant", {
-      for: "insert",
-      to: process.env.POSTGRES_USER_ROLE!,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // updates only on your rows, and team_id can't be changed
-    pgPolicy("whatsapp_business_accounts_update_tenant", {
-      for: "update",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-      withCheck: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-    // deletes only your rows
-    pgPolicy("whatsapp_business_accounts_delete_tenant", {
-      for: "delete",
-      to: process.env.POSTGRES_USER_ROLE!,
-      using: sql`${t.teamId} = current_setting('app.current_tenant')::uuid`,
-    }),
-  ]
+  (t) => [...createOrganizationPolicies("whatsapp_business_accounts", t)]
 );
 
 export const whatsappBusinessesRelation = relations(
@@ -87,10 +53,10 @@ export const whatsappBusinessesRelation = relations(
   })
 );
 
-export type WhatsAppBusinessAccount =
-  typeof whatsAppBusinessAccountsTable.$inferSelect;
 export type NewWhatsAppBusinessAccount =
   typeof whatsAppBusinessAccountsTable.$inferInsert;
+export type WhatsAppBusinessAccount =
+  typeof whatsAppBusinessAccountsTable.$inferSelect;
 
 export type WhatsAppBusinessAccountDetails = WhatsAppBusinessAccount & {
   team: Team & {

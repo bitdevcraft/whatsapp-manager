@@ -1,3 +1,4 @@
+import { env } from "@/env/server";
 import { getUserWithTeam } from "@/lib/db/queries";
 import {
   AdAccount,
@@ -17,7 +18,7 @@ export async function POST() {
     }
 
     const ad_account_id = "698225195907162";
-    const api = FacebookAdsApi.init(process.env.WHATSAPP_API_ACCESS_TOKEN!);
+    const api = FacebookAdsApi.init(env.WHATSAPP_API_ACCESS_TOKEN!);
 
     const account = new AdAccount(`act_${ad_account_id}`, api);
 

@@ -1,8 +1,9 @@
+import { relations } from "drizzle-orm";
 import { pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { baseIdModel } from "./abstract/baseIdModel";
 import { eventsTable } from "./events";
 import { teamsTable } from "./teams";
-import { relations } from "drizzle-orm";
-import { baseIdModel } from "./abstract/baseIdModel";
 
 export const outboxTable = pgTable("outbox", {
   ...baseIdModel,
@@ -22,5 +23,5 @@ export const outboxRelations = relations(outboxTable, ({ one }) => ({
   }),
 }));
 
-export type Outbox = typeof outboxTable.$inferSelect;
 export type NewOutbox = typeof outboxTable.$inferInsert;
+export type Outbox = typeof outboxTable.$inferSelect;

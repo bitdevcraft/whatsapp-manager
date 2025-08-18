@@ -1,3 +1,3 @@
-export function enumToValues<T extends Record<string, string>>(e: T) {
+export function enumToValues(e: Record<string, string>) {
   return Object.values(e) as [string, ...string[]];
 }

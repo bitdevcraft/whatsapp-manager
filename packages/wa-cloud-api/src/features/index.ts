@@ -1,5 +1,14 @@
 export { default as EncryptionApi } from './encryption';
 export type { EncryptionClass, EncryptionPublicKeyResponse } from './encryption';
+export { default as FileUploadApi } from './fileUpload';
+export type {
+    FileInterruptedUploadResponse,
+    FileSessionDetails,
+    FileStartResumeUploadResponse,
+    FileStartSessionResponse,
+    FileUploadClass,
+    FileUploadDetails,
+} from './fileUpload';
 export { default as FlowApi } from './flow';
 export type {
     CreateFlowResponse,

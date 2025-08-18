@@ -66,7 +66,6 @@ export default function ContactTable({ promises }: ContactTableProps) {
       columnPinning: { right: ["actions"] },
       pagination: { pageSize: 10, pageIndex: 1 },
       columnVisibility: {
-        phone: false,
         email: false,
         createdAt: false,
       },

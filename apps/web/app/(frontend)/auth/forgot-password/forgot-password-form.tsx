@@ -29,6 +29,7 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Input } from "@workspace/ui/components/input";
 import { authClient } from "@/lib/auth/auth-client";
+import { env } from "@/env/client";
 
 export const useForgotPasswordMutation = () => {
   const mutation = useMutation({
@@ -37,7 +38,7 @@ export const useForgotPasswordMutation = () => {
     ): Promise<ForgotPasswordResponse> => {
       const { data, error } = await authClient.requestPasswordReset({
         email: payload.email, // required
-        redirectTo: `${process.env.NEXT_PUBLIC_WEB_URL}/auth/reset-password`,
+        redirectTo: `${env.NEXT_PUBLIC_WEB_URL}/auth/reset-password`,
       });
 
       if (error) throw new Error(error.message);

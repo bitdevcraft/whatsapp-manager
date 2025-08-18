@@ -73,6 +73,21 @@ export function getTableColumns({
       },
       enableColumnFilter: true,
     },
+
+    {
+      id: "phone",
+      accessorKey: "phone",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Phone" />
+      ),
+      meta: {
+        label: "Phone",
+        placeholder: "Search phone...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
     {
       id: "tags",
       accessorKey: "tags",
@@ -118,16 +133,6 @@ export function getTableColumns({
         icon: CircleDashed,
       },
       enableColumnFilter: true,
-    },
-    {
-      id: "phone",
-      accessorKey: "phone",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Phone" />
-      ),
-      meta: {
-        label: "Phone",
-      },
     },
     {
       id: "email",

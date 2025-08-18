@@ -22,8 +22,7 @@ const nextConfig = {
   // },
   // output: "standalone",
   async rewrites() {
-    const REALTIME_SVC =
-      process.env.REALTIME_SERVICE_URL ?? "http://localhost:3000";
+    const REALTIME_SVC = process.env.WEB_SOCKET ?? "http://localhost:3000";
     return [
       // → all Socket.IO traffic
       {
