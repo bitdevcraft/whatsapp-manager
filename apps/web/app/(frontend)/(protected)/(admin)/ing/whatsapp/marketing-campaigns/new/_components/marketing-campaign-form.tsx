@@ -120,7 +120,7 @@ export default function MarketingCampaignForm({
         </MultiStepFormContextProvider>
       </MultiStepFormHeader>
 
-      <MultiStepFormStep name="details">
+      <MultiStepFormStep name="details" className="max-w-xl mx-auto">
         <DetailsStep phoneNumbers={phoneNumbers} />
       </MultiStepFormStep>
 
@@ -128,7 +128,7 @@ export default function MarketingCampaignForm({
         <TemplateStep templates={templates} />
       </MultiStepFormStep>
 
-      <MultiStepFormStep name="audience">
+      <MultiStepFormStep name="audience" className="max-w-xl mx-auto">
         <AudienceStep tags={tags} />
       </MultiStepFormStep>
     </MultiStepForm>

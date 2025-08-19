@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       name: d.name,
       teamId: teamId,
       email: d.email,
-      phone: d.phoneNumber,
+      phone: d.phoneNumber.replace(/\D/g, ""),
       message: "",
       tags: d.tags,
     };

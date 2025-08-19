@@ -10,6 +10,7 @@ import { Progress } from "@workspace/ui/components/progress";
 import {
   Calendar,
   Check,
+  LoaderCircle,
   SendHorizontal,
   SquareArrowOutUpRight,
   Tag,
@@ -32,6 +33,19 @@ import {
 } from "@workspace/ui/components/dialog";
 import Link from "next/link";
 import { SingleTemplatePreview } from "./template-preview";
+import { useMutation } from "@tanstack/react-query";
+import z from "zod";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PhoneInput } from "@workspace/ui/components/phone-input";
 
 interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getMarketingCampaignById>>]>;
@@ -39,6 +53,8 @@ interface Props {
 
 export default function MarketingCampaignDashboard({ promises }: Props) {
   const { id } = useParams();
+
+  const [openPreview, setOpenPreview] = React.useState<boolean>(false);
 
   const [
     {
@@ -70,57 +86,100 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
     }
   };
 
+  const useSendPreview = () => {
+    return useMutation({
+      mutationFn: async (payload: PreviewPhoneMessageValue) => {
+        const response = await axios.post(
+          `/api/whatsapp/marketing-campaigns/${data?.id}/test-preview`,
+          payload
+        );
+
+        setOpenPreview(false);
+        return response.data;
+      },
+    });
+  };
+
+  const sendPreview = useSendPreview();
+
+  const onSubmit: SubmitHandler<PreviewPhoneMessageValue> = (data) => {
+    sendPreview.mutate(data, {
+      onSuccess: () => {
+        toast.success("Preview Sent");
+      },
+      onError: () => {
+        toast.error("Error");
+      },
+    });
+  };
+
   return (
-    <section className="p-8 grid gap-4 ">
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="flex gap-2 items-center">
-          <Badge variant="outline">{data?.status}</Badge>
-          <p className="text-muted-foreground text-sm">
-            Created on&nbsp;
-            {data?.createdAt && new Date(data?.createdAt).toDateString()}
-          </p>
+    <>
+      <ResponsiveDialog
+        isOpen={openPreview}
+        title={"Send Campaign Preview"}
+        setIsOpen={setOpenPreview}
+      >
+        <PreviewForm onSubmit={onSubmit} pending={sendPreview.isPending} />
+      </ResponsiveDialog>
+      <section className="p-8 grid gap-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="flex gap-2 items-center">
+            <Badge variant="outline">{data?.status}</Badge>
+            <p className="text-muted-foreground text-sm">
+              Created on&nbsp;
+              {data?.createdAt && new Date(data?.createdAt).toDateString()}
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-green-600 text-white font-semibold text-sm"
+              disabled={data?.status !== "draft" && data?.status !== "pending"}
+              onClick={sendMarketingCampaign}
+            >
+              <SendHorizontal />
+              Send
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setOpenPreview(true)}
+            >
+              Preview
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={data?.status !== "draft" && data?.status !== "pending"}
+            >
+              <Trash />
+            </Button>
+          </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-green-600 text-white font-semibold text-sm"
-            disabled={data?.status !== "draft" && data?.status !== "pending"}
-            onClick={sendMarketingCampaign}
-          >
-            <SendHorizontal />
-            Send
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            disabled={data?.status !== "draft" && data?.status !== "pending"}
-          >
-            <Trash />
-          </Button>
-        </div>
-      </div>
-      <h1 className="font-semibold text-lg">{data?.name}</h1>
-      <CampaignAnalytics
-        messageSent={messageSent}
-        totalRecipients={totalRecipients}
-        openRate={openRate}
-        replyRate={replyRate}
-        engagement={engagement}
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <DeliveryStatus
+        <h1 className="font-semibold text-lg">{data?.name}</h1>
+        <CampaignAnalytics
           messageSent={messageSent}
           totalRecipients={totalRecipients}
+          openRate={openRate}
+          replyRate={replyRate}
+          engagement={engagement}
         />
-        <CampaignDetails
-          tags={data?.tags}
-          schedule={data?.scheduleAt}
-          contacts={contacts}
-        />
-      </div>
-      <CampaignTemplatePreview template={data?.template} />
-    </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DeliveryStatus
+            messageSent={messageSent}
+            totalRecipients={totalRecipients}
+          />
+          <CampaignDetails
+            tags={data?.tags}
+            schedule={data?.scheduleAt}
+            contacts={contacts}
+          />
+        </div>
+        <CampaignTemplatePreview template={data?.template} />
+      </section>
+    </>
   );
 }
 
@@ -302,5 +361,68 @@ function CampaignAnalytics({
         </p>
       </div>
     </div>
+  );
+}
+
+const PreviewPhoneMessageSchema = z.object({
+  phone: z.string(),
+});
+
+type PreviewPhoneMessageValue = z.infer<typeof PreviewPhoneMessageSchema>;
+
+export function PreviewForm({
+  onSubmit,
+  pending = false,
+}: {
+  onSubmit: (data: PreviewPhoneMessageValue) => void;
+  pending?: boolean;
+}) {
+  const form = useForm<PreviewPhoneMessageValue>({
+    resolver: zodResolver(PreviewPhoneMessageSchema),
+    defaultValues: {
+      phone: "",
+    },
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="flex gap-4 justify-center">
+          <FormField
+            name={`phone`}
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl className="flex-1">
+                  <PhoneInput
+                    placeholder="+971 50 XXX XXXX"
+                    {...field}
+                    defaultCountry="AE"
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {pending ? (
+            <Button size={"icon"} disabled>
+              <LoaderCircle className="animate-spin" />
+            </Button>
+          ) : (
+            <Button size={"icon"} type="submit">
+              <SendHorizontal />
+            </Button>
+          )}
+        </div>
+        <p className="text-muted-foreground font-light text-sm">
+          <span className="font-bold text-danger">Note:</span>&nbsp;Please note
+          that you can only receive 1 message campaign per 24 hours. <br />
+          <br />
+          If you want to receive a new test campaign, reply to the conversation
+          first to open the&nbsp;
+          <span className="font-semibold">WhatsApp 24hr Window Rule</span>
+        </p>
+      </form>
+    </Form>
   );
 }

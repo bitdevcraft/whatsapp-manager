@@ -1,6 +1,6 @@
 "use client";
 
-import { type Contact } from "@workspace/db/schema/contacts";
+import { Contact } from "@workspace/db/schema";
 import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
 import { CheckCircle2, Download, Trash2, XCircle } from "lucide-react";

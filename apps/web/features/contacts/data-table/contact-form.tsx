@@ -111,7 +111,7 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Create Contact</Button>
+        <Button type="submit">Submit</Button>
       </form>
     </Form>
   );
