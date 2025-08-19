@@ -336,7 +336,7 @@ function CampaignAnalytics({
       <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
         <h3 className="text-muted-foreground ">Open Rate</h3>
         <p className="text-3xl font-semibold">
-          {openRate}&nbsp;
+          {openRate.toFixed(2)}&nbsp;
           <span className="text-xl font-light text-muted-foreground">%</span>
         </p>
         <p className="text-xs font-light text-muted-foreground">
