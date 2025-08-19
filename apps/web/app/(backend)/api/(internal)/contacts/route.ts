@@ -54,6 +54,7 @@ export async function POST(request: Request) {
           "phone",
           "email",
           "tags",
+          "updatedAt",
         ]),
       })
       .returning();
