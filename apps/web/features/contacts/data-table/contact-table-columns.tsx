@@ -159,6 +159,20 @@ export function getTableColumns({
       enableColumnFilter: true,
     },
     {
+      id: "updatedAt",
+      accessorKey: "updatedAt",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Updated At" />
+      ),
+      cell: ({ cell }) => formatDate(cell.getValue<Date>()),
+      meta: {
+        label: "Updated At",
+        variant: "dateRange",
+        icon: CalendarIcon,
+      },
+      enableColumnFilter: true,
+    },
+    {
       id: "actions",
       cell: ({ row }) => (
         <div className="w-full flex justify-end">
