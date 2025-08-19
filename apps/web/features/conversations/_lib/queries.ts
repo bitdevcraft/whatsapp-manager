@@ -102,7 +102,7 @@ export async function getConversations(
     [JSON.stringify(input), teamId],
     {
       revalidate: 10,
-      tags: ["conversations", `conversations:${teamId}`],
+      tags: [`conversations:${teamId}`, "conversations"],
     }
   )();
 }
