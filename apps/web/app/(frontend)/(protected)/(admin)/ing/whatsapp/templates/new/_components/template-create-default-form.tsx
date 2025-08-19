@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DevTool } from "@hookform/devtools";
 import { useMutation } from "@tanstack/react-query";
 import {
+  HeaderComponentSchema,
   TemplateCreateSchema,
   type TemplateCreateValue,
   defaultValue,
@@ -30,6 +31,8 @@ import { toSnake } from "@/utils/string-helper";
 import { parseNamed, parsePositional } from "../_lib/utils";
 import { HeaderField } from "./template-header";
 import { TemplateDetails } from "./template-details";
+import z from "zod";
+import { useRouter } from "next/navigation";
 
 /* -----------------------------
  * Component
@@ -39,6 +42,8 @@ export default function TemplateCreateForm({
 }: {
   initialValues?: Partial<TemplateCreateValue>;
 }) {
+  const router = useRouter();
+
   const form = useForm<TemplateCreateValue>({
     resolver: zodResolver(TemplateCreateSchema),
     defaultValues: { ...defaultValue, ...initialValues },
@@ -299,7 +304,7 @@ export default function TemplateCreateForm({
       const indexOfType = (type: string) =>
         cleanPayload.components.findIndex((c) => c.type === type);
 
-      const hIdx = indexOfType("HEADER");
+      let hIdx = indexOfType("HEADER");
 
       if (
         hIdx !== -1 &&
@@ -307,6 +312,19 @@ export default function TemplateCreateForm({
         !Object.hasOwn(cleanPayload.components[hIdx]!, "example")
       ) {
         cleanPayload.components.splice(hIdx, 1);
+        hIdx = -1;
+      }
+
+      if (
+        hIdx !== -1 &&
+        Object.hasOwn(cleanPayload.components[hIdx]!, "text") &&
+        Object.hasOwn(cleanPayload.components[hIdx]!, "format") &&
+        (cleanPayload.components[hIdx] as z.infer<typeof HeaderComponentSchema>)
+          .format !== "TEXT"
+      ) {
+        delete (
+          cleanPayload.components[hIdx] as z.infer<typeof HeaderComponentSchema>
+        ).text;
       }
 
       const fIdx = indexOfType("FOOTER");
@@ -325,7 +343,10 @@ export default function TemplateCreateForm({
 
       return result.data;
     },
-    onSuccess: () => toast.success("Saved"),
+    onSuccess: () => {
+      toast.success("Saved");
+      router.push("/ing/whatsapp/templates");
+    },
     onError: (error: AxiosError) => {
       toast.error(
         <div>

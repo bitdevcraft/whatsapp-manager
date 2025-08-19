@@ -32,6 +32,7 @@ import { HeaderFileField } from "./template-header-file-field";
 import { BodyAutoExamples } from "./template-body-examples";
 import { BodyEditor } from "./template-body-editor";
 import { TemplateDetails } from "./template-details";
+import { useRouter } from "next/navigation";
 
 /* -----------------------------
  * Component
@@ -42,6 +43,8 @@ export default function TemplateCreateForm({
 }: {
   initialValues?: Partial<TemplateCarouselCreateValue>;
 }) {
+  const router = useRouter();
+
   const form = useForm<TemplateCarouselCreateValue>({
     resolver: zodResolver(TemplateCarouselCreateSchema),
     defaultValues: { ...templateCarouselDefault, ...initialValues },
@@ -144,7 +147,10 @@ export default function TemplateCreateForm({
       );
       return result.data;
     },
-    onSuccess: () => toast.success("Saved"),
+    onSuccess: () => {
+      toast.success("Saved");
+      router.push("/ing/whatsapp/templates");
+    },
     onError: (error) => {
       if (error instanceof AxiosError) {
         const title =
