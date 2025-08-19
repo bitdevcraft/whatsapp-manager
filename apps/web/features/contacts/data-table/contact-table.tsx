@@ -95,29 +95,19 @@ export default function ContactTable({ promises }: ContactTableProps) {
         actionBar={<ContactsTableActionBar table={table} tags={tags} />}
         pageSizeOptions={[10, 20, 50, 100, 200]}
       >
-        {enableAdvancedFilter ? (
-          <DataTableAdvancedToolbar table={table}>
-            <DataTableFilterList
-              table={table}
-              shallow={shallow}
-              debounceMs={debounceMs}
-              throttleMs={throttleMs}
-              align="end"
-            />
-            <UploadCSVContact />
-            <ContactNewDialog tags={tags} />
-            <DataTableSortList table={table} align="start" />
-            <FeatureFlagsToggle />
-          </DataTableAdvancedToolbar>
-        ) : (
-          <DataTableToolbar table={table}>
-            <UploadCSVContact />
-            <ContactNewDialog tags={tags} />
-
-            <DataTableSortList table={table} align="start" />
-            <FeatureFlagsToggle />
-          </DataTableToolbar>
-        )}
+        <DataTableAdvancedToolbar table={table}>
+          <DataTableFilterList
+            table={table}
+            shallow={shallow}
+            debounceMs={debounceMs}
+            throttleMs={throttleMs}
+            align="end"
+          />
+          <UploadCSVContact />
+          <ContactNewDialog tags={tags} />
+          <DataTableSortList table={table} align="start" />
+          {/* <FeatureFlagsToggle /> */}
+        </DataTableAdvancedToolbar>
       </DataTable>
     </div>
   );
