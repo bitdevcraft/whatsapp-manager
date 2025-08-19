@@ -144,6 +144,7 @@ export async function getSelectTags() {
     },
     [`tags:select:${teamId}`],
     {
+      revalidate: 1,
       tags: [`tags:select:${teamId}`, "tags:select"],
     }
   )();
