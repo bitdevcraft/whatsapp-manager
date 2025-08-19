@@ -40,7 +40,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
     setTitle("Contacts");
   }, [setTitle]);
 
-  const { enableAdvancedFilter } = useFeatureFlags();
+  const { onFilterFlagChange } = useFeatureFlags();
 
   const [{ data, pageCount }, tags] = React.use(promises);
 
@@ -56,11 +56,15 @@ export default function ContactTable({ promises }: ContactTableProps) {
     [tags]
   );
 
+  React.useEffect(() => {
+    onFilterFlagChange("advancedFilters");
+  }, [onFilterFlagChange]);
+
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data,
     columns,
     pageCount,
-    enableAdvancedFilter: false,
+    enableAdvancedFilter: true,
     initialState: {
       sorting: [{ id: "createdAt", desc: true }],
       columnPinning: { right: ["actions"] },
@@ -106,7 +110,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
           <UploadCSVContact />
           <ContactNewDialog tags={tags} />
           <DataTableSortList table={table} align="start" />
-          {/* <FeatureFlagsToggle /> */}
+          <FeatureFlagsToggle />
         </DataTableAdvancedToolbar>
       </DataTable>
     </div>

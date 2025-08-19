@@ -61,13 +61,13 @@ export function getTableColumns({
         variant: "text",
         icon: Text,
       },
-      cell: ({ row }) => {
-        return (
-          <Link href={`/ing/whatsapp/template/${row.id}`}>
-            <p>{row.original.name}</p>
-          </Link>
-        );
-      },
+      // cell: ({ row }) => {
+      //   return (
+      //     <Link href={`/ing/whatsapp/template/${row.id}`}>
+      //       <p>{row.original.name}</p>
+      //     </Link>
+      //   );
+      // },
       enableColumnFilter: true,
     },
     {
