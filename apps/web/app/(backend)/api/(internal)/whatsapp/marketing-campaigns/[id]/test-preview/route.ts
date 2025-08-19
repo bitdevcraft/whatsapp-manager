@@ -1,42 +1,71 @@
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
-import { templateSendSchema } from "@/types/validations/templates/template-send-schema";
+import { contactsTable } from "@workspace/db";
+import { MessageStatus } from "@workspace/db/enums";
 import {
-  baseConversation,
   conversationsTable,
-  MessageStatus,
-  templatesTable,
-  withTenantTransaction,
-} from "@workspace/db";
-import {
-  ConversationBody,
+  marketingCampaignsTable,
+  NewContact,
   NewConversation,
+  templatesTable,
   whatsAppBusinessAccountsTable,
 } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, {
   ComponentTypesEnum,
   MessageTemplateObject,
-  ParametersTypesEnum,
   WhatsAppConfig,
 } from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import z from "zod";
-import { generateConversationComponentBody, interpolate } from "../../actions";
+import { generateConversationComponentBody } from "../../../actions";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: Request,
+  {
+    params,
+  }: {
+    params: Promise<{ id: string }>;
+  }
+) {
   try {
     const userWithTeam = await getUserWithTeam();
 
-    if (!userWithTeam?.teamId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!userWithTeam) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    const { teamId, user } = userWithTeam;
-    const body = await request.json();
-    const input = templateSendSchema.parse(body);
+    if (!userWithTeam.teamId) {
+      return new Response("", {
+        status: 401,
+        statusText: "No Team",
+      });
+    }
+    const { id } = await params;
 
-    const { account, template } = await withTenantTransaction(
+    const body = (await request.json()) as { phone: string };
+
+    const { teamId, user } = userWithTeam;
+
+    const marketingCampaign = await withTenantTransaction(
+      teamId,
+      async (tx) => {
+        return await tx.query.marketingCampaignsTable.findFirst({
+          where: eq(marketingCampaignsTable.id, id),
+        });
+      }
+    );
+
+    if (!marketingCampaign) {
+      return new Response("", {
+        status: 400,
+      });
+    }
+
+    const { messageTemplate, templateId } = marketingCampaign;
+
+    const { account, template, contact } = await withTenantTransaction(
       teamId,
       async (tx) => {
         const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
@@ -51,10 +80,30 @@ export async function POST(request: NextRequest) {
         });
 
         const template = await tx.query.templatesTable.findFirst({
-          where: eq(templatesTable.id, input.templateId),
+          where: eq(templatesTable.id, templateId),
         });
 
-        return { account, template };
+        let contact = await tx.query.contactsTable.findFirst({
+          where: eq(
+            contactsTable.normalizedPhone,
+            body.phone.replace(/\D/g, "")
+          ),
+        });
+
+        if (!contact) {
+          const tempContact: NewContact = {
+            email: "",
+            name: "",
+            teamId,
+            message: "",
+            phone: body.phone.replace(/\D/g, ""),
+          };
+          contact = (
+            await tx.insert(contactsTable).values(tempContact).returning()
+          )[0];
+        }
+
+        return { account, template, contact };
       }
     );
 
@@ -81,16 +130,14 @@ export async function POST(request: NextRequest) {
     const whatsapp = new WhatsApp(config);
 
     const response = await whatsapp.messages.template({
-      body: input.template
-        .messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
-      to: input.phone.replace(/\D/g, ""),
+      body: messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
+      to: body.phone.replace(/\D/g, ""),
     });
 
     const isSuccess = !!response?.messages[0]?.id;
 
     const conversationBody = generateConversationComponentBody(
-      input.template
-        .messageTemplate as MessageTemplateObject<ComponentTypesEnum>,
+      messageTemplate as MessageTemplateObject<ComponentTypesEnum>,
       template
     );
 
@@ -98,11 +145,10 @@ export async function POST(request: NextRequest) {
       const conv: NewConversation = {
         userId: user.id,
         teamId,
-        contactId: input.contactId,
+        contactId: contact?.id,
         content: {
-          body: input.template
-            .messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
-          to: input.phone.replace(/\D/g, ""),
+          body: messageTemplate as MessageTemplateObject<ComponentTypesEnum>,
+          to: body.phone.replace(/\D/g, ""),
         },
         from: null,
         wamid: response?.messages[0]?.id,
@@ -116,6 +162,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({}, { status: 200 });
+    //
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ errors: error.flatten() }, { status: 400 });

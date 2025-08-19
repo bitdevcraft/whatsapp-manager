@@ -53,7 +53,7 @@ export default function ContactTable({ promises }: ContactTableProps) {
         setRowAction,
         tags,
       }),
-    []
+    [tags]
   );
 
   const { table, shallow, debounceMs, throttleMs } = useDataTable({

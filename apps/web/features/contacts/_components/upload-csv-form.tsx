@@ -1,9 +1,12 @@
 "use client";
 import { CsvImporter } from "@workspace/ui/components/data-importer";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function UploadCSVContact() {
+  const router = useRouter();
+
   const onImport = async (data: Record<string, unknown>[]) => {
     try {
       await axios.post("/api/contacts", data);
@@ -12,6 +15,8 @@ export default function UploadCSVContact() {
     } catch (error) {
       toast.error("Failed to Insert");
     }
+
+    router.refresh();
   };
 
   return (

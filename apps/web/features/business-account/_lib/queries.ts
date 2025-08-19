@@ -46,8 +46,8 @@ export async function getWhatsAppBusinessAccountDetails() {
     {
       revalidate: 10,
       tags: [
-        `whatsapp:business-account`,
         `whatsapp:business-account:${teamId}`,
+        `whatsapp:business-account`,
       ],
     }
   )();
