@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       phone: d.phoneNumber.replace(/\D/g, ""),
       message: "",
       tags: d.tags,
+      updatedAt: new Date(),
     };
 
     return temp;
