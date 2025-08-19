@@ -105,7 +105,7 @@ export async function getTemplates(input: GetTemplateSchema) {
     [JSON.stringify(input), userWithTeam?.teamId],
     {
       revalidate: 1,
-      tags: ["templates", `templates:${userWithTeam?.teamId}`],
+      tags: [`templates:${userWithTeam?.teamId}`, "templates"],
     }
   )();
 }

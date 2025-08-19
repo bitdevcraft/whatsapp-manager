@@ -26,6 +26,7 @@ import {
   updateContacts,
 } from "@/features/contacts/_lib/actions";
 import { getSelectTags } from "@/features/tags/_lib/queries";
+import { useRouter } from "next/navigation";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = [
@@ -47,6 +48,7 @@ export function ContactsTableActionBar({
   table,
   tags,
 }: ContactsTableActionBarProps) {
+  const router = useRouter();
   const rows = table.getFilteredSelectedRowModel().rows;
   const [isPending, startTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);
@@ -55,6 +57,10 @@ export function ContactsTableActionBar({
     (action: Action) => isPending && currentAction === action,
     [isPending, currentAction]
   );
+
+  React.useEffect(() => {
+    if (!isPending) router.refresh();
+  }, [isPending, router]);
 
   const onContactUpdate = React.useCallback(
     ({ field, value }: { field: "tags" | "priority"; value: string }) => {

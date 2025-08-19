@@ -25,6 +25,7 @@ import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import { getSelectTemplates } from "./queries";
+import { SingleTemplatePreview } from "../../[id]/template-preview";
 
 interface TemplateStepFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
@@ -57,75 +58,80 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
       const match = templates.templates.find((t: any) => t.id === templateId);
       setSelectedTemplate(match ?? null);
     }
-  }, [defaultMessageTemplate, form]);
+  }, [defaultMessageTemplate, form, templates.templates]);
 
   return (
     <Form {...form}>
-      <div className={"flex flex-col gap-4"}>
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={prevStep}
-          >
-            <ArrowLeft />
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={nextStep}
-          >
-            <ArrowRight />
-          </Button>
-        </div>
-        <FormField
-          name="template.template"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Template</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    const match = templates.templates.find(
-                      (t) => t.id === value
-                    );
-                    setSelectedTemplate(match ?? null);
-                  }}
-                  value={field.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {selectedTemplate && (
-          <MessageTemplateForm
-            namePrefix="template.messageTemplate"
-            initialTemplate={selectedTemplate.content!}
-            preview
+      <div className="flex gap-4 relative">
+        <div className={"flex flex-col gap-4 max-w-xl w-full"}>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={prevStep}
+            >
+              <ArrowLeft />
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={nextStep}
+            >
+              <ArrowRight />
+            </Button>
+          </div>
+          <FormField
+            name="template.template"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Template</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      const match = templates.templates.find(
+                        (t) => t.id === value
+                      );
+                      setSelectedTemplate(match ?? null);
+                    }}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={prevStep}>
-            Previous
-          </Button>
-          <Button onClick={nextStep}>Next</Button>
+          {selectedTemplate && (
+            <MessageTemplateForm
+              namePrefix="template.messageTemplate"
+              initialTemplate={selectedTemplate.content!}
+              preview
+            />
+          )}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={prevStep}>
+              Previous
+            </Button>
+            <Button onClick={nextStep}>Next</Button>
+          </div>
+        </div>
+        <div className="w-full sticky top-4">
+          {selectedTemplate?.content && (
+            <SingleTemplatePreview template={selectedTemplate?.content} />
+          )}
         </div>
       </div>
     </Form>
