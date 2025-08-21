@@ -6,7 +6,12 @@ import {
   TemplateResponse,
 } from "@workspace/wa-cloud-api";
 import { useEffect } from "react";
-import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+import {
+  ControllerRenderProps,
+  useFieldArray,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import { TranslateTemplateResponseToMessageTemplate } from "./message-template-actions";
 import React from "react";
 import {
@@ -25,7 +30,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { Switch } from "@workspace/ui/components/switch";
-import { Upload } from "lucide-react";
+import { LoaderCircle, Upload, X } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -40,6 +45,7 @@ import {
 import { usePreviewStore } from "./message-template-store";
 import {
   FileUpload,
+  FileUploadClear,
   FileUploadDropzone,
   FileUploadItem,
   FileUploadItemDelete,
@@ -48,11 +54,10 @@ import {
   FileUploadList,
   FileUploadTrigger,
 } from "@workspace/ui/components/data-importer/file-upload";
-import {
-  onFileReject,
-  onWhatsAppMediaFileUpload,
-} from "./message-template-utils";
+import { onWhatsAppMediaFileUpload } from "./message-template-utils";
 import { Button } from "@workspace/ui/components/button";
+import { startTask } from "better-auth/react";
+import { toast } from "sonner";
 
 interface Props {
   prefix: string;
@@ -311,9 +316,13 @@ export function MessageTemplateComponentItemParameterItem({
   return (
     <>
       {type === "TEXT" && (
-        <div className="flex gap-2 items-center justify-between">
-          <div>{`{{${parameterName ?? index + 1}}}`}</div>
-          <MessageTemplateComponentItemParameterTextType prefix={`${prefix}`} />
+        <div className="grid grid-cols-12 gap-2">
+          <div className="col-span-2">{`{{${parameterName ?? index + 1}}}`}</div>
+          <div className="col-span-10">
+            <MessageTemplateComponentItemParameterTextType
+              prefix={`${prefix}`}
+            />
+          </div>
         </div>
       )}
       {(type === "IMAGE" || type === "VIDEO" || type === "DOCUMENT") && (
@@ -354,15 +363,92 @@ export function MessageTemplateComponentItemParameterMediaType({
   mediaType,
 }: {
   prefix: string;
-  mediaType: string;
+  mediaType: "IMAGE" | "VIDEO" | "DOCUMENT";
 }) {
   const { control } = useFormContext();
 
   const phoneNumber = useWatch({ control, name: "details.phoneNumber" });
 
+  const fileClearRef = React.useRef<HTMLButtonElement>(null);
+
   const mediaPath = `${prefix}.${mediaType.toLowerCase()}`;
 
   const [files, setFiles] = React.useState<File[]>([]);
+
+  const [isPending, startTransition] = React.useTransition();
+
+  const onUpload = async (
+    data: File[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    field: ControllerRenderProps<any, any>
+  ) => {
+    setFiles([]);
+    startTransition(async () => {
+      if (data.length > 0) {
+        const valid = await onWhatsAppMediaFileUpload(
+          data,
+          phoneNumber,
+          field,
+          mediaType
+        );
+        if (valid) setFiles(() => [...data]);
+      }
+    });
+  };
+
+  const onFileReject = React.useCallback((file: File, message: string) => {
+    toast(message, {
+      description: `"${file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name}" has been rejected`,
+    });
+  }, []);
+
+  const onFileValidate = React.useCallback(
+    (file: File): string | null => {
+      // Validate max files
+      if (files.length >= 1) {
+        return "You can only upload up to 1 files";
+      }
+
+      const isValid = (() => {
+        switch (mediaType) {
+          case "IMAGE":
+            return file.type.startsWith("image/");
+          case "VIDEO":
+            return file.type.startsWith("video/");
+          case "DOCUMENT":
+            // allow common doc mimetypes (pdf, docx, etc.)
+            return (
+              file.type === "application/pdf" ||
+              file.type ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+              file.type === "application/msword" ||
+              file.type === "application/vnd.ms-excel" ||
+              file.type ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            );
+          default:
+            return false;
+        }
+      })();
+
+      if (!isValid) {
+        return `Only ${mediaType} files are allowed`;
+      }
+
+      // Validate file size (max 2MB)
+      const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+      if (file.size > MAX_SIZE) {
+        return `File size must be less than ${MAX_SIZE / (1024 * 1024)}MB`;
+      }
+
+      return null;
+    },
+    [files, mediaType]
+  );
+
+  const onDelete = React.useCallback(() => {
+    setFiles([]);
+  }, []);
 
   return (
     <>
@@ -376,18 +462,16 @@ export function MessageTemplateComponentItemParameterMediaType({
               <FileUpload
                 value={files}
                 onValueChange={(next) => {
-                  setFiles(next);
-                  // Upload on add; clear value on delete
-                  if (next.length > 0) {
-                    onWhatsAppMediaFileUpload(next, phoneNumber, field);
-                  } else {
-                    field.onChange(undefined);
-                  }
+                  onUpload(next, field);
                 }}
                 maxSize={5 * 1024 * 1024}
-                className="w-full max-w-md mx-auto"
+                className="w-full max-w-sm mx-auto relative"
                 onFileReject={onFileReject}
+                onFileValidate={onFileValidate}
               >
+                {isPending && (
+                  <div className="absolute z-99 size-full bg-background/50 rounded"></div>
+                )}
                 <FileUploadDropzone>
                   <div className="flex flex-col items-center gap-1 text-center">
                     <div className="flex items-center justify-center rounded-full border p-2.5">
@@ -409,13 +493,23 @@ export function MessageTemplateComponentItemParameterMediaType({
                 {/* ✅ The list is back */}
                 <FileUploadList>
                   {files.map((file, i) => (
-                    <FileUploadItem key={i} value={file}>
+                    <FileUploadItem key={`${file.name}-${i}`} value={file}>
                       <FileUploadItemPreview />
                       <FileUploadItemMetadata />
-                      <FileUploadItemDelete />
+                      <FileUploadItemDelete asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          onClick={onDelete}
+                        >
+                          <X />
+                        </Button>
+                      </FileUploadItemDelete>
                     </FileUploadItem>
                   ))}
                 </FileUploadList>
+                <FileUploadClear />
               </FileUpload>
             </FormControl>
             <FormMessage />

@@ -5,7 +5,6 @@ import {
   ComponentTypesEnum,
   ParametersTypesEnum,
 } from "@workspace/wa-cloud-api";
-import template from "@workspace/wa-cloud-api/template";
 
 export function generateConversationComponentBody(
   messageTemplate: MessageTemplateObject<ComponentTypesEnum>,
@@ -61,13 +60,13 @@ export function generateConversationComponentBody(
     messageTemplate as MessageTemplateObject<ComponentTypesEnum>;
 
   components?.forEach((component) => {
-    const { type, parameters } = component;
+    const { type } = component;
 
     if (type === ComponentTypesEnum.Header) {
       const baseConversation: baseConversation = {};
       const parameterName: Record<string, string> = {};
       const indexName: string[] = [];
-      parameters.forEach((parameter) => {
+      component.parameters.forEach((parameter) => {
         switch (parameter.type) {
           case ParametersTypesEnum.Text:
             if (parameter.parameter_name)
@@ -111,7 +110,7 @@ export function generateConversationComponentBody(
     if (type === ComponentTypesEnum.Body) {
       const parameterName: Record<string, string> = {};
       const indexName: string[] = [];
-      parameters.forEach((parameter) => {
+      component.parameters.forEach((parameter) => {
         switch (parameter.type) {
           case ParametersTypesEnum.Text:
             if (parameter.parameter_name)

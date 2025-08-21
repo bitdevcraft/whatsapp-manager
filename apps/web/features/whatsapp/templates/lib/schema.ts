@@ -41,12 +41,15 @@ const DateTimeParametersObjectSchema = z.object({
   date_time: z.object({ fallback_value: z.string() }),
 });
 
+const MediaObjectSchema = z.object({
+  id: z.string().min(1, "Please Upload"),
+  link: z.string().optional(),
+});
+
 const DocumentParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Document),
   id: z.string().optional(),
-  document: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  document: MediaObjectSchema.extend({
     caption: z.string().optional(),
     filename: z.string().optional(),
   }),
@@ -54,18 +57,14 @@ const DocumentParametersObjectSchema = z.object({
 
 const ImageParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Image),
-  image: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  image: MediaObjectSchema.extend({
     caption: z.string().optional(),
   }),
 });
 
 const VideoParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Video),
-  video: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  video: MediaObjectSchema.extend({
     caption: z.string().optional(),
   }),
 });
