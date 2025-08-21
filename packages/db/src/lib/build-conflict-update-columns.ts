@@ -12,8 +12,22 @@ export const buildConflictUpdateColumns = <
   return columns.reduce(
     (acc, column) => {
       const colName = cls[column]?.name;
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      acc[column] = sql.raw(`excluded.${colName}`);
+      if (colName === "tags") {
+        // merge old + new tags
+        acc[column] = sql`
+        (
+          SELECT jsonb_agg(DISTINCT elem)
+          FROM jsonb_array_elements_text(
+            COALESCE(${cls[column]}, '[]'::jsonb) || excluded.${
+              // @ts-expect-error column name
+              sql.identifier([colName])
+            }
+          ) elem
+        )
+      `;
+      } else {
+        acc[column] = sql.raw(`excluded.${colName}`);
+      }
       return acc;
     },
     {} as Record<Q, SQL>
