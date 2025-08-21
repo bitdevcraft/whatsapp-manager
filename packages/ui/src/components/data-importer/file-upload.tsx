@@ -1125,15 +1125,15 @@ function FileUploadItemMetadata(props: FileUploadItemMetadataProps) {
       data-slot="file-upload-metadata"
       dir={context.dir}
       {...metadataProps}
-      className={cn("flex min-w-0 flex-1 flex-col", className)}
+      className={cn("flex min-w-0 flex-col", className)}
     >
       {children ?? (
         <>
           <span
             id={itemContext.nameId}
             className={cn(
-              "truncate font-medium text-sm",
-              size === "sm" && "font-normal text-[13px] leading-snug",
+              "truncate font-medium text-sm w-[16ch]",
+              size === "sm" && "font-normal text-[13px] leading-snug"
             )}
           >
             {itemContext.fileState.file.name}
@@ -1142,7 +1142,7 @@ function FileUploadItemMetadata(props: FileUploadItemMetadataProps) {
             id={itemContext.sizeId}
             className={cn(
               "truncate text-muted-foreground text-xs",
-              size === "sm" && "text-[11px] leading-snug",
+              size === "sm" && "text-[11px] leading-snug"
             )}
           >
             {formatBytes(itemContext.fileState.file.size)}

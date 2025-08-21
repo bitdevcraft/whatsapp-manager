@@ -191,11 +191,8 @@ function CampaignTemplatePreview({ template }: { template?: Template }) {
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Template Preview
       </h3>
-      <div className="min-h-16 bg-background bg-muted rounded-sm">
-        <pre className="p-4 rounded">
-          {/* {JSON.stringify(template.content, null, 2)} */}
-          <SingleTemplatePreview template={template.content} />
-        </pre>
+      <div className="min-h-16 ">
+        <SingleTemplatePreview template={template.content} />
       </div>
     </div>
   );

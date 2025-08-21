@@ -158,6 +158,7 @@ export const ComponentSchema = z.array(
 export const TemplateCreateSchema = BaseCreateSchema.extend({
   components: ComponentSchema,
 });
+
 export type TemplateCreateValue = z.infer<typeof TemplateCreateSchema>;
 
 const headerValue: z.infer<typeof HeaderComponentSchema> = {

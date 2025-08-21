@@ -1,60 +1,189 @@
 import { Button } from "@workspace/ui/components/button";
-import { Card } from "@workspace/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@workspace/ui/components/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@workspace/ui/components/carousel";
 import { TemplateResponse } from "@workspace/wa-cloud-api";
+import {
+  ComponentTypes,
+  TemplateBody,
+  TemplateButtons,
+  TemplateCarousel,
+  TemplateFooter,
+  TemplateFormat,
+  TemplateHeader,
+} from "@workspace/wa-cloud-api/template";
+import Image from "next/image";
 
-interface SingleTemplatePreviewProps {
+interface Props {
   template: TemplateResponse;
 }
 
-export function SingleTemplatePreview({
-  template,
-}: SingleTemplatePreviewProps) {
-  return (
-    <Card className="max-w-md mx-auto bg-[#DCF8C6] w-full text-black">
-      {template.components.map((component, idx) => {
-        if (component.type === "HEADER") {
-          return (
-            <div key={idx} className="font-bold text-lg px-4 ">
-              {component.text as string}
-            </div>
-          );
-        }
-        if (component.type === "BODY") {
-          return (
-            <div key={idx} className="text-base whitespace-pre-line px-4">
-              {component.text as string}
-            </div>
-          );
-        }
-        if (component.type === "FOOTER") {
-          return (
-            <div key={idx} className="text-xs px-4">
-              {component.text as string}
-            </div>
-          );
-        }
-        if (component.type === "BUTTONS" && component.buttons) {
-          return (
-            <div
-              key={idx}
-              className="flex gap-2 mt-4 flex-wrap justify-center items-center flex-col border-t-1 pt-2"
-            >
-              {component.buttons.map((btn, i) => (
-                <Button
-                  key={i}
-                  variant="link"
-                  size="sm"
-                  className="text-green-900"
-                >
-                  {btn.type}
-                </Button>
-              ))}
-            </div>
-          );
-        }
+export function SingleTemplatePreview({ template }: Props) {
+  const base = template.components.filter((comp) =>
+    ["HEADER", "BODY", "FOOTER", "BUTTONS"].includes(comp.type)
+  );
+  const carousel = template.components.filter((comp) =>
+    ["CAROUSEL"].includes(comp.type)
+  );
 
-        return null;
-      })}
-    </Card>
+  return (
+    <div>
+      <p className="text-sm font-light">
+        This is a preview of the template without the data
+      </p>
+      <div className="space-y-2 border bg-muted p-4">
+        <Card>
+          {base.map((component, idx) => (
+            <ComponentPreview key={idx} component={component} />
+          ))}
+        </Card>
+        {carousel.map((component, idx) => (
+          <ComponentPreview key={idx} component={component} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ComponentPreview({
+  component,
+  ...props
+}: React.ComponentProps<"div"> & { component: ComponentTypes }) {
+  const type = component.type;
+
+  if (type === "CAROUSEL") {
+    return <ComponentCarouselPreview component={component} />;
+  }
+
+  return (
+    <div {...props}>
+      <div>
+        {type === "HEADER" && <ComponentHeaderPreview component={component} />}
+        {type === "BODY" && <ComponentBodyPreview component={component} />}
+        {type === "FOOTER" && <ComponentFooterPreview component={component} />}
+        {type === "BUTTONS" && <ComponentButtonPreview component={component} />}
+      </div>
+    </div>
+  );
+}
+
+export function ComponentHeaderPreview({
+  component,
+}: {
+  component: TemplateHeader;
+}) {
+  const format: TemplateFormat = component.format;
+  return (
+    <CardHeader>
+      {format === "TEXT" && <p>{component.text}</p>}
+      {format === "IMAGE" && (
+        <Image
+          src={
+            component.example?.header_handle
+              ? (component.example?.header_handle[0] ?? "")
+              : ""
+          }
+          alt={""}
+          width={200}
+          height={100}
+          className="aspect-3/2 object-cover w-full"
+        />
+      )}
+      {format === "VIDEO" && (
+        <video width={320} height={240} controls className="w-full">
+          <source
+            src={
+              component.example?.header_handle
+                ? (component.example?.header_handle[0] ?? "")
+                : ""
+            }
+            type="video/mp4"
+          />
+          <source
+            src={
+              component.example?.header_handle
+                ? (component.example?.header_handle[0] ?? "")
+                : ""
+            }
+            type="video/ogg"
+          ></source>
+          Your browser does not support the video tag.
+        </video>
+      )}
+      {format === "DOCUMENT" && <></>}
+    </CardHeader>
+  );
+}
+
+export function ComponentBodyPreview({
+  component,
+}: {
+  component: TemplateBody;
+}) {
+  return <CardContent>{component.text as string}</CardContent>;
+}
+
+export function ComponentFooterPreview({
+  component,
+}: {
+  component: TemplateFooter;
+}) {
+  return <CardFooter>{component.text as string}</CardFooter>;
+}
+
+export function ComponentButtonPreview({
+  component,
+}: {
+  component: TemplateButtons;
+}) {
+  return (
+    <div className="flex flex-col">
+      {component.buttons.map((btn, i) => (
+        <Button
+          key={i}
+          variant="ghost"
+          size="sm"
+          className="text-green-900"
+          type="button"
+        >
+          {btn.type}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export function ComponentCarouselPreview({
+  component,
+}: {
+  component: TemplateCarousel;
+}) {
+  return (
+    <Carousel>
+      <CarouselContent>
+        {component.cards.map((card, idx) => (
+          <CarouselItem key={idx} className="basis-3/4">
+            <Card>
+              {card.components.map((comp, i) => (
+                <ComponentPreview
+                  key={`${idx}-${i}-${comp.type}`}
+                  component={comp}
+                />
+              ))}
+            </Card>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 }

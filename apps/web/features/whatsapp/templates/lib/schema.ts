@@ -41,12 +41,15 @@ const DateTimeParametersObjectSchema = z.object({
   date_time: z.object({ fallback_value: z.string() }),
 });
 
+const MediaObjectSchema = z.object({
+  id: z.string().min(1, "Please Upload"),
+  link: z.string().optional(),
+});
+
 const DocumentParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Document),
   id: z.string().optional(),
-  document: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  document: MediaObjectSchema.extend({
     caption: z.string().optional(),
     filename: z.string().optional(),
   }),
@@ -54,18 +57,14 @@ const DocumentParametersObjectSchema = z.object({
 
 const ImageParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Image),
-  image: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  image: MediaObjectSchema.extend({
     caption: z.string().optional(),
   }),
 });
 
 const VideoParametersObjectSchema = z.object({
   type: z.literal(ParametersTypesEnum.Video),
-  video: z.object({
-    id: z.string().optional(),
-    link: z.string().optional(),
+  video: MediaObjectSchema.extend({
     caption: z.string().optional(),
   }),
 });
@@ -80,7 +79,6 @@ export const ParameterSchema = z.union([
   ImageParametersObjectSchema,
   VideoParametersObjectSchema,
 ]);
-
 
 // Component Schemas for Header, Body, Footer
 const HeaderComponentSchema = z.object({
@@ -106,12 +104,29 @@ const ButtonComponentSchema = z.object({
   index: z.nativeEnum(ButtonPositionEnum),
 });
 
+export const CardsComponentsSchema = z.discriminatedUnion("type", [
+  HeaderComponentSchema,
+  BodyComponentSchema,
+  ButtonComponentSchema,
+]);
+
+export const CardSchema = z.object({
+  card_index: z.number(),
+  components: z.array(CardsComponentsSchema),
+});
+
+const CarouselComponentSchema = z.object({
+  type: z.literal(ComponentTypesEnum.Carousel),
+  cards: z.array(CardSchema),
+});
+
 // Union of component schemas, discriminated by 'type'
 export const ComponentSchema = z.discriminatedUnion("type", [
   HeaderComponentSchema,
   BodyComponentSchema,
   FooterComponentSchema,
   ButtonComponentSchema,
+  CarouselComponentSchema,
 ]);
 
 // Main MessageTemplateObject Schema

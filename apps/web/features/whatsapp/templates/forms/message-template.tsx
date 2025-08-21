@@ -30,6 +30,7 @@ import { ComponentParametersArray } from "./message-template-component-parameter
 import { transformTemplateResponseToFormValues } from "./message-template-actions";
 import { TranslateTemplateResponseToMessageTemplate } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/new/_components/template-form/message-template-actions";
 import React from "react";
+import { DevTool } from "@hookform/devtools";
 
 type Props = {
   namePrefix: string;
@@ -215,6 +216,9 @@ export function MessageTemplateForm({
                   Remove
                 </Button>
               </div>
+
+              <p>{fieldType}</p>
+
               {fieldType === ComponentTypesEnum.Button && (
                 <>
                   <FormField
@@ -284,7 +288,16 @@ export function MessageTemplateForm({
                   />
                 </>
               )}
-              
+
+              {fieldType === "CAROUSEL" && (
+                <>
+                  <CarouselCards
+                    prefix={`${componentsPath}.${index}`}
+                    preview={preview}
+                  />
+                </>
+              )}
+
               <ComponentParametersArray
                 name={`${componentsPath}.${index}.parameters`}
                 control={control}
@@ -294,6 +307,197 @@ export function MessageTemplateForm({
           );
         })}
       </div>
+ 
     </div>
+  );
+}
+
+function CarouselCards({
+  prefix,
+  preview = false,
+}: {
+  prefix: string;
+  preview?: boolean;
+}) {
+  const { control } = useFormContext();
+
+  const cardsPath = `${prefix}.cards` as const;
+
+  const { fields } = useFieldArray({
+    control,
+    name: cardsPath,
+  });
+
+  return (
+    <>
+      {fields.map((el, idx) => {
+        <div key={idx}>
+          <CarouselCardComponents
+            prefix={`${cardsPath}.${idx}`}
+            preview={preview}
+          />
+          Test
+        </div>;
+      })}
+    </>
+  );
+}
+function CarouselCardComponents({
+  prefix,
+  preview = false,
+}: {
+  prefix: string;
+  preview?: boolean;
+}) {
+  const { control, watch } = useFormContext();
+
+  const componentsPath = `${prefix}.components` as const;
+
+  const { fields, remove } = useFieldArray({
+    control,
+    name: componentsPath,
+  });
+
+  console.log(componentsPath);
+
+  const componentTypes = Object.values(ComponentTypesEnum);
+  const buttonTypes = Object.values(SubTypeEnum);
+  const buttonPositions = Object.values(ButtonPositionEnum);
+
+  return (
+    <>
+      {fields.map((field, index) => {
+        const fieldType = watch(`${componentsPath}.${index}.type`);
+        return (
+          <div key={field.id} className="border p-4 rounded-md space-y-4">
+            <div className="flex justify-between items-center">
+              <FormField
+                control={control}
+                name={`${componentsPath}.${index}.type`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={
+                        preview ? `font-light text-muted-foreground` : ""
+                      }
+                    >
+                      Type
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          className={
+                            preview
+                              ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                              : ``
+                          }
+                          disabled={preview}
+                        >
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {componentTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => remove(index)}
+                hidden={preview}
+              >
+                Remove
+              </Button>
+            </div>
+
+            <p>{fieldType}</p>
+
+            {fieldType === ComponentTypesEnum.Button && (
+              <>
+                <FormField
+                  control={control}
+                  name={`${componentsPath}.${index}.sub_type`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={
+                          preview ? `font-light text-muted-foreground` : ""
+                        }
+                      >
+                        Button Sub Type
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select sub type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {buttonTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name={`${componentsPath}.${index}.index`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        className={
+                          preview ? `font-light text-muted-foreground` : ""
+                        }
+                      >
+                        Button Index
+                      </FormLabel>
+                      <Select
+                        onValueChange={(v) => field.onChange(parseInt(v))}
+                        value={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select index" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {buttonPositions.map((pos, idx) => (
+                            <SelectItem key={pos} value={idx.toString()}>
+                              {pos}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            <ComponentParametersArray
+              name={`${componentsPath}.${index}.parameters`}
+              control={control}
+              preview={preview}
+            />
+          </div>
+        );
+      })}
+    </>
   );
 }
