@@ -30,7 +30,7 @@ export default async function Home(props: IndexPageProps) {
                 <MarketingCampaignStats promises={promises} />
                 <DeliveryStatus promises={promises} />
               </div>
-              <ChartAreaInteractive />
+              {/* <ChartAreaInteractive /> */}
             </div>
           </div>
         </div>
