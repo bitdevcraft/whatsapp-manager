@@ -22,6 +22,8 @@ const nextConfig = {
       hostname,
     })),
   },
+  trailingSlash: false,
+
   // experimental: {
   //   nodeMiddleware: true,
   // },
