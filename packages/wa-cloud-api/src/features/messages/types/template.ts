@@ -97,13 +97,14 @@ type CarouselComponentObject = {
     type: ComponentTypesEnum.Carousel;
     cards: {
         card_index: number;
+        components?: (ComponentObject<ComponentTypesEnum> | ButtonComponentObject)[];
     };
 };
 
 export type MessageTemplateObject<T extends ComponentTypesEnum> = {
     name: string;
     language: LanguageObject;
-    components?: (ComponentObject<T> | ButtonComponentObject)[];
+    components?: (ComponentObject<T> | ButtonComponentObject | CarouselComponentObject)[];
 };
 
 export type MessageTemplateRequestBody<T extends ComponentTypesEnum> = MessageRequestBody<MessageTypesEnum.Template> &

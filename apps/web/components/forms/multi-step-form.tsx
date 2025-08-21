@@ -15,6 +15,7 @@ import { Slot, Slottable } from "@radix-ui/react-slot";
 import { Path, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { cn } from "@workspace/ui/lib/utils";
+import { DevTool } from "@hookform/devtools";
 
 interface MultiStepFormProps<T extends z.ZodType> {
   schema: T;
@@ -105,6 +106,7 @@ export function MultiStepForm<T extends z.ZodType>({
         </div>
 
         {footer}
+        {/* <DevTool control={form.control} /> */}
       </form>
     </MultiStepFormContext.Provider>
   );

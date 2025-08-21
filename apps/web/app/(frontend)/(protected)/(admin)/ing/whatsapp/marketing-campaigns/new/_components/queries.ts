@@ -7,7 +7,7 @@ import {
   withTenantTransaction,
 } from "@workspace/db";
 import { Template } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export async function getSelectTemplates(): Promise<{ templates: Template[] }> {
   const userWithTeam = await getUserWithTeam();
@@ -29,6 +29,9 @@ export async function getSelectTemplates(): Promise<{ templates: Template[] }> {
             const templates = await tx
               .select()
               .from(templatesTable)
+              .where(
+                sql`${templatesTable.content} ->> 'status' ILIKE 'approved'`
+              )
               .orderBy(templatesTable.name);
 
             return { templates };

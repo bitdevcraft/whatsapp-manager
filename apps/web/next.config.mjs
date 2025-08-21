@@ -1,5 +1,7 @@
 import createNextIntlPlugin from "next-intl/plugin";
 
+const hostnames = ["lookaside.fbsbx.com", "scontent.whatsapp.net"];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: [
@@ -15,7 +17,10 @@ const nextConfig = {
     "*.facebook.com",
   ],
   images: {
-    remotePatterns: [new URL("https://lookaside.fbsbx.com/*")],
+    remotePatterns: hostnames.map((hostname) => ({
+      protocol: "https",
+      hostname,
+    })),
   },
   // experimental: {
   //   nodeMiddleware: true,

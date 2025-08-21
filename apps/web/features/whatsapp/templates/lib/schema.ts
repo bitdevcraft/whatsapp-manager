@@ -81,7 +81,6 @@ export const ParameterSchema = z.union([
   VideoParametersObjectSchema,
 ]);
 
-
 // Component Schemas for Header, Body, Footer
 const HeaderComponentSchema = z.object({
   type: z.literal(ComponentTypesEnum.Header),
@@ -106,12 +105,29 @@ const ButtonComponentSchema = z.object({
   index: z.nativeEnum(ButtonPositionEnum),
 });
 
+export const CardsComponentsSchema = z.discriminatedUnion("type", [
+  HeaderComponentSchema,
+  BodyComponentSchema,
+  ButtonComponentSchema,
+]);
+
+export const CardSchema = z.object({
+  card_index: z.number(),
+  components: z.array(CardsComponentsSchema),
+});
+
+const CarouselComponentSchema = z.object({
+  type: z.literal(ComponentTypesEnum.Carousel),
+  cards: z.array(CardSchema),
+});
+
 // Union of component schemas, discriminated by 'type'
 export const ComponentSchema = z.discriminatedUnion("type", [
   HeaderComponentSchema,
   BodyComponentSchema,
   FooterComponentSchema,
   ButtonComponentSchema,
+  CarouselComponentSchema,
 ]);
 
 // Main MessageTemplateObject Schema
