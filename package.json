@@ -17,26 +17,26 @@
     "@types/uuid": "^10.0.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "drizzle-kit": "^0.31.1",
-    "eslint": "^9.32.0",
-    "prettier": "^3.5.3",
-    "turbo": "^2.5.4",
-    "typescript": "5.7.3"
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "5.9.2"
   },
   "packageManager": "pnpm@10.12.1",
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.835.0",
-    "@aws-sdk/s3-presigned-post": "^3.835.0",
-    "@aws-sdk/s3-request-presigner": "^3.835.0",
+    "@aws-sdk/client-s3": "^3.873.0",
+    "@aws-sdk/s3-presigned-post": "^3.873.0",
+    "@aws-sdk/s3-request-presigner": "^3.873.0",
     "@tsconfig/next": "^2.0.3",
     "@tsconfig/node-lts": "^22.0.2",
     "@tsconfig/recommended": "^1.0.10",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.44.4",
     "uuid": "^11.1.0",
-    "zod": "^3.25.74"
+    "zod": "^4.0.17"
   }
 }
