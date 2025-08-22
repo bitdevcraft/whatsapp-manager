@@ -87,15 +87,13 @@ export function ComponentHeaderPreview({
     <CardHeader>
       {format === "TEXT" && <p>{component.text}</p>}
       {format === "IMAGE" && (
-        <Image
+        <img
           src={
             component.example?.header_handle
               ? (component.example?.header_handle[0] ?? "")
               : ""
           }
           alt={""}
-          width={200}
-          height={100}
           className="aspect-3/2 object-cover w-full"
         />
       )}
