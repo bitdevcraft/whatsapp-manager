@@ -1,10 +1,11 @@
-import { SearchParams } from "@/types";
-import { conversationSearchParamsCache } from "@/features/conversations/_lib/validations";
 import React from "react";
 
-import { Conversations } from "./conversations";
 import { getContactById } from "@/features/contacts/_lib/queries";
+import { conversationSearchParamsCache } from "@/features/conversations/_lib/validations";
+import { SearchParams } from "@/types";
+
 import { getSelectTemplates } from "../marketing-campaigns/new/_components/queries";
+import { Conversations } from "./conversations";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;

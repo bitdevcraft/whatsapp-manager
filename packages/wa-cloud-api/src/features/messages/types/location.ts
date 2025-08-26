@@ -1,14 +1,15 @@
 import { MessageTypesEnum } from '@shared/types/enums';
-import { MessageRequestBody } from './common';
 
-// Location Message Types
-export type LocationObject = {
-    longitude: number;
-    latitude: number;
-    name?: string;
-    address?: string;
-};
+import { MessageRequestBody } from './common';
 
 export type LocationMessageRequestBody = MessageRequestBody<MessageTypesEnum.Location> & {
     [MessageTypesEnum.Location]: [LocationObject];
 };
+
+// Location Message Types
+export interface LocationObject {
+    address?: string;
+    latitude: number;
+    longitude: number;
+    name?: string;
+}

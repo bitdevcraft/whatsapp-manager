@@ -1,8 +1,6 @@
 "use client";
 
-import { IconBell, IconCirclePlusFilled, type Icon } from "@tabler/icons-react";
-
-import { Button } from "@workspace/ui/components/button";
+import { type Icon } from "@tabler/icons-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -16,9 +14,9 @@ export function NavMain({
   items,
 }: {
   items: {
+    icon?: Icon;
     title: string;
     url: string;
-    icon?: Icon;
   }[];
 }) {
   return (
@@ -27,7 +25,7 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} asChild>
+              <SidebarMenuButton asChild tooltip={item.title}>
                 <Link href={item.url}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>

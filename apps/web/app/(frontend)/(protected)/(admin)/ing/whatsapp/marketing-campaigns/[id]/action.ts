@@ -1,56 +1,9 @@
 "use server";
 
-import { getUserWithTeam } from "@/lib/db/queries";
 import { ContactRepository, UsageLimitRepository } from "@workspace/db";
 import { unstable_cache, unstable_noStore } from "next/cache";
 
-export async function hasRemainingUsage(id: string): Promise<{
-  success: boolean;
-  message?: string;
-  remaining?: number;
-  contactCount?: number;
-}> {
-  unstable_noStore();
-
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    return {
-      success: false,
-      message: "No Team",
-    };
-  }
-
-  const { teamId, user } = userWithTeam;
-
-  const usageRepo = new UsageLimitRepository(teamId);
-
-  const usages = await usageRepo.getTeamLimit(user.id);
-
-  const contactRepo = new ContactRepository(teamId);
-
-  const contactCount = await contactRepo.countContactByMarketingCampaignId(id);
-
-  const limit =
-    usages?.memberLimit?.limitType === "inherited"
-      ? (usages?.teamUsage?.limit ?? 0)
-      : (usages?.memberLimit?.maxLimit ?? 0);
-
-  const remaining = limit - (usages?.memberLimit?.usage ?? 0);
-
-  if (remaining < contactCount) {
-    return {
-      success: false,
-      message: `Remaining Balance is Limited (Remaining:${remaining}). Please limit your recipients`,
-      remaining,
-      contactCount,
-    };
-  }
-
-  return {
-    success: true,
-  };
-}
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function getEstimatedRecipients(id: string) {
   unstable_noStore();
@@ -73,8 +26,56 @@ export async function getEstimatedRecipients(id: string) {
     },
     [id],
     {
-      tags: [id],
       revalidate: 10,
+      tags: [id],
     }
   )();
+}
+
+export async function hasRemainingUsage(id: string): Promise<{
+  contactCount?: number;
+  message?: string;
+  remaining?: number;
+  success: boolean;
+}> {
+  unstable_noStore();
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return {
+      message: "No Team",
+      success: false,
+    };
+  }
+
+  const { teamId, user } = userWithTeam;
+
+  const usageRepo = new UsageLimitRepository(teamId);
+
+  const usages = await usageRepo.getTeamLimit(user.id);
+
+  const contactRepo = new ContactRepository(teamId);
+
+  const contactCount = await contactRepo.countContactByMarketingCampaignId(id);
+
+  const limit =
+    usages?.memberLimit?.limitType === "inherited"
+      ? (usages?.teamUsage?.limit ?? 0)
+      : (usages?.memberLimit?.maxLimit ?? 0);
+
+  const remaining = limit - (usages?.memberLimit?.usage ?? 0);
+
+  if (remaining < contactCount) {
+    return {
+      contactCount,
+      message: `Remaining Balance is Limited (Remaining:${remaining}). Please limit your recipients`,
+      remaining,
+      success: false,
+    };
+  }
+
+  return {
+    success: true,
+  };
 }

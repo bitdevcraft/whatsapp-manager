@@ -1,8 +1,5 @@
-import { WabaConfigType, WhatsAppConfig } from '@shared/types/config';
-import * as SDKEnums from '@shared/types/enums';
-import Logger from '@shared/utils/logger';
-
 import EncryptionApi from '@features/encryption';
+import FileUploadApi from '@features/fileUpload';
 import FlowApi from '@features/flow';
 import MediaApi from '@features/media';
 import MessagesApi from '@features/messages';
@@ -15,8 +12,11 @@ import TwoStepVerificationApi from '@features/twoStepVerification';
 import WabaApi from '@features/waba';
 import { importConfig } from '@shared/config/importConfig';
 import Requester from '@shared/http/request';
+import { WabaConfigType, WhatsAppConfig } from '@shared/types/config';
+import * as SDKEnums from '@shared/types/enums';
+import Logger from '@shared/utils/logger';
+
 import { WhatsAppClass } from './types';
-import FileUploadApi from '@features/fileUpload';
 
 const LIB_NAME = 'WHATSAPP';
 const LOG_LOCAL = false;
@@ -25,23 +25,23 @@ const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 const headerPrefix = 'WA_SDK';
 
 export default class WhatsApp implements WhatsAppClass {
+    static readonly Enums = SDKEnums;
+
+    readonly businessProfile: BusinessProfileApi;
+
     config: WabaConfigType;
-
-    requester: Readonly<Requester>;
-
+    readonly encryption: EncryptionApi;
+    readonly fileUpload: FileUploadApi;
+    readonly flow: FlowApi;
+    readonly media: MediaApi;
     readonly messages: MessagesApi;
-    readonly templates: TemplateApi;
     readonly phoneNumber: PhoneNumberApi;
     readonly qrCode: QrCodeApi;
-    readonly encryption: EncryptionApi;
-    readonly twoStepVerification: TwoStepVerificationApi;
     readonly registration: RegistrationApi;
-    readonly media: MediaApi;
-    readonly fileUpload: FileUploadApi;
+    requester: Readonly<Requester>;
+    readonly templates: TemplateApi;
+    readonly twoStepVerification: TwoStepVerificationApi;
     readonly waba: WabaApi;
-    readonly flow: FlowApi;
-    readonly businessProfile: BusinessProfileApi;
-    static readonly Enums = SDKEnums;
 
     constructor(config?: WhatsAppConfig) {
         this.config = importConfig(config);
@@ -68,14 +68,9 @@ export default class WhatsApp implements WhatsAppClass {
         LOGGER.log('WhatsApp Node.js SDK instantiated!');
     }
 
-    private userAgent(): string {
-        const userAgentString = `${headerPrefix}/${'0.0.1'} (Node.js ${process.version})`;
-        return userAgentString;
-    }
-
-    updateTimeout(ms: number): boolean {
-        this.config[SDKEnums.WabaConfigEnum.RequestTimeout] = ms;
-        LOGGER.log(`Updated request timeout to ${ms}ms`);
+    updateAccessToken(accessToken: string): boolean {
+        this.config[SDKEnums.WabaConfigEnum.AccessToken] = accessToken;
+        LOGGER.log(`Updated access token`);
         return true;
     }
 
@@ -85,9 +80,9 @@ export default class WhatsApp implements WhatsAppClass {
         return true;
     }
 
-    updateAccessToken(accessToken: string): boolean {
-        this.config[SDKEnums.WabaConfigEnum.AccessToken] = accessToken;
-        LOGGER.log(`Updated access token`);
+    updateTimeout(ms: number): boolean {
+        this.config[SDKEnums.WabaConfigEnum.RequestTimeout] = ms;
+        LOGGER.log(`Updated request timeout to ${ms}ms`);
         return true;
     }
 
@@ -95,5 +90,10 @@ export default class WhatsApp implements WhatsAppClass {
         this.config[SDKEnums.WabaConfigEnum.BusinessAcctId] = wabaId;
         LOGGER.log(`Updated business account id to ${wabaId}`);
         return true;
+    }
+
+    private userAgent(): string {
+        const userAgentString = `${headerPrefix}/0.0.1 (Node.js ${process.version})`;
+        return userAgentString;
     }
 }

@@ -24,38 +24,9 @@ const rawKey = hexToBytes(KEY_HEX);
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-/** Import the AES-GCM key once */
-async function getCryptoKey(): Promise<CryptoKey> {
-  return crypto.subtle.importKey("raw", rawKey.buffer, "AES-GCM", false, [
-    "encrypt",
-    "decrypt",
-  ]);
-}
-
 export interface EncryptedPayload {
-  iv: string; // base64 iv
   data: string; // base64 ciphertext+tag
-}
-
-/**
- * Encrypt a plaintext string, returning base64 iv + base64 ciphertext.
- */
-export async function encryptApiKey(
-  plainText: string
-): Promise<EncryptedPayload> {
-  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit nonce
-  const key = await getCryptoKey();
-
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    encoder.encode(plainText)
-  );
-
-  return {
-    iv: Buffer.from(iv).toString("base64"),
-    data: Buffer.from(encrypted).toString("base64"),
-  };
+  iv: string; // base64 iv
 }
 
 /**
@@ -68,10 +39,39 @@ export async function decryptApiKey(
   const key = await getCryptoKey();
 
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
+    { iv, name: "AES-GCM" },
     key,
     Buffer.from(payload.data, "base64")
   );
 
   return decoder.decode(decrypted);
+}
+
+/**
+ * Encrypt a plaintext string, returning base64 iv + base64 ciphertext.
+ */
+export async function encryptApiKey(
+  plainText: string
+): Promise<EncryptedPayload> {
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit nonce
+  const key = await getCryptoKey();
+
+  const encrypted = await crypto.subtle.encrypt(
+    { iv, name: "AES-GCM" },
+    key,
+    encoder.encode(plainText)
+  );
+
+  return {
+    data: Buffer.from(encrypted).toString("base64"),
+    iv: Buffer.from(iv).toString("base64"),
+  };
+}
+
+/** Import the AES-GCM key once */
+async function getCryptoKey(): Promise<CryptoKey> {
+  return crypto.subtle.importKey("raw", rawKey.buffer, "AES-GCM", false, [
+    "encrypt",
+    "decrypt",
+  ]);
 }

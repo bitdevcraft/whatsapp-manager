@@ -1,21 +1,22 @@
-import React from "react";
-import { getMember } from "./_lib/queries";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { User } from "@workspace/db/schema";
+import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { User } from "@workspace/db/schema";
-import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import React from "react";
+
+import { getMember } from "./_lib/queries";
 
 interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getMember>>]>;
 }
 
 export function TeamList({ promises }: Props) {
-  const getUserDisplayName = (user: Pick<User, "id" | "name" | "email">) => {
+  const getUserDisplayName = (user: Pick<User, "email" | "id" | "name">) => {
     return user.name || user.email || "Unknown User";
   };
 
@@ -28,7 +29,7 @@ export function TeamList({ promises }: Props) {
       <CardContent>
         <ScrollArea className="max-h-[50vh] ">
           {data.map((el) => (
-            <div key={el.id} className="flex items-center space-x-4 mb-4">
+            <div className="flex items-center space-x-4 mb-4" key={el.id}>
               <Avatar>
                 {/* 
                     This app doesn't save profile images, but here

@@ -1,12 +1,10 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import {
   IconCreditCard,
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
-
 import {
   Avatar,
   AvatarFallback,
@@ -31,17 +29,19 @@ import { ChevronsUpDown, LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { authClient } from "@/lib/auth/auth-client";
+
 export function NavUser({
   user,
 }: {
   user: {
-    id: string;
-    name: string;
-    emailVerified: boolean;
-    email: string;
     createdAt: Date;
+    email: string;
+    emailVerified: boolean;
+    id: string;
+    image?: null | string | undefined | undefined | undefined;
+    name: string;
     updatedAt: Date;
-    image?: string | null | undefined | undefined | undefined;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -63,11 +63,11 @@ export function NavUser({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              size="lg"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
+                <AvatarImage alt={user.name ?? ""} src={user.image ?? ""} />
                 <AvatarFallback className="rounded-lg">
                   <UserRound size={15} />
                 </AvatarFallback>
@@ -80,15 +80,15 @@ export function NavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
+            align="end"
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
-            align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={""} alt={user?.name!} />
+                  <AvatarImage alt={user?.name!} src={""} />
                   <AvatarFallback className="rounded-lg">
                     <UserRound size={15} />
                   </AvatarFallback>

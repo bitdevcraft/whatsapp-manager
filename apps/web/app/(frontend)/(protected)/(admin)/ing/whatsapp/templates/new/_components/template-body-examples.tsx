@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { AutoMatrixRowInputs } from "./template-auto-matrix";
 import { AutoNamedParamsInputs } from "./template-auto-name-param";
 
@@ -7,7 +7,7 @@ export function BodyAutoExamples({
   parameterFormat,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
 }) {
   if (parameterFormat === "POSITIONAL") {
     return (

@@ -2,8 +2,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { Contact, Template } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
-import { Textarea } from "@workspace/ui/components/textarea";
 import {
   Form,
   FormControl,
@@ -12,19 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { SendHorizonal } from "lucide-react";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
-import axios from "axios";
-import { useSearchMessageStore } from "../_store/message-store";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { LanguagesEnum } from "@workspace/wa-cloud-api";
-import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
-import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
-
-import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
 import {
   Select,
   SelectContent,
@@ -32,28 +21,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Contact, Template } from "@workspace/db/schema";
+import { Textarea } from "@workspace/ui/components/textarea";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import axios from "axios";
+import { SendHorizonal } from "lucide-react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import {
   MultiStepForm,
   MultiStepFormStep,
 } from "@/components/forms/multi-step-form";
+import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
+import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
 import {
-  TemplateSendValue,
   templateSendSchema,
+  TemplateSendValue,
 } from "@/types/validations/templates/template-send-schema";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
+import { useSearchMessageStore } from "../_store/message-store";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
 });
-
-type FormValues = z.infer<typeof FormSchema>;
 
 export interface Props {
   contact: Contact;
   lastMessageDate?: Date;
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
+
+type FormValues = z.infer<typeof FormSchema>;
 export default function ConversationMessage({
   contact,
   lastMessageDate,
@@ -61,14 +62,14 @@ export default function ConversationMessage({
 }: Props) {
   const queryClient = useQueryClient();
 
-  const { updateRandomId, clearSearchMessageId, clearSearchString } =
+  const { clearSearchMessageId, clearSearchString, updateRandomId } =
     useSearchMessageStore();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       text: "",
     },
+    resolver: zodResolver(FormSchema),
   });
 
   const onSubmit = async (input: FormValues) => {
@@ -103,13 +104,13 @@ export default function ConversationMessage({
       <div className="w-full">
         <ResponsiveDialog
           isOpen={templateDialog}
-          title={"Message Template"}
           setIsOpen={setTemplateDialog}
+          title={"Message Template"}
         >
           <TemplateMessage
             contact={contact}
-            templates={templates}
             setIsOpen={setTemplateDialog}
+            templates={templates}
           />
         </ResponsiveDialog>
         <div className="flex gap-2 w-full">
@@ -164,37 +165,37 @@ function isWithinLast24Hours(createdAt: Date | string): boolean {
 
 function TemplateMessage({
   contact,
-  templates,
   setIsOpen,
+  templates,
 }: {
   contact: Contact;
-  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
   setIsOpen: (state: boolean) => void;
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }) {
   const queryClient = useQueryClient();
 
   const form = useForm<TemplateSendValue>({
-    resolver: zodResolver(templateSendSchema),
     defaultValues: {
-      template: {
-        template: "",
-        messageTemplate: {
-          name: "",
-          language: {
-            policy: "deterministic",
-            code: LanguagesEnum.English,
-          },
-          components: [],
-        },
-      },
-      phone: contact.phone,
       contactId: contact.id,
+      phone: contact.phone,
+      template: {
+        messageTemplate: {
+          components: [],
+          language: {
+            code: LanguagesEnum.English,
+            policy: "deterministic",
+          },
+          name: "",
+        },
+        template: "",
+      },
       templateId: "",
     },
+    resolver: zodResolver(templateSendSchema),
   });
 
   const [selectedTemplate, setSelectedTemplate] =
-    React.useState<Template | null>(null);
+    React.useState<null | Template>(null);
 
   const defaultMessageTemplate = React.useMemo(() => {
     return selectedTemplate
@@ -241,9 +242,9 @@ function TemplateMessage({
     <div>
       <MultiStepForm
         className={"space-y-10"}
-        schema={templateSendSchema}
         form={form}
         onSubmit={onSubmit}
+        schema={templateSendSchema}
       >
         <MultiStepFormStep name="templates">
           <Form {...form}>
@@ -283,8 +284,8 @@ function TemplateMessage({
 
               {selectedTemplate && (
                 <MessageTemplateForm
-                  namePrefix="template.messageTemplate"
                   initialTemplate={selectedTemplate.content!}
+                  namePrefix="template.messageTemplate"
                   preview
                 />
               )}

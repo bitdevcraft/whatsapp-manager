@@ -1,13 +1,15 @@
+import { getValidFilters } from "@workspace/ui/lib/data-table";
+import React from "react";
+
 import {
   getAdAccount,
   getWhatsAppBusinessAccountDetails,
 } from "@/features/business-account/_lib/queries";
-import BusinessAccount from "./business-account";
-import React from "react";
 import { getWhatsAppBusinessAccountPhoneNumber } from "@/features/whatsapp/phone-number/_lib/queries";
 import { waPhoneNumberSearchParamsCache } from "@/features/whatsapp/phone-number/_lib/validation";
-import { getValidFilters } from "@workspace/ui/lib/data-table";
 import { SearchParams } from "@/types";
+
+import BusinessAccount from "./business-account";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;

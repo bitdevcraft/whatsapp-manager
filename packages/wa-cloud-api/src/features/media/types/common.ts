@@ -1,31 +1,31 @@
 import type { ResponseSuccess } from '@shared/types/request';
 
-export type MediaResponse = {
+export interface MediaClass {
+    deleteMedia(mediaId: string, phone_number_id?: string): Promise<ResponseSuccess>;
+    downloadMedia(mediaUrl: string): Promise<Blob>;
+    getMediaById(mediaId: string, phone_number_id?: string): Promise<MediaResponse>;
+    uploadMedia(file: File, messagingProduct?: string): Promise<UploadMediaResponse>;
+}
+
+export interface MediaResponse {
+    file_size: number;
     id: string;
-    url: string;
+    messaging_product: 'whatsapp';
     mime_type: string;
     sha256: string;
-    file_size: number;
-    messaging_product: 'whatsapp';
-};
+    url: string;
+}
 
-export type MediasResponse = {
+export interface MediasResponse {
     data: MediaResponse[];
     paging: {
         cursors: {
-            before: string;
             after: string;
+            before: string;
         };
     };
-};
+}
 
-export type UploadMediaResponse = {
+export interface UploadMediaResponse {
     id: string;
-};
-
-export interface MediaClass {
-    getMediaById(mediaId: string, phone_number_id?: string): Promise<MediaResponse>;
-    uploadMedia(file: File, messagingProduct?: string): Promise<UploadMediaResponse>;
-    deleteMedia(mediaId: string, phone_number_id?: string): Promise<ResponseSuccess>;
-    downloadMedia(mediaUrl: string): Promise<Blob>;
 }

@@ -1,10 +1,10 @@
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@workspace/ui/components/card";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
@@ -34,7 +34,7 @@ export default function InvitationExpired() {
           <div className="text-center">
             <p className="text-xs text-muted-foreground">
               Need help?{" "}
-              <a href="#" className="text-primary hover:underline">
+              <a className="text-primary hover:underline" href="#">
                 Contact Support
               </a>
             </p>

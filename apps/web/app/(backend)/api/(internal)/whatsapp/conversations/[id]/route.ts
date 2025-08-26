@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getUserWithTeam } from "@/lib/db/queries";
-import { conversationsTable, conversationMembersTable } from "@workspace/db";
+import { conversationMembersTable, conversationsTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { eq, and, count, lt, gt, ne } from "drizzle-orm";
+import { and, count, eq, gt, lt, ne } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(
   request: NextRequest,
@@ -63,15 +64,15 @@ export async function GET(
           });
 
           const beforeRecord = await tx.query.conversationsTable.findMany({
+            limit: beforeCount,
+            orderBy: (conversationsTable, { asc }) => [
+              asc(conversationsTable.createdAt),
+            ],
             where: and(
               eq(conversationsTable.contactId, id),
               gt(conversationsTable.createdAt, target!.createdAt),
               ne(conversationsTable.id, target!.id)
             ),
-            orderBy: (conversationsTable, { asc }) => [
-              asc(conversationsTable.createdAt),
-            ],
-            limit: beforeCount,
             with: {
               user: true,
             },
@@ -93,15 +94,15 @@ export async function GET(
             .then((res) => res[0]?.count ?? 0);
 
           const afterRecord = await tx.query.conversationsTable.findMany({
+            limit: afterCount + 1,
+            orderBy: (conversationsTable, { desc }) => [
+              desc(conversationsTable.createdAt),
+            ],
             where: and(
               eq(conversationsTable.contactId, id),
               lt(conversationsTable.createdAt, target!.createdAt),
               ne(conversationsTable.id, target!.id)
             ),
-            orderBy: (conversationsTable, { desc }) => [
-              desc(conversationsTable.createdAt),
-            ],
-            limit: afterCount + 1,
             with: {
               user: true,
             },
@@ -125,12 +126,12 @@ export async function GET(
           batch.push(...beforeRecord.reverse(), target, ...afterRecord);
         } else {
           const data = await tx.query.conversationsTable.findMany({
-            where: eq(conversationsTable.contactId, id),
+            limit: limitPrev > 0 ? limitPrev : limit + 1,
+            offset,
             orderBy: (conversationsTable, { desc }) => [
               desc(conversationsTable.createdAt),
             ],
-            offset,
-            limit: limitPrev > 0 ? limitPrev : limit + 1,
+            where: eq(conversationsTable.contactId, id),
             with: {
               user: true,
             },
@@ -158,7 +159,7 @@ export async function GET(
             )
           );
 
-        return { batch, total, beforeTotal, afterTotal };
+        return { afterTotal, batch, beforeTotal, total };
       }
     );
 
@@ -178,8 +179,8 @@ export async function GET(
     return NextResponse.json(
       {
         data,
-        previousOffset,
         nextOffset,
+        previousOffset,
       },
       { status: 200 }
     );

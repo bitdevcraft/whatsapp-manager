@@ -10,7 +10,6 @@ export { FlowApi };
 export type {
     CreateFlowResponse,
     Flow,
-    FlowType,
     FlowActionEnum,
     FlowAssetsResponse,
     FlowCategoryEnum,
@@ -21,6 +20,7 @@ export type {
     FlowPreviewResponse,
     FlowsListResponse,
     FlowStatusEnum,
+    FlowType,
     FlowValidationError,
     UpdateFlowResponse,
     ValidateFlowJsonResponse,

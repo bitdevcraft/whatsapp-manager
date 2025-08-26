@@ -1,7 +1,8 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import { buildFieldsQueryString } from '@shared/utils/buildFieldsQueryString';
 import { objectToQueryString } from '@shared/utils/objectToQueryString';
 
@@ -23,6 +24,44 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
 
     constructor(config: WabaConfigType, client: RequesterClass) {
         super(config, client);
+    }
+
+    /**
+     * Create an upload session for a profile picture.
+     *
+     * This is the first step in the profile picture upload process.
+     *
+     * @param fileLength Length of the file to be uploaded in bytes.
+     * @param fileType MIME type of the file (e.g., 'image/jpeg').
+     * @param fileName Name of the file with extension.
+     * @returns Response containing the upload session ID needed for the next step.
+     *
+     * @example
+     * // Create upload session for profile picture
+     * const session = await whatsappClient.businessProfile.createUploadSession(
+     *   fileBuffer.length,
+     *   'image/jpeg',
+     *   'profile.jpg'
+     * );
+     * const uploadSessionId = session.upload_session_id;
+     */
+    async createUploadSession(
+        fileLength: number,
+        fileType: string,
+        fileName: string,
+    ): Promise<bp.UploadSessionResponse> {
+        const queryParams = objectToQueryString({
+            file_length: fileLength,
+            file_name: fileName,
+            file_type: fileType,
+        });
+
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `app/uploads/${queryParams}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
     }
 
     /**
@@ -52,6 +91,44 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
+    }
+
+    /**
+     * Get the upload handle information.
+     *
+     * This is the third step in the profile picture upload process.
+     * After uploading the file, get the handle to use when updating the profile.
+     *
+     * @param uploadId The upload session ID from createUploadSession response.
+     * @returns Response containing the upload handle information.
+     *
+     * @example
+     * // Complete profile picture update process
+     * // 1. Create upload session
+     * const session = await whatsappClient.businessProfile.createUploadSession(
+     *   fileBuffer.length, 'image/jpeg', 'profile.jpg'
+     * );
+     *
+     * // 2. Upload the image data
+     * await whatsappClient.businessProfile.uploadMedia(
+     *   session.upload_session_id, fileBuffer
+     * );
+     *
+     * // 3. Get the handle for the uploaded file
+     * const handleInfo = await whatsappClient.businessProfile.getUploadHandle(
+     *   session.upload_session_id
+     * );
+     *
+     * // 4. Update profile with new picture and business information
+     * await whatsappClient.businessProfile.updateBusinessProfile({
+     *   messaging_product: 'whatsapp',
+     *   profile_picture_handle: handleInfo.handle,
+     *   vertical: BusinessVerticalEnum.RESTAURANT,
+     *   about: 'Delicious food served daily'
+     * });
+     */
+    async getUploadHandle(uploadId: string): Promise<bp.UploadHandle> {
+        return this.sendJson(HttpMethodsEnum.Get, uploadId, this.config[WabaConfigEnum.RequestTimeout], null);
     }
 
     /**
@@ -90,44 +167,6 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
     }
 
     /**
-     * Create an upload session for a profile picture.
-     *
-     * This is the first step in the profile picture upload process.
-     *
-     * @param fileLength Length of the file to be uploaded in bytes.
-     * @param fileType MIME type of the file (e.g., 'image/jpeg').
-     * @param fileName Name of the file with extension.
-     * @returns Response containing the upload session ID needed for the next step.
-     *
-     * @example
-     * // Create upload session for profile picture
-     * const session = await whatsappClient.businessProfile.createUploadSession(
-     *   fileBuffer.length,
-     *   'image/jpeg',
-     *   'profile.jpg'
-     * );
-     * const uploadSessionId = session.upload_session_id;
-     */
-    async createUploadSession(
-        fileLength: number,
-        fileType: string,
-        fileName: string,
-    ): Promise<bp.UploadSessionResponse> {
-        const queryParams = objectToQueryString({
-            file_length: fileLength,
-            file_type: fileType,
-            file_name: fileName,
-        });
-
-        return this.sendJson(
-            HttpMethodsEnum.Post,
-            `app/uploads/${queryParams}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
-    }
-
-    /**
      * Upload media file to the upload session.
      *
      * This is the second step in the profile picture upload process.
@@ -145,44 +184,6 @@ export default class BusinessProfileApi extends BaseAPI implements bp.BusinessPr
      * );
      */
     async uploadMedia(uploadId: string, file: Buffer): Promise<bp.UploadBusinessProfileResponse> {
-        return this.sendJson(HttpMethodsEnum.Post, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], file);
-    }
-
-    /**
-     * Get the upload handle information.
-     *
-     * This is the third step in the profile picture upload process.
-     * After uploading the file, get the handle to use when updating the profile.
-     *
-     * @param uploadId The upload session ID from createUploadSession response.
-     * @returns Response containing the upload handle information.
-     *
-     * @example
-     * // Complete profile picture update process
-     * // 1. Create upload session
-     * const session = await whatsappClient.businessProfile.createUploadSession(
-     *   fileBuffer.length, 'image/jpeg', 'profile.jpg'
-     * );
-     *
-     * // 2. Upload the image data
-     * await whatsappClient.businessProfile.uploadMedia(
-     *   session.upload_session_id, fileBuffer
-     * );
-     *
-     * // 3. Get the handle for the uploaded file
-     * const handleInfo = await whatsappClient.businessProfile.getUploadHandle(
-     *   session.upload_session_id
-     * );
-     *
-     * // 4. Update profile with new picture and business information
-     * await whatsappClient.businessProfile.updateBusinessProfile({
-     *   messaging_product: 'whatsapp',
-     *   profile_picture_handle: handleInfo.handle,
-     *   vertical: BusinessVerticalEnum.RESTAURANT,
-     *   about: 'Delicious food served daily'
-     * });
-     */
-    async getUploadHandle(uploadId: string): Promise<bp.UploadHandle> {
-        return this.sendJson(HttpMethodsEnum.Get, `${uploadId}`, this.config[WabaConfigEnum.RequestTimeout], null);
+        return this.sendJson(HttpMethodsEnum.Post, uploadId, this.config[WabaConfigEnum.RequestTimeout], file);
     }
 }

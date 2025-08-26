@@ -1,17 +1,17 @@
 "use client";
-import { createContext, useContext, useState, ReactNode } from "react";
 import Head from "next/head";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 // Context value now includes both title and setter
 interface TitleContextValue {
-  title: string;
   setTitle: (title: string) => void;
+  title: string;
 }
 
 // Create context with default values
 const TitleContext = createContext<TitleContextValue>({
-  title: "",
   setTitle: () => {},
+  title: "",
 });
 
 interface TitleProviderProps {
@@ -26,7 +26,7 @@ export function TitleProvider({
   const [title, setTitle] = useState(defaultTitle);
 
   return (
-    <TitleContext.Provider value={{ title, setTitle }}>
+    <TitleContext.Provider value={{ setTitle, title }}>
       <Head>
         <title>{title}</title>
       </Head>

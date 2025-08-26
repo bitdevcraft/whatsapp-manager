@@ -8,7 +8,7 @@ export default function Layout({
 }>) {
   return (
     <html lang="en">
-      <link rel="icon" href="/icon.svg" sizes="any" />
+      <link href="/icon.svg" rel="icon" sizes="any" />
       <body>
         <Navbar />
         {children}

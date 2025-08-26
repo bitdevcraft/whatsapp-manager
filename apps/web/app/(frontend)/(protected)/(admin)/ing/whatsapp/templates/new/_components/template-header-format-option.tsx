@@ -1,9 +1,9 @@
 import {
+  FormControl,
+  FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormField,
 } from "@workspace/ui/components/form";
 import {
   Select,
@@ -33,7 +33,7 @@ export function HeaderFormatOption({ index }: { index: number }) {
         <FormItem>
           <FormLabel>Header Format</FormLabel>
           <FormControl>
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <SelectTrigger>
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>

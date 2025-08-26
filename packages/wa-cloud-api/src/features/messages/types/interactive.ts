@@ -1,222 +1,223 @@
 import { InteractiveTypesEnum, MessageTypesEnum } from '@shared/types/enums';
+
 import { MessageRequestBody } from './common';
 
-// Import media types to avoid circular dependencies
-type DocumentMediaObject = {
-    id?: string;
-    link?: string;
-    caption?: string;
-    filename?: string;
+export type InteractiveMessageRequestBody = MessageRequestBody<MessageTypesEnum.Interactive> & {
+    [MessageTypesEnum.Interactive]: InteractiveObject;
 };
 
-type ImageMediaObject = {
-    id?: string;
-    link?: string;
-    caption?: string;
-};
+export type InteractiveObject =
+    | AddressMessageInteractiveObject
+    | ButtonInteractiveObject
+    | CtaUrlInteractiveObject
+    | FlowInteractiveObject
+    | ListInteractiveObject
+    | LocationRequestInteractiveObject
+    | ProductInteractiveObject
+    | ProductListInteractiveObject;
 
-type VideoMediaObject = {
-    id?: string;
-    link?: string;
-    caption?: string;
-};
-
-// Interactive Message Types
-type ProductObject = {
-    product_retailer_id: string;
-};
-
-type SimpleTextObject = {
-    text: string;
-};
-
-type RowObject = {
-    id: string;
-    title: string;
-    description?: string;
-};
-
-type MultiProductSectionObject = {
-    product_items: ProductObject[];
-    rows?: never;
-    title?: string;
-};
-
-type ListSectionObject = {
-    product_items?: never;
-    rows: RowObject[];
-    title?: string;
-};
-
-type SectionObject = MultiProductSectionObject | ListSectionObject;
-
-type ButtonObject = {
-    title: string;
-    id: string;
-};
-
-type ReplyButtonObject = {
-    type: 'reply';
-    reply: ButtonObject;
-};
-
-type ActionObject = {
+interface ActionObject {
     buttons?: ReplyButtonObject[];
     catalog_id?: string;
     product_retailer_id?: string;
     sections?: SectionObject;
-};
+}
 
-type HeaderObject = {
-    type: 'document' | 'image' | 'text' | 'video';
+interface AddressMessageActionObject {
+    name: 'address_message';
+    parameters: AddressMessageParameters;
+}
+
+interface AddressMessageInteractiveObject {
+    action: AddressMessageActionObject;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    type: InteractiveTypesEnum.AddressMessage;
+}
+
+interface AddressMessageParameters {
+    country: string; // ISO country code, e.g., "IN" for India
+    saved_addresses?: SavedAddress[];
+    validation_errors?: ValidationErrors;
+    values?: AddressValues;
+}
+
+interface AddressValues {
+    address?: string;
+    building_name?: string;
+    city?: string;
+    floor_number?: string;
+    house_number?: string;
+    in_pin_code?: string;
+    landmark_area?: string;
+    name?: string;
+    phone_number?: string;
+    state?: string;
+    tower_number?: string;
+}
+
+interface ButtonInteractiveObject {
+    action: ActionObject;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    type: InteractiveTypesEnum.Button;
+}
+
+interface ButtonObject {
+    id: string;
+    title: string;
+}
+
+interface CtaUrlActionObject {
+    name: 'cta_url';
+    parameters: CtaUrlParameters;
+}
+
+interface CtaUrlInteractiveObject {
+    action: CtaUrlActionObject;
+    body?: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    type: InteractiveTypesEnum.CtaUrl;
+}
+
+interface CtaUrlParameters {
+    display_text: string;
+    url: string;
+}
+
+// Import media types to avoid circular dependencies
+interface DocumentMediaObject {
+    caption?: string;
+    filename?: string;
+    id?: string;
+    link?: string;
+}
+
+interface FlowActionObject {
+    name: 'flow';
+    parameters: FlowParameters;
+}
+
+interface FlowInteractiveObject {
+    action: FlowActionObject;
+    body: SimpleTextObject;
+    footer?: SimpleTextObject;
+    header?: HeaderObject;
+    type: InteractiveTypesEnum.Flow;
+}
+
+interface FlowParameters {
+    flow_action: 'data_exchange' | 'navigate';
+    flow_action_payload?: {
+        data?: Record<string, string>;
+        screen?: string;
+    };
+    flow_cta: string;
+    flow_id?: string;
+    flow_message_version: string;
+    flow_name?: string;
+    flow_token: string;
+    mode?: 'draft' | 'published';
+}
+
+interface HeaderObject {
     document?: DocumentMediaObject;
     image?: ImageMediaObject;
     text?: string;
+    type: 'document' | 'image' | 'text' | 'video';
     video?: VideoMediaObject;
-};
+}
 
-type ButtonInteractiveObject = {
-    type: InteractiveTypesEnum.Button;
+interface ImageMediaObject {
+    caption?: string;
+    id?: string;
+    link?: string;
+}
+
+interface ListInteractiveObject {
+    action: ActionObject;
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
-    action: ActionObject;
-};
-
-type ListInteractiveObject = {
     type: InteractiveTypesEnum.List;
+}
+
+interface ListSectionObject {
+    product_items?: never;
+    rows: RowObject[];
+    title?: string;
+}
+
+interface LocationRequestActionObject {
+    name: 'send_location';
+}
+
+interface LocationRequestInteractiveObject {
+    action: LocationRequestActionObject;
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
-    action: ActionObject;
-};
+    type: InteractiveTypesEnum.LocationRequest;
+}
 
-type ProductInteractiveObject = {
-    type: InteractiveTypesEnum.Product;
+interface MultiProductSectionObject {
+    product_items: ProductObject[];
+    rows?: never;
+    title?: string;
+}
+
+interface ProductInteractiveObject {
+    action: ActionObject;
     body?: SimpleTextObject;
     footer?: SimpleTextObject;
     header?: HeaderObject;
-    action: ActionObject;
-};
+    type: InteractiveTypesEnum.Product;
+}
 
-type ProductListInteractiveObject = {
-    type: InteractiveTypesEnum.ProductList;
+interface ProductListInteractiveObject {
+    action: ActionObject;
     body: SimpleTextObject;
     footer?: SimpleTextObject;
     header: HeaderObject;
-    action: ActionObject;
-};
+    type: InteractiveTypesEnum.ProductList;
+}
 
-type CtaUrlParameters = {
-    display_text: string;
-    url: string;
-};
+// Interactive Message Types
+interface ProductObject {
+    product_retailer_id: string;
+}
 
-type CtaUrlActionObject = {
-    name: 'cta_url';
-    parameters: CtaUrlParameters;
-};
+interface ReplyButtonObject {
+    reply: ButtonObject;
+    type: 'reply';
+}
 
-type CtaUrlInteractiveObject = {
-    type: InteractiveTypesEnum.CtaUrl;
-    body?: SimpleTextObject;
-    footer?: SimpleTextObject;
-    header?: HeaderObject;
-    action: CtaUrlActionObject;
-};
+interface RowObject {
+    description?: string;
+    id: string;
+    title: string;
+}
 
-type LocationRequestActionObject = {
-    name: 'send_location';
-};
-
-type LocationRequestInteractiveObject = {
-    type: InteractiveTypesEnum.LocationRequest;
-    body: SimpleTextObject;
-    footer?: SimpleTextObject;
-    header?: HeaderObject;
-    action: LocationRequestActionObject;
-};
-
-type AddressValues = {
-    name?: string;
-    phone_number?: string;
-    in_pin_code?: string;
-    house_number?: string;
-    floor_number?: string;
-    tower_number?: string;
-    building_name?: string;
-    address?: string;
-    landmark_area?: string;
-    city?: string;
-    state?: string;
-};
-
-type SavedAddress = {
+interface SavedAddress {
     id: string;
     value: AddressValues;
-};
+}
+
+type SectionObject = ListSectionObject | MultiProductSectionObject;
+
+interface SimpleTextObject {
+    text: string;
+}
 
 type ValidationErrors = {
     [key in keyof AddressValues]?: string;
 };
 
-type AddressMessageParameters = {
-    country: string; // ISO country code, e.g., "IN" for India
-    values?: AddressValues;
-    saved_addresses?: SavedAddress[];
-    validation_errors?: ValidationErrors;
-};
-
-type AddressMessageActionObject = {
-    name: 'address_message';
-    parameters: AddressMessageParameters;
-};
-
-type AddressMessageInteractiveObject = {
-    type: InteractiveTypesEnum.AddressMessage;
-    body: SimpleTextObject;
-    footer?: SimpleTextObject;
-    header?: HeaderObject;
-    action: AddressMessageActionObject;
-};
-
-type FlowParameters = {
-    flow_message_version: string;
-    flow_id?: string;
-    flow_name?: string;
-    flow_cta: string;
-    mode?: 'draft' | 'published';
-    flow_token: string;
-    flow_action: 'navigate' | 'data_exchange';
-    flow_action_payload?: {
-        screen?: string;
-        data?: Record<string, string>;
-    };
-};
-
-type FlowActionObject = {
-    name: 'flow';
-    parameters: FlowParameters;
-};
-
-type FlowInteractiveObject = {
-    type: InteractiveTypesEnum.Flow;
-    body: SimpleTextObject;
-    footer?: SimpleTextObject;
-    header?: HeaderObject;
-    action: FlowActionObject;
-};
-
-export type InteractiveObject =
-    | ButtonInteractiveObject
-    | ListInteractiveObject
-    | ProductInteractiveObject
-    | ProductListInteractiveObject
-    | CtaUrlInteractiveObject
-    | LocationRequestInteractiveObject
-    | AddressMessageInteractiveObject
-    | FlowInteractiveObject;
-
-export type InteractiveMessageRequestBody = MessageRequestBody<MessageTypesEnum.Interactive> & {
-    [MessageTypesEnum.Interactive]: InteractiveObject;
-};
+interface VideoMediaObject {
+    caption?: string;
+    id?: string;
+    link?: string;
+}

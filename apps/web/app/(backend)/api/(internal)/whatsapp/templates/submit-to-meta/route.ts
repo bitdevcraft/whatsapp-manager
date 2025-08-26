@@ -1,27 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from "next/server";
-import { eq, and, isNull } from "drizzle-orm";
-import axios from "axios";
-import { AppTemplateResponse, TemplateMeta } from "@/types/template";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { getUserWithTeam } from "@/lib/db/queries";
-import WhatsApp from "@workspace/wa-cloud-api";
-import { decryptApiKey } from "@/lib/crypto";
 import { templatesTable } from "@workspace/db/schema/templates";
+import { withTenantTransaction } from "@workspace/db/tenant";
+import WhatsApp from "@workspace/wa-cloud-api";
+import axios from "axios";
+import { and, eq, isNull } from "drizzle-orm";
+import { NextResponse } from "next/server";
+
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
+import { AppTemplateResponse, TemplateMeta } from "@/types/template";
 
 export const runtime = "nodejs";
 
 type TemplateSubmissionResponse = {
-  success: boolean;
+  details?: Record<string, unknown>;
+  error?: string;
   message: string;
+  success: boolean;
   template?: {
     id: string;
+    meta?: TemplateMeta;
     name: string;
     status: string;
-    meta?: TemplateMeta;
   };
-  error?: string;
-  details?: Record<string, unknown>;
 };
 
 export async function POST(request: Request) {
@@ -72,11 +73,11 @@ export async function POST(request: Request) {
 
       if (!template) {
         const newTemplate = {
+          content: templateData.content,
+          createdAt: new Date(),
           id: templateData.id,
           name: templateData.name,
-          content: templateData.content,
           teamId,
-          createdAt: new Date(),
           updatedAt: new Date(),
         };
 
@@ -128,17 +129,17 @@ export async function POST(request: Request) {
 
     // Decrypt the access token
     const accessToken = await decryptApiKey({
-      iv: verifiedAccount.accessToken.iv,
       data: verifiedAccount.accessToken.data,
+      iv: verifiedAccount.accessToken.iv,
     });
 
     // Create a custom Axios instance for v22.0
     const axiosInstance = axios.create({
       baseURL: "https://graph.facebook.com/v22.0",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       timeout: 30000, // 30 second timeout
     });
@@ -156,10 +157,10 @@ export async function POST(request: Request) {
       (error) => {
         if (error.response) {
           console.error("Meta API error response:", {
-            status: error.response.status,
-            statusText: error.response.statusText,
             data: error.response.data,
             headers: error.response.headers,
+            status: error.response.status,
+            statusText: error.response.statusText,
           });
         } else if (error.request) {
           console.error("No response received from Meta API:", error.request);
@@ -176,9 +177,9 @@ export async function POST(request: Request) {
         super({
           accessToken,
           businessAcctId: verifiedAccount.id.toString(),
-          phoneNumberId: verifiedPhoneNumber.id,
           // @ts-expect-error - Private property access needed to fix the issue
           httpClient: axiosInstance,
+          phoneNumberId: verifiedPhoneNumber.id,
         });
         // @ts-expect-error - Override private property
         this.baseUrl = "https://graph.facebook.com/v22.0";
@@ -204,8 +205,8 @@ export async function POST(request: Request) {
         id: existingTemplate.content?.id || templateData.name,
         meta: {
           ...(existingTemplate.content?.meta || {}),
-          status: "PENDING",
           id: result.id,
+          status: "PENDING",
           submittedAt: new Date().toISOString(),
         },
       };
@@ -237,13 +238,13 @@ export async function POST(request: Request) {
       }
 
       const response: TemplateSubmissionResponse = {
-        success: true,
         message: "Template submitted to Meta for approval",
+        success: true,
         template: {
           id: updatedTemplate.id,
+          meta: updatedContent.meta,
           name: updatedTemplate.name,
           status: updatedContent.meta?.status || "PENDING",
-          meta: updatedContent.meta,
         },
       };
 
@@ -264,17 +265,17 @@ export async function POST(request: Request) {
       }
 
       console.error("Error in template submission to Meta:", {
-        message: errorMessage,
         details: errorDetails,
+        message: errorMessage,
         timestamp: new Date().toISOString(),
       });
 
       const response: TemplateSubmissionResponse = {
-        success: false,
-        message: errorMessage,
-        error: errorMessage,
         details:
           process.env.NODE_ENV === "development" ? errorDetails : undefined,
+        error: errorMessage,
+        message: errorMessage,
+        success: false,
       };
 
       return NextResponse.json(response, { status: 500 });
@@ -295,17 +296,17 @@ export async function POST(request: Request) {
     }
 
     console.error("Error in template submission to Meta:", {
-      message: errorMessage,
       details: errorDetails,
+      message: errorMessage,
       timestamp: new Date().toISOString(),
     });
 
     const response: TemplateSubmissionResponse = {
-      success: false,
-      message: errorMessage,
-      error: errorMessage,
       details:
         process.env.NODE_ENV === "development" ? errorDetails : undefined,
+      error: errorMessage,
+      message: errorMessage,
+      success: false,
     };
 
     return NextResponse.json(response, { status: 500 });
@@ -332,10 +333,10 @@ async function submitTemplateToMeta(
   // Prepare template data for Meta API v22.0 - exactly matching Meta's example
   // Prepare template data for Meta API v22.0 - exactly matching Meta's example
   const template = {
-    name: templateData.content.name,
-    language: templateData.content.language || "en",
     category: templateData.content.category || "MARKETING",
     components: templateData.content.components || [],
+    language: templateData.content.language || "en",
+    name: templateData.content.name,
   };
 
   try {
@@ -343,9 +344,9 @@ async function submitTemplateToMeta(
 
     const response = await axios.post(url, template, {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       timeout: 30000,
     });
@@ -357,15 +358,15 @@ async function submitTemplateToMeta(
     return { id: response.data.id };
   } catch (error: any) {
     console.error("Direct Meta API error:", {
+      config: {
+        data: error.config?.data,
+        method: error.config?.method,
+        url: error.config?.url,
+      },
+      headers: error.response?.headers,
       message: error.message,
       response: error.response?.data,
       status: error.response?.status,
-      headers: error.response?.headers,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        data: error.config?.data,
-      },
     });
 
     throw new Error(

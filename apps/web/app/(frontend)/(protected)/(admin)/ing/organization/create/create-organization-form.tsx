@@ -1,14 +1,14 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@workspace/ui/components/card";
 import {
   Form,
@@ -19,10 +19,11 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
+
+import { authClient } from "@/lib/auth/auth-client";
 
 const OrganizationSchema = z.object({
   name: z.string().nonempty(),
@@ -55,8 +56,8 @@ export function CreateOrganizationForm() {
 
     if (error) {
       form.setError("slug", {
-        type: "custom",
         message: "Domain isn't available",
+        type: "custom",
       });
 
       return;
@@ -70,11 +71,11 @@ export function CreateOrganizationForm() {
   };
 
   const form = useForm<OrganizationPayload>({
-    resolver: zodResolver(OrganizationSchema),
     defaultValues: {
       name: "",
       slug: "",
     },
+    resolver: zodResolver(OrganizationSchema),
   });
 
   return (
@@ -85,7 +86,7 @@ export function CreateOrganizationForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"

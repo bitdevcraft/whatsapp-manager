@@ -1,8 +1,9 @@
-import Stripe from "stripe";
-import { handleSubscriptionChange, stripe } from "@/lib/payments/stripe";
 import { NextRequest, NextResponse } from "next/server";
-import { logger } from "@/lib/logger";
+import Stripe from "stripe";
+
 import { env } from "@/env/server";
+import { logger } from "@/lib/logger";
+import { handleSubscriptionChange, stripe } from "@/lib/payments/stripe";
 
 const webhookSecret = env.STRIPE_WEBHOOK_SECRET!;
 
@@ -23,8 +24,8 @@ export async function POST(request: NextRequest) {
   }
 
   switch (event.type) {
-    case "customer.subscription.updated":
-    case "customer.subscription.deleted": {
+    case "customer.subscription.deleted":
+    case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
       await handleSubscriptionChange(subscription);
       break;

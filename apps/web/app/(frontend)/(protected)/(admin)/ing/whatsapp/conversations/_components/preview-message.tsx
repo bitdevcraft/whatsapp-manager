@@ -1,21 +1,22 @@
 "use client";
 
-import { UniversalPreviewBlob } from "@/components/universal-preview-blob";
 import { ConversationBody, User } from "@workspace/db";
 import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import React from "react";
 
+import { UniversalPreviewBlob } from "@/components/universal-preview-blob";
+
 export function PreviewMessage({
-  input,
-  date,
-  user,
   className,
+  date,
+  input,
+  user,
   ...props
 }: React.ComponentProps<"div"> & {
-  input: ConversationBody;
   date: Date;
-  user?: User | null;
+  input: ConversationBody;
+  user?: null | User;
 }) {
   return (
     <div
@@ -28,9 +29,9 @@ export function PreviewMessage({
       {input.body?.media?.id && (
         <div className="w-72">
           <UniversalPreviewBlob
-            src={`/api/whatsapp/files?mediaId=${input.body?.media?.id}`} // replace with your endpoint
-            modalOnClick
             allowDownload
+            modalOnClick
+            src={`/api/whatsapp/files?mediaId=${input.body?.media?.id}`} // replace with your endpoint
           />
         </div>
       )}

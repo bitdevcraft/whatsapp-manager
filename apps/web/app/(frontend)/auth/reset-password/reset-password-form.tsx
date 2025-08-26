@@ -1,5 +1,7 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -17,20 +19,18 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  type ResetPasswordPayload,
-  type ResetPasswordResponse,
-  ResetPasswordSchema,
-} from "@/types/auth";
-import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import axios from "axios";
+
 import { authClient } from "@/lib/auth/auth-client";
+import {
+  type ResetPasswordPayload,
+  type ResetPasswordResponse,
+  ResetPasswordSchema,
+} from "@/types/auth";
 
 export const useResetPasswordMutation = () => {
   const mutation = useMutation({
@@ -60,8 +60,8 @@ export const ResetPasswordForm = () => {
   const t = useTranslations("auth");
 
   const form = useForm<ResetPasswordPayload>({
-    resolver: zodResolver(ResetPasswordSchema),
     defaultValues: { password: "", passwordAgain: "", token: token ?? "" },
+    resolver: zodResolver(ResetPasswordSchema),
     reValidateMode: "onChange",
   });
 
@@ -82,7 +82,7 @@ export const ResetPasswordForm = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4">
               <FormField
                 control={form.control}
@@ -116,12 +116,12 @@ export const ResetPasswordForm = () => {
                 )}
               />
 
-              <Button type="submit" className="w-full">
+              <Button className="w-full" type="submit">
                 {t("reset_password.form.save")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              <Link href="/auth/login" className="ml-1 underline">
+              <Link className="ml-1 underline" href="/auth/login">
                 {t("login_button")}
               </Link>
             </div>

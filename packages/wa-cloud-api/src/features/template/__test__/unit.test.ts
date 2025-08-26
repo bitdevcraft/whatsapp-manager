@@ -1,6 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum, WabaConfigEnum } from '@shared/types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { TemplateDeleteParams, TemplateGetParams, TemplateRequestBody } from '../types';
 
 describe('Template API - Unit Tests', () => {
@@ -8,24 +9,24 @@ describe('Template API - Unit Tests', () => {
     let mockRequestSend: any;
 
     const mockTemplateResponse = {
-        id: 'template_123',
-        status: 'APPROVED',
-        language: LanguagesEnum.English,
         category: CategoryEnum.Marketing,
-        name: 'test_template',
         components: [
             {
-                type: 'BODY',
                 text: 'Hello {{1}}, welcome to our service!',
+                type: 'BODY',
             },
         ],
+        id: 'template_123',
+        language: LanguagesEnum.English,
+        name: 'test_template',
+        status: 'APPROVED',
     };
 
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
@@ -50,13 +51,13 @@ describe('Template API - Unit Tests', () => {
         it('should update template with correct payload', async () => {
             const templateId = 'template_update_123';
             const updateData: Partial<TemplateRequestBody> = {
-                name: 'updated_template_name',
                 components: [
                     {
-                        type: 'BODY',
                         text: 'Updated template text {{1}}',
+                        type: 'BODY',
                     },
                 ],
+                name: 'updated_template_name',
             };
 
             await whatsApp.templates.updateTemplate(templateId, updateData);
@@ -72,10 +73,10 @@ describe('Template API - Unit Tests', () => {
 
         it('should get templates with query parameters', async () => {
             const params: TemplateGetParams = {
+                category: CategoryEnum.Marketing,
+                language: LanguagesEnum.English,
                 limit: 10,
                 name: 'test_template',
-                language: LanguagesEnum.English,
-                category: CategoryEnum.Marketing,
                 status: TemplateStatusEnum.Approved,
             };
 
@@ -107,24 +108,24 @@ describe('Template API - Unit Tests', () => {
 
         it('should create template with correct payload', async () => {
             const templateData: TemplateRequestBody = {
-                name: 'new_template',
-                language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
                 components: [
                     {
-                        type: 'HEADER',
                         format: 'TEXT',
                         text: 'Welcome!',
+                        type: 'HEADER',
                     },
                     {
-                        type: 'BODY',
                         text: 'Hello {{1}}, thank you for joining us!',
+                        type: 'BODY',
                     },
                     {
-                        type: 'FOOTER',
                         text: 'Best regards, Team',
+                        type: 'FOOTER',
                     },
                 ],
+                language: LanguagesEnum.English,
+                name: 'new_template',
             };
 
             await whatsApp.templates.createTemplate(templateData);
@@ -161,22 +162,22 @@ describe('Template API - Unit Tests', () => {
     describe('Template Components Validation', () => {
         it('should create template with header component', async () => {
             const templateData: TemplateRequestBody = {
-                name: 'header_template',
-                language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
                 components: [
                     {
-                        type: 'HEADER',
-                        format: 'IMAGE',
                         example: {
                             header_handle: ['image_handle_123'],
                         },
+                        format: 'IMAGE',
+                        type: 'HEADER',
                     },
                     {
-                        type: 'BODY',
                         text: 'Check out our latest products!',
+                        type: 'BODY',
                     },
                 ],
+                language: LanguagesEnum.English,
+                name: 'header_template',
             };
 
             await whatsApp.templates.createTemplate(templateData);
@@ -192,29 +193,29 @@ describe('Template API - Unit Tests', () => {
 
         it('should create template with buttons', async () => {
             const templateData: TemplateRequestBody = {
-                name: 'button_template',
-                language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
                 components: [
                     {
-                        type: 'BODY',
                         text: 'Would you like to learn more?',
+                        type: 'BODY',
                     },
                     {
-                        type: 'BUTTONS',
                         buttons: [
                             {
-                                type: 'QUICK_REPLY',
                                 text: 'Yes, tell me more',
+                                type: 'QUICK_REPLY',
                             },
                             {
-                                type: 'URL',
                                 text: 'Visit Website',
+                                type: 'URL',
                                 url: 'https://example.com',
                             },
                         ],
+                        type: 'BUTTONS',
                     },
                 ],
+                language: LanguagesEnum.English,
+                name: 'button_template',
             };
 
             await whatsApp.templates.createTemplate(templateData);
@@ -231,21 +232,21 @@ describe('Template API - Unit Tests', () => {
 
         it('should create template with named parameters', async () => {
             const templateData: TemplateRequestBody = {
-                name: 'named_params_template',
-                language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
                 components: [
                     {
-                        type: 'BODY',
-                        text: 'Hello {{customer_name}}, your order {{order_id}} is ready!',
                         example: {
                             body_text_named_params: [
-                                { param_name: 'customer_name', example: 'John' },
-                                { param_name: 'order_id', example: '12345' },
+                                { example: 'John', param_name: 'customer_name' },
+                                { example: '12345', param_name: 'order_id' },
                             ],
                         },
+                        text: 'Hello {{customer_name}}, your order {{order_id}} is ready!',
+                        type: 'BODY',
                     },
                 ],
+                language: LanguagesEnum.English,
+                name: 'named_params_template',
             };
 
             await whatsApp.templates.createTemplate(templateData);
@@ -278,10 +279,10 @@ describe('Template API - Unit Tests', () => {
             mockRequestSend.mockRejectedValue(new Error('Create failed: Template name already exists'));
 
             const templateData: TemplateRequestBody = {
-                name: 'existing_template',
-                language: LanguagesEnum.English,
                 category: CategoryEnum.Marketing,
                 components: [],
+                language: LanguagesEnum.English,
+                name: 'existing_template',
             };
 
             await expect(whatsApp.templates.createTemplate(templateData)).rejects.toThrow(
@@ -359,10 +360,10 @@ describe('Template API - Unit Tests', () => {
     describe('Query String Handling', () => {
         it('should build correct query string for complex parameters', async () => {
             const params: TemplateGetParams = {
+                category: CategoryEnum.Utility,
+                language: LanguagesEnum.English_US,
                 limit: 25,
                 name: 'test template with spaces',
-                language: LanguagesEnum.English_US,
-                category: CategoryEnum.Utility,
                 status: TemplateStatusEnum.Pending,
             };
 

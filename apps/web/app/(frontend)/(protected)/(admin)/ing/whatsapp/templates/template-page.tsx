@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useTitle } from "@/components/provider/title-provider";
-import { DataTable } from "@workspace/ui/data-table";
-import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, ColumnDef } from "@tanstack/react-table";
-import axios from "axios";
+import { ColumnDef, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
 import { Template } from "@workspace/db/schema/templates";
-import { columns } from "@/features/whatsapp/templates/columns";
 import { Button } from "@workspace/ui/components/button";
+import { DataTable } from "@workspace/ui/data-table";
+import axios from "axios";
 import { Plus, XCircle } from "lucide-react";
 import Link from "next/link";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+
+import { useTitle } from "@/components/provider/title-provider";
+import { columns } from "@/features/whatsapp/templates/columns";
 
 export default function TemplatePage() {
   // State hooks
   const [data, setData] = useState<Template[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [syncStatus, setSyncStatus] = useState<{ type?: 'success' | 'error'; message: string } | null>(null);
+  const [error, setError] = useState<null | string>(null);
+  const [syncStatus, setSyncStatus] = useState<null | { message: string; type?: 'error' | 'success'; }>(null);
   const setTitle = useTitle();
 
   // Define columns
@@ -28,12 +29,12 @@ export default function TemplatePage() {
 
   // Initialize the table
   const table = useReactTable({
-    data: Array.isArray(data) ? data : [],
     columns: tableColumns,
+    data: Array.isArray(data) ? data : [],
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     initialState: {
       pagination: {
         pageSize: 10,
@@ -68,11 +69,11 @@ export default function TemplatePage() {
       });
       setData(Array.isArray(response.data) ? response.data : []);
       setError(null);
-      setSyncStatus({ type: 'success', message: 'Templates synced successfully!' });
+      setSyncStatus({ message: 'Templates synced successfully!', type: 'success' });
     } catch (err) {
       console.error("Error syncing templates:", err);
       setError("Failed to sync templates. Please try again later.");
-      setSyncStatus({ type: 'error', message: 'Failed to sync templates' });
+      setSyncStatus({ message: 'Failed to sync templates', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -117,12 +118,12 @@ export default function TemplatePage() {
         <div className="rounded-md bg-red-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <XCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+              <XCircle aria-hidden="true" className="h-5 w-5 text-red-400" />
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">{error}</h3>
               <div className="mt-2">
-                <Button variant="outline" onClick={fetchData}>
+                <Button onClick={fetchData} variant="outline">
                   Retry
                 </Button>
               </div>
@@ -143,9 +144,9 @@ export default function TemplatePage() {
         </Link>
       </Button>
       <Button 
-        variant="outline" 
+        disabled={loading} 
         onClick={onSync}
-        disabled={loading}
+        variant="outline"
       >
         {loading ? 'Syncing...' : 'Sync'}
       </Button>
@@ -163,9 +164,9 @@ export default function TemplatePage() {
           </div>
         </div>
         <DataTable
-          table={table}
           className="w-full"
           paginationClassName="px-4 py-2"
+          table={table}
         />
       </div>
     </section>

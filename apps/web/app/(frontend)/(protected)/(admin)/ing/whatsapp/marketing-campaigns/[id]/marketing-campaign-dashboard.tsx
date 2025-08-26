@@ -1,12 +1,38 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
-import { useParams } from "next/navigation";
-import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Template } from "@workspace/db/schema";
 import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { PhoneInput } from "@workspace/ui/components/phone-input";
 import { Progress } from "@workspace/ui/components/progress";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { Separator } from "@workspace/ui/components/separator";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import axios from "axios";
 import {
   Calendar,
   Check,
@@ -17,42 +43,18 @@ import {
   Trash,
   X,
 } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import { toast } from "sonner";
-import { logger } from "@/lib/logger";
-import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/queries";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
-import { Separator } from "@workspace/ui/components/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@workspace/ui/components/dialog";
 import Link from "next/link";
-import { SingleTemplatePreview } from "./template-preview";
-import { useMutation } from "@tanstack/react-query";
-import z from "zod";
-import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@workspace/ui/components/form";
+import { useParams } from "next/navigation";
+import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PhoneInput } from "@workspace/ui/components/phone-input";
+import { toast } from "sonner";
+import z from "zod";
+
+import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/queries";
+import { logger } from "@/lib/logger";
+
 import { getEstimatedRecipients, hasRemainingUsage } from "./action";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
-import { Skeleton } from "@workspace/ui/components/skeleton";
+import { SingleTemplatePreview } from "./template-preview";
 
 interface Props {
   promises: Promise<
@@ -71,13 +73,13 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
 
   const [
     {
+      contacts,
       data,
+      engagement,
       messageSent,
-      totalRecipients,
       openRate,
       replyRate,
-      engagement,
-      contacts,
+      totalRecipients,
     },
     estRecipients,
     remainingUsage,
@@ -119,11 +121,11 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
 
   const onSubmit: SubmitHandler<PreviewPhoneMessageValue> = (data) => {
     sendPreview.mutate(data, {
-      onSuccess: () => {
-        toast.success("Preview Sent");
-      },
       onError: () => {
         toast.error("Error");
+      },
+      onSuccess: () => {
+        toast.success("Preview Sent");
       },
     });
   };
@@ -132,8 +134,8 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
     <>
       <ResponsiveDialog
         isOpen={openPreview}
-        title={"Send Campaign Preview"}
         setIsOpen={setOpenPreview}
+        title={"Send Campaign Preview"}
       >
         <PreviewForm onSubmit={onSubmit} pending={sendPreview.isPending} />
       </ResponsiveDialog>
@@ -151,8 +153,6 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
               <TooltipTrigger asChild>
                 <div>
                   <Button
-                    size="sm"
-                    variant="outline"
                     className="bg-green-600 text-white font-semibold text-sm"
                     disabled={
                       (data?.status !== "draft" &&
@@ -160,6 +160,8 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
                       !remainingUsage.success
                     }
                     onClick={sendMarketingCampaign}
+                    size="sm"
+                    variant="outline"
                   >
                     <SendHorizontal />
                     Send
@@ -174,10 +176,10 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
               <TooltipTrigger asChild>
                 <div>
                   <Button
+                    disabled={!remainingUsage.success}
+                    onClick={() => setOpenPreview(true)}
                     size="sm"
                     variant="outline"
-                    onClick={() => setOpenPreview(true)}
-                    disabled={!remainingUsage.success}
                   >
                     Preview
                   </Button>
@@ -190,9 +192,9 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
               </TooltipContent>
             </Tooltip>
             <Button
+              disabled={data?.status !== "draft" && data?.status !== "pending"}
               size="sm"
               variant="destructive"
-              disabled={data?.status !== "draft" && data?.status !== "pending"}
             >
               <Trash />
             </Button>
@@ -200,14 +202,14 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
         </div>
         <h1 className="font-semibold text-lg">{data?.name}</h1>
         <CampaignAnalytics
+          engagement={engagement}
           messageSent={messageSent}
+          openRate={openRate}
+          replyRate={replyRate}
+          status={data?.status}
           totalRecipients={
             data?.status !== "draft" ? totalRecipients : estRecipients
           }
-          openRate={openRate}
-          replyRate={replyRate}
-          engagement={engagement}
-          status={data?.status}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DeliveryStatus
@@ -215,9 +217,9 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             totalRecipients={totalRecipients}
           />
           <CampaignDetails
-            tags={data?.tags}
-            schedule={data?.scheduleAt}
             contacts={contacts}
+            schedule={data?.scheduleAt}
+            tags={data?.tags}
           />
         </div>
         <CampaignTemplatePreview template={data?.template} />
@@ -226,138 +228,20 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
   );
 }
 
-function CampaignTemplatePreview({ template }: { template?: Template }) {
-  if (!template?.content) return null;
-
-  return (
-    <div className="min-h-16 bg-background border rounded p-4 flex flex-col gap-4">
-      <h3 className="text-secondary-foreground text-sm font-semibold">
-        Template Preview
-      </h3>
-      <div className="min-h-16 ">
-        <SingleTemplatePreview template={template.content} />
-      </div>
-    </div>
-  );
-}
-
-function DeliveryStatus({
-  messageSent,
-  totalRecipients,
-}: {
-  messageSent: number;
-  totalRecipients: number;
-}) {
-  return (
-    <div className="rounded border p-4 grid gap-4 bg-background">
-      <h3 className="text-secondary-foreground text-sm font-semibold">
-        Delivery Status
-      </h3>
-      <div className="grid gap-2">
-        <div className="flex gap-2">
-          <Check size={15} color="green" strokeWidth={3} />
-          <p className="text-xs font-light">Delivered</p>
-        </div>
-        <Progress value={(messageSent / totalRecipients) * 100} />
-      </div>
-      <div className="grid gap-2">
-        <div className="flex gap-2">
-          <X size={15} color="red" strokeWidth={3} />
-          <p className="text-xs font-light">Failed</p>
-        </div>
-        <Progress
-          value={((totalRecipients - messageSent) / totalRecipients) * 100}
-        />
-      </div>
-    </div>
-  );
-}
-
-function CampaignDetails({
-  tags,
-  schedule,
-  contacts,
-}: {
-  tags?: string[] | null;
-  schedule?: Date | null;
-  contacts: { name: string; phone: string; id: string }[] | null;
-}) {
-  return (
-    <div className="rounded border p-4 flex flex-col gap-4 bg-background">
-      <h3 className="text-secondary-foreground text-sm font-semibold">
-        Campaign Details
-      </h3>
-      <div className="flex gap-2 flex-wrap justify-start items-center">
-        <Tag size={15} />
-        {tags?.map((el, i) => (
-          <Badge key={i} variant="outline">
-            {el}
-          </Badge>
-        ))}
-      </div>
-      {schedule && (
-        <div className="flex gap-2 flex-wrap justify-start items-center">
-          <Calendar size={15} />
-          <p className="text-sm text-muted-foreground pl-2">
-            Scheduled at:&nbsp;
-            {schedule && new Date(schedule).toDateString()}&nbsp;
-            {schedule && new Date(schedule).toLocaleTimeString()}
-          </p>
-        </div>
-      )}
-      {contacts && (
-        <div className="w-full">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
-                Contacts
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="w-72">
-              <DialogHeader className="grid gap-4">
-                <DialogTitle>Contacts</DialogTitle>
-                <DialogDescription>
-                  <ScrollArea className="h-72 rounded-md border">
-                    <div className="p-4">
-                      {contacts.map((el, i) => (
-                        <React.Fragment key={i}>
-                          <Link
-                            href={`/ing/whatsapp/conversations?contact=${el.id}`}
-                            target="_blank"
-                            className="flex items-center justify-between"
-                          >
-                            {el.name}
-                            <SquareArrowOutUpRight size={15} />
-                          </Link>
-                          <Separator className="my-2" />
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function CampaignAnalytics({
+  engagement,
   messageSent,
-  totalRecipients,
   openRate,
   replyRate,
-  engagement,
   status,
+  totalRecipients,
 }: {
+  engagement: number;
   messageSent: number;
-  totalRecipients: number;
   openRate: number;
   replyRate: number;
-  engagement: number;
-  status?: string | null;
+  status?: null | string;
+  totalRecipients: number;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -409,6 +293,124 @@ function CampaignAnalytics({
   );
 }
 
+function CampaignDetails({
+  contacts,
+  schedule,
+  tags,
+}: {
+  contacts: null | { id: string; name: string; phone: string; }[];
+  schedule?: Date | null;
+  tags?: null | string[];
+}) {
+  return (
+    <div className="rounded border p-4 flex flex-col gap-4 bg-background">
+      <h3 className="text-secondary-foreground text-sm font-semibold">
+        Campaign Details
+      </h3>
+      <div className="flex gap-2 flex-wrap justify-start items-center">
+        <Tag size={15} />
+        {tags?.map((el, i) => (
+          <Badge key={i} variant="outline">
+            {el}
+          </Badge>
+        ))}
+      </div>
+      {schedule && (
+        <div className="flex gap-2 flex-wrap justify-start items-center">
+          <Calendar size={15} />
+          <p className="text-sm text-muted-foreground pl-2">
+            Scheduled at:&nbsp;
+            {schedule && new Date(schedule).toDateString()}&nbsp;
+            {schedule && new Date(schedule).toLocaleTimeString()}
+          </p>
+        </div>
+      )}
+      {contacts && (
+        <div className="w-full">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline">
+                Contacts
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-72">
+              <DialogHeader className="grid gap-4">
+                <DialogTitle>Contacts</DialogTitle>
+                <DialogDescription>
+                  <ScrollArea className="h-72 rounded-md border">
+                    <div className="p-4">
+                      {contacts.map((el, i) => (
+                        <React.Fragment key={i}>
+                          <Link
+                            className="flex items-center justify-between"
+                            href={`/ing/whatsapp/conversations?contact=${el.id}`}
+                            target="_blank"
+                          >
+                            {el.name}
+                            <SquareArrowOutUpRight size={15} />
+                          </Link>
+                          <Separator className="my-2" />
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CampaignTemplatePreview({ template }: { template?: Template }) {
+  if (!template?.content) return null;
+
+  return (
+    <div className="min-h-16 bg-background border rounded p-4 flex flex-col gap-4">
+      <h3 className="text-secondary-foreground text-sm font-semibold">
+        Template Preview
+      </h3>
+      <div className="min-h-16 ">
+        <SingleTemplatePreview template={template.content} />
+      </div>
+    </div>
+  );
+}
+
+function DeliveryStatus({
+  messageSent,
+  totalRecipients,
+}: {
+  messageSent: number;
+  totalRecipients: number;
+}) {
+  return (
+    <div className="rounded border p-4 grid gap-4 bg-background">
+      <h3 className="text-secondary-foreground text-sm font-semibold">
+        Delivery Status
+      </h3>
+      <div className="grid gap-2">
+        <div className="flex gap-2">
+          <Check color="green" size={15} strokeWidth={3} />
+          <p className="text-xs font-light">Delivered</p>
+        </div>
+        <Progress value={(messageSent / totalRecipients) * 100} />
+      </div>
+      <div className="grid gap-2">
+        <div className="flex gap-2">
+          <X color="red" size={15} strokeWidth={3} />
+          <p className="text-xs font-light">Failed</p>
+        </div>
+        <Progress
+          value={((totalRecipients - messageSent) / totalRecipients) * 100}
+        />
+      </div>
+    </div>
+  );
+}
+
 const PreviewPhoneMessageSchema = z.object({
   phone: z.string(),
 });
@@ -423,15 +425,15 @@ export function PreviewForm({
   pending?: boolean;
 }) {
   const form = useForm<PreviewPhoneMessageValue>({
-    resolver: zodResolver(PreviewPhoneMessageSchema),
     defaultValues: {
       phone: "",
     },
+    resolver: zodResolver(PreviewPhoneMessageSchema),
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex gap-4 justify-center">
           <FormField
             name={`phone`}
@@ -441,8 +443,8 @@ export function PreviewForm({
                   <PhoneInput
                     placeholder="+971 50 XXX XXXX"
                     {...field}
-                    defaultCountry="AE"
                     className="w-full"
+                    defaultCountry="AE"
                   />
                 </FormControl>
                 <FormMessage />
@@ -450,7 +452,7 @@ export function PreviewForm({
             )}
           />
           {pending ? (
-            <Button size={"icon"} disabled>
+            <Button disabled size={"icon"}>
               <LoaderCircle className="animate-spin" />
             </Button>
           ) : (

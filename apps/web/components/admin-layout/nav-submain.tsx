@@ -1,8 +1,6 @@
 "use client";
 
-import { usePermission } from "@/hooks/user-permissions";
 import { type Icon } from "@tabler/icons-react";
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -10,24 +8,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import Link from "next/link";
 import React from "react";
+
+import { usePermission } from "@/hooks/user-permissions";
+
 import { useOrganization } from "../provider/organization-provider";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function NavSubMain({
-  title = "Others",
-  items,
   actionMenu,
+  items,
+  title = "Others",
 }: {
-  title?: string;
+  actionMenu?: React.ReactNode;
   items: {
+    access?: string;
+    icon: Icon;
     name: string;
     url: string;
-    icon: Icon;
-    access?: string;
   }[];
-  actionMenu?: React.ReactNode;
+  title?: string;
 }) {
   const { activeOrganization } = useOrganization();
 
@@ -64,7 +65,7 @@ export function NavSubMain({
             {item.access !== "business" ||
             (item.access === "business" && canRead) ? (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton tooltip={item.name} asChild>
+                <SidebarMenuButton asChild tooltip={item.name}>
                   <Link href={item.url}>
                     <item.icon />
                     <span>{item.name}</span>

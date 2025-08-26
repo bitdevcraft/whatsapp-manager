@@ -10,42 +10,18 @@ export type GeneralMessageBody = GeneralRequestBody & {
     messaging_product: 'whatsapp';
 };
 
-export type StatusObject = {
-    status: 'read';
-    message_id: string;
-    typing_indicator?: TypingIndicatorObject;
-};
-
-export type TypingIndicatorObject = {
-    type: 'text';
-};
-
-export type StatusRequestBody = GeneralMessageBody & StatusObject;
-
-type ConTextObject = {
-    message_id: string;
-};
-
 export type MessageRequestBody<T extends MessageTypesEnum> = GeneralMessageBody & {
+    context?: ConTextObject;
     recipient_type?: string;
     to: string;
-    context?: ConTextObject;
     type?: T;
 };
 
 // Request Parameter Interfaces
 export interface MessageRequestParams<T> {
     body: T;
-    to: string;
     replyMessageId?: string;
-}
-
-export interface StatusParams {
-    status: string;
-    messageId: string;
-    typingIndicator?: {
-        type: string;
-    };
+    to: string;
 }
 
 // Response Types
@@ -63,33 +39,48 @@ export type MessagesResponse = GeneralMessageBody & {
     ];
 };
 
+export interface StatusObject {
+    message_id: string;
+    status: 'read';
+    typing_indicator?: TypingIndicatorObject;
+}
+
+export interface StatusParams {
+    messageId: string;
+    status: string;
+    typingIndicator?: {
+        type: string;
+    };
+}
+
+export type StatusRequestBody = GeneralMessageBody & StatusObject;
+
+export interface TypingIndicatorObject {
+    type: 'text';
+}
+
+interface ConTextObject {
+    message_id: string;
+}
+
 // Messages API Class Interface - Complete definition
 export declare class MessagesClass extends BaseClass {
-    // Text messages
-    text(params: import('./text').TextMessageParams): Promise<MessagesResponse>;
-
-    // Template messages
-    template(
-        params: MessageRequestParams<import('./template').MessageTemplateObject<ComponentTypesEnum>>,
-    ): Promise<MessagesResponse>;
-
     // Media messages
     audio(params: MessageRequestParams<import('./media').AudioMediaObject>): Promise<MessagesResponse>;
-    document(params: MessageRequestParams<import('./media').DocumentMediaObject>): Promise<MessagesResponse>;
-    image(params: MessageRequestParams<import('./media').ImageMediaObject>): Promise<MessagesResponse>;
-    video(params: MessageRequestParams<import('./media').VideoMediaObject>): Promise<MessagesResponse>;
-    sticker(params: MessageRequestParams<import('./media').StickerMediaObject>): Promise<MessagesResponse>;
 
     // Contact messages
     contacts(params: MessageRequestParams<[import('./contact').ContactObject]>): Promise<MessagesResponse>;
 
-    // Location messages
-    location(params: MessageRequestParams<import('./location').LocationObject>): Promise<MessagesResponse>;
-
+    document(params: MessageRequestParams<import('./media').DocumentMediaObject>): Promise<MessagesResponse>;
+    image(params: MessageRequestParams<import('./media').ImageMediaObject>): Promise<MessagesResponse>;
     // Interactive messages
     interactive(params: MessageRequestParams<import('./interactive').InteractiveObject>): Promise<MessagesResponse>;
-    interactiveList(
-        params: MessageRequestParams<import('./interactive').InteractiveObject & { type: InteractiveTypesEnum.List }>,
+    interactiveAddressMessage(
+        params: MessageRequestParams<
+            import('./interactive').InteractiveObject & {
+                type: InteractiveTypesEnum.AddressMessage;
+            }
+        >,
     ): Promise<MessagesResponse>;
     interactiveCtaUrl(
         params: MessageRequestParams<
@@ -98,17 +89,23 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
+
+    interactiveFlow(
+        params: MessageRequestParams<
+            import('./interactive').InteractiveObject & {
+                type: InteractiveTypesEnum.Flow;
+            }
+        >,
+    ): Promise<MessagesResponse>;
+
+    interactiveList(
+        params: MessageRequestParams<import('./interactive').InteractiveObject & { type: InteractiveTypesEnum.List }>,
+    ): Promise<MessagesResponse>;
+
     interactiveLocationRequest(
         params: MessageRequestParams<
             import('./interactive').InteractiveObject & {
                 type: InteractiveTypesEnum.LocationRequest;
-            }
-        >,
-    ): Promise<MessagesResponse>;
-    interactiveAddressMessage(
-        params: MessageRequestParams<
-            import('./interactive').InteractiveObject & {
-                type: InteractiveTypesEnum.AddressMessage;
             }
         >,
     ): Promise<MessagesResponse>;
@@ -119,17 +116,20 @@ export declare class MessagesClass extends BaseClass {
             }
         >,
     ): Promise<MessagesResponse>;
-    interactiveFlow(
-        params: MessageRequestParams<
-            import('./interactive').InteractiveObject & {
-                type: InteractiveTypesEnum.Flow;
-            }
-        >,
-    ): Promise<MessagesResponse>;
-
+    // Location messages
+    location(params: MessageRequestParams<import('./location').LocationObject>): Promise<MessagesResponse>;
+    markAsRead(params: { messageId: string }): Promise<MessagesResponse>;
     // Reaction and status messages
     reaction(params: import('./reaction').ReactionParams): Promise<MessagesResponse>;
-    markAsRead(params: { messageId: string }): Promise<MessagesResponse>;
     showTypingIndicator(params: { messageId: string }): Promise<MessagesResponse>;
     status(params: StatusParams): Promise<MessagesResponse>;
+
+    sticker(params: MessageRequestParams<import('./media').StickerMediaObject>): Promise<MessagesResponse>;
+    // Template messages
+    template(
+        params: MessageRequestParams<import('./template').MessageTemplateObject<ComponentTypesEnum>>,
+    ): Promise<MessagesResponse>;
+    // Text messages
+    text(params: import('./text').TextMessageParams): Promise<MessagesResponse>;
+    video(params: MessageRequestParams<import('./media').VideoMediaObject>): Promise<MessagesResponse>;
 }

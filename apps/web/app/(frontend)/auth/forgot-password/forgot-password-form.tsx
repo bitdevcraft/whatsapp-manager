@@ -1,5 +1,7 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -16,20 +18,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@workspace/ui/components/input";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { env } from "@/env/client";
+import { authClient } from "@/lib/auth/auth-client";
 import {
   type ForgotPasswordPayload,
   type ForgotPasswordResponse,
   ForgotPasswordSchema,
 } from "@/types/auth";
-import { useMutation } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Input } from "@workspace/ui/components/input";
-import { authClient } from "@/lib/auth/auth-client";
-import { env } from "@/env/client";
 
 export const useForgotPasswordMutation = () => {
   const mutation = useMutation({
@@ -57,8 +58,8 @@ export const ForgotPasswordForm = () => {
   const t = useTranslations("auth");
 
   const form = useForm<ForgotPasswordPayload>({
-    resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: { email: "" },
+    resolver: zodResolver(ForgotPasswordSchema),
     reValidateMode: "onChange",
   });
 
@@ -75,7 +76,7 @@ export const ForgotPasswordForm = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4">
               <FormField
                 control={form.control}
@@ -97,9 +98,9 @@ export const ForgotPasswordForm = () => {
               />
 
               <Button
-                type="submit"
-                disabled={forgotPassword.data === true}
                 className="w-full"
+                disabled={forgotPassword.data === true}
+                type="submit"
               >
                 {forgotPassword.data === true &&
                   t("forgot_password.form.link_sent")}
@@ -115,7 +116,7 @@ export const ForgotPasswordForm = () => {
               )}
             </div>
             <div className="mt-4 text-center text-sm">
-              <Link href="/auth/login" className="ml-1 underline">
+              <Link className="ml-1 underline" href="/auth/login">
                 {t("login_button")}
               </Link>
             </div>

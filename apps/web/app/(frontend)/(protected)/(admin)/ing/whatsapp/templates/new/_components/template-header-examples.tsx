@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { AutoArrayInputs } from "./template-auto-array";
 import { AutoNamedParamsInputs } from "./template-auto-name-param";
 
@@ -7,7 +7,7 @@ export function HeaderAutoExamples({
   parameterFormat,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
 }) {
   if (parameterFormat === "POSITIONAL") {
     return (

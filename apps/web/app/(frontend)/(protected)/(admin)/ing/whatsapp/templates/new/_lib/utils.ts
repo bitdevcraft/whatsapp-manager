@@ -1,27 +1,3 @@
-export function parsePositional(text: string | undefined): number[] {
-  if (!text) return [];
-  const matches = text.match(/\{\{\s*(\d+)\s*\}\}/g) || [];
-  const nums = matches
-    .map((m) => Number(m.replace(/[^\d]/g, "")))
-    .filter((n) => Number.isFinite(n));
-  return Array.from(new Set(nums)).sort((a, b) => a - b);
-}
-
-export function parseNamed(text: string | undefined): string[] {
-  if (!text) return [];
-  const re = /\{\{\s*([^\s{}]+)\s*\}\}/g;
-  const names: string[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text))) names.push(m[1]!);
-  return Array.from(new Set(names));
-}
-
-// Get next positional index (e.g., next after {{1}} is 2)
-export function nextPositionalIndex(text: string | undefined) {
-  const nums = parsePositional(text);
-  return nums.length ? Math.max(...nums) + 1 : 1;
-}
-
 export function insertAtCursor(
   el: HTMLInputElement | null,
   current: string,
@@ -42,4 +18,28 @@ export function insertAtCursor(
     }
   });
   return newValue;
+}
+
+// Get next positional index (e.g., next after {{1}} is 2)
+export function nextPositionalIndex(text: string | undefined) {
+  const nums = parsePositional(text);
+  return nums.length ? Math.max(...nums) + 1 : 1;
+}
+
+export function parseNamed(text: string | undefined): string[] {
+  if (!text) return [];
+  const re = /\{\{\s*([^\s{}]+)\s*\}\}/g;
+  const names: string[] = [];
+  let m: null | RegExpExecArray;
+  while ((m = re.exec(text))) names.push(m[1]!);
+  return Array.from(new Set(names));
+}
+
+export function parsePositional(text: string | undefined): number[] {
+  if (!text) return [];
+  const matches = text.match(/\{\{\s*(\d+)\s*\}\}/g) || [];
+  const nums = matches
+    .map((m) => Number(m.replace(/[^\d]/g, "")))
+    .filter((n) => Number.isFinite(n));
+  return Array.from(new Set(nums)).sort((a, b) => a - b);
 }

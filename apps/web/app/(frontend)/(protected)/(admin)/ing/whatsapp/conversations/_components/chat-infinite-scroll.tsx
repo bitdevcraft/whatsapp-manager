@@ -1,27 +1,27 @@
-import React, { ReactNode, useRef, useEffect, useLayoutEffect } from "react";
+import React, { ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 
 // Props interface for the ChatInfiniteScroll component
 export interface ChatInfiniteScrollProps {
-  /** If true, scroll to the middle on mount */
-  showMiddle: boolean;
+  /** Message elements or other children */
+  children: ReactNode;
+  /** Custom wrapper classes */
+  className?: string;
   /** Whether there's more data to load below */
   hasNext: boolean;
   /** Whether there's more data to load above */
   hasPrevious: boolean;
   /** If true, render items in reverse order */
   isReverse: boolean;
-  /** Callback to load next page */
-  next: () => void;
-  /** Callback to load previous page */
-  previous: () => void;
   /** Indicates if a next-page load is in progress */
   loadingNext?: boolean;
   /** Indicates if a previous-page load is in progress */
   loadingPrevious?: boolean;
-  /** Custom wrapper classes */
-  className?: string;
-  /** Message elements or other children */
-  children: ReactNode;
+  /** Callback to load next page */
+  next: () => void;
+  /** Callback to load previous page */
+  previous: () => void;
+  /** If true, scroll to the middle on mount */
+  showMiddle: boolean;
 }
 
 /**
@@ -31,16 +31,16 @@ export interface ChatInfiniteScrollProps {
  * and supports loading indicators.
  */
 export function ChatInfiniteScroll({
-  showMiddle,
+  children,
+  className = "",
   hasNext,
   hasPrevious,
   isReverse,
-  next,
-  previous,
   loadingNext = false,
   loadingPrevious = false,
-  className = "",
-  children,
+  next,
+  previous,
+  showMiddle,
 }: ChatInfiniteScrollProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const topSentinelRef = useRef<HTMLDivElement | null>(null);
@@ -163,12 +163,12 @@ export function ChatInfiniteScroll({
 
   return (
     <div
-      ref={containerRef}
       className={`overflow-y-auto flex flex-col ${className}`}
+      ref={containerRef}
       style={{ height: "100%" }}
     >
       {/* Top sentinel and loader */}
-      <div ref={topSentinelRef} className="w-full h-1" />
+      <div className="w-full h-1" ref={topSentinelRef} />
       {!isReverse && loadingPrevious && <Spinner />}
       {isReverse && loadingNext && <Spinner />}
 
@@ -182,7 +182,7 @@ export function ChatInfiniteScroll({
       {/* Loader and bottom sentinel */}
       {!isReverse && loadingNext && <Spinner />}
       {isReverse && loadingPrevious && <Spinner />}
-      <div ref={bottomSentinelRef} className="w-full h-1" />
+      <div className="w-full h-1" ref={bottomSentinelRef} />
     </div>
   );
 }

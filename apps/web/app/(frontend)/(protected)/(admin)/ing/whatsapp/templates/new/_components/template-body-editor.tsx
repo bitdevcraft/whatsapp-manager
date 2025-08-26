@@ -3,16 +3,17 @@
 
 import { Button } from "@workspace/ui/components/button";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
-import { useFormContext, type ControllerRenderProps } from "react-hook-form";
-import { nextPositionalIndex, insertAtCursor } from "../_lib/utils";
+import { type ControllerRenderProps, useFormContext } from "react-hook-form";
+
+import { insertAtCursor, nextPositionalIndex } from "../_lib/utils";
 
 export function BodyEditor({
   index,
@@ -20,7 +21,7 @@ export function BodyEditor({
   syncExamples,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: { bodyTextOverride?: string }) => void;
 }) {
   const { control } = useFormContext();
@@ -47,7 +48,7 @@ function BodyEditorField({
   syncExamples,
 }: {
   field: ControllerRenderProps<any, any>;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: { bodyTextOverride?: string }) => void;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -93,18 +94,18 @@ function BodyEditorField({
       <FormControl>
         <Input
           {...field}
-          ref={setRefs}
-          placeholder="e.g. Dear {{1}} or Dear {{name}}"
           onChange={onChange}
+          placeholder="e.g. Dear {{1}} or Dear {{name}}"
+          ref={setRefs}
         />
       </FormControl>
       <div className="mt-1 flex justify-end">
         <Button
+          className="border"
+          onClick={onAddVariable}
+          size="sm"
           type="button"
           variant="ghost"
-          size="sm"
-          onClick={onAddVariable}
-          className="border"
         >
           Add Variable
         </Button>

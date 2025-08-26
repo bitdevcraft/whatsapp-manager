@@ -1,9 +1,10 @@
-import { getContacts } from "@/features/contacts/get-users";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { contactsTable, NewContact } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/index";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import { revalidateTag } from "next/cache";
+
+import { getContacts } from "@/features/contacts/get-users";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET() {
   const result = await getContacts();
@@ -21,9 +22,9 @@ export async function POST(request: Request) {
   }
 
   const data = (await request.json()) as {
+    email: string;
     name: string;
     phoneNumber: string;
-    email: string;
     tags: string[];
   }[];
 
@@ -31,12 +32,12 @@ export async function POST(request: Request) {
 
   const contacts: NewContact[] = data.map((d) => {
     const temp: NewContact = {
-      name: d.name,
-      teamId: teamId,
       email: d.email,
-      phone: d.phoneNumber.replace(/\D/g, ""),
       message: "",
+      name: d.name,
+      phone: d.phoneNumber.replace(/\D/g, ""),
       tags: d.tags,
+      teamId: teamId,
       updatedAt: new Date(),
     };
 
@@ -48,7 +49,6 @@ export async function POST(request: Request) {
       .insert(contactsTable)
       .values(contacts)
       .onConflictDoUpdate({
-        target: [contactsTable.teamId, contactsTable.phone],
         set: buildConflictUpdateColumns(contactsTable, [
           "name",
           "phone",
@@ -56,6 +56,7 @@ export async function POST(request: Request) {
           "tags",
           "updatedAt",
         ]),
+        target: [contactsTable.teamId, contactsTable.phone],
       })
       .returning();
   });

@@ -1,5 +1,3 @@
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
 import {
   contactsTable,
   ConversationBody,
@@ -15,6 +13,9 @@ import { and, count, eq, gt, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,17 +35,17 @@ export async function GET(request: NextRequest) {
     const { batch } = await withTenantTransaction(teamId, async (tx) => {
       const messages = tx
         .select({
-          // ...getTableColumns(conversationsTable),
-          id: contactsTable.id,
-          message: conversationsTable.body,
-          createdAt: conversationsTable.createdAt,
           contact: {
             name: contactsTable.name,
             phone: contactsTable.phone,
           },
+          createdAt: conversationsTable.createdAt,
+          // ...getTableColumns(conversationsTable),
+          id: contactsTable.id,
           isUnread: sql<boolean>`
                       (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
                     `.as("isUnread"),
+          message: conversationsTable.body,
           rn: sql<number>`row_number() over (
                       partition by ${conversationsTable.contactId}
                       order by ${conversationsTable.createdAt} desc
@@ -106,8 +107,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         data,
-        previousOffset,
         nextOffset,
+        previousOffset,
       },
       { status: 200 }
     );
@@ -142,16 +143,16 @@ export async function POST(request: Request) {
     text: string;
   };
   try {
-    const { account, phoneNumberId, contact } = await withTenantTransaction(
+    const { account, contact, phoneNumberId } = await withTenantTransaction(
       teamId,
       async (tx) => {
         const conv = await tx.query.conversationsTable.findFirst({
+          orderBy: (conversationsTable, { desc }) =>
+            desc(conversationsTable.createdAt),
           where: and(
             eq(conversationsTable.contactId, contactId),
             eq(conversationsTable.direction, "inbound")
           ),
-          orderBy: (conversationsTable, { desc }) =>
-            desc(conversationsTable.createdAt),
           with: {
             contact: true,
           },
@@ -163,12 +164,12 @@ export async function POST(request: Request) {
 
         if (!conv)
           return {
-            contact: null,
             account: null,
+            contact: null,
             phoneNumberId: null,
           };
 
-        const { wabaId, phoneNumberId } = conv.content as WebhookMessage;
+        const { phoneNumberId, wabaId } = conv.content as WebhookMessage;
 
         const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
           where: eq(whatsAppBusinessAccountsTable.id, Number(wabaId)),
@@ -176,14 +177,14 @@ export async function POST(request: Request) {
 
         if (!account)
           return {
-            contact: null,
             account: null,
+            contact: null,
             phoneNumberId: null,
           };
 
         return {
-          contact,
           account,
+          contact,
           phoneNumberId,
         };
       }
@@ -193,14 +194,14 @@ export async function POST(request: Request) {
       return new Response(null, { status: 400 });
 
     const decryptedToken = await decryptApiKey({
-      iv: account.accessToken.iv,
       data: account.accessToken.data,
+      iv: account.accessToken.iv,
     });
 
     const config = {
       accessToken: decryptedToken,
-      phoneNumberId: Number(phoneNumberId),
       businessAcctId: String(account.id),
+      phoneNumberId: Number(phoneNumberId),
     };
 
     const whatsapp = new WhatsApp(config);
@@ -222,13 +223,13 @@ export async function POST(request: Request) {
       };
 
       const conversation: NewConversation = {
-        teamId: teamId,
-        contactId,
-        wamid: response?.messages[0]?.id,
-        success: true,
         body,
-        userId: user.id,
+        contactId,
         direction: "outbound",
+        success: true,
+        teamId: teamId,
+        userId: user.id,
+        wamid: response?.messages[0]?.id,
       };
 
       await tx.insert(conversationsTable).values(conversation).returning();

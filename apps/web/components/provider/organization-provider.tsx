@@ -1,23 +1,25 @@
 // src/context/OrganizationContext.tsx
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import { Organization } from "better-auth/plugins/organization";
 import React, {
   createContext,
-  useContext,
   ReactNode,
   useCallback,
+  useContext,
 } from "react";
+
+import { authClient } from "@/lib/auth/auth-client";
+
 import { CubeLoader } from "../loaders/cube-loader";
 
 // shape of our context value
 interface OrgContextValue {
-  organizations: Array<Organization>;
-  activeOrganization: Organization | null;
-  setActiveOrganization: (orgId: string) => Promise<void>;
-  isLoading: boolean;
+  activeOrganization: null | Organization;
   error?: Error;
+  isLoading: boolean;
+  organizations: Array<Organization>;
+  setActiveOrganization: (orgId: string) => Promise<void>;
 }
 
 const OrganizationContext = createContext<OrgContextValue | undefined>(
@@ -28,17 +30,17 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   // fetch all orgs
   const {
     data: organizations,
+    error: listError,
     isPending: loadingOrgs,
     isRefetching: refetchingOrgs,
-    error: listError,
     refetch: refetchOrgs,
   } = authClient.useListOrganizations();
 
   const {
     data: activeOrganization,
+    error: activeError,
     isPending: loadingActive,
     isRefetching: refetchingActive,
-    error: activeError,
     refetch: refetchActive,
   } = authClient.useActiveOrganization();
 
@@ -64,11 +66,11 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   return (
     <OrganizationContext.Provider
       value={{
-        organizations: organizations ?? [],
         activeOrganization: activeOrganization ?? null,
-        setActiveOrganization,
-        isLoading,
         error: error as Error | undefined,
+        isLoading,
+        organizations: organizations ?? [],
+        setActiveOrganization,
       }}
     >
       {children}

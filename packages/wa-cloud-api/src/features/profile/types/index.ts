@@ -1,6 +1,4 @@
 export * from './common';
-export * from './upload';
-
 // Common types
 export type {
     BusinessProfileClass,
@@ -10,6 +8,8 @@ export type {
     BusinessProfileResponse,
     UpdateBusinessProfileRequest,
 } from './common';
+
+export * from './upload';
 
 // Upload types
 export type {

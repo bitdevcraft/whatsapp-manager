@@ -1,53 +1,53 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useForm } from "react-hook-form";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { CategoryEnum, LanguagesEnum } from "@workspace/wa-cloud-api";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 interface ButtonForm {
-  type: "URL" | "PHONE_NUMBER" | "QUICK_REPLY";
-  text: string;
-  url?: string;
   phone_number?: string;
+  text: string;
+  type: "PHONE_NUMBER" | "QUICK_REPLY" | "URL";
+  url?: string;
 }
 
 interface SimpleTemplateFormValues {
-  name: string;
-  category: CategoryEnum;
-  language: {
-    policy: string;
-    code: LanguagesEnum;
-  };
   body: string;
   buttons: ButtonForm[];
+  category: CategoryEnum;
+  language: {
+    code: LanguagesEnum;
+    policy: string;
+  };
+  name: string;
 }
 
 export default function SimpleTemplateForm() {
   const {
-    register,
-    handleSubmit,
     formState: { errors },
+    handleSubmit,
+    register,
   } = useForm<SimpleTemplateFormValues>({
     defaultValues: {
-      name: "",
-      category: CategoryEnum.Marketing,
-      language: {
-        policy: "deterministic",
-        code: LanguagesEnum.English,
-      },
       body: "",
       buttons: [],
+      category: CategoryEnum.Marketing,
+      language: {
+        code: LanguagesEnum.English,
+        policy: "deterministic",
+      },
+      name: "",
     },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [, setError] = useState<string | null>(null);
+  const [, setError] = useState<null | string>(null);
   const [buttons, setButtons] = useState<ButtonForm[]>([]);
   const router = useRouter();
 
@@ -73,14 +73,14 @@ export default function SimpleTemplateForm() {
       try {
         const apiUrl = "/api/whatsapp/templates/submit-to-meta";
         response = await fetch(apiUrl, {
-          method: "POST",
+          body: JSON.stringify(templateData),
+          credentials: "include", // Ensure cookies are sent with the request
           headers: {
             "Content-Type": "application/json",
             "X-Request-ID": crypto.randomUUID(), // Add a unique request ID for tracking
           },
-          body: JSON.stringify(templateData),
+          method: "POST",
           signal: controller.signal,
-          credentials: "include", // Ensure cookies are sent with the request
         });
 
         // Clear the timeout since we got a response
@@ -99,22 +99,22 @@ export default function SimpleTemplateForm() {
         } catch (parseError) {
           // If we can't parse as JSON, include the response text in the error
           console.error("Failed to parse JSON response:", {
+            parseError,
+            responseText,
             status: response.status,
             statusText: response.statusText,
-            responseText,
-            parseError,
           });
 
           return {
-            success: false,
-            status: response.status,
-            statusText: response.statusText,
-            error: `Invalid JSON response from server: ${response.status} ${response.statusText}`,
             details: {
+              responseText: responseText.slice(0, 1000), // Include first 1000 chars of response
               status: response.status,
               statusText: response.statusText,
-              responseText: responseText.slice(0, 1000), // Include first 1000 chars of response
             },
+            error: `Invalid JSON response from server: ${response.status} ${response.statusText}`,
+            status: response.status,
+            statusText: response.statusText,
+            success: false,
           };
         }
 
@@ -143,16 +143,16 @@ export default function SimpleTemplateForm() {
           }
 
           console.error("Error response from API:", {
+            details: errorDetails,
+            error: errorMessage,
             status: response.status,
             statusText: response.statusText,
-            error: errorMessage,
-            details: errorDetails,
           });
 
           return {
-            success: false,
-            error: errorMessage,
             details: errorDetails,
+            error: errorMessage,
+            success: false,
           };
         }
 
@@ -180,35 +180,35 @@ export default function SimpleTemplateForm() {
         }
 
         console.error("Fetch error in submitToMeta:", {
-          name: fetchError.name,
-          message: fetchError.message,
-          error: fetchError,
           details: errorDetails,
+          error: fetchError,
+          message: fetchError.message,
+          name: fetchError.name,
         });
 
         return {
-          success: false,
-          error: errorMessage,
           details: errorDetails,
+          error: errorMessage,
+          success: false,
         };
       }
     } catch (error: any) {
       // This catch block is a last resort for any unhandled errors
       console.error("Unexpected error in submitToMeta:", {
-        name: error.name,
         message: error.message,
+        name: error.name,
         stack: error.stack,
         ...(error.response && { response: error.response }),
         ...(error.config && { config: error.config }),
       });
 
       return {
-        success: false,
-        error: "An unexpected error occurred while submitting to Meta",
         details: {
-          name: error.name,
           message: error.message,
+          name: error.name,
         },
+        error: "An unexpected error occurred while submitting to Meta",
+        success: false,
       };
     }
   };
@@ -223,39 +223,39 @@ export default function SimpleTemplateForm() {
       // Prepare components array
       const components: any[] = [
         {
-          type: "BODY",
           text: data.body,
+          type: "BODY",
         },
       ];
       if (buttons.length > 0) {
         components.push({
-          type: "BUTTONS",
           buttons: buttons.map((btn) => ({
-            type: btn.type,
             text: btn.text,
+            type: btn.type,
             ...(btn.type === "URL" && btn.url ? { url: btn.url } : {}),
             ...(btn.type === "PHONE_NUMBER" && btn.phone_number
               ? { phone_number: btn.phone_number }
               : {}),
           })),
+          type: "BUTTONS",
         });
       }
 
       const templateData = {
-        name: formattedName,
         category: data.category,
-        language: data.language.code, // Use just the language code
-        parameter_format: "POSITIONAL", // Default to POSITIONAL for simple templates
         components,
+        language: data.language.code, // Use just the language code
+        name: formattedName,
+        parameter_format: "POSITIONAL", // Default to POSITIONAL for simple templates
       };
 
       // First save to our database
       const saveResponse = await fetch("/api/whatsapp/templates", {
-        method: "POST",
+        body: JSON.stringify(templateData),
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(templateData),
+        method: "POST",
       });
 
       if (!saveResponse.ok) {
@@ -275,11 +275,11 @@ export default function SimpleTemplateForm() {
       if (!metaResponse.success) {
         // Log the complete error response for debugging
         console.error("Meta submission failed with response:", {
+          details: metaResponse.details,
+          error: metaResponse.error,
+          response: metaResponse.data,
           status: metaResponse.status,
           statusText: metaResponse.statusText,
-          error: metaResponse.error,
-          details: metaResponse.details,
-          response: metaResponse.data,
         });
 
         // Extract error message from different possible locations in the response
@@ -348,26 +348,26 @@ export default function SimpleTemplateForm() {
   const languages = Object.entries(LanguagesEnum)
     .filter(([key]) => isNaN(Number(key)))
     .map(([key, value]) => ({
-      value: value as LanguagesEnum,
       label: key,
+      value: value as LanguagesEnum,
     }));
 
   const categories = [
-    { value: CategoryEnum.Marketing, label: "Marketing" },
-    { value: CategoryEnum.Utility, label: "Utility" },
-    { value: CategoryEnum.Authentication, label: "Authentication" },
+    { label: "Marketing", value: CategoryEnum.Marketing },
+    { label: "Utility", value: CategoryEnum.Utility },
+    { label: "Authentication", value: CategoryEnum.Authentication },
   ];
 
   // Button types for Meta
   const BUTTON_TYPES = [
-    { value: "URL", label: "Website URL" },
-    { value: "PHONE_NUMBER", label: "Phone Number" },
-    { value: "QUICK_REPLY", label: "Quick Reply" },
+    { label: "Website URL", value: "URL" },
+    { label: "Phone Number", value: "PHONE_NUMBER" },
+    { label: "Quick Reply", value: "QUICK_REPLY" },
   ];
 
   const handleAddButton = () => {
     if (buttons.length < 3) {
-      setButtons([...buttons, { type: "QUICK_REPLY", text: "" }]);
+      setButtons([...buttons, { text: "", type: "QUICK_REPLY" }]);
     }
   };
 
@@ -387,9 +387,9 @@ export default function SimpleTemplateForm() {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, onError)}
       className="space-y-6 max-w-2xl"
       noValidate
+      onSubmit={handleSubmit(onSubmit, onError)}
     >
       <div className="space-y-4">
         <div>
@@ -397,15 +397,15 @@ export default function SimpleTemplateForm() {
           <Input
             id="name"
             {...register("name", {
-              required: "Name is required",
               minLength: {
-                value: 3,
                 message: "Name must be at least 3 characters",
+                value: 3,
               },
+              required: "Name is required",
             })}
-            placeholder="Enter template name"
             className="mt-1"
             disabled={isSubmitting}
+            placeholder="Enter template name"
           />
           {errors.name && (
             <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
@@ -463,15 +463,15 @@ export default function SimpleTemplateForm() {
           <textarea
             id="body"
             {...register("body", {
-              required: "Message body is required",
               minLength: {
-                value: 5,
                 message: "Message must be at least 5 characters",
+                value: 5,
               },
+              required: "Message body is required",
             })}
-            placeholder="Enter your message content here"
             className="w-full p-2 border rounded min-h-[100px] disabled:opacity-50"
             disabled={isSubmitting}
+            placeholder="Enter your message content here"
           />
           <p className="text-sm text-gray-500">
             Use {"{{1}}"} for variables. Example: &ldquo;Hello {"{{1}}"}, your
@@ -487,10 +487,10 @@ export default function SimpleTemplateForm() {
           <div className="flex items-center justify-between">
             <Label>Buttons</Label>
             <Button
-              type="button"
-              onClick={handleAddButton}
               disabled={buttons.length >= 3}
+              onClick={handleAddButton}
               size="sm"
+              type="button"
               variant="outline"
             >
               + Add Button
@@ -502,16 +502,16 @@ export default function SimpleTemplateForm() {
             </p>
           )}
           {buttons.map((btn, idx) => (
-            <div key={idx} className="p-3 border rounded mb-2 bg-gray-50">
+            <div className="p-3 border rounded mb-2 bg-gray-50" key={idx}>
               <div className="flex gap-2 items-center mb-2">
                 <Label className="w-24">Type</Label>
                 <select
-                  value={btn.type}
+                  className="border rounded px-2 py-1"
+                  disabled={isSubmitting}
                   onChange={(e) =>
                     handleButtonChange(idx, "type", e.target.value)
                   }
-                  className="border rounded px-2 py-1"
-                  disabled={isSubmitting}
+                  value={btn.type}
                 >
                   {BUTTON_TYPES.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -520,11 +520,11 @@ export default function SimpleTemplateForm() {
                   ))}
                 </select>
                 <Button
+                  disabled={isSubmitting}
+                  onClick={() => handleRemoveButton(idx)}
+                  size="icon"
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  onClick={() => handleRemoveButton(idx)}
-                  disabled={isSubmitting}
                 >
                   &times;
                 </Button>
@@ -532,26 +532,26 @@ export default function SimpleTemplateForm() {
               <div className="flex gap-2 items-center mb-2">
                 <Label className="w-24">Text</Label>
                 <Input
-                  value={btn.text}
+                  className="flex-1"
+                  disabled={isSubmitting}
                   onChange={(e) =>
                     handleButtonChange(idx, "text", e.target.value)
                   }
                   placeholder="Button text"
-                  className="flex-1"
-                  disabled={isSubmitting}
+                  value={btn.text}
                 />
               </div>
               {btn.type === "URL" && (
                 <div className="flex gap-2 items-center mb-2">
                   <Label className="w-24">URL</Label>
                   <Input
-                    value={btn.url || ""}
+                    className="flex-1"
+                    disabled={isSubmitting}
                     onChange={(e) =>
                       handleButtonChange(idx, "url", e.target.value)
                     }
                     placeholder="https://example.com"
-                    className="flex-1"
-                    disabled={isSubmitting}
+                    value={btn.url || ""}
                   />
                 </div>
               )}
@@ -559,13 +559,13 @@ export default function SimpleTemplateForm() {
                 <div className="flex gap-2 items-center mb-2">
                   <Label className="w-24">Phone</Label>
                   <Input
-                    value={btn.phone_number || ""}
+                    className="flex-1"
+                    disabled={isSubmitting}
                     onChange={(e) =>
                       handleButtonChange(idx, "phone_number", e.target.value)
                     }
                     placeholder="+1234567890"
-                    className="flex-1"
-                    disabled={isSubmitting}
+                    value={btn.phone_number || ""}
                   />
                 </div>
               )}
@@ -574,7 +574,7 @@ export default function SimpleTemplateForm() {
         </div>
       </div>
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button disabled={isSubmitting} type="submit">
         {isSubmitting ? "Creating..." : "Create Template"}
       </Button>
     </form>

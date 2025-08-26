@@ -1,13 +1,14 @@
-import { DataLocalizationRegionEnum } from '@shared/types/enums';
 import type { ResponseSuccess } from '@shared/types/request';
 
-export type RegistrationRequest = {
-    messaging_product: 'whatsapp';
-    pin: string;
-    data_localization_region?: DataLocalizationRegionEnum;
-};
+import { DataLocalizationRegionEnum } from '@shared/types/enums';
 
 export interface RegistrationClass {
-    register(pin: string, dataLocalizationRegion?: DataLocalizationRegionEnum): Promise<ResponseSuccess>;
     deregister(): Promise<ResponseSuccess>;
+    register(pin: string, dataLocalizationRegion?: DataLocalizationRegionEnum): Promise<ResponseSuccess>;
+}
+
+export interface RegistrationRequest {
+    data_localization_region?: DataLocalizationRegionEnum;
+    messaging_product: 'whatsapp';
+    pin: string;
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useTitle } from "@/components/provider/title-provider";
-import { DataTable } from "@workspace/ui/components/custom/data-table";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { columns } from "@/features/users/columns";
 import { User } from "@workspace/db/schema/users";
+import { DataTable } from "@workspace/ui/components/custom/data-table";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+import { useTitle } from "@/components/provider/title-provider";
+import { columns } from "@/features/users/columns";
 
 export default function Home() {
   const setTitle = useTitle();
@@ -32,11 +33,11 @@ export default function Home() {
   return (
     <section className="p-4">
       <DataTable
-        title=""
+        actions={() => <></>}
         columns={columns}
         data={data}
-        actions={() => <></>}
         isLoading={loading}
+        title=""
       />
     </section>
   );

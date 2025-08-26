@@ -1,48 +1,51 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { cn } from "@workspace/ui/lib/utils";
-import { PreviewMessage } from "./preview-message";
 import { Conversation } from "@workspace/db/schema";
+import { cn } from "@workspace/ui/lib/utils";
+import React from "react";
+
 import { useContactStore } from "../_store/contact-store";
-import { ChatInfiniteScroll } from "./chat-infinite-scroll";
 import { useSearchMessageStore } from "../_store/message-store";
+import { ChatInfiniteScroll } from "./chat-infinite-scroll";
+import { PreviewMessage } from "./preview-message";
 
 interface PaginatedResponse<T> {
   data: T[];
-  nextOffset: number | null;
-  previousOffset: number | null;
+  nextOffset: null | number;
+  previousOffset: null | number;
 }
 
 export function ScrollableChats() {
   const contactId = useContactStore((state) => state.contactId);
 
-  const { searchMessageId, setLoading, loading, searchRandomId } =
+  const { loading, searchMessageId, searchRandomId, setLoading } =
     useSearchMessageStore();
 
   // const [rId, setRid] = useQueryState("rId", parseAsString);
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
-    status,
     data,
     error,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
     fetchNextPage,
     fetchPreviousPage,
     hasNextPage,
     hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
+    status,
   } = useInfiniteQuery<PaginatedResponse<Conversation>>({
-    queryKey: [
-      "conversations",
-      contactId,
-      searchMessageId,
-      searchRandomId,
-      // rId,
-    ],
+    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+    getPreviousPageParam: (firstPage) => {
+      return Number(firstPage.previousOffset) > 0
+        ? firstPage.previousOffset
+        : remaining > 0
+          ? 0
+          : undefined;
+    },
+    initialPageParam: 0,
     queryFn: async ({
       pageParam,
     }): Promise<PaginatedResponse<Conversation>> => {
@@ -71,15 +74,13 @@ export function ScrollableChats() {
 
       return data;
     },
-    initialPageParam: 0,
-    getPreviousPageParam: (firstPage) => {
-      return Number(firstPage.previousOffset) > 0
-        ? firstPage.previousOffset
-        : remaining > 0
-          ? 0
-          : undefined;
-    },
-    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+    queryKey: [
+      "conversations",
+      contactId,
+      searchMessageId,
+      searchRandomId,
+      // rId,
+    ],
   });
 
   if (status === "pending") {
@@ -99,44 +100,44 @@ export function ScrollableChats() {
       <div
         id="scrollableDiv"
         style={{
-          height: "60vh",
-          overflow: "auto",
           display: "flex",
           flexDirection: "column-reverse",
+          height: "60vh",
+          overflow: "auto",
         }}
       >
         <ChatInfiniteScroll
-          showMiddle={!!searchMessageId}
+          className=" p-4"
           hasNext={hasNextPage}
           hasPrevious={hasPreviousPage}
           isReverse={true}
+          loadingNext={isFetchingNextPage}
+          loadingPrevious={isFetchingPreviousPage}
           next={() => {
             fetchNextPage();
           }}
           previous={() => {
             fetchPreviousPage();
           }}
-          className=" p-4"
-          loadingNext={isFetchingNextPage}
-          loadingPrevious={isFetchingPreviousPage}
+          showMiddle={!!searchMessageId}
         >
           {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
               {page.data?.map((el: any) => (
                 <div
-                  key={el.id}
                   className={cn(
                     `flex mb-2`,
                     el.direction === "inbound" ? "justify-start" : "justify-end"
                   )}
+                  key={el.id}
                 >
                   {el.body && (
                     <PreviewMessage
                       className={
                         searchMessageId === el.id ? "bg-yellow-200" : ""
                       }
-                      input={el.body}
                       date={el.createdAt}
+                      input={el.body}
                       user={el.user}
                     />
                   )}

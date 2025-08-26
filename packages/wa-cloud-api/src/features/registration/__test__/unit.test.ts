@@ -9,8 +9,8 @@ describe('Registration API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
@@ -54,9 +54,9 @@ describe('Registration API - Unit Tests', () => {
 
             const parsedBody = JSON.parse(body);
             expect(parsedBody).toEqual({
+                data_localization_region: 'SG',
                 messaging_product: 'whatsapp',
                 pin: '654321',
-                data_localization_region: 'SG',
             });
         });
 

@@ -1,16 +1,17 @@
-import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
-import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
-import { getUserWithTeam } from "@/lib/db/queries";
 import {
   marketingCampaignsTable,
   NewMarketingCampaign,
 } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { NextResponse } from "next/server";
 import { IJobMessageOutgoing, WhatsAppEvents } from "@workspace/shared";
 import { revalidateTag } from "next/cache";
-import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { NextResponse } from "next/server";
+
+import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
+import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
 import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET() {
   const result = await getMarketingCampaigns();
@@ -40,18 +41,18 @@ export async function POST(request: Request) {
       userWithTeam?.teamId,
       async (tx) => {
         const marketingCampaign: NewMarketingCampaign = {
+          enableTracking: body.details.track,
+          messageTemplate: body.template.messageTemplate,
           name: body.details.campaignName,
-          templateId: body.template.template,
+          phoneNumber: body.details.phoneNumber,
+          recipients: body.audience.phone.map((phone) => phone.value),
           scheduleAt: body.details.schedule
             ? new Date(body.details.schedule)
             : null,
-          recipients: body.audience.phone.map((phone) => phone.value),
-          tags: body.audience.tags,
-          enableTracking: body.details.track,
-          phoneNumber: body.details.phoneNumber,
           status: body.details.schedule ? "pending" : "draft",
-          messageTemplate: body.template.messageTemplate,
+          tags: body.audience.tags,
           teamId: userWithTeam.teamId!,
+          templateId: body.template.template,
         };
 
         const data = await tx
@@ -67,8 +68,8 @@ export async function POST(request: Request) {
 
     if (result?.data?.id && body.details.schedule) {
       const jobData: IJobMessageOutgoing = {
-        teamId: userWithTeam.teamId,
         marketingCampaignId: result.data.id,
+        teamId: userWithTeam.teamId,
         userId: userWithTeam.user.id,
       };
 
@@ -80,8 +81,8 @@ export async function POST(request: Request) {
       );
 
       await waBulkMessagesOutgoingQueue.add(jobId, jobData, {
-        jobId,
         delay,
+        jobId,
       });
     }
 

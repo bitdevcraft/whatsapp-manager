@@ -1,13 +1,12 @@
 "use client";
 
-import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "@workspace/ui/components/card";
 import {
   ChartConfig,
@@ -16,7 +15,9 @@ import {
   ChartTooltipContent,
 } from "@workspace/ui/components/chart";
 import React from "react";
-import { XAxis, YAxis, Bar, BarChart } from "recharts";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
+import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 
 export interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getDashboardAnalytics>>]>;
@@ -24,38 +25,38 @@ export interface Props {
 
 export const description = "A horizontal bar chart";
 const chartData = [
-  { status: "success", count: 0, fill: "var(--color-success)" },
-  { status: "pending", count: 0, fill: "var(--color-pending)" },
-  { status: "failed", count: 0, fill: "var(--color-failed)" },
-  { status: "disabled", count: 0, fill: "var(--color-disabled)" },
-  { status: "draft", count: 0, fill: "var(--color-draft)" },
-  { status: "processing", count: 0, fill: "var(--color-processing)" },
+  { count: 0, fill: "var(--color-success)", status: "success" },
+  { count: 0, fill: "var(--color-pending)", status: "pending" },
+  { count: 0, fill: "var(--color-failed)", status: "failed" },
+  { count: 0, fill: "var(--color-disabled)", status: "disabled" },
+  { count: 0, fill: "var(--color-draft)", status: "draft" },
+  { count: 0, fill: "var(--color-processing)", status: "processing" },
 ];
 
 const chartConfig = {
-  success: {
-    label: "Success",
-    color: "var(--color-green-400)",
-  },
-  pending: {
-    label: "Pending",
-    color: "var(--color-blue-300)",
-  },
-  failed: {
-    label: "Failed",
-    color: "var(--color-red-400)",
-  },
   disabled: {
-    label: "Disabled",
     color: "var(--muted)",
+    label: "Disabled",
   },
   draft: {
-    label: "Draft",
     color: "var(--muted-foreground)",
+    label: "Draft",
+  },
+  failed: {
+    color: "var(--color-red-400)",
+    label: "Failed",
+  },
+  pending: {
+    color: "var(--color-blue-300)",
+    label: "Pending",
   },
   processing: {
-    label: "Processing",
     color: "var(--color-blue-500)",
+    label: "Processing",
+  },
+  success: {
+    color: "var(--color-green-400)",
+    label: "Success",
   },
 } satisfies ChartConfig;
 
@@ -64,7 +65,7 @@ export default function MarketingCampaignStats({ promises }: Props) {
 
   // 3. turn it into a lookup map
   const realCountByStatus = new Map(
-    marketingCampaignStatus.map(({ status, count }) => [status, count] as const)
+    marketingCampaignStatus.map(({ count, status }) => [status, count] as const)
   );
 
   // 4. merge!
@@ -92,20 +93,20 @@ export default function MarketingCampaignStats({ promises }: Props) {
               left: 20,
             }}
           >
-            <XAxis type="number" dataKey="count" hide />
+            <XAxis dataKey="count" hide type="number" />
             <YAxis
-              dataKey="status"
-              type="category"
-              tickLine={true}
-              tickMargin={10}
               axisLine={false}
+              dataKey="status"
               tickFormatter={(value) =>
                 chartConfig[value as keyof typeof chartConfig]?.label
               }
+              tickLine={true}
+              tickMargin={10}
+              type="category"
             />
             <ChartTooltip
-              cursor={false}
               content={<ChartTooltipContent hideLabel />}
+              cursor={false}
             />
             <Bar dataKey="count" layout="vertical" radius={5} />
           </BarChart>

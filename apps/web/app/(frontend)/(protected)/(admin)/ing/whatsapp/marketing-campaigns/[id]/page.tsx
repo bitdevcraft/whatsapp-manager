@@ -1,8 +1,10 @@
-import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/queries";
-import MarketingCampaignDashboard from "./marketing-campaign-dashboard";
 import React from "react";
-import { MarketingCampaignSkeleton } from "./skeleton";
+
+import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/queries";
+
 import { getEstimatedRecipients, hasRemainingUsage } from "./action";
+import MarketingCampaignDashboard from "./marketing-campaign-dashboard";
+import { MarketingCampaignSkeleton } from "./skeleton";
 
 interface IndexPageProps {
   params: Promise<{ id: string }>;

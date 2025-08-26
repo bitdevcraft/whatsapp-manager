@@ -3,15 +3,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@workspace/ui/components/button";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
-import { ErrorSummary } from "./helpers";
 import {
   Select,
   SelectContent,
@@ -19,15 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
+
+import { ErrorSummary } from "./helpers";
 
 export function ButtonsArray({
-  prefix,
   index,
+  prefix,
 }: {
-  prefix?: string;
   index: number;
+  prefix?: string;
 }) {
-  const { trigger, control } = useFormContext(); // ✅ revalidation hook
+  const { control, trigger } = useFormContext(); // ✅ revalidation hook
 
   const base = prefix
     ? (`${prefix}.components.${index}` as const)
@@ -43,7 +44,7 @@ export function ButtonsArray({
   const canAdd = fa.fields.length < 2; // UI guard: at most 2
   const handleAdd = () => {
     if (!canAdd) return;
-    fa.append({ type: "QUICK_REPLY", text: "" });
+    fa.append({ text: "", type: "QUICK_REPLY" });
     void trigger(`${base}.buttons` as any); // 🔁 show superRefine errors immediately
   };
 
@@ -60,10 +61,10 @@ export function ButtonsArray({
       <div className="flex items-center justify-between">
         <span className="text-sm">Buttons</span>
         <Button
+          disabled={!canAdd}
+          onClick={handleAdd}
           type="button"
           variant="secondary"
-          onClick={handleAdd}
-          disabled={!canAdd}
         >
           Add Button
         </Button>
@@ -79,11 +80,11 @@ export function ButtonsArray({
       <div className="space-y-3">
         {fa.fields.map((f, i) => (
           <ButtonRow
-            key={f.id}
             base={base}
             index={i}
-            total={fa.fields.length}
+            key={f.id}
             remove={() => handleRemove(i)}
+            total={fa.fields.length}
             types={types}
           />
         ))}
@@ -95,26 +96,26 @@ export function ButtonsArray({
 function ButtonRow({
   base,
   index,
-  total,
   remove,
+  total,
   types,
 }: {
   base: string;
   index: number;
-  total: number;
   remove: () => void;
+  total: number;
   types: readonly ["QUICK_REPLY", "URL", "PHONE_NUMBER"];
 }) {
-  const { setValue, trigger, control } = useFormContext();
+  const { control, setValue, trigger } = useFormContext();
 
   const typePath = `${base}.buttons.${index}.type` as const;
   const typeValue = useWatch({ control, name: typePath }) as
+    | "PHONE_NUMBER"
     | "QUICK_REPLY"
     | "URL"
-    | "PHONE_NUMBER"
     | undefined;
 
-  const onTypeChange = (v: "QUICK_REPLY" | "URL" | "PHONE_NUMBER") => {
+  const onTypeChange = (v: "PHONE_NUMBER" | "QUICK_REPLY" | "URL") => {
     // Update type
     setValue(typePath as any, v, { shouldDirty: true, shouldValidate: false });
 
@@ -156,7 +157,7 @@ function ButtonRow({
           <FormItem>
             <FormLabel>Type</FormLabel>
             <FormControl>
-              <Select value={field.value} onValueChange={onTypeChange}>
+              <Select onValueChange={onTypeChange} value={field.value}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -225,10 +226,10 @@ function ButtonRow({
 
       <div className="flex justify-end">
         <Button
+          disabled={total <= 1} // UI guard: keep ≥ 1 button
+          onClick={remove}
           type="button"
           variant="destructive"
-          onClick={remove}
-          disabled={total <= 1} // UI guard: keep ≥ 1 button
         >
           Remove
         </Button>

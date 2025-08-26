@@ -1,12 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import {
-  AdCampaignSchema,
-  MultiStepAdsFormValues,
-  MultiStepAdsSchema,
-} from "./schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
 import {
   Form,
   FormControl,
@@ -16,14 +11,12 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { cn } from "@workspace/ui/lib/utils";
+import { Label } from "@workspace/ui/components/label";
+import { MultiSelect } from "@workspace/ui/components/multi-select";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
-import { Label } from "@workspace/ui/components/label";
-import { toTitleCase } from "@/utils/string-helper";
-import { MultiSelect } from "@workspace/ui/components/multi-select";
 import {
   Select,
   SelectContent,
@@ -31,11 +24,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { cn } from "@workspace/ui/lib/utils";
 import React from "react";
-import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
+import { useForm } from "react-hook-form";
+
+import { toTitleCase } from "@/utils/string-helper";
+
+import {
+  AdCampaignSchema,
+  MultiStepAdsFormValues,
+  MultiStepAdsSchema,
+} from "./schema";
 
 const optimization_goal: Record<string, string[]> = {
   OUTCOME_ENGAGEMENT: ["CONVERSATIONS", "LINK_CLICKS"],
+  OUTCOME_LEADS: ["CONVERSATIONS"],
   OUTCOME_SALES: [
     "CONVERSATIONS",
     "OFFSITE_CONVERSIONS",
@@ -51,36 +54,35 @@ const optimization_goal: Record<string, string[]> = {
     "REACH",
     "POST_ENGAGEMENT",
   ],
-  OUTCOME_LEADS: ["CONVERSATIONS"],
 };
 
 export function AdForm() {
   const form = useForm<MultiStepAdsFormValues>({
-    resolver: zodResolver(MultiStepAdsSchema),
     defaultValues: {
-      campaign: {
-        name: "Click to WhatsApp Ads",
-        objective: undefined,
-        special_ad_categories: [],
-        status: undefined,
-      },
       adSet: {
         billing_event: "IMPRESSIONS",
         destination_type: "WHATSAPP",
+        end_time: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         name: "Click to WhatsApp Ads",
         optimization_goal: undefined,
         promoted_object: {
           page_id: "",
         },
         start_time: new Date(),
-        end_time: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         targeting: {
           age_max: 65,
           age_min: 18,
           genders: [0],
         },
       },
+      campaign: {
+        name: "Click to WhatsApp Ads",
+        objective: undefined,
+        special_ad_categories: [],
+        status: undefined,
+      },
     },
+    resolver: zodResolver(MultiStepAdsSchema),
   });
 
   const [optimizationGoal, setOptimizationGoal] = React.useState<string[]>([]);
@@ -129,6 +131,7 @@ export function AdForm() {
                   <FormLabel>Campaign Objective</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      defaultValue={field.value}
                       onValueChange={(v) => {
                         field.onChange(v);
                         if (optimization_goal[v]) {
@@ -138,16 +141,15 @@ export function AdForm() {
                           });
                         }
                       }}
-                      defaultValue={field.value}
                     >
                       {AdCampaignSchema.shape.objective.options.map((el) => (
-                        <div key={el} className="flex items-center gap-3">
+                        <div className="flex items-center gap-3" key={el}>
                           <RadioGroupItem
                             className="border-muted-foreground shadow-none"
-                            value={el}
                             id={el}
+                            value={el}
                           />
-                          <Label htmlFor={el} className="font-normal text-md">
+                          <Label className="font-normal text-md" htmlFor={el}>
                             {toTitleCase(el, { outcome: "" })}
                           </Label>
                         </div>
@@ -168,18 +170,18 @@ export function AdForm() {
                   <FormLabel>Special Ad Categories</FormLabel>
                   <FormControl>
                     <MultiSelect
+                      className="shadow-none border-muted"
+                      maxCount={4}
+                      onValueChange={field.onChange}
                       options={AdCampaignSchema.shape.special_ad_categories.element.options.map(
                         (c) => ({
                           label: toTitleCase(c),
                           value: c,
                         })
                       )}
-                      onValueChange={field.onChange}
-                      value={field.value || []}
                       placeholder="Declare category if applicable"
+                      value={field.value || []}
                       variant="default"
-                      maxCount={4}
-                      className="shadow-none border-muted"
                     />
                   </FormControl>
                   <FormMessage />
@@ -220,8 +222,8 @@ export function AdForm() {
                   {form.getValues().adSet.optimization_goal}
                   {field.value}
                   <Select
-                    onValueChange={field.onChange}
                     defaultValue={field.value ?? ""}
+                    onValueChange={field.onChange}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -274,8 +276,8 @@ export function AdForm() {
                       <Input
                         placeholder="Budget"
                         {...field}
-                        type="number"
                         className="shadow-none border-muted w-full rounded-l-none"
+                        type="number"
                       />
                     </FormControl>
                     <FormMessage />
@@ -292,9 +294,9 @@ export function AdForm() {
                   <FormLabel>Start Time</FormLabel>
                   <FormControl>
                     <DateTimePicker
-                      name={field.name}
                       control={form.control}
                       dateFormat="MMM dd, yyyy HH:mm"
+                      name={field.name}
                     />
                   </FormControl>
                   <FormMessage />
@@ -309,9 +311,9 @@ export function AdForm() {
                   <FormLabel>End Time</FormLabel>
                   <FormControl>
                     <DateTimePicker
-                      name={field.name}
                       control={form.control}
                       dateFormat="MMM dd, yyyy HH:mm"
+                      name={field.name}
                     />
                   </FormControl>
                   <FormMessage />
@@ -330,8 +332,8 @@ export function AdForm() {
                 render={({ field }) => (
                   <FormItem className="">
                     <Select
-                      onValueChange={field.onChange}
                       defaultValue={String(field.value)}
+                      onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger className="w-24">
@@ -358,8 +360,8 @@ export function AdForm() {
                 render={({ field }) => (
                   <FormItem className="">
                     <Select
-                      onValueChange={field.onChange}
                       defaultValue={String(field.value)}
+                      onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger className="w-24">
@@ -390,21 +392,21 @@ export function AdForm() {
                   <FormLabel>Gender</FormLabel>
                   <FormControl>
                     <RadioGroup
+                      className="flex"
+                      defaultValue={String(field.value[0])}
                       onValueChange={(v) => {
                         field.onChange([Number(v)]);
                       }}
-                      defaultValue={String(field.value[0])}
-                      className="flex"
                     >
                       <div className="flex items-center gap-3">
                         <RadioGroupItem
                           className="border-muted-foreground shadow-none"
-                          value={String(0)}
                           id="gender.all"
+                          value={String(0)}
                         />
                         <Label
-                          htmlFor="gender.all"
                           className="font-normal text-md"
+                          htmlFor="gender.all"
                         >
                           All
                         </Label>
@@ -412,12 +414,12 @@ export function AdForm() {
                       <div className="flex items-center gap-3">
                         <RadioGroupItem
                           className="border-muted-foreground shadow-none"
-                          value={String(1)}
                           id="gender.male"
+                          value={String(1)}
                         />
                         <Label
-                          htmlFor="gender.male"
                           className="font-normal text-md"
+                          htmlFor="gender.male"
                         >
                           Male
                         </Label>
@@ -425,12 +427,12 @@ export function AdForm() {
                       <div className="flex items-center gap-3">
                         <RadioGroupItem
                           className="border-muted-foreground shadow-none"
-                          value={String(2)}
                           id="gender.female"
+                          value={String(2)}
                         />
                         <Label
-                          htmlFor="gender.female"
                           className="font-normal text-md"
+                          htmlFor="gender.female"
                         >
                           Female
                         </Label>

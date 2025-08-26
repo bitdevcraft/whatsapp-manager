@@ -1,5 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { WabaAccountFields } from '../types/common';
 
 describe('WABA API - Unit Tests', () => {
@@ -9,17 +10,17 @@ describe('WABA API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
         mockRequestSend.mockResolvedValue({
+            account_review_status: 'APPROVED',
+            business_verification_status: 'verified',
             id: 'test_business_id',
             name: 'Test Business',
-            account_review_status: 'APPROVED',
             status: 'ACTIVE',
-            business_verification_status: 'verified',
         });
     });
 
@@ -54,10 +55,10 @@ describe('WABA API - Unit Tests', () => {
                 data: [
                     {
                         whatsapp_business_api_data: {
+                            category: 'BUSINESS',
                             id: 'app_123',
                             link: 'https://example.com',
                             name: 'Test App',
-                            category: 'BUSINESS',
                         },
                     },
                 ],
@@ -210,15 +211,15 @@ describe('WABA API - Unit Tests', () => {
     describe('Response Structure Validation', () => {
         it('should return proper WABA account structure', async () => {
             const mockAccount = {
-                id: 'test_business_123',
-                name: 'Test Business Account',
                 account_review_status: 'APPROVED',
-                status: 'ACTIVE',
                 business_verification_status: 'verified',
                 health_status: {
                     can_send_message: 'AVAILABLE',
                     entities: [],
                 },
+                id: 'test_business_123',
+                name: 'Test Business Account',
+                status: 'ACTIVE',
             };
 
             mockRequestSend.mockResolvedValue(mockAccount);
@@ -234,13 +235,13 @@ describe('WABA API - Unit Tests', () => {
             const mockSubscriptions = {
                 data: [
                     {
+                        override_callback_uri: 'https://webhook.example.com',
                         whatsapp_business_api_data: {
+                            category: 'BUSINESS',
                             id: 'app_123',
                             link: 'https://example.com',
                             name: 'Test App',
-                            category: 'BUSINESS',
                         },
-                        override_callback_uri: 'https://webhook.example.com',
                     },
                 ],
             };

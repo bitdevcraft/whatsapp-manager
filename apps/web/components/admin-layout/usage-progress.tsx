@@ -1,7 +1,5 @@
 "use client";
 
-import { getUsage } from "@/lib/db/usage-queries";
-import { Progress } from "@workspace/ui/components/progress";
 import { ProgressCircle } from "@workspace/ui/components/progress-circle";
 import {
   SidebarMenu,
@@ -9,6 +7,8 @@ import {
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
 import React from "react";
+
+import { getUsage } from "@/lib/db/usage-queries";
 
 interface Limits {
   limit: number;
