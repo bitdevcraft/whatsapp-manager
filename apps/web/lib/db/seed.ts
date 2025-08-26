@@ -18,8 +18,8 @@ async function createStripeProducts() {
   logger.log("Creating Stripe products and prices...");
 
   const baseProduct = await stripe.products.create({
-    name: "Base",
-    description: "Base subscription plan",
+    name: "Starter",
+    description: "Starter subscription plan",
   });
 
   await stripe.prices.create({
@@ -28,7 +28,10 @@ async function createStripeProducts() {
     currency: "usd",
     recurring: {
       interval: "month",
-      trial_period_days: 7,
+      trial_period_days: 0,
+    },
+    metadata: {
+      limit: 1000,
     },
   });
 
@@ -43,7 +46,10 @@ async function createStripeProducts() {
     currency: "usd",
     recurring: {
       interval: "month",
-      trial_period_days: 7,
+      trial_period_days: 0,
+    },
+    metadata: {
+      limit: 10000,
     },
   });
 
@@ -51,92 +57,92 @@ async function createStripeProducts() {
 }
 
 async function seed() {
-  const email = "test@test.com";
-  const password = "admin123";
-  const passwordHash = await hashPassword(password);
+  // const email = "test@test.com";
+  // const password = "admin123";
+  // const passwordHash = await hashPassword(password);
 
-  const [user] = await db
-    .insert(usersTable)
-    .values([
-      {
-        email: email,
-        passwordHash: passwordHash,
-        role: "owner",
-      },
-    ])
-    .returning();
+  // const [user] = await db
+  //   .insert(usersTable)
+  //   .values([
+  //     {
+  //       email: email,
+  //       passwordHash: passwordHash,
+  //       role: "owner",
+  //     },
+  //   ])
+  //   .returning();
 
-  logger.log("Initial user created.");
+  // logger.log("Initial user created.");
 
-  const [team] = await db
-    .insert(teamsTable)
-    .values({
-      name: "Test Team",
-    })
-    .returning();
+  // const [team] = await db
+  //   .insert(teamsTable)
+  //   .values({
+  //     name: "Test Team",
+  //   })
+  //   .returning();
 
-  await db.insert(teamMembersTable).values({
-    organizationId: team!.id,
-    userId: user!.id,
-    role: "owner",
-  });
+  // await db.insert(teamMembersTable).values({
+  //   organizationId: team!.id,
+  //   userId: user!.id,
+  //   role: "owner",
+  // });
 
-  const interestsPool = [
-    "sports",
-    "music",
-    "travel",
-    "reading",
-    "coding",
-    "photography",
-    "art",
-  ];
+  // const interestsPool = [
+  //   "sports",
+  //   "music",
+  //   "travel",
+  //   "reading",
+  //   "coding",
+  //   "photography",
+  //   "art",
+  // ];
 
-  const tagsPool = [
-    "new",
-    "vip",
-    "prospect",
-    "newsletter",
-    "follow-up",
-    "important",
-  ];
+  // const tagsPool = [
+  //   "new",
+  //   "vip",
+  //   "prospect",
+  //   "newsletter",
+  //   "follow-up",
+  //   "important",
+  // ];
 
-  const tags: NewTag[] = tagsPool.map((tag) => ({
-    name: tag,
-    teamId: team!.id,
-  }));
+  // const tags: NewTag[] = tagsPool.map((tag) => ({
+  //   name: tag,
+  //   teamId: team!.id,
+  // }));
 
-  const contacts: NewContact[] = Array.from({ length: 100 }).map(() => ({
-    // baseSchema fields – adjust names if yours differ
-    createdAt: faker.date.past({ years: 1 }),
-    updatedAt: faker.date.recent({ days: 30 }),
+  // const contacts: NewContact[] = Array.from({ length: 100 }).map(() => ({
+  //   // baseSchema fields – adjust names if yours differ
+  //   createdAt: faker.date.past({ years: 1 }),
+  //   updatedAt: faker.date.recent({ days: 30 }),
 
-    name: faker.person.fullName(),
-    // required fields
-    phone: faker.phone.number({ style: "international" }),
-    email: "demo-" + faker.internet.email(),
-    message: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
+  //   name: faker.person.fullName(),
+  //   // required fields
+  //   phone: faker.phone.number({ style: "international" }),
+  //   email: "demo-" + faker.internet.email(),
+  //   message: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
 
-    // JSONB arrays
-    interests: faker.helpers.arrayElements(
-      interestsPool,
-      faker.number.int({ min: 0, max: interestsPool.length })
-    ),
-    tags: faker.helpers.arrayElements(
-      tagsPool,
-      faker.number.int({ min: 0, max: tagsPool.length })
-    ),
+  //   // JSONB arrays
+  //   interests: faker.helpers.arrayElements(
+  //     interestsPool,
+  //     faker.number.int({ min: 0, max: interestsPool.length })
+  //   ),
+  //   tags: faker.helpers.arrayElements(
+  //     tagsPool,
+  //     faker.number.int({ min: 0, max: tagsPool.length })
+  //   ),
 
-    // boolean & optional FK
-    opt_in: faker.datatype.boolean(),
-    teamId: team!.id,
-  }));
+  //   // boolean & optional FK
+  //   opt_in: faker.datatype.boolean(),
+  //   teamId: team!.id,
+  // }));
 
-  await withTenantTransaction(team!.id, async (tx) => {
-    await tx.insert(tagsTable).values(tags);
+  // await withTenantTransaction(team!.id, async (tx) => {
+  //   await tx.insert(tagsTable).values(tags);
 
-    // insert all 100 rows in one go
-    await tx.insert(contactsTable).values(contacts);
-  });
+  //   // insert all 100 rows in one go
+  //   await tx.insert(contactsTable).values(contacts);
+  // });
 
   await createStripeProducts();
 }

@@ -2,6 +2,7 @@ import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/qu
 import MarketingCampaignDashboard from "./marketing-campaign-dashboard";
 import React from "react";
 import { MarketingCampaignSkeleton } from "./skeleton";
+import { getEstimatedRecipients, hasRemainingUsage } from "./action";
 
 interface IndexPageProps {
   params: Promise<{ id: string }>;
@@ -10,7 +11,11 @@ interface IndexPageProps {
 export default async function Home({ params }: IndexPageProps) {
   const { id } = await params;
 
-  const promises = Promise.all([getMarketingCampaignById(id)]);
+  const promises = Promise.all([
+    getMarketingCampaignById(id),
+    getEstimatedRecipients(id),
+    hasRemainingUsage(id),
+  ]);
 
   return (
     <React.Suspense fallback={<MarketingCampaignSkeleton />}>

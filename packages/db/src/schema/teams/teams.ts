@@ -1,5 +1,13 @@
 import { relations } from "drizzle-orm";
-import { bigint, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import {
+  bigint,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { baseModel } from "../abstract/baseModel";
 import { activityLogsTable } from "../activity-logs";
@@ -30,12 +38,15 @@ export const teamsTable = pgTable("teams", {
     2 * 1024 * 1024 * 1024
   ),
   metadata: text("metadata"),
-  planName: varchar("plan_name", { length: 50 }),
+  planName: varchar("plan_name", { length: 50 }).default("demo"),
   slug: text("slug"),
   stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeMetadata: jsonb("stripe_metadata"),
   stripeProductId: text("stripe_product_id"),
   stripeSubscriptionId: text("stripe_subscription_id").unique(),
   subscriptionStatus: varchar("subscription_status", { length: 20 }),
+  whatsappLimit: integer("whatsapp_limit").default(20),
+  whatsappSubscribeAt: timestamp("whatsapp_subscribe_at"),
 });
 
 export type NewTeam = typeof teamsTable.$inferInsert;

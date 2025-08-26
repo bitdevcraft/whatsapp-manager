@@ -3,11 +3,14 @@ import {
   contactsTable,
   ConversationBody,
   conversationsTable,
+  db,
   marketingCampaignsTable,
   NewContact,
   NewConversation,
+  teamMembersUsageTracking,
   withTenantTransaction,
 } from "@workspace/db";
+import { UsageLimitRepository } from "@workspace/db/repositories";
 import {
   NotificationEvent,
   NotificationRelatedObject,
@@ -19,7 +22,8 @@ import {
 } from "@workspace/wa-cloud-api";
 import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
 import { Worker } from "bullmq";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 import { waClientRegistry } from "@/instance";
 import { redisConnection } from "@/lib/redis";
@@ -62,7 +66,12 @@ export function setupBulkMessagesWorker() {
 
         const whatsapp = waClientRegistry.get(registryId);
 
-        const response = await whatsapp?.messages.template(template);
+        const response =
+          //  {
+          //   contacts: [{ input: "971555606707" }],
+          //   messages: [{ id: nanoid() }],
+          // };
+          await whatsapp?.messages.template(template);
 
         const isSuccess = !!response?.messages[0]?.id;
 
@@ -127,13 +136,13 @@ export function setupBulkMessagesWorker() {
         const { components } = template.body;
 
         components?.forEach((component) => {
-          const { type, parameters } = component;
+          const { type } = component;
 
           if (type === ComponentTypesEnum.Header) {
             const baseConversation: baseConversation = {};
             const parameterName: Record<string, string> = {};
             const indexName: string[] = [];
-            parameters.forEach((parameter) => {
+            component.parameters.forEach((parameter) => {
               switch (parameter.type) {
                 case ParametersTypesEnum.Document:
                 case ParametersTypesEnum.Image:
@@ -178,7 +187,7 @@ export function setupBulkMessagesWorker() {
           if (type === ComponentTypesEnum.Body) {
             const parameterName: Record<string, string> = {};
             const indexName: string[] = [];
-            parameters.forEach((parameter) => {
+            component.parameters.forEach((parameter) => {
               switch (parameter.type) {
                 case ParametersTypesEnum.Text:
                   if (parameter.parameter_name)
@@ -210,7 +219,7 @@ export function setupBulkMessagesWorker() {
           }
         });
 
-        await withTenantTransaction(teamId, async (tx) => {
+        const conv = await withTenantTransaction(teamId, async (tx) => {
           let contactId = "";
 
           const contact = response?.contacts[0]
@@ -256,11 +265,15 @@ export function setupBulkMessagesWorker() {
             wamid: response?.messages[0]?.id,
           };
 
-          return await tx
+          const conv = await tx
             .insert(conversationsTable)
             .values(conversation)
             .returning();
+
+          return conv;
         });
+
+        await upsertUsage(teamId, conv.length, userId);
       } catch (error) {
         console.error(error);
         throw Error("");
@@ -312,4 +325,20 @@ export function setupBulkMessagesWorker() {
   });
 
   return worker;
+}
+
+function getMonthBounds(date: Date = new Date()) {
+  // First day of the month (midnight)
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+
+  // Last day of the month (23:59:59.999)
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  return { firstDay, lastDay };
+}
+
+async function upsertUsage(teamId: string, usage: number, userId?: string) {
+  const repo = new UsageLimitRepository(teamId);
+  console.log("test");
+  if (userId && usage > 0) await repo.upsertUsageTracking(userId, usage);
 }

@@ -1,3 +1,7 @@
+import {
+  ComponentSchema,
+  MessageTemplateValues,
+} from "@/features/whatsapp/templates/lib/schema";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -9,8 +13,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@workspace/ui/components/carousel";
 import { TemplateResponse } from "@workspace/wa-cloud-api";
 import {
@@ -22,19 +24,22 @@ import {
   TemplateFormat,
   TemplateHeader,
 } from "@workspace/wa-cloud-api/template";
-import Image from "next/image";
+import z from "zod";
 
 interface Props {
   template: TemplateResponse;
+  messageTemplate?: MessageTemplateValues;
 }
 
-export function SingleTemplatePreview({ template }: Props) {
+export function SingleTemplatePreview({ template, messageTemplate }: Props) {
   const base = template.components.filter((comp) =>
     ["HEADER", "BODY", "FOOTER", "BUTTONS"].includes(comp.type)
   );
   const carousel = template.components.filter((comp) =>
     ["CAROUSEL"].includes(comp.type)
   );
+
+  const messageComponents = messageTemplate?.components ?? [];
 
   return (
     <div>
@@ -44,11 +49,19 @@ export function SingleTemplatePreview({ template }: Props) {
       <div className="space-y-2 border bg-muted p-4">
         <Card>
           {base.map((component, idx) => (
-            <ComponentPreview key={idx} component={component} />
+            <ComponentPreview
+              key={idx}
+              component={component}
+              messageComponents={messageComponents}
+            />
           ))}
         </Card>
         {carousel.map((component, idx) => (
-          <ComponentPreview key={idx} component={component} />
+          <ComponentPreview
+            key={idx}
+            component={component}
+            messageComponents={messageComponents}
+          />
         ))}
       </div>
     </div>
@@ -57,13 +70,19 @@ export function SingleTemplatePreview({ template }: Props) {
 
 export function ComponentPreview({
   component,
+  messageComponents,
   ...props
-}: React.ComponentProps<"div"> & { component: ComponentTypes }) {
+}: React.ComponentProps<"div"> & {
+  component: ComponentTypes;
+  messageComponents?: z.infer<typeof ComponentSchema>[];
+}) {
   const type = component.type;
 
   if (type === "CAROUSEL") {
     return <ComponentCarouselPreview component={component} />;
   }
+
+  const cIdx = messageComponents?.findIndex((c) => c.type === type) ?? -1;
 
   return (
     <div {...props}>

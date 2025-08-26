@@ -14,6 +14,7 @@ import { SocketProvider } from "@/components/provider/socket-provider";
 import { redirect } from "next/navigation";
 import Notification from "./notification";
 import { auth } from "@workspace/auth";
+import { getUsage } from "@/lib/db/usage-queries";
 
 export default async function Layout({
   children,
@@ -36,7 +37,7 @@ export default async function Layout({
     redirect(`/auth/login?path=${pathname}`);
   }
 
-  
+  const promises = Promise.all([getUsage()]);
 
   return (
     <div>
@@ -60,6 +61,7 @@ export default async function Layout({
                 variant="inset"
                 teams={data}
                 user={authSession.user}
+                promises={promises}
               />
               <SidebarInset>
                 <div className="px-1">
