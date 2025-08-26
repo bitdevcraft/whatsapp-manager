@@ -23,6 +23,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 import { generateConversationComponentBody, interpolate } from "../../actions";
+import { UsageLimitRepository } from "@workspace/db/repositories";
 
 export async function POST(request: NextRequest) {
   try {
@@ -114,6 +115,10 @@ export async function POST(request: NextRequest) {
       };
       await tx.insert(conversationsTable).values(conv);
     });
+
+    const usageRepo = new UsageLimitRepository(teamId);
+
+    if (isSuccess) await usageRepo.upsertUsageTracking(user.id, 1);
 
     return NextResponse.json({}, { status: 200 });
   } catch (error) {

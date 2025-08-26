@@ -38,10 +38,12 @@ import { useRouter } from "next/navigation";
  * Component
  * --------------------------- */
 
-export default function TemplateCreateForm({
+export default function TemplateCarouselCreateForm({
   initialValues,
+  id,
 }: {
   initialValues?: Partial<TemplateCarouselCreateValue>;
+  id?: string;
 }) {
   const router = useRouter();
 
@@ -141,10 +143,14 @@ export default function TemplateCreateForm({
         removeEmptyStrings: true,
         trimStrings: true,
       });
-      const result = await axios.post(
-        "/api/whatsapp/templates/create",
-        cleanPayload
-      );
+
+      const url = id
+        ? `/api/whatsapp/templates/edit/${id}`
+        : `/api/whatsapp/templates/create`;
+
+      console.log(url);
+
+      const result = await axios.post(url, cleanPayload);
       return result.data;
     },
     onSuccess: () => {

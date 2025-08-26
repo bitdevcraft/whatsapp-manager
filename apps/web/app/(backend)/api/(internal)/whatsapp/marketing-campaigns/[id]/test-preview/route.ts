@@ -20,6 +20,8 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import z from "zod";
 import { generateConversationComponentBody } from "../../../actions";
+import { UsageLimitRepository } from "@workspace/db/repositories";
+import { nanoid } from "nanoid";
 
 export async function POST(
   request: Request,
@@ -129,10 +131,12 @@ export async function POST(
 
     const whatsapp = new WhatsApp(config);
 
-    const response = await whatsapp.messages.template({
-      body: messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
-      to: body.phone.replace(/\D/g, ""),
-    });
+    const response =
+      // { messages: [{ id: nanoid() }] };
+      await whatsapp.messages.template({
+        body: messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
+        to: body.phone.replace(/\D/g, ""),
+      });
 
     const isSuccess = !!response?.messages[0]?.id;
 
@@ -160,6 +164,9 @@ export async function POST(
       };
       await tx.insert(conversationsTable).values(conv);
     });
+
+    const usageRepo = new UsageLimitRepository(teamId);
+    await usageRepo.upsertUsageTracking(user.id, 1);
 
     return NextResponse.json({}, { status: 200 });
     //

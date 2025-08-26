@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   getTeamByStripeCustomerId,
   getUser,
+  getUserWithTeam,
   updateTeamSubscription,
 } from "@/lib/db/queries";
 import { Team } from "@workspace/db/schema";
@@ -16,15 +17,24 @@ export const stripe = new Stripe(env.STRIPE_SECRET_KEY!, {
 export async function createCheckoutSession({
   team,
   priceId,
+  productId,
 }: {
   team: Team | null;
   priceId: string;
+  productId: string;
 }) {
-  const user = await getUser();
+  const userWithTeam = await getUserWithTeam();
 
-  if (!team || !user) {
+  if (!team || !userWithTeam?.user) {
     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
+
+  const { user, teamId } = userWithTeam;
+
+  const product = await stripe.products.retrieve(productId);
+  const productMetadata = product.metadata;
+
+  console.log(productMetadata);
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
@@ -34,15 +44,13 @@ export async function createCheckoutSession({
         quantity: 1,
       },
     ],
+    metadata: { ...productMetadata },
     mode: "subscription",
-    success_url: `${env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}&teamId=${teamId}`,
     cancel_url: `${env.BASE_URL}/pricing`,
     customer: team.stripeCustomerId || undefined,
     client_reference_id: user.id.toString(),
     allow_promotion_codes: true,
-    subscription_data: {
-      trial_period_days: 14,
-    },
   });
 
   redirect(session.url!);
@@ -50,7 +58,7 @@ export async function createCheckoutSession({
 
 export async function createCustomerPortalSession(team: Team) {
   if (!team.stripeCustomerId || !team.stripeProductId) {
-    redirect("/pricing");
+    redirect("/ing/account/pricing");
   }
 
   let configuration: Stripe.BillingPortal.Configuration;

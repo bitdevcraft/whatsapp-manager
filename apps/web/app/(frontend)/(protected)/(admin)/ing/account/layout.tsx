@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { Users, Settings, Shield, Activity, Menu } from "lucide-react";
+import { IconMoneybag } from "@tabler/icons-react";
 
 export default function DashboardLayout({
   children,
@@ -35,10 +36,15 @@ export default function DashboardLayout({
       icon: Users,
       label: "Team",
     },
+    {
+      href: "/ing/account/pricing",
+      icon: IconMoneybag,
+      label: "Subscription",
+    },
   ];
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
+    <div className="flex flex-col min-h-[calc(100dvh-68px)] mx-auto w-full">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between bg-background border-b border-gray-200 p-4">
         <div className="flex items-center">

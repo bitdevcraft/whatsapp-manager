@@ -25,7 +25,6 @@ import axios from "axios";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
 import { getSelectPhoneNumber, getSelectTemplates } from "./queries";
 import { getSelectTags } from "@/features/tags/_lib/queries";
-import { DevTool } from "@hookform/devtools";
 
 interface MarketingCampaignFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;

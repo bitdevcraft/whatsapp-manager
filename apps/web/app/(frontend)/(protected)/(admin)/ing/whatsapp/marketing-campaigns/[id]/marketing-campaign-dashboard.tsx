@@ -46,9 +46,22 @@ import {
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneInput } from "@workspace/ui/components/phone-input";
+import { getEstimatedRecipients, hasRemainingUsage } from "./action";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 
 interface Props {
-  promises: Promise<[Awaited<ReturnType<typeof getMarketingCampaignById>>]>;
+  promises: Promise<
+    [
+      Awaited<ReturnType<typeof getMarketingCampaignById>>,
+      Awaited<ReturnType<typeof getEstimatedRecipients>>,
+      Awaited<ReturnType<typeof hasRemainingUsage>>,
+    ]
+  >;
 }
 
 export default function MarketingCampaignDashboard({ promises }: Props) {
@@ -66,6 +79,8 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
       engagement,
       contacts,
     },
+    estRecipients,
+    remainingUsage,
   ] = React.use(promises);
 
   const sendMarketingCampaign = async () => {
@@ -132,23 +147,48 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             </p>
           </div>
           <div className="flex justify-end gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-green-600 text-white font-semibold text-sm"
-              disabled={data?.status !== "draft" && data?.status !== "pending"}
-              onClick={sendMarketingCampaign}
-            >
-              <SendHorizontal />
-              Send
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setOpenPreview(true)}
-            >
-              Preview
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-green-600 text-white font-semibold text-sm"
+                    disabled={
+                      (data?.status !== "draft" &&
+                        data?.status !== "pending") ||
+                      !remainingUsage.success
+                    }
+                    onClick={sendMarketingCampaign}
+                  >
+                    <SendHorizontal />
+                    Send
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{remainingUsage.message ?? "Send Now"}</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setOpenPreview(true)}
+                    disabled={!remainingUsage.success}
+                  >
+                    Preview
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {remainingUsage.message ?? "Send to Internal Contact to test"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
             <Button
               size="sm"
               variant="destructive"
@@ -161,10 +201,13 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
         <h1 className="font-semibold text-lg">{data?.name}</h1>
         <CampaignAnalytics
           messageSent={messageSent}
-          totalRecipients={totalRecipients}
+          totalRecipients={
+            data?.status !== "draft" ? totalRecipients : estRecipients
+          }
           openRate={openRate}
           replyRate={replyRate}
           engagement={engagement}
+          status={data?.status}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DeliveryStatus
@@ -307,17 +350,22 @@ function CampaignAnalytics({
   openRate,
   replyRate,
   engagement,
+  status,
 }: {
   messageSent: number;
   totalRecipients: number;
   openRate: number;
   replyRate: number;
   engagement: number;
+  status?: string | null;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <div className="min-h-16 bg-background border rounded flex flex-col p-4 gap-2">
-        <h3 className="text-muted-foreground ">Total Recipients</h3>
+        <h3 className="text-muted-foreground ">
+          {status === "draft" && "Est. "}Total Recipients
+        </h3>
+
         <p className="text-3xl font-semibold">{totalRecipients}</p>
         <p className="text-xs font-light text-muted-foreground">
           Total Number of contacts

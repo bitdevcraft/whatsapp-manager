@@ -32,6 +32,9 @@ import { TeamSwitcher } from "./team-switcher";
 import { Organization } from "better-auth/plugins/organization";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
+import { Progress } from "@workspace/ui/components/progress";
+import { UsageProgress } from "./usage-progress";
+import { getUsage } from "@/lib/db/usage-queries";
 
 const data = {
   user: {
@@ -122,6 +125,7 @@ const data = {
 export function AppSidebar({
   teams,
   user,
+  promises,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   teams: Organization[];
@@ -134,6 +138,7 @@ export function AppSidebar({
     updatedAt: Date;
     image?: string | null | undefined | undefined | undefined;
   };
+  promises: Promise<[Awaited<ReturnType<typeof getUsage>>]>;
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -164,9 +169,9 @@ export function AppSidebar({
         ></NavSubMain>
         {/* <NavSubMain title="Ads" items={data.ads} /> */}
         <NavSubMain title="Management" items={data.management} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
+        <UsageProgress promises={promises}/>
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

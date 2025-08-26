@@ -8,6 +8,7 @@ import {
   NewConversation,
   whatsAppBusinessAccountsTable,
 } from "@workspace/db";
+import { UsageLimitRepository } from "@workspace/db/repositories";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
 import { and, count, eq, gt, sql } from "drizzle-orm";
@@ -234,6 +235,10 @@ export async function POST(request: Request) {
     });
 
     revalidateTag(`conversations:${teamId}:${contactId}`);
+
+    const usageRepo = new UsageLimitRepository(teamId);
+    await usageRepo.upsertUsageTracking(user.id, 1);
+
     return new Response(JSON.stringify(response), { status: 200 });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {

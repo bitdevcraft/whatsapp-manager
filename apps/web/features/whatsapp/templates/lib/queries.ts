@@ -1,10 +1,12 @@
 import { unstable_cache } from "@/lib/unstable-cache";
-import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetTemplateSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
+import { Template } from "@workspace/db";
 
 export async function getTemplates(input: GetTemplateSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -208,6 +210,37 @@ export async function getAllTemplates(input: GetTemplateSchema) {
     {
       revalidate: 10,
       tags: ["templates", `templates:${userWithTeam?.teamId}`],
+    }
+  )();
+}
+
+export async function getTemplateById(
+  id: string
+): Promise<Template | null | undefined> {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return null;
+  }
+
+  const { teamId } = userWithTeam;
+
+  return unstable_cache(
+    async () => {
+      try {
+        return await withTenantTransaction(teamId, async (tx) => {
+          return tx.query.templatesTable.findFirst({
+            where: eq(templatesTable.id, id),
+          });
+        });
+      } catch (error) {
+        return null;
+      }
+    },
+    [id],
+    {
+      revalidate: 10,
+      tags: [id],
     }
   )();
 }

@@ -37,6 +37,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import { SingleTemplatePreview } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/[id]/template-preview";
+import { MessageTemplateValues } from "../lib/schema";
 
 const useTemplateSync = () => {
   return useMutation({
@@ -114,6 +117,18 @@ export default function TemplateTable({ promises }: Props) {
 
   return (
     <div className="">
+      <ResponsiveDialog
+        isOpen={rowAction?.variant === "preview"}
+        setIsOpen={() => setRowAction(null)}
+        title="Preview"
+      >
+        <div>
+          {rowAction?.row.original.content && (
+            <SingleTemplatePreview template={rowAction?.row.original.content} />
+          )}
+        </div>
+      </ResponsiveDialog>
+
       <DataTable
         table={table}
         actionBar={<TemplateTableActionBar table={table} />}

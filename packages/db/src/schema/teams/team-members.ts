@@ -1,5 +1,11 @@
 import { relations } from "drizzle-orm";
-import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { baseModel } from "../abstract/baseModel";
 import { teamsTable } from "../teams";
@@ -18,6 +24,7 @@ export const teamMembersTable = pgTable("team_members", {
   userId: uuid("user_id")
     .references(() => usersTable.id)
     .notNull(),
+  whatsappLimit: integer("whatsapp_limit").default(1000),
 });
 
 export type NewTeamMember = typeof teamMembersTable.$inferInsert;
