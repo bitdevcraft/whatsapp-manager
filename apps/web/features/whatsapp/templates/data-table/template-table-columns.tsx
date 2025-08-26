@@ -1,3 +1,5 @@
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
@@ -13,6 +15,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { Template } from "@workspace/db/schema";
+import { useRouter } from "next/navigation";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
@@ -61,13 +64,18 @@ export function getTableColumns({
         variant: "text",
         icon: Text,
       },
-      // cell: ({ row }) => {
-      //   return (
-      //     <Link href={`/ing/whatsapp/template/${row.id}`}>
-      //       <p>{row.original.name}</p>
-      //     </Link>
-      //   );
-      // },
+      cell: ({ row }) => {
+        return (
+          <Button
+            variant="link"
+            onClick={() => setRowAction({ row, variant: "preview" })}
+            size={"sm"}
+            className="text-foreground font-normal"
+          >
+            <p>{row.original.name}</p>
+          </Button>
+        );
+      },
       enableColumnFilter: true,
     },
     {
@@ -99,28 +107,40 @@ export function getTableColumns({
     },
     {
       id: "actions",
-      cell: ({ row }) => (
-        <div className="w-full flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                aria-label="Open menu"
-                variant="ghost"
-                className="flex size-8 p-0 data-[state=open]:bg-muted"
-              >
-                <Ellipsis className="size-4" aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onSelect={() => setRowAction({ row, variant: "edit" })}
-              >
-                Edit
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
+      cell: ({ row }) => {
+        return (
+          <div className="w-full flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  aria-label="Open menu"
+                  variant="ghost"
+                  className="flex size-8 p-0 data-[state=open]:bg-muted"
+                >
+                  <Ellipsis className="size-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  // onSelect={() => setRowAction({ row, variant: "edit" })}
+                  asChild
+                >
+                  <Link
+                    href={`/ing/whatsapp/templates/edit/${row.original.id}`}
+                  >
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => setRowAction({ row, variant: "preview" })}
+                >
+                  Preview
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
       enableSorting: false,
       size: 40,
     },

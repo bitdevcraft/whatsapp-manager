@@ -12,7 +12,14 @@ import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import z from "zod";
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request,
+  {
+    params,
+  }: {
+    params: Promise<{ id: string }>;
+  }
+) {
   try {
     const userWithTeam = await getUserWithTeam();
 
@@ -22,6 +29,8 @@ export async function POST(request: Request) {
 
     const { teamId } = userWithTeam;
     const body = (await request.json()) as TemplateRequestBody;
+    const { id } = await params;
+    revalidateTag(id);
 
     const { account } = await withTenantTransaction(teamId, async (tx) => {
       const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
@@ -60,7 +69,7 @@ export async function POST(request: Request) {
 
     const whatsapp = new WhatsApp(config);
 
-    const response = await whatsapp.templates.createTemplate(body);
+    const response = await whatsapp.templates.updateTemplate(id, body);
 
     getTemplates(true);
 
