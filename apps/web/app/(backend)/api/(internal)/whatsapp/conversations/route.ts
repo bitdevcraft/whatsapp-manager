@@ -9,7 +9,7 @@ import {
 import { UsageLimitRepository } from "@workspace/db/repositories";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
-import { and, count, eq, gt, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -72,12 +72,14 @@ export async function GET(request: NextRequest) {
           contactsTable,
           eq(contactsTable.id, conversationsTable.contactId)
         )
+        .orderBy(desc(conversationsTable.createdAt))
         .as("sub");
 
       const batch = await tx
         .select()
         .from(messages)
         .where(eq(sql<number>`"sub"."rn"`, 1))
+        .orderBy(desc(messages.createdAt))
         .limit(limit + 1)
         .offset(offset);
 
