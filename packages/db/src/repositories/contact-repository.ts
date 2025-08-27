@@ -15,6 +15,9 @@ export class ContactRepository {
 
       if (!marketingCampaign) return 0;
 
+      if (!marketingCampaign.tags || marketingCampaign.tags.length === 0)
+        return marketingCampaign.recipients?.length ?? 0;
+
       const result = await tx
         .select({
           count: sql<number>`COUNT(*)`,
@@ -22,7 +25,7 @@ export class ContactRepository {
         .from(contactsTable)
         .where(
           sql`${contactsTable.tags} ?| ARRAY[${sql.join(
-            marketingCampaign.tags?.map((v) => sql`${v}`) ?? [],
+            marketingCampaign.tags.map((v) => sql`${v}`),
             sql`, `
           )}]`
         );
