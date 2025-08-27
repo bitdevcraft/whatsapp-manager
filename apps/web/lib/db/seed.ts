@@ -59,92 +59,92 @@ async function createStripeProducts() {
 }
 
 async function seed() {
-  // const email = "test@test.com";
-  // const password = "admin123";
-  // const passwordHash = await hashPassword(password);
+  const email = "test@test.com";
+  const password = "admin123";
+  const passwordHash = await hashPassword(password);
 
-  // const [user] = await db
-  //   .insert(usersTable)
-  //   .values([
-  //     {
-  //       email: email,
-  //       passwordHash: passwordHash,
-  //       role: "owner",
-  //     },
-  //   ])
-  //   .returning();
+  const [user] = await db
+    .insert(usersTable)
+    .values([
+      {
+        email: email,
+        passwordHash: passwordHash,
+        role: "owner",
+      },
+    ])
+    .returning();
 
-  // logger.log("Initial user created.");
+  logger.log("Initial user created.");
 
-  // const [team] = await db
-  //   .insert(teamsTable)
-  //   .values({
-  //     name: "Test Team",
-  //   })
-  //   .returning();
+  const [team] = await db
+    .insert(teamsTable)
+    .values({
+      name: "Test Team",
+    })
+    .returning();
 
-  // await db.insert(teamMembersTable).values({
-  //   organizationId: team!.id,
-  //   userId: user!.id,
-  //   role: "owner",
-  // });
+  await db.insert(teamMembersTable).values({
+    organizationId: team!.id,
+    role: "owner",
+    userId: user!.id,
+  });
 
-  // const interestsPool = [
-  //   "sports",
-  //   "music",
-  //   "travel",
-  //   "reading",
-  //   "coding",
-  //   "photography",
-  //   "art",
-  // ];
+  const interestsPool = [
+    "sports",
+    "music",
+    "travel",
+    "reading",
+    "coding",
+    "photography",
+    "art",
+  ];
 
-  // const tagsPool = [
-  //   "new",
-  //   "vip",
-  //   "prospect",
-  //   "newsletter",
-  //   "follow-up",
-  //   "important",
-  // ];
+  const tagsPool = [
+    "new",
+    "vip",
+    "prospect",
+    "newsletter",
+    "follow-up",
+    "important",
+  ];
 
-  // const tags: NewTag[] = tagsPool.map((tag) => ({
-  //   name: tag,
-  //   teamId: team!.id,
-  // }));
+  const tags: NewTag[] = tagsPool.map((tag) => ({
+    name: tag,
+    teamId: team!.id,
+  }));
 
-  // const contacts: NewContact[] = Array.from({ length: 100 }).map(() => ({
-  //   // baseSchema fields – adjust names if yours differ
-  //   createdAt: faker.date.past({ years: 1 }),
-  //   updatedAt: faker.date.recent({ days: 30 }),
+  const contacts: NewContact[] = Array.from({ length: 100 }).map(() => ({
+    // baseSchema fields – adjust names if yours differ
+    createdAt: faker.date.past({ years: 1 }),
+    email: "demo-" + faker.internet.email(),
 
-  //   name: faker.person.fullName(),
-  //   // required fields
-  //   phone: faker.phone.number({ style: "international" }),
-  //   email: "demo-" + faker.internet.email(),
-  //   message: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
+    // JSONB arrays
+    interests: faker.helpers.arrayElements(
+      interestsPool,
+      faker.number.int({ max: interestsPool.length, min: 0 })
+    ),
+    message: faker.lorem.sentences(faker.number.int({ max: 3, min: 1 })),
+    name: faker.person.fullName(),
+    // boolean & optional FK
+    opt_in: faker.datatype.boolean(),
 
-  //   // JSONB arrays
-  //   interests: faker.helpers.arrayElements(
-  //     interestsPool,
-  //     faker.number.int({ min: 0, max: interestsPool.length })
-  //   ),
-  //   tags: faker.helpers.arrayElements(
-  //     tagsPool,
-  //     faker.number.int({ min: 0, max: tagsPool.length })
-  //   ),
+    // required fields
+    phone: faker.phone.number({ style: "international" }),
+    tags: faker.helpers.arrayElements(
+      tagsPool,
+      faker.number.int({ max: tagsPool.length, min: 0 })
+    ),
 
-  //   // boolean & optional FK
-  //   opt_in: faker.datatype.boolean(),
-  //   teamId: team!.id,
-  // }));
+    teamId: team!.id,
+    updatedAt: faker.date.recent({ days: 30 }),
+  }));
 
-  // await withTenantTransaction(team!.id, async (tx) => {
-  //   await tx.insert(tagsTable).values(tags);
+  await withTenantTransaction(team!.id, async (tx) => {
+    await tx.insert(tagsTable).values(tags);
 
-  //   // insert all 100 rows in one go
-  //   await tx.insert(contactsTable).values(contacts);
-  // });
+    // insert all 100 rows in one go
+    await tx.insert(contactsTable).values(contacts);
+  });
 
   await createStripeProducts();
 }

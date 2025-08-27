@@ -36,6 +36,7 @@ export const ShadcnAutoFormFieldComponents = {
 } as const;
 export type FieldTypes = keyof typeof ShadcnAutoFormFieldComponents;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function AutoForm<T extends Record<string, any>>({
   uiComponents,
   formComponents,

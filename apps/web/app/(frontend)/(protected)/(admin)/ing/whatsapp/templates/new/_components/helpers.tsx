@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* -----------------------------
  * Helpers
  * ----------------------------- */
@@ -12,7 +13,7 @@ export function ErrorSummary({ name }: { name: string }) {
   } = useFormContext();
 
   const items = React.useMemo(() => {
-    const all: { message: string; path: string; }[] = [];
+    const all: { message: string; path: string }[] = [];
 
     const visit = (node: any, path: string[] = []) => {
       if (!node || typeof node !== "object") return;

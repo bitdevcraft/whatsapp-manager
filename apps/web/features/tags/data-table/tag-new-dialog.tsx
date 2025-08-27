@@ -2,13 +2,14 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { TagsForm } from "./tag-form";
-import { TagsFormValues } from "../_lib/schema";
 import axios from "axios";
-import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { TagsFormValues } from "../_lib/schema";
+import { TagsForm } from "./tag-form";
 export default function TagNewDialog() {
   const [isAddOpen, setIsAddOpen] = useState(false);
 

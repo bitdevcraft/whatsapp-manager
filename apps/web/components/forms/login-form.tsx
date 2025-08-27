@@ -1,8 +1,9 @@
-import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent } from "@workspace/ui/components/card"
-import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import { cn } from "@workspace/ui/lib/utils"
+/* eslint-disable @next/next/no-img-element */
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { cn } from "@workspace/ui/lib/utils";
 
 export function LoginForm({
   className,
@@ -100,5 +101,5 @@ export function LoginForm({
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>
-  )
+  );
 }

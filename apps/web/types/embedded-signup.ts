@@ -1,16 +1,13 @@
-export type EmbedSignUpObject = {
-  data:
-    | EmbedSignupSuccessObject
-    | EmbedSignupAbandonObject
-    | EmbedSignupErrorObject;
-  type: "WA_EMBEDDED_SIGNUP";
-  event: EmbedSignUpFlowEventType;
-};
+export enum EmbedSignUpFlowEventType {
+  Cancel = "CANCEL",
+  Finish = "FINISH",
+  FinishOnboarding = "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING",
+  FinishOnlyWaba = "FINISH_ONLY_WABA",
+}
 
-export type EmbedSignupSuccessObject = {
-  phone_number_id: string;
-  waba_id: string;
-  business_id: string;
+export type EmbeddedSignUpAuthorizedObject = {
+  auth: EmbedSignUpLoginSuccess;
+  signUp: EmbedSignUpObject;
 };
 
 export type EmbedSignupAbandonObject = {
@@ -18,26 +15,10 @@ export type EmbedSignupAbandonObject = {
 };
 
 export type EmbedSignupErrorObject = {
-  error_message: string;
   error_id: string;
+  error_message: string;
   session_id: string;
   timestamp: string;
-};
-
-export enum EmbedSignUpFlowEventType {
-  Finish = "FINISH",
-  FinishOnlyWaba = "FINISH_ONLY_WABA",
-  FinishOnboarding = "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING",
-  Cancel = "CANCEL",
-}
-
-export type EmbedSignUpLoginSuccess = {
-  authResponse: {
-    code: string;
-    expiresIn?: string | null;
-    userId: string | null;
-  };
-  status: string;
 };
 
 export type EmbedSignUpExchangeToken = {
@@ -45,7 +26,26 @@ export type EmbedSignUpExchangeToken = {
   token_type: "bearer";
 };
 
-export type EmbeddedSignUpAuthorizedObject = {
-  signUp: EmbedSignUpObject;
-  auth: EmbedSignUpLoginSuccess;
+export type EmbedSignUpLoginSuccess = {
+  authResponse: {
+    code: string;
+    expiresIn?: null | string;
+    userId: null | string;
+  };
+  status: string;
+};
+
+export type EmbedSignUpObject = {
+  data:
+    | EmbedSignupAbandonObject
+    | EmbedSignupErrorObject
+    | EmbedSignupSuccessObject;
+  event: EmbedSignUpFlowEventType;
+  type: "WA_EMBEDDED_SIGNUP";
+};
+
+export type EmbedSignupSuccessObject = {
+  business_id: string;
+  phone_number_id: string;
+  waba_id: string;
 };

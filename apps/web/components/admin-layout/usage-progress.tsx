@@ -10,11 +10,6 @@ import React from "react";
 
 import { getUsage } from "@/lib/db/usage-queries";
 
-interface Limits {
-  limit: number;
-  usage: number;
-}
-
 export function UsageProgress({
   promises,
 }: {

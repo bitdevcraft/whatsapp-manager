@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo } from "react";
-import Uppy, { Body, Meta } from "@uppy/core";
-import AwsS3, { AwsS3MultipartOptions, type AwsS3Options } from "@uppy/aws-s3";
+import Uppy from "@uppy/core";
+import AwsS3 from "@uppy/aws-s3";
 import { Dashboard } from "@uppy/react";
 
 // import "@uppy/core/dist/style.css";
@@ -29,8 +29,9 @@ export function S3FileUploader({
         restrictions: { maxFileSize },
         allowMultipleUploads: multiple,
 
-        // @ts-ignore
+        // @ts-expect-error aws
       }).use(AwsS3, {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async getUploadParameters(file, options) {
           const res = await fetch("/api/s3-presigned", {
             method: "POST",
@@ -55,7 +56,7 @@ export function S3FileUploader({
           };
         },
       }),
-    [maxFileSize]
+    [maxFileSize, multiple]
   );
 
   useEffect(() => {

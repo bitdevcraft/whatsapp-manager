@@ -1,6 +1,6 @@
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
 // schema.ts (or your ../_lib/validation)
 import { z } from "zod";
-import { LanguagesEnum } from "@workspace/wa-cloud-api";
 
 /* Enums */
 export const ButtonType = z.union([
@@ -27,16 +27,16 @@ export const ParameterFormatType = z.union([
 ]);
 
 export const HeaderExampleSchema = z.object({
+  header_handle: z.array(z.string()).optional(),
   header_text: z.array(z.string()).optional(),
   header_text_named_params: z
     .array(
       z.object({
-        param_name: z.string(),
         example: z.string(),
+        param_name: z.string(),
       })
     )
     .optional(),
-  header_handle: z.array(z.string()).optional(),
 });
 
 export type HeaderExampleValue = z.infer<typeof HeaderExampleSchema>;
@@ -46,8 +46,8 @@ export const BodyExampleSchema = z.object({
   body_text_named_params: z
     .array(
       z.object({
-        param_name: z.string(),
         example: z.string(),
+        param_name: z.string(),
       })
     )
     .optional(),
@@ -57,45 +57,45 @@ export type BodyExampleValue = z.infer<typeof BodyExampleSchema>;
 
 /* Components */
 export const HeaderComponentSchema = z.object({
-  type: z.literal("HEADER"),
+  example: HeaderExampleSchema.optional(),
   format: HeaderType,
   text: z.string().optional(),
-  example: HeaderExampleSchema.optional(),
+  type: z.literal("HEADER"),
 });
 
 export const BodyComponentSchema = z.object({
-  type: z.literal("BODY"),
-  text: z.string(),
   example: BodyExampleSchema.optional(),
+  text: z.string(),
+  type: z.literal("BODY"),
 });
 
 export const FooterComponentSchema = z.object({
-  type: z.literal("FOOTER"),
   text: z.string(),
+  type: z.literal("FOOTER"),
 });
 
 /* Button + per-type constraints */
 export const ButtonSchema = z
   .object({
-    type: ButtonType,
-    text: z.string().min(3, "Button Label Missing"),
-    url: z.string().url().optional(),
     phone_number: z.string().optional(),
+    text: z.string().min(3, "Button Label Missing"),
+    type: ButtonType,
+    url: z.string().url().optional(),
   })
   .superRefine((btn, ctx) => {
     if (btn.type === "URL") {
       if (!btn.url) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["url"],
           message: "URL is required for URL buttons.",
+          path: ["url"],
         });
       }
       if (btn.phone_number) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["phone_number"],
           message: "phone_number must be empty for URL buttons.",
+          path: ["phone_number"],
         });
       }
     }
@@ -103,15 +103,15 @@ export const ButtonSchema = z
       if (!btn.phone_number) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["phone_number"],
           message: "phone_number is required for PHONE_NUMBER buttons.",
+          path: ["phone_number"],
         });
       }
       if (btn.url) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["url"],
           message: "url must be empty for PHONE_NUMBER buttons.",
+          path: ["url"],
         });
       }
     }
@@ -126,22 +126,22 @@ export const ButtonSchema = z
   });
 
 export const ButtonComponentSchema = z.object({
-  type: z.literal("BUTTONS"),
   buttons: z
     .array(ButtonSchema)
     .min(1, "At least 1 button")
     .max(2, "At most 2 buttons"),
+  type: z.literal("BUTTONS"),
 });
 
 export const BaseCreateSchema = z.object({
+  category: CategoryType,
+  language: z.nativeEnum(LanguagesEnum),
   name: z
     .string()
     .min(1, "Required")
     .max(512)
     .regex(/^[a-z0-9_]+$/, "snake_case, lowercase only"),
-  category: CategoryType,
   parameter_format: ParameterFormatType,
-  language: z.nativeEnum(LanguagesEnum),
 });
 
 export type BaseCreateValue = z.infer<typeof BaseCreateSchema>;
@@ -162,26 +162,26 @@ export const TemplateCreateSchema = BaseCreateSchema.extend({
 export type TemplateCreateValue = z.infer<typeof TemplateCreateSchema>;
 
 const headerValue: z.infer<typeof HeaderComponentSchema> = {
-  type: "HEADER",
   format: "TEXT",
   text: "",
+  type: "HEADER",
 };
 const bodyValue: z.infer<typeof BodyComponentSchema> = {
-  type: "BODY",
   text: "",
+  type: "BODY",
 };
 
 const footerValue: z.infer<typeof FooterComponentSchema> = {
-  type: "FOOTER",
   text: "",
+  type: "FOOTER",
 };
 
 export const defaultValue: TemplateCreateValue = {
-  name: "",
   category: "MARKETING",
   components: [headerValue, bodyValue, footerValue],
-  parameter_format: "POSITIONAL",
   language: LanguagesEnum.English,
+  name: "",
+  parameter_format: "POSITIONAL",
 };
 
 /* -----------------------------
@@ -201,15 +201,15 @@ const CarouselCardSchema = z
     if (headers.length !== 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["components"],
         message: "Each card must have exactly one HEADER component.",
+        path: ["components"],
       });
     }
     if (buttons.length !== 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["components"],
         message: "Each card must have exactly one BUTTONS component.",
+        path: ["components"],
       });
     }
     // buttons count range is already enforced in ButtonComponentSchema
@@ -217,8 +217,8 @@ const CarouselCardSchema = z
 
 const CarouselComponentSchema = z
   .object({
-    type: z.literal("CAROUSEL"),
     cards: z.array(CarouselCardSchema).min(1),
+    type: z.literal("CAROUSEL"),
   })
   .superRefine((carousel, ctx) => {
     if (!carousel.cards.length) return;
@@ -258,8 +258,8 @@ const CarouselComponentSchema = z
         );
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["cards", idx, "components", headerIndex, "format"],
           message: `Header format must match all cards (${refHeaderFormat}).`,
+          path: ["cards", idx, "components", headerIndex, "format"],
         });
       }
 
@@ -267,8 +267,8 @@ const CarouselComponentSchema = z
         const btnIndex = card.components.findIndex((c) => c.type === "BUTTONS");
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["cards", idx, "components", btnIndex, "buttons"],
           message: `Each card must have exactly ${refSig.count} button(s) to match the first card.`,
+          path: ["cards", idx, "components", btnIndex, "buttons"],
         });
       } else {
         // Ensure button TYPES (and order) match the first card
@@ -279,6 +279,7 @@ const CarouselComponentSchema = z
             );
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
+              message: `Button type at index ${i} must be "${refSig.types[i]}", found "${sig.types[i]}".`,
               path: [
                 "cards",
                 idx,
@@ -288,7 +289,6 @@ const CarouselComponentSchema = z
                 i,
                 "type",
               ],
-              message: `Button type at index ${i} must be "${refSig.types[i]}", found "${sig.types[i]}".`,
             });
           }
         }
@@ -318,31 +318,31 @@ export type TemplateCarouselCreateValue = z.infer<
 
 /* Useful default */
 export const templateCarouselDefault: TemplateCarouselCreateValue = {
-  name: "",
   category: "MARKETING",
-  parameter_format: "POSITIONAL",
-  language: LanguagesEnum.English,
   components: [
-    { type: "BODY", text: "" },
+    { text: "", type: "BODY" },
     {
-      type: "CAROUSEL",
       cards: [
         {
           components: [
             {
-              type: "HEADER",
-              format: "IMAGE",
               example: {
                 header_handle: [""],
               },
+              format: "IMAGE",
+              type: "HEADER",
             },
             {
+              buttons: [{ text: "Quick Reply", type: "QUICK_REPLY" }],
               type: "BUTTONS",
-              buttons: [{ type: "QUICK_REPLY", text: "Quick Reply" }],
             },
           ],
         },
       ],
+      type: "CAROUSEL",
     },
   ],
+  language: LanguagesEnum.English,
+  name: "",
+  parameter_format: "POSITIONAL",
 };

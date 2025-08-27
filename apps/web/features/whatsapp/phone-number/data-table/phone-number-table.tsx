@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
-
-import { useDataTable } from "@workspace/ui/hooks/use-data-table";
+import { WhatsAppBusinessAccountPhoneNumber } from "@workspace/db";
+import { Button } from "@workspace/ui/components/button";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
 import {
   DataTable,
   DataTableAdvancedToolbar,
@@ -10,22 +10,22 @@ import {
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
-
-import { WhatsAppBusinessAccountPhoneNumberActionBar } from "./phone-number-table-action-bar";
-import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
-import { useTitle } from "@/components/provider/title-provider";
+import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { WhatsAppBusinessAccountPhoneNumber } from "@workspace/db";
-import { getTableColumns } from "./phone-number-table-columns";
-import { getWhatsAppBusinessAccountPhoneNumber } from "../_lib/queries";
-import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { InputOTPForm } from "./phone-number-register-form";
 import axios from "axios";
-import { toast } from "sonner";
-import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
-import { Button } from "@workspace/ui/components/button";
 import { RefreshCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { toast } from "sonner";
+
+import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
+import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import { useTitle } from "@/components/provider/title-provider";
+
+import { getWhatsAppBusinessAccountPhoneNumber } from "../_lib/queries";
+import { InputOTPForm } from "./phone-number-register-form";
+import { WhatsAppBusinessAccountPhoneNumberActionBar } from "./phone-number-table-action-bar";
+import { getTableColumns } from "./phone-number-table-columns";
 
 interface WhatsAppBusinessAccountPhoneNumberTableProps {
   promises: Promise<
@@ -61,22 +61,22 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
     []
   );
 
-  const { table, shallow, debounceMs, throttleMs } = useDataTable({
-    data,
+  const { debounceMs, shallow, table, throttleMs } = useDataTable({
+    clearOnDefault: true,
     columns,
-    pageCount,
+    data,
     enableAdvancedFilter: false,
+    getRowId: (row) => String(row.id),
     initialState: {
-      sorting: [{ id: "createdAt", desc: true }],
       columnPinning: { right: ["actions"] },
-      pagination: { pageSize: 10, pageIndex: 1 },
       columnVisibility: {
         createdAt: false,
       },
+      pagination: { pageIndex: 1, pageSize: 10 },
+      sorting: [{ desc: true, id: "createdAt" }],
     },
-    getRowId: (row) => String(row.id),
+    pageCount,
     shallow: false,
-    clearOnDefault: true,
   });
 
   const registerPhone = async (
@@ -85,8 +85,8 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
   ) => {
     try {
       await axios.post("/api/whatsapp/business-account/registration/register", {
-        pin: data.pin,
         phoneNumberId,
+        pin: data.pin,
       });
       router.refresh();
 
@@ -102,8 +102,8 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
       await axios.post(
         "/api/whatsapp/business-account/registration/setup-2FA",
         {
-          pin: data.pin,
           phoneNumberId,
+          pin: data.pin,
         }
       );
       toast.success("Registered Successfully");
@@ -127,30 +127,30 @@ export default function WhatsAppBusinesAccountPhoneNumberTable({
   return (
     <div className="">
       <DataTable
-        table={table}
         actionBar={
           <WhatsAppBusinessAccountPhoneNumberActionBar table={table} />
         }
         pageSizeOptions={[10, 20, 50, 100, 200]}
+        table={table}
       >
         {enableAdvancedFilter ? (
           <DataTableAdvancedToolbar table={table}>
             <DataTableFilterList
-              table={table}
-              shallow={shallow}
-              debounceMs={debounceMs}
-              throttleMs={throttleMs}
               align="end"
+              debounceMs={debounceMs}
+              shallow={shallow}
+              table={table}
+              throttleMs={throttleMs}
             />
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
-            <Button size="sm" onClick={getPhoneNumbers}>
+            <Button onClick={getPhoneNumbers} size="sm">
               <RefreshCcw />
             </Button>
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableToolbar>
         )}

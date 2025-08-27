@@ -92,6 +92,7 @@ export default function Notification() {
       socket.off(NotificationEvent.WhatsAppBulkMessageOutgoingProcessing);
       socket.off(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return <></>;

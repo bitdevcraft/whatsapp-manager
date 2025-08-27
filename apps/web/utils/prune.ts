@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// utils/prune.ts
-type NonNullish<T> = T extends null | undefined ? never : T;
-
 export type Pruned<T> = T extends (infer U)[]
   ? Pruned<NonNullish<U>>[]
   : T extends object
@@ -12,9 +9,12 @@ export type Pruned<T> = T extends (infer U)[]
       }
     : T;
 
+// utils/prune.ts
+type NonNullish<T> = T extends null | undefined ? never : T;
+
 type Options = {
-  removeEmptyObjects?: boolean;
   removeEmptyArrays?: boolean;
+  removeEmptyObjects?: boolean;
   removeEmptyStrings?: boolean;
   trimStrings?: boolean;
 };
@@ -26,8 +26,8 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
 export function prune<T>(
   input: T,
   opts: Options = {
-    removeEmptyObjects: true,
     removeEmptyArrays: true,
+    removeEmptyObjects: true,
     removeEmptyStrings: false,
     trimStrings: false,
   }

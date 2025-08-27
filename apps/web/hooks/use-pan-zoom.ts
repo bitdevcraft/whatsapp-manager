@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type PanZoomOptions = {
   initialScale?: number;
-  minScale?: number;
   maxScale?: number;
+  minScale?: number;
 };
 
 type Vec2 = { x: number; y: number };
@@ -29,9 +29,9 @@ export function usePanZoom(opts?: PanZoomOptions) {
 
   const pinch = useRef<{
     active: boolean;
-    lastDistance: number;
     center: Vec2;
-  }>({ active: false, lastDistance: 0, center: { x: 0, y: 0 } });
+    lastDistance: number;
+  }>({ active: false, center: { x: 0, y: 0 }, lastDistance: 0 });
 
   // Apply transform (content wrapper)
   const applyTransform = useCallback(
@@ -108,11 +108,13 @@ export function usePanZoom(opts?: PanZoomOptions) {
     dragging.current = false;
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      //
+    }
   }, []);
 
   // Wheel zoom (debounced per frame)
-  const wheelRAF = useRef<number | null>(null);
+  const wheelRAF = useRef<null | number>(null);
   const onWheel = useCallback(
     (e: React.WheelEvent) => {
       if (e.ctrlKey) {
@@ -229,21 +231,21 @@ export function usePanZoom(opts?: PanZoomOptions) {
   return {
     containerRef,
     contentRef,
-    scale,
-    translate,
-    setScale,
-    setTranslate,
-    reset,
-    zoomBy,
     handlers: {
+      onKeyDown,
       onPointerDown,
       onPointerMove,
       onPointerUp,
-      onWheel,
-      onTouchStart,
-      onTouchMove,
       onTouchEnd,
-      onKeyDown,
+      onTouchMove,
+      onTouchStart,
+      onWheel,
     },
+    reset,
+    scale,
+    setScale,
+    setTranslate,
+    translate,
+    zoomBy,
   };
 }

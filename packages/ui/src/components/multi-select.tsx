@@ -119,10 +119,7 @@ interface MultiSelectProps
   className?: string;
 }
 
-export const MultiSelect = React.forwardRef<
-  HTMLButtonElement,
-  MultiSelectProps
->(
+export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
   (
     {
       options,
@@ -133,6 +130,7 @@ export const MultiSelect = React.forwardRef<
       animation = 0,
       maxCount = 3,
       modalPopover = false,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       asChild = false,
       className,
       ...props

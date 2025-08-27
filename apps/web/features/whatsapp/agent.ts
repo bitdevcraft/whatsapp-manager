@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { env } from "@/env/server";
 import axios from "axios";
+
+import { env } from "@/env/server";
 
 const whatsappAxios = axios.create({
   baseURL: `https://graph.facebook.com/${env.WHATSAPP_API_VERSION}`,
@@ -10,16 +11,16 @@ const whatsappAxios = axios.create({
 });
 
 const waApi = {
+  createTemplate: () =>
+    whatsappAxios.post(
+      `/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`,
+      {}
+    ),
   sendMessage: (message: any) =>
     whatsappAxios.post(`${env.WHATSAPP_PHONE_NUMBER_ID}/messages`, message),
   syncTemplate: () =>
     whatsappAxios.get<any>(
       `/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`
-    ),
-  createTemplate: () =>
-    whatsappAxios.post(
-      `/${env.WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`,
-      {}
     ),
 };
 

@@ -1,13 +1,14 @@
+/* eslint-disable perfectionist/sort-union-types */
 import { ConversationBody } from "@workspace/db/schema";
 
 export interface ConversationContact {
-  id: string | null;
-  message: ConversationBody | null;
-  createdAt: Date;
   contact: {
     name?: string | null;
     phone: string | null;
   };
+  createdAt: Date;
+  id: string | null;
   isUnread: boolean;
+  message: ConversationBody | null;
   rn: number;
 }

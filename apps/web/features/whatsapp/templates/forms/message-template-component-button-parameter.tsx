@@ -2,13 +2,12 @@
 "use client";
 
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useWatch } from "react-hook-form";
 import {
   Select,
   SelectTrigger,
@@ -17,13 +16,14 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { ParametersTypesEnum } from "@workspace/wa-cloud-api";
+import { useWatch } from "react-hook-form";
 
 export function ComponentButtonParameter({
-  name,
   control,
+  name,
 }: {
-  name: string;
   control: any;
+  name: string;
 }) {
   const type = useWatch({ control, name: `${name}.type` });
 
@@ -35,7 +35,7 @@ export function ComponentButtonParameter({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Parameter Type</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />

@@ -1,18 +1,17 @@
 "use client";
 
-import { Template } from "@workspace/db/schema";
 import type { Table } from "@tanstack/react-table";
-import { Download, Trash2 } from "lucide-react";
-import * as React from "react";
 
+import { Template } from "@workspace/db/schema";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@workspace/ui/data-table";
-
-import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
+import { Download, Trash2 } from "lucide-react";
+import * as React from "react";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,23 +67,23 @@ export function TemplateTableActionBar({ table }: TemplateTableActionBarProps) {
     <DataTableActionBar table={table} visible={rows.length > 0}>
       <DataTableActionBarSelection table={table} />
       <Separator
-        orientation="vertical"
         className="hidden data-[orientation=vertical]:h-5 sm:block"
+        orientation="vertical"
       />
       <div className="flex items-center gap-1.5">
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Export Tags"
           isPending={getIsActionPending("export")}
           onClick={onTaskExport}
+          size="icon"
+          tooltip="Export Tags"
         >
           <Download />
         </DataTableActionBarAction>
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Delete Tags"
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}
+          size="icon"
+          tooltip="Delete Tags"
         >
           <Trash2 />
         </DataTableActionBarAction>

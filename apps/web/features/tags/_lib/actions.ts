@@ -1,8 +1,9 @@
-import { getUserWithTeam } from "@/lib/db/queries";
-import { unstable_cache } from "@/lib/unstable-cache";
-import { withTenantTransaction } from "@workspace/db/tenant";
 import { tagsTable } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
+import { unstable_cache } from "@/lib/unstable-cache";
 
 export async function getTags() {
   const userWithTeam = await getUserWithTeam();

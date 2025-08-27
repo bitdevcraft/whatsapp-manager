@@ -1,55 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadItem,
+  FileUploadItemDelete,
+  FileUploadItemMetadata,
+  FileUploadItemPreview,
+  FileUploadList,
+  FileUploadTrigger,
+} from "@workspace/ui/components/data-importer/file-upload";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { ParametersTypesEnum } from "@workspace/wa-cloud-api";
+import axios from "axios";
+import { Upload, X } from "lucide-react";
+import React from "react";
 import {
   ControllerRenderProps,
   FieldValues,
   useFieldArray,
   useWatch,
 } from "react-hook-form";
-import { Input } from "@workspace/ui/components/input";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from "@workspace/ui/components/form";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@workspace/ui/components/select";
-import { Button } from "@workspace/ui/components/button";
-import { ParametersTypesEnum } from "@workspace/wa-cloud-api";
-import {
-  FileUpload,
-  FileUploadDropzone,
-  FileUploadTrigger,
-  FileUploadList,
-  FileUploadItem,
-  FileUploadItemPreview,
-  FileUploadItemMetadata,
-  FileUploadItemDelete,
-} from "@workspace/ui/components/data-importer/file-upload";
-import { Upload, X } from "lucide-react";
-import React from "react";
 import { toast } from "sonner";
-import axios from "axios";
-import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 
 export function ComponentParametersArray({
-  name,
   control,
+  name,
   preview = false,
 }: {
-  name: string;
   control: any;
+  name: string;
   preview?: boolean;
 }) {
-  const { fields, append, remove } = useFieldArray({ name, control });
+  const { append, fields, remove } = useFieldArray({ control, name });
 
   const [fileRecord, setFileRecord] = React.useState<Record<string, File>>({});
 
@@ -106,14 +107,14 @@ export function ComponentParametersArray({
         const type = types[i]?.type;
 
         return (
-          <div key={field.id} className="border p-3 rounded-md space-y-2">
+          <div className="border p-3 rounded-md space-y-2" key={field.id}>
             <FormField
               control={control}
               name={`${name}.${i}.type`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Type</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger
                         className={
@@ -167,11 +168,11 @@ export function ComponentParametersArray({
                         {/* <Input {...field} placeholder="Enter text" /> */}
                         <FileUpload
                           {...field}
-                          maxSize={5 * 1024 * 1024}
                           className="w-full max-w-md mx-auto"
-                          value={Object.values(fileRecord)}
-                          onValueChange={(files) => onFileUpload(files, field)}
+                          maxSize={5 * 1024 * 1024}
                           onFileReject={onFileReject}
+                          onValueChange={(files) => onFileUpload(files, field)}
+                          value={Object.values(fileRecord)}
                         >
                           <FileUploadDropzone>
                             <div className="flex flex-col items-center gap-1 text-center">
@@ -187,9 +188,9 @@ export function ComponentParametersArray({
                             </div>
                             <FileUploadTrigger asChild>
                               <Button
-                                variant="outline"
-                                size="sm"
                                 className="mt-2 w-fit"
+                                size="sm"
+                                variant="outline"
                               >
                                 Browse files
                               </Button>
@@ -202,9 +203,9 @@ export function ComponentParametersArray({
                                 <FileUploadItemMetadata />
                                 <FileUploadItemDelete asChild>
                                   <Button
-                                    variant="ghost"
-                                    size="icon"
                                     className="size-7"
+                                    size="icon"
+                                    variant="ghost"
                                   >
                                     <X />
                                   </Button>
@@ -288,10 +289,10 @@ export function ComponentParametersArray({
             )}
 
             <Button
+              hidden={preview}
+              onClick={() => remove(i)}
               type="button"
               variant="destructive"
-              onClick={() => remove(i)}
-              hidden={preview}
             >
               Remove Parameter
             </Button>
@@ -300,14 +301,14 @@ export function ComponentParametersArray({
       })}
 
       <Button
-        type="button"
-        variant="outline"
+        hidden={preview}
         onClick={() =>
           append({
             type: ParametersTypesEnum.Text,
           })
         }
-        hidden={preview}
+        type="button"
+        variant="outline"
       >
         Add Parameter
       </Button>

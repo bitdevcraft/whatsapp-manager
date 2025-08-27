@@ -51,7 +51,7 @@ function HeaderEditorField({
   syncExamples: (opts?: { headerTextOverride?: string }) => void;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const VAR_RE = /\{\{[^{}\n]*}}/g;
+  const VAR_RE = React.useMemo(() => /\{\{[^{}\n]*}}/g, []);
 
   const setRefs = React.useCallback(
     (el: HTMLInputElement | null) => {
@@ -86,7 +86,7 @@ function HeaderEditorField({
     const next = insertAtCursor(inputRef.current, current, insertion, start);
     field.onChange(next);
     syncExamples({ headerTextOverride: next });
-  }, [field, parameterFormat, syncExamples]);
+  }, [VAR_RE, field, parameterFormat, syncExamples]);
 
   const onChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ function HeaderEditorField({
       field.onChange(val);
       syncExamples({ headerTextOverride: val });
     },
-    [field, syncExamples]
+    [VAR_RE, field, syncExamples]
   );
 
   return (

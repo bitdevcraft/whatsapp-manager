@@ -1,28 +1,28 @@
+/* eslint-disable perfectionist/sort-objects */
 "use client";
 
-import React, { useEffect } from "react";
-
-import { useDataTable } from "@workspace/ui/hooks/use-data-table";
+import { Contact } from "@workspace/db";
 import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
-  DataTableToolbar,
 } from "@workspace/ui/data-table";
-
-import { ContactsTableActionBar } from "./contact-table-action-bar";
-import { getContacts } from "@/features/contacts/_lib/queries";
-import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
-import { useTitle } from "@/components/provider/title-provider";
-import { getSelectTags } from "@/features/tags/_lib/queries";
-import { getTableColumns } from "./contact-table-columns";
+import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { Contact } from "@workspace/db";
+import React, { useEffect } from "react";
+
+import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import { useTitle } from "@/components/provider/title-provider";
+import { getContacts } from "@/features/contacts/_lib/queries";
+import { getSelectTags } from "@/features/tags/_lib/queries";
+
 import UploadCSVContact from "../_components/upload-csv-form";
-import ContactNewDialog from "./contact-new-dialog";
 import { ContactEditDialog } from "./contact-edit-dialog";
+import ContactNewDialog from "./contact-new-dialog";
+import { ContactsTableActionBar } from "./contact-table-action-bar";
+import { getTableColumns } from "./contact-table-columns";
 
 interface ContactTableProps {
   promises: Promise<
@@ -82,34 +82,34 @@ export default function ContactTable({ promises }: ContactTableProps) {
   return (
     <div className="">
       <ContactEditDialog
-        isOpen={rowAction?.variant === "update"}
-        setIsOpen={() => setRowAction(null)}
-        title="Edit Contact"
-        tags={tags}
         initialValues={{
           name: rowAction?.row.original.name,
           email: rowAction?.row.original.email,
           phoneNumber: rowAction?.row.original.phone,
           tags: rowAction?.row.original.tags ?? [],
         }}
+        isOpen={rowAction?.variant === "update"}
+        setIsOpen={() => setRowAction(null)}
+        tags={tags}
+        title="Edit Contact"
       />
 
       <DataTable
-        table={table}
         actionBar={<ContactsTableActionBar table={table} tags={tags} />}
         pageSizeOptions={[10, 20, 50, 100, 200]}
+        table={table}
       >
         <DataTableAdvancedToolbar table={table}>
           <DataTableFilterList
-            table={table}
-            shallow={shallow}
-            debounceMs={debounceMs}
-            throttleMs={throttleMs}
             align="end"
+            debounceMs={debounceMs}
+            shallow={shallow}
+            table={table}
+            throttleMs={throttleMs}
           />
           <UploadCSVContact />
           <ContactNewDialog tags={tags} />
-          <DataTableSortList table={table} align="start" />
+          <DataTableSortList align="start" table={table} />
           <FeatureFlagsToggle />
         </DataTableAdvancedToolbar>
       </DataTable>

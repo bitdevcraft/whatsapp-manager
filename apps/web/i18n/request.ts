@@ -1,6 +1,7 @@
-import { COOKIE_NAME } from "@/types/cookie";
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
+
+import { COOKIE_NAME } from "@/types/cookie";
 
 const config = getRequestConfig(async () => {
   // Read locale from cookies, fallback to "en" if not found

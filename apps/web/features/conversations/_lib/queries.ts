@@ -1,12 +1,69 @@
-import { unstable_cache } from "@/lib/unstable-cache";
-import { and, count, eq, gt, ilike, or, sql } from "drizzle-orm";
-import { conversationsTable } from "@workspace/db/schema/conversations";
-import { GetConversationSchema } from "./validations";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { logger } from "@/lib/logger";
+/* eslint-disable perfectionist/sort-objects */
 import { contactsTable, conversationMembersTable } from "@workspace/db";
+import { conversationsTable } from "@workspace/db/schema/conversations";
+import { withTenantTransaction } from "@workspace/db/tenant";
+import { and, count, eq, gt, ilike, or, sql } from "drizzle-orm";
+
+import { getUserWithTeam } from "@/lib/db/queries";
+import { logger } from "@/lib/logger";
+import { unstable_cache } from "@/lib/unstable-cache";
+
 import { ConversationContact } from "./types";
+import { GetConversationSchema } from "./validations";
+
+export async function getContactConversation(contact: string) {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return [];
+  }
+
+  const { teamId, user } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const data = await withTenantTransaction(teamId, async (tx) => {
+          const data = await tx.query.conversationsTable.findMany({
+            where: eq(conversationsTable.contactId, contact),
+            orderBy: (conversationsTable, { asc }) => [
+              asc(conversationsTable.createdAt),
+            ],
+            with: {
+              user: true,
+            },
+          });
+
+          await tx
+            .update(conversationMembersTable)
+            .set({ lastReadAt: new Date() })
+            .where(
+              and(
+                eq(conversationMembersTable.contactId, contact),
+                eq(conversationMembersTable.userId, user.id)
+              )
+            );
+
+          return data;
+        });
+
+        return data;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        return [];
+      }
+    },
+    [JSON.stringify(contact), teamId],
+    {
+      revalidate: 10,
+      tags: [
+        "conversations",
+        `conversations:${teamId}:${contact}`,
+        `conversations:${teamId}`,
+      ],
+    }
+  )();
+}
 
 export async function getConversations(
   input: GetConversationSchema
@@ -31,16 +88,16 @@ export async function getConversations(
           async (tx) => {
             const messages = tx
               .select({
-                id: contactsTable.id,
-                message: conversationsTable.body,
-                createdAt: conversationsTable.createdAt,
                 contact: {
                   name: contactsTable.name,
                   phone: contactsTable.phone,
                 },
+                createdAt: conversationsTable.createdAt,
+                id: contactsTable.id,
                 isUnread: sql<boolean>`
                       (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
                     `.as("isUnread"),
+                message: conversationsTable.body,
                 rn: sql<number>`row_number() over (
                       partition by ${conversationsTable.contactId}
                       order by ${conversationsTable.createdAt} desc
@@ -158,60 +215,6 @@ export async function getConversationSearch(searchInput: string) {
     {
       revalidate: 10,
       tags: [`${searchInput}:${teamId}`],
-    }
-  )();
-}
-
-export async function getContactConversation(contact: string) {
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    return [];
-  }
-
-  const { teamId, user } = userWithTeam;
-
-  return await unstable_cache(
-    async () => {
-      try {
-        const data = await withTenantTransaction(teamId, async (tx) => {
-          const data = await tx.query.conversationsTable.findMany({
-            where: eq(conversationsTable.contactId, contact),
-            orderBy: (conversationsTable, { asc }) => [
-              asc(conversationsTable.createdAt),
-            ],
-            with: {
-              user: true,
-            },
-          });
-
-          await tx
-            .update(conversationMembersTable)
-            .set({ lastReadAt: new Date() })
-            .where(
-              and(
-                eq(conversationMembersTable.contactId, contact),
-                eq(conversationMembersTable.userId, user.id)
-              )
-            );
-
-          return data;
-        });
-
-        return data;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        return [];
-      }
-    },
-    [JSON.stringify(contact), teamId],
-    {
-      revalidate: 10,
-      tags: [
-        "conversations",
-        `conversations:${teamId}:${contact}`,
-        `conversations:${teamId}`,
-      ],
     }
   )();
 }

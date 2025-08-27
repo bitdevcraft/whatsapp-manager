@@ -1,13 +1,14 @@
-import { MessageTemplateSchema } from "@/features/whatsapp/templates/lib/schema";
 import z from "zod";
 
+import { MessageTemplateSchema } from "@/features/whatsapp/templates/lib/schema";
+
 export const templateSendSchema = z.object({
-  template: z.object({
-    template: z.string().min(3),
-    messageTemplate: MessageTemplateSchema,
-  }),
-  phone: z.string(),
   contactId: z.string(),
+  phone: z.string(),
+  template: z.object({
+    messageTemplate: MessageTemplateSchema,
+    template: z.string().min(3),
+  }),
   templateId: z.string(),
 });
 

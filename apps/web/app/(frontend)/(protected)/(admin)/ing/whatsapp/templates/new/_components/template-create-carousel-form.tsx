@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import { Form } from "@workspace/ui/components/form";
 import axios, { AxiosError } from "axios";
-import { Trash, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import {

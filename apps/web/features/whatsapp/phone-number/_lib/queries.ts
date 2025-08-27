@@ -1,10 +1,12 @@
-import { unstable_cache } from "@/lib/unstable-cache";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
 import { whatsAppBusinessAccountPhoneNumbersTable } from "@workspace/db";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
+import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
+
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
+import { unstable_cache } from "@/lib/unstable-cache";
+
 import { GetWaPhoneNumberSchema } from "./validation";
 
 export async function getWhatsAppBusinessAccountPhoneNumber(

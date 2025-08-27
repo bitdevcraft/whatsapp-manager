@@ -2,20 +2,22 @@
 
 import { Button } from "@workspace/ui/components/button";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { ContactFormValues } from "../_lib/schema";
 import axios from "axios";
-import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ContactForm } from "./contact-form";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import { getSelectTags } from "@/features/tags/_lib/queries";
 
+import { ContactFormValues } from "../_lib/schema";
+import { ContactForm } from "./contact-form";
+
 interface Props {
-  tags: Awaited<ReturnType<typeof getSelectTags>>;
   initialValues?: Partial<ContactFormValues>;
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
 }
-export default function ContactNewDialog({ tags, initialValues }: Props) {
+export default function ContactNewDialog({ initialValues, tags }: Props) {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const router = useRouter();
@@ -27,10 +29,11 @@ export default function ContactNewDialog({ tags, initialValues }: Props) {
         description: "Successful",
       });
       router.refresh();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(
         <div>
-          <p>Contacts can't be created. Please check with the support.</p>
+          <p>Contacts can&apos;t be created. Please check with the support.</p>
           <p className="font-light">{error.response.statusText}</p>
         </div>
       );
@@ -47,9 +50,9 @@ export default function ContactNewDialog({ tags, initialValues }: Props) {
         title="New Contact"
       >
         <ContactForm
+          initialValues={initialValues}
           onSubmit={onSubmit}
           tags={tags}
-          initialValues={initialValues}
         />
       </ResponsiveDialog>
       <Button

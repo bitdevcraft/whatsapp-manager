@@ -1,8 +1,5 @@
 "use client";
 
-import React, { useEffect } from "react";
-
-import { useDataTable } from "@workspace/ui/hooks/use-data-table";
 import {
   DataTable,
   DataTableAdvancedToolbar,
@@ -10,14 +7,17 @@ import {
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
+import { useDataTable } from "@workspace/ui/hooks/use-data-table";
+import React, { useEffect } from "react";
 
-import { TagsTableActionBar } from "./tag-table-action-bar";
-import { columns } from "@/features/tags/data-table/tag-table-columns";
-import { getTags } from "@/features/tags/_lib/queries";
 import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
-import { useTitle } from "@/components/provider/title-provider";
-import TagNewDialog from "./tag-new-dialog";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
+import { useTitle } from "@/components/provider/title-provider";
+import { getTags } from "@/features/tags/_lib/queries";
+import { columns } from "@/features/tags/data-table/tag-table-columns";
+
+import TagNewDialog from "./tag-new-dialog";
+import { TagsTableActionBar } from "./tag-table-action-bar";
 
 interface TagTableProps {
   promises: Promise<[Awaited<ReturnType<typeof getTags>>]>;
@@ -33,46 +33,46 @@ export default function TagsTable({ promises }: TagTableProps) {
 
   const [{ data, pageCount }] = React.use(promises);
 
-  const { table, shallow, debounceMs, throttleMs } = useDataTable({
-    data,
-    columns,
-    pageCount,
-    enableAdvancedFilter: false,
-    initialState: {
-      sorting: [{ id: "createdAt", desc: true }],
-      columnPinning: { right: ["actions"] },
-      pagination: { pageSize: 10, pageIndex: 1 },
-      columnVisibility: {
-        phone: false,
-        email: false,
-      },
-    },
-    getRowId: (row) => row.id,
-    shallow: false,
+  const { debounceMs, shallow, table, throttleMs } = useDataTable({
     clearOnDefault: true,
+    columns,
+    data,
+    enableAdvancedFilter: false,
+    getRowId: (row) => row.id,
+    initialState: {
+      columnPinning: { right: ["actions"] },
+      columnVisibility: {
+        email: false,
+        phone: false,
+      },
+      pagination: { pageIndex: 1, pageSize: 10 },
+      sorting: [{ desc: true, id: "createdAt" }],
+    },
+    pageCount,
+    shallow: false,
   });
 
   return (
     <div className="">
-      <DataTable table={table} actionBar={<TagsTableActionBar table={table} />}>
+      <DataTable actionBar={<TagsTableActionBar table={table} />} table={table}>
         {enableAdvancedFilter ? (
           <DataTableAdvancedToolbar table={table}>
             <DataTableFilterList
-              table={table}
-              shallow={shallow}
-              debounceMs={debounceMs}
-              throttleMs={throttleMs}
               align="end"
+              debounceMs={debounceMs}
+              shallow={shallow}
+              table={table}
+              throttleMs={throttleMs}
             />
             <TagNewDialog />
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
           <DataTableToolbar table={table}>
             <TagNewDialog />
 
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableToolbar>
         )}

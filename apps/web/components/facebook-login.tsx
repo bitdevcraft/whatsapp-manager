@@ -30,7 +30,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   const embedDataRef = useRef<EmbedSignUpObject | null>(null);
   const submittedRef = useRef(false);
 
-  const checkReady = async () => {
+  const checkReady = React.useCallback(async () => {
     if (submittedRef.current) return;
 
     const auth = loginResponseRef.current;
@@ -54,7 +54,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           onLoginFailure("Signup failed");
         });
     }
-  };
+  }, [onLoginFailure, onLoginSuccess]);
 
   // Dynamically load the Facebook SDK client-side only
   useEffect(() => {
@@ -104,7 +104,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         window.removeEventListener("message", messageEvent);
       }
     };
-  }, []);
+  }, [checkReady, onLoginFailure]);
 
   const handleLogin = () => {
     // @ts-expect-error doesn't exist

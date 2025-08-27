@@ -1,4 +1,10 @@
-import React, { ReactNode, useEffect, useLayoutEffect, useRef } from "react";
+import React, {
+  ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 // Props interface for the ChatInfiniteScroll component
 export interface ChatInfiniteScrollProps {
@@ -53,6 +59,13 @@ export function ChatInfiniteScroll({
   const lastLoadPrependRef = useRef<boolean>(false);
   const lastLoadAppendRef = useRef<boolean>(false);
 
+  // Mirror the current children count into a ref so the observer effect
+  // doesn't need to depend directly on `children`.
+  const childrenCountRef = useRef<number>(React.Children.count(children));
+  useEffect(() => {
+    childrenCountRef.current = React.Children.count(children);
+  }, [children]);
+
   // Initial scroll: middle, bottom, or top
   useEffect(() => {
     const container = containerRef.current;
@@ -95,55 +108,70 @@ export function ChatInfiniteScroll({
     lastLoadAppendRef.current = false;
   }, [children]);
 
-  // IntersectionObserver for triggers
+  // Stable options object (optional micro-opt)
+  const observerOptions = useMemo<IntersectionObserverInit>(
+    () => ({
+      root: containerRef.current ?? undefined,
+      threshold: 0.1,
+      // rootMargin: "200px 0px 200px 0px", // optional prefetching margin
+    }),
+    []
+  );
+
+  // IntersectionObserver for triggers (with ref snapshots)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const topEl = topSentinelRef.current;
+    const bottomEl = bottomSentinelRef.current;
+    if (!container || !topEl || !bottomEl) return;
 
-    const options = { root: container, threshold: 0.1 };
-    const observer = new IntersectionObserver((entries) => {
-      // Determine callbacks and gating
-      const loadOlder = isReverse ? next : previous;
-      const loadNewer = isReverse ? previous : next;
-      const canLoadOlder =
-        (isReverse ? hasNext : hasPrevious) &&
-        !(isReverse ? loadingNext : loadingPrevious);
-      const canLoadNewer =
-        (isReverse ? hasPrevious : hasNext) &&
-        !(isReverse ? loadingPrevious : loadingNext);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Determine callbacks and gating (use latest props via closure)
+        const loadOlder = isReverse ? next : previous;
+        const loadNewer = isReverse ? previous : next;
+        const canLoadOlder =
+          (isReverse ? hasNext : hasPrevious) &&
+          !(isReverse ? loadingNext : loadingPrevious);
+        const canLoadNewer =
+          (isReverse ? hasPrevious : hasNext) &&
+          !(isReverse ? loadingPrevious : loadingNext);
 
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-        // Prepend (older) scenario: top sentinel in normal, bottom in reverse
-        if (entry.target === topSentinelRef.current && canLoadOlder) {
-          prevChildrenCountRef.current = React.Children.count(children);
-          prevScrollHeightRef.current = container.scrollHeight;
-          prevScrollTopRef.current = container.scrollTop;
-          lastLoadPrependRef.current = true;
-          loadOlder();
-        }
+          // Prepend (older) scenario: top sentinel in normal, bottom in reverse
+          if (entry.target === topEl && canLoadOlder) {
+            prevChildrenCountRef.current = childrenCountRef.current;
+            prevScrollHeightRef.current = container.scrollHeight;
+            prevScrollTopRef.current = container.scrollTop;
+            lastLoadPrependRef.current = true;
+            loadOlder();
+          }
 
-        // Append (newer) scenario
-        if (entry.target === bottomSentinelRef.current && canLoadNewer) {
-          prevChildrenCountRef.current = React.Children.count(children);
-          prevScrollTopRef.current = container.scrollTop;
-          lastLoadAppendRef.current = true;
-          loadNewer();
-        }
-      });
-    }, options);
+          // Append (newer) scenario
+          if (entry.target === bottomEl && canLoadNewer) {
+            prevChildrenCountRef.current = childrenCountRef.current;
+            prevScrollTopRef.current = container.scrollTop;
+            lastLoadAppendRef.current = true;
+            loadNewer();
+          }
+        });
+      },
+      { ...observerOptions, root: container }
+    );
 
-    if (topSentinelRef.current) observer.observe(topSentinelRef.current);
-    if (bottomSentinelRef.current) observer.observe(bottomSentinelRef.current);
+    observer.observe(topEl);
+    observer.observe(bottomEl);
 
     return () => {
-      if (topSentinelRef.current) observer.unobserve(topSentinelRef.current);
-      if (bottomSentinelRef.current)
-        observer.unobserve(bottomSentinelRef.current);
+      // Use the snapshots captured at effect mount
+      observer.unobserve(topEl);
+      observer.unobserve(bottomEl);
       observer.disconnect();
     };
   }, [
+    // Dependencies that truly affect loading behavior:
     hasNext,
     hasPrevious,
     isReverse,
@@ -151,7 +179,7 @@ export function ChatInfiniteScroll({
     loadingPrevious,
     next,
     previous,
-    children,
+    observerOptions,
   ]);
 
   // Loading spinner
@@ -163,12 +191,14 @@ export function ChatInfiniteScroll({
 
   return (
     <div
+      aria-busy={loadingNext || loadingPrevious}
       className={`overflow-y-auto flex flex-col ${className}`}
       ref={containerRef}
+      role="feed"
       style={{ height: "100%" }}
     >
       {/* Top sentinel and loader */}
-      <div className="w-full h-1" ref={topSentinelRef} />
+      <div aria-hidden="true" className="w-full h-1" ref={topSentinelRef} />
       {!isReverse && loadingPrevious && <Spinner />}
       {isReverse && loadingNext && <Spinner />}
 
@@ -182,7 +212,7 @@ export function ChatInfiniteScroll({
       {/* Loader and bottom sentinel */}
       {!isReverse && loadingNext && <Spinner />}
       {isReverse && loadingPrevious && <Spinner />}
-      <div className="w-full h-1" ref={bottomSentinelRef} />
+      <div aria-hidden="true" className="w-full h-1" ref={bottomSentinelRef} />
     </div>
   );
 }

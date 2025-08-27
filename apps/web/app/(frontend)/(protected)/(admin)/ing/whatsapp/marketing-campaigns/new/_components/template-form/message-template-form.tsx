@@ -38,14 +38,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   ComponentTypesEnum,
   LanguagesEnum,
   TemplateResponse,
 } from "@workspace/wa-cloud-api";
-import { startTask } from "better-auth/react";
-import { LoaderCircle, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useEffect } from "react";
 import React from "react";
 import {
@@ -96,7 +94,6 @@ export function MessageTemplateComponentItemCards({
   prefix: string;
 }) {
   const { control } = useFormContext();
-  const preview = usePreviewStore((state) => state.preview);
 
   const cardsFA = useFieldArray({ control, name: `${prefix}.cards` as const });
 
@@ -224,8 +221,6 @@ export function MessageTemplateComponentItemParameterMediaType({
   const { control } = useFormContext();
 
   const phoneNumber = useWatch({ control, name: "details.phoneNumber" });
-
-  const fileClearRef = React.useRef<HTMLButtonElement>(null);
 
   const mediaPath = `${prefix}.${mediaType.toLowerCase()}`;
 

@@ -1,5 +1,3 @@
-import { getUserWithTeam } from "@/lib/db/queries";
-import { unstable_cache } from "@/lib/unstable-cache";
 import {
   contactsTable,
   conversationsTable,
@@ -19,6 +17,10 @@ import {
   SQL,
   sum,
 } from "drizzle-orm";
+
+import { getUserWithTeam } from "@/lib/db/queries";
+import { unstable_cache } from "@/lib/unstable-cache";
+
 import { GetDashboardSchema } from "./validations";
 
 // Total Contacts
@@ -29,20 +31,44 @@ import { GetDashboardSchema } from "./validations";
 // Number of Messages Received per Day
 // Campaigns Stats
 
+export function buildTeamDateRangeFilter(
+  teamIdColumn: AnyColumn,
+  teamId: string,
+  dateColumn: AnyColumn,
+  dateRange: number[]
+): SQL | undefined {
+  // always filter by team
+  const clauses = [eq(teamIdColumn, teamId)];
+
+  const [from, to] = dateRange;
+  if (from) {
+    const start = new Date(from);
+    start.setHours(0, 0, 0, 0);
+    clauses.push(gte(dateColumn, start));
+  }
+  if (to) {
+    const end = new Date(to);
+    end.setHours(23, 59, 59, 999);
+    clauses.push(lte(dateColumn, end));
+  }
+
+  return and(...clauses);
+}
+
 export async function getDashboardAnalytics(input: GetDashboardSchema) {
   const userWithTeam = await getUserWithTeam();
 
   const dataTemp = {
-    totalContacts: 0,
-    totalNewContacts: 0,
-    totalMessagesSent: 0,
-    totalReplies: 0,
-    openRate: 0,
-    replyRate: 0,
+    deliveryStatus: [],
+    marketingCampaignStatus: [],
     messagesDeliveredPerDay: [],
     messagesReceivedPerDay: [],
-    marketingCampaignStatus: [],
-    deliveryStatus: [],
+    openRate: 0,
+    replyRate: 0,
+    totalContacts: 0,
+    totalMessagesSent: 0,
+    totalNewContacts: 0,
+    totalReplies: 0,
   };
 
   if (!userWithTeam?.teamId) {
@@ -55,14 +81,14 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
     async () => {
       try {
         const {
-          totalContacts,
-          totalNewContacts,
-          totalMessagesSent,
-          totalReplies,
+          deliveryStatus,
+          marketingCampaignStatus,
           openRate,
           replyRate,
-          marketingCampaignStatus,
-          deliveryStatus,
+          totalContacts,
+          totalMessagesSent,
+          totalNewContacts,
+          totalReplies,
         } = await withTenantTransaction(teamId, async (tx) => {
           const totalContacts = await tx.$count(contactsTable);
 
@@ -106,7 +132,7 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
             .select({ value: sum(marketingCampaignsTable.totalRecipients) })
             .from(marketingCampaignsTable)
             .execute()
-            .then((res) => Number(res[0]?.value) ?? 0);
+            .then((res) => Number(res[0]?.value ?? 0));
 
           // Open Rate
           const openConversation = await tx.$count(
@@ -151,11 +177,11 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
 
           const marketingCampaignStatus = await tx
             .select({
-              status: marketingCampaignsTable.status,
               count: count(),
               fill: sql<string>`
                 'var(--color-' || ${marketingCampaignsTable.status} || ')'
               `,
+              status: marketingCampaignsTable.status,
             })
             .from(marketingCampaignsTable)
             .groupBy(marketingCampaignsTable.status);
@@ -173,43 +199,43 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
 
           const deliveryStatus = [
             {
+              fill: "var(--color-delivered)",
               status: "delivered",
               value: delivered,
-              fill: "var(--color-delivered)",
             },
           ];
 
           if (failed > 0) {
             deliveryStatus.push({
+              fill: "var(--color-failed)",
               status: "failed",
               value: failed > 100 ? 100 - delivered : failed,
-              fill: "var(--color-failed)",
             });
           }
 
           return {
-            totalContacts,
-            totalNewContacts,
-            totalMessagesSent,
-            totalReplies,
+            deliveryStatus,
+            marketingCampaignStatus,
             openRate,
             replyRate,
-            marketingCampaignStatus,
-            deliveryStatus,
+            totalContacts,
+            totalMessagesSent,
+            totalNewContacts,
+            totalReplies,
           };
         });
 
         return {
-          totalContacts,
-          totalNewContacts,
-          totalMessagesSent,
-          totalReplies,
-          openRate,
-          replyRate,
+          deliveryStatus,
+          marketingCampaignStatus,
           messagesDeliveredPerDay: [],
           messagesReceivedPerDay: [],
-          marketingCampaignStatus,
-          deliveryStatus,
+          openRate,
+          replyRate,
+          totalContacts,
+          totalMessagesSent,
+          totalNewContacts,
+          totalReplies,
         };
       } catch (error) {
         return dataTemp;
@@ -221,28 +247,4 @@ export async function getDashboardAnalytics(input: GetDashboardSchema) {
       tags: [`dashboard:${teamId}`],
     }
   )();
-}
-
-export function buildTeamDateRangeFilter<T>(
-  teamIdColumn: AnyColumn,
-  teamId: string,
-  dateColumn: AnyColumn,
-  dateRange: number[]
-): SQL | undefined {
-  // always filter by team
-  const clauses = [eq(teamIdColumn, teamId)];
-
-  const [from, to] = dateRange;
-  if (from) {
-    const start = new Date(from);
-    start.setHours(0, 0, 0, 0);
-    clauses.push(gte(dateColumn, start));
-  }
-  if (to) {
-    const end = new Date(to);
-    end.setHours(23, 59, 59, 999);
-    clauses.push(lte(dateColumn, end));
-  }
-
-  return and(...clauses);
 }

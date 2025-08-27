@@ -26,7 +26,6 @@ import { Progress } from "@workspace/ui/components/progress";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Separator } from "@workspace/ui/components/separator";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Tooltip,
   TooltipContent,

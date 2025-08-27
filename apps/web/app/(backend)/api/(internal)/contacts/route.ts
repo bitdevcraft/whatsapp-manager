@@ -3,13 +3,7 @@ import { withTenantTransaction } from "@workspace/db/index";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import { revalidateTag } from "next/cache";
 
-import { getContacts } from "@/features/contacts/get-users";
 import { getUserWithTeam } from "@/lib/db/queries";
-
-export async function GET() {
-  const result = await getContacts();
-  return new Response(JSON.stringify(result), { status: 200 });
-}
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();

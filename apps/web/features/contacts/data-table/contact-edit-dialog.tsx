@@ -1,18 +1,20 @@
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { ContactForm } from "./contact-form";
-import { ContactFormValues } from "../_lib/schema";
-import { getSelectTags } from "@/features/tags/_lib/queries";
-import { toast } from "sonner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { getSelectTags } from "@/features/tags/_lib/queries";
+
+import { ContactFormValues } from "../_lib/schema";
+import { ContactForm } from "./contact-form";
 
 export function ContactEditDialog({
-  tags,
   initialValues,
+  tags,
   ...props
 }: Omit<React.ComponentProps<typeof ResponsiveDialog>, "children"> & {
-  tags: Awaited<ReturnType<typeof getSelectTags>>;
   initialValues?: Partial<ContactFormValues>;
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
 }) {
   const router = useRouter();
   const onSubmit = async (data: ContactFormValues) => {
@@ -23,10 +25,11 @@ export function ContactEditDialog({
         description: "Successful",
       });
       router.refresh();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(
         <div>
-          <p>Contacts can't be created. Please check with the support.</p>
+          <p>Contacts can&apos;t be created. Please check with the support.</p>
           <p className="font-light">{error.response.statusText}</p>
         </div>
       );
@@ -38,9 +41,9 @@ export function ContactEditDialog({
   return (
     <ResponsiveDialog {...props}>
       <ContactForm
+        initialValues={initialValues}
         onSubmit={onSubmit}
         tags={tags}
-        initialValues={initialValues}
       />
     </ResponsiveDialog>
   );

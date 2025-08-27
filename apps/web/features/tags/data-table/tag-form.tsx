@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormField,
@@ -13,20 +11,22 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
-import { TagsFormValues, TagsFormSchema } from "../_lib/schema";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+
+import { TagsFormSchema, TagsFormValues } from "../_lib/schema";
 
 interface TagsFormProps {
-  onSubmit: (values: TagsFormValues) => void;
   initialValues?: Partial<TagsFormValues>;
+  onSubmit: (values: TagsFormValues) => void;
 }
 
-export function TagsForm({ onSubmit, initialValues }: TagsFormProps) {
+export function TagsForm({ initialValues, onSubmit }: TagsFormProps) {
   const form = useForm<TagsFormValues>({
-    resolver: zodResolver(TagsFormSchema),
     defaultValues: {
       name: initialValues?.name ?? "",
     },
+    resolver: zodResolver(TagsFormSchema),
   });
 
   function handleFormSubmit(data: TagsFormValues) {
@@ -36,8 +36,8 @@ export function TagsForm({ onSubmit, initialValues }: TagsFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-4"
+        onSubmit={form.handleSubmit(handleFormSubmit)}
       >
         <FormField
           control={form.control}

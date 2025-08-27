@@ -1,5 +1,8 @@
+/* eslint-disable perfectionist/sort-objects */
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
@@ -16,23 +19,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Button } from "@workspace/ui/components/button";
-import { useFieldArray, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useMemo } from "react";
 import {
   ButtonPositionEnum,
-  SubTypeEnum,
   ComponentTypesEnum,
   LanguagesEnum,
+  SubTypeEnum,
   TemplateResponse,
 } from "@workspace/wa-cloud-api";
-import { MessageTemplateSchema, MessageTemplateValues } from "../lib/schema";
-import { ComponentParametersArray } from "./message-template-component-parameter-array";
-import { ComponentButtonParameter } from "./message-template-component-button-parameter";
-import { transformTemplateResponseToFormValues } from "./message-template-actions";
+import { useMemo } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+
 import { logger } from "@/lib/logger";
+
+import { MessageTemplateSchema, MessageTemplateValues } from "../lib/schema";
+import { transformTemplateResponseToFormValues } from "./message-template-actions";
+import { ComponentButtonParameter } from "./message-template-component-button-parameter";
+import { ComponentParametersArray } from "./message-template-component-parameter-array";
 
 type Props = {
   initialTemplate?: TemplateResponse;
@@ -76,7 +78,7 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <FormField
           control={control}
           name="name"
@@ -120,10 +122,10 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Components</h3>
             <Button
-              type="button"
               onClick={() =>
                 append({ type: ComponentTypesEnum.Body, parameters: [] })
               }
+              type="button"
             >
               Add Component
             </Button>
@@ -133,7 +135,7 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
             const fieldType = watch(`components.${index}.type`);
 
             return (
-              <div key={field.id} className="border p-4 rounded-md space-y-4">
+              <div className="border p-4 rounded-md space-y-4" key={field.id}>
                 <div className="flex justify-between items-center">
                   <FormField
                     control={control}
@@ -163,9 +165,9 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
                   />
 
                   <Button
+                    onClick={() => remove(index)}
                     type="button"
                     variant="destructive"
-                    onClick={() => remove(index)}
                   >
                     Remove
                   </Button>
@@ -233,14 +235,14 @@ export function MessageTemplateForm({ initialTemplate }: Props) {
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium">Parameters</h4>
                     <ComponentParametersArray
-                      name={`components.${index}.parameters`}
                       control={control}
+                      name={`components.${index}.parameters`}
                     />
                   </div>
                 ) : (
                   <ComponentButtonParameter
-                    name={`components.${index}.parameters`}
                     control={control}
+                    name={`components.${index}.parameters`}
                   />
                 )}
               </div>

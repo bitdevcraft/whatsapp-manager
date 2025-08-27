@@ -1,24 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { Button } from "@workspace/ui/components/button";
 import {
-  ButtonPositionEnum,
-  ComponentTypesEnum,
-  LanguagesEnum,
-  SubTypeEnum,
-  TemplateResponse,
-} from "@workspace/wa-cloud-api";
-import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
 import {
   Select,
   SelectContent,
@@ -26,21 +17,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { ComponentParametersArray } from "./message-template-component-parameter-array";
-import { transformTemplateResponseToFormValues } from "./message-template-actions";
-import { TranslateTemplateResponseToMessageTemplate } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/new/_components/template-form/message-template-actions";
+import {
+  ButtonPositionEnum,
+  ComponentTypesEnum,
+  LanguagesEnum,
+  SubTypeEnum,
+  TemplateResponse,
+} from "@workspace/wa-cloud-api";
+import { useEffect } from "react";
 import React from "react";
-import { DevTool } from "@hookform/devtools";
+import { useFieldArray, useFormContext } from "react-hook-form";
+
+import { TranslateTemplateResponseToMessageTemplate } from "@/app/(frontend)/(protected)/(admin)/ing/whatsapp/marketing-campaigns/new/_components/template-form/message-template-actions";
+
+import { ComponentParametersArray } from "./message-template-component-parameter-array";
 
 type Props = {
-  namePrefix: string;
   initialTemplate?: TemplateResponse;
+  namePrefix: string;
   preview?: boolean;
 };
 
 export function MessageTemplateForm({
-  namePrefix,
   initialTemplate,
+  namePrefix,
   preview = false,
 }: Props) {
   const { control, setValue, watch } = useFormContext();
@@ -54,18 +54,18 @@ export function MessageTemplateForm({
     if (values) return TranslateTemplateResponseToMessageTemplate(values);
 
     return {
-      name: "",
-      language: {
-        policy: "deterministic",
-        code: LanguagesEnum.English,
-      },
       components: [],
+      language: {
+        code: LanguagesEnum.English,
+        policy: "deterministic",
+      },
+      name: "",
     };
   }, [values]);
 
   const componentsPath = `${namePrefix}.components` as const;
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { append, fields, remove, replace } = useFieldArray({
     control,
     name: componentsPath,
   });
@@ -152,11 +152,11 @@ export function MessageTemplateForm({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Components</h3>
           <Button
-            type="button"
-            onClick={() =>
-              append({ type: ComponentTypesEnum.Body, parameters: [] })
-            }
             hidden={preview}
+            onClick={() =>
+              append({ parameters: [], type: ComponentTypesEnum.Body })
+            }
+            type="button"
           >
             Add Component
           </Button>
@@ -165,7 +165,7 @@ export function MessageTemplateForm({
         {fields.map((field, index) => {
           const fieldType = watch(`${componentsPath}.${index}.type`);
           return (
-            <div key={field.id} className="border p-4 rounded-md space-y-4">
+            <div className="border p-4 rounded-md space-y-4" key={field.id}>
               <div className="flex justify-between items-center">
                 <FormField
                   control={control}
@@ -208,10 +208,10 @@ export function MessageTemplateForm({
                 />
 
                 <Button
+                  hidden={preview}
+                  onClick={() => remove(index)}
                   type="button"
                   variant="destructive"
-                  onClick={() => remove(index)}
-                  hidden={preview}
                 >
                   Remove
                 </Button>
@@ -299,49 +299,18 @@ export function MessageTemplateForm({
               )}
 
               <ComponentParametersArray
-                name={`${componentsPath}.${index}.parameters`}
                 control={control}
+                name={`${componentsPath}.${index}.parameters`}
                 preview={preview}
               />
             </div>
           );
         })}
       </div>
- 
     </div>
   );
 }
 
-function CarouselCards({
-  prefix,
-  preview = false,
-}: {
-  prefix: string;
-  preview?: boolean;
-}) {
-  const { control } = useFormContext();
-
-  const cardsPath = `${prefix}.cards` as const;
-
-  const { fields } = useFieldArray({
-    control,
-    name: cardsPath,
-  });
-
-  return (
-    <>
-      {fields.map((el, idx) => {
-        <div key={idx}>
-          <CarouselCardComponents
-            prefix={`${cardsPath}.${idx}`}
-            preview={preview}
-          />
-          Test
-        </div>;
-      })}
-    </>
-  );
-}
 function CarouselCardComponents({
   prefix,
   preview = false,
@@ -369,7 +338,7 @@ function CarouselCardComponents({
       {fields.map((field, index) => {
         const fieldType = watch(`${componentsPath}.${index}.type`);
         return (
-          <div key={field.id} className="border p-4 rounded-md space-y-4">
+          <div className="border p-4 rounded-md space-y-4" key={field.id}>
             <div className="flex justify-between items-center">
               <FormField
                 control={control}
@@ -409,10 +378,10 @@ function CarouselCardComponents({
               />
 
               <Button
+                hidden={preview}
+                onClick={() => remove(index)}
                 type="button"
                 variant="destructive"
-                onClick={() => remove(index)}
-                hidden={preview}
               >
                 Remove
               </Button>
@@ -491,12 +460,42 @@ function CarouselCardComponents({
             )}
 
             <ComponentParametersArray
-              name={`${componentsPath}.${index}.parameters`}
               control={control}
+              name={`${componentsPath}.${index}.parameters`}
               preview={preview}
             />
           </div>
         );
+      })}
+    </>
+  );
+}
+function CarouselCards({
+  prefix,
+  preview = false,
+}: {
+  prefix: string;
+  preview?: boolean;
+}) {
+  const { control } = useFormContext();
+
+  const cardsPath = `${prefix}.cards` as const;
+
+  const { fields } = useFieldArray({
+    control,
+    name: cardsPath,
+  });
+
+  return (
+    <>
+      {fields.map((el, idx) => {
+        <div key={idx}>
+          <CarouselCardComponents
+            prefix={`${cardsPath}.${idx}`}
+            preview={preview}
+          />
+          Test
+        </div>;
       })}
     </>
   );

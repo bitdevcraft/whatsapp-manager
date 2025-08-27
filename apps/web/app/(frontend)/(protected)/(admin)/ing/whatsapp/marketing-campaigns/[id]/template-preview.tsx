@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -155,6 +156,7 @@ export function ComponentPreview({
     return <ComponentCarouselPreview component={component} />;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const cIdx = messageComponents?.findIndex((c) => c.type === type) ?? -1;
 
   return (

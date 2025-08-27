@@ -8,15 +8,9 @@ import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { MarketingCampaignFormValues } from "@/features/marketing-campaigns/_lib/schema";
-import { getMarketingCampaigns } from "@/features/marketing-campaigns/get-marketing-campaigns";
 import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
 import { getUserWithTeam } from "@/lib/db/queries";
-
-export async function GET() {
-  const result = await getMarketingCampaigns();
-  return new Response(JSON.stringify(result), { status: 200 });
-}
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -30,7 +31,8 @@ export function AutoArrayInputs({
       cur = cur[p];
     }
     setLen(Array.isArray(cur) ? cur.length : 0);
-  });
+  }, [control._formValues, baseName]);
+
   return (
     <div className="space-y-2">
       {len === 0 ? null : (

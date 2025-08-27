@@ -7,6 +7,7 @@ export const StringField: React.FC<AutoFormFieldProps> = ({
   error,
   id,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { key, ...props } = inputProps;
 
   return (
