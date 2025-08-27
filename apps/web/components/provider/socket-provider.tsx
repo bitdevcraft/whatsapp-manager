@@ -1,36 +1,37 @@
 "use client";
 
-import { env } from "@/env/client";
 import { SocketEventPayloads } from "@workspace/shared";
 import React, {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
   useState,
-  ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
 
+import { env } from "@/env/client";
+
 interface SocketContextType {
-  socket: Socket<SocketEventPayloads> | null;
-  userId: string;
+  socket: null | Socket<SocketEventPayloads>;
   teamId: string;
+  userId: string;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 interface SocketProviderProps {
   children: ReactNode;
-  userId: string;
   teamId: string;
+  userId: string;
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({
   children,
-  userId,
   teamId,
+  userId,
 }) => {
-  const [socket, setSocket] = useState<Socket<SocketEventPayloads> | null>(
+  const [socket, setSocket] = useState<null | Socket<SocketEventPayloads>>(
     null
   );
 
@@ -40,8 +41,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       {
         path: "/socket.io",
         query: {
-          userId,
           teamId,
+          userId,
         },
       }
     );
@@ -54,7 +55,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
   }, [userId, teamId]);
 
   return (
-    <SocketContext.Provider value={{ socket, userId, teamId }}>
+    <SocketContext.Provider value={{ socket, teamId, userId }}>
       {children}
     </SocketContext.Provider>
   );

@@ -1,5 +1,12 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
+import { DataTableSkeleton } from "@workspace/ui/components/data-table";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import { Separator } from "@workspace/ui/components/separator";
+import React from "react";
+
 import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
 import {
   getAdAccount,
@@ -8,12 +15,7 @@ import {
 import { getWhatsAppBusinessAccountPhoneNumber } from "@/features/whatsapp/phone-number/_lib/queries";
 import WhatsAppBusinesAccountPhoneNumberTable from "@/features/whatsapp/phone-number/data-table/phone-number-table";
 import { toTitleCase } from "@/utils/string-helper";
-import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
-import { DataTableSkeleton } from "@workspace/ui/components/data-table";
-import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { Separator } from "@workspace/ui/components/separator";
-import React from "react";
+
 import AdAccountForm from "./ad-account-form";
 
 interface Props {
@@ -48,9 +50,9 @@ export default function BusinessAccount({ promises }: Props) {
           <p className="text-xl font-semibold">{waba?.ownerBusinessName}</p>
           <div>
             <Button
-              variant="outline"
-              size="sm"
               onClick={() => setAddAdAccount(true)}
+              size="sm"
+              variant="outline"
             >
               Add Ad Account
             </Button>
@@ -66,11 +68,11 @@ export default function BusinessAccount({ promises }: Props) {
                 <React.Suspense
                   fallback={
                     <DataTableSkeleton
+                      cellWidths={["10rem", "6rem", "6rem", "6rem"]}
                       columnCount={4}
                       filterCount={2}
-                      cellWidths={["10rem", "6rem", "6rem", "6rem"]}
-                      shrinkZero
                       rowCount={2}
+                      shrinkZero
                     />
                   }
                 >

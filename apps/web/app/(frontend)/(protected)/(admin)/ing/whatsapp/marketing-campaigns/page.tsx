@@ -1,11 +1,12 @@
-import { getMarketingCampaigns } from "@/features/marketing-campaigns/_lib/queries";
-import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
 import { getValidFilters } from "@workspace/ui/lib/data-table";
-import { SearchParams } from "@/types";
+import React from "react";
+
 import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+import { getMarketingCampaigns } from "@/features/marketing-campaigns/_lib/queries";
 import { marketingCampaignSearchParamsCache } from "@/features/marketing-campaigns/_lib/validations";
 import MarketingCampaignTable from "@/features/marketing-campaigns/data-table/marketing-campaign-table";
+import { SearchParams } from "@/types";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
@@ -27,8 +28,6 @@ export default async function Home(props: IndexPageProps) {
         <React.Suspense
           fallback={
             <DataTableSkeleton
-              columnCount={7}
-              filterCount={2}
               cellWidths={[
                 "10rem",
                 "30rem",
@@ -38,6 +37,8 @@ export default async function Home(props: IndexPageProps) {
                 "6rem",
                 "6rem",
               ]}
+              columnCount={7}
+              filterCount={2}
               shrinkZero
             />
           }

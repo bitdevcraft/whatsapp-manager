@@ -1,14 +1,14 @@
 export interface MetaError extends Error {
     error: {
-        message: string;
-        type: string;
         code: number;
         error_data?: {
-            messaging_product: 'whatsapp';
             details: string;
+            messaging_product: 'whatsapp';
         };
         error_subcode?: number;
         fbtrace_id: string;
+        message: string;
+        type: string;
     };
 }
 

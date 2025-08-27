@@ -2,10 +2,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
@@ -33,8 +33,8 @@ export function AutoMatrixRowInputs({
       <div className="text-sm">{label}</div>
       {Array.from({ length: len }).map((_, i) => (
         <FormField
-          key={i}
           control={control}
+          key={i}
           name={`${baseName}.${i}`}
           render={({ field }) => (
             <FormItem>

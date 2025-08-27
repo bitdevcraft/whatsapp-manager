@@ -1,40 +1,38 @@
 "use client";
 
+import { Slot, Slottable } from "@radix-ui/react-slot";
+import { cn } from "@workspace/ui/lib/utils";
 import React, {
-  HTMLProps,
   createContext,
+  HTMLProps,
   useCallback,
   useContext,
-  useMemo,
-  useState,
   useEffect,
+  useMemo,
   useRef,
+  useState,
 } from "react";
-
-import { Slot, Slottable } from "@radix-ui/react-slot";
 import { Path, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { cn } from "@workspace/ui/lib/utils";
-import { DevTool } from "@hookform/devtools";
 
 interface MultiStepFormProps<T extends z.ZodType> {
-  schema: T;
+  className?: string;
   form: UseFormReturn<z.infer<T>>;
   onSubmit: (data: z.infer<T>) => void;
+  schema: T;
   useStepTransition?: boolean;
-  className?: string;
 }
 
 type StepProps = React.PropsWithChildren<
-  {
-    name: string;
+  React.HTMLProps<HTMLDivElement> & {
     asChild?: boolean;
-  } & React.HTMLProps<HTMLDivElement>
+    name: string;
+  }
 >;
 
-const MultiStepFormContext = createContext<ReturnType<
+const MultiStepFormContext = createContext<null | ReturnType<
   typeof useMultiStepForm
-> | null>(null);
+>>(null);
 
 /**
  * @name MultiStepForm
@@ -47,11 +45,11 @@ const MultiStepFormContext = createContext<ReturnType<
  * @constructor
  */
 export function MultiStepForm<T extends z.ZodType>({
-  schema,
-  form,
-  onSubmit,
   children,
   className,
+  form,
+  onSubmit,
+  schema,
 }: React.PropsWithChildren<MultiStepFormProps<T>>) {
   const steps = useMemo(
     () =>
@@ -82,8 +80,8 @@ export function MultiStepForm<T extends z.ZodType>({
   return (
     <MultiStepFormContext.Provider value={multiStepForm}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
         className={cn(className, "flex size-full flex-col overflow-hidden")}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         {header}
 
@@ -93,11 +91,11 @@ export function MultiStepForm<T extends z.ZodType>({
 
             return (
               <AnimatedStep
-                key={step.props.name}
-                direction={multiStepForm.direction}
-                isActive={isActive}
-                index={index}
                 currentIndex={multiStepForm.currentStepIndex}
+                direction={multiStepForm.direction}
+                index={index}
+                isActive={isActive}
+                key={step.props.name}
               >
                 {step}
               </AnimatedStep>
@@ -131,11 +129,11 @@ export function MultiStepFormContextProvider(props: {
 export const MultiStepFormStep = React.forwardRef<
   HTMLDivElement,
   React.PropsWithChildren<
-    {
+    HTMLProps<HTMLDivElement> & {
       asChild?: boolean;
-    } & HTMLProps<HTMLDivElement>
+    }
   >
->(function MultiStepFormStep({ children, asChild, ...props }, ref) {
+>(function MultiStepFormStep({ asChild, children, ...props }, ref) {
   const Cmp = asChild ? Slot : "div";
 
   return (
@@ -144,20 +142,6 @@ export const MultiStepFormStep = React.forwardRef<
     </Cmp>
   );
 });
-
-export function useMultiStepFormContext<Schema extends z.ZodType>() {
-  const context = useContext(MultiStepFormContext) as ReturnType<
-    typeof useMultiStepForm<Schema>
-  >;
-
-  if (!context) {
-    throw new Error(
-      "useMultiStepFormContext must be used within a MultiStepForm"
-    );
-  }
-
-  return context;
-}
 
 /**
  * @name useMultiStepForm
@@ -172,7 +156,7 @@ export function useMultiStepForm<Schema extends z.ZodType>(
   stepNames: string[]
 ) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [direction, setDirection] = useState<"forward" | "backward">();
+  const [direction, setDirection] = useState<"backward" | "forward">();
 
   const isStepValid = useCallback(() => {
     const currentStepName = stepNames[currentStepIndex] as Path<
@@ -266,19 +250,19 @@ export function useMultiStepForm<Schema extends z.ZodType>(
 
   return useMemo(
     () => ({
-      form,
       currentStep: stepNames[currentStepIndex] as string,
       currentStepIndex,
-      totalSteps: stepNames.length,
+      direction,
+      errors,
+      form,
+      goToStep,
       isFirstStep: currentStepIndex === 0,
       isLastStep: currentStepIndex === stepNames.length - 1,
-      nextStep,
-      prevStep,
-      goToStep,
-      direction,
       isStepValid,
       isValid,
-      errors,
+      nextStep,
+      prevStep,
+      totalSteps: stepNames.length,
     }),
     [
       form,
@@ -295,14 +279,28 @@ export function useMultiStepForm<Schema extends z.ZodType>(
   );
 }
 
+export function useMultiStepFormContext<Schema extends z.ZodType>() {
+  const context = useContext(MultiStepFormContext) as ReturnType<
+    typeof useMultiStepForm<Schema>
+  >;
+
+  if (!context) {
+    throw new Error(
+      "useMultiStepFormContext must be used within a MultiStepForm"
+    );
+  }
+
+  return context;
+}
+
 export const MultiStepFormHeader = React.forwardRef<
   HTMLDivElement,
   React.PropsWithChildren<
-    {
+    HTMLProps<HTMLDivElement> & {
       asChild?: boolean;
-    } & HTMLProps<HTMLDivElement>
+    }
   >
->(function MultiStepFormHeader({ children, asChild, ...props }, ref) {
+>(function MultiStepFormHeader({ asChild, children, ...props }, ref) {
   const Cmp = asChild ? Slot : "div";
 
   return (
@@ -315,11 +313,11 @@ export const MultiStepFormHeader = React.forwardRef<
 export const MultiStepFormFooter = React.forwardRef<
   HTMLDivElement,
   React.PropsWithChildren<
-    {
+    HTMLProps<HTMLDivElement> & {
       asChild?: boolean;
-    } & HTMLProps<HTMLDivElement>
+    }
   >
->(function MultiStepFormFooter({ children, asChild, ...props }, ref) {
+>(function MultiStepFormFooter({ asChild, children, ...props }, ref) {
   const Cmp = asChild ? Slot : "div";
 
   return (
@@ -328,6 +326,13 @@ export const MultiStepFormFooter = React.forwardRef<
     </Cmp>
   );
 });
+
+interface AnimatedStepProps {
+  currentIndex: number;
+  direction: "backward" | "forward" | undefined;
+  index: number;
+  isActive: boolean;
+}
 
 /**
  * @name createStepSchema
@@ -340,19 +345,12 @@ export function createStepSchema<T extends Record<string, z.ZodType>>(
   return z.object(steps);
 }
 
-interface AnimatedStepProps {
-  direction: "forward" | "backward" | undefined;
-  isActive: boolean;
-  index: number;
-  currentIndex: number;
-}
-
 function AnimatedStep({
-  isActive,
-  direction,
   children,
-  index,
   currentIndex,
+  direction,
+  index,
+  isActive,
 }: React.PropsWithChildren<AnimatedStepProps>) {
   const [shouldRender, setShouldRender] = useState(isActive);
   const stepRef = useRef<HTMLDivElement>(null);
@@ -401,7 +399,7 @@ function AnimatedStep({
   const className = cn(baseClasses, visibilityClasses, transformClasses);
 
   return (
-    <div ref={stepRef} className={className} aria-hidden={!isActive}>
+    <div aria-hidden={!isActive} className={className} ref={stepRef}>
       {children}
     </div>
   );

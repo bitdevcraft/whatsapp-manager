@@ -1,196 +1,196 @@
 import { CategoryEnum, LanguagesEnum, TemplateStatusEnum } from '@shared/types/enums';
 import { GeneralRequestBody, ResponsePagination, ResponseSuccess } from '@shared/types/request';
 
-export type TemplateFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | 'LOCATION' | 'PRODUCT';
+// Reusable carousel card types
+export interface CarouselCard {
+    card_index: number;
+    components: ComponentTypes[];
+}
 
-export type PhoneNumberButton = {
-    type: 'PHONE_NUMBER';
-    text: string; // max 25 chars
-    phone_number: string; // max 20 chars
-};
-
-export type URLButton = {
-    type: 'URL';
-    text: string; // max 25 chars
-    url: string; // max 2000 chars
-    example?: string[]; // Required if url contains variable
-};
-
-export type QuickReplyButton = {
-    type: 'QUICK_REPLY';
-    text: string; // max 25 chars
-};
-
-export type CopyCodeButton = {
-    type: 'COPY_CODE';
-    example: string; // max 15 chars
-};
-
-export type FlowButton = {
-    type: 'FLOW';
-    text: string; // max 25 chars
-    flow_id?: string;
-    flow_name?: string;
-    flow_json?: string;
-    flow_action?: 'navigate' | 'data_exchange';
-    navigate_screen?: string;
-};
-
-export type MPMButton = {
-    type: 'MPM';
+export interface CatalogButton {
     action?: {
         thumbnail_product_retailer_id: string;
-        sections: Array<{
-            title?: string;
-            product_items: Array<{
-                product_retailer_id: string;
-            }>;
-        }>;
     };
-};
+    type: 'CATALOG';
+}
 
-export type OTPButton = {
+export type ComponentTypes =
+    | TemplateBody
+    | TemplateButtons
+    | TemplateCarousel
+    | TemplateFooter
+    | TemplateHeader
+    | TemplateLimitedTimeOffer;
+
+export interface CopyCodeButton {
+    example: string; // max 15 chars
+    type: 'COPY_CODE';
+}
+
+export interface FlowButton {
+    flow_action?: 'data_exchange' | 'navigate';
+    flow_id?: string;
+    flow_json?: string;
+    flow_name?: string;
+    navigate_screen?: string;
+    text: string; // max 25 chars
+    type: 'FLOW';
+}
+
+export interface MediaCarouselCard {
+    card_index: number;
+    components: (TemplateBody | TemplateButtons | TemplateHeader)[];
+}
+
+export interface MPMButton {
+    action?: {
+        sections: {
+            product_items: {
+                product_retailer_id: string;
+            }[];
+            title?: string;
+        }[];
+        thumbnail_product_retailer_id: string;
+    };
+    type: 'MPM';
+}
+
+export interface OTPButton {
     type: 'OTP';
-};
+}
 
-export type SPMButton = {
-    type: 'SPM';
+export interface PhoneNumberButton {
+    phone_number: string; // max 20 chars
+    text: string; // max 25 chars
+    type: 'PHONE_NUMBER';
+}
+
+export interface ProductCarouselCard {
+    card_index: number;
+    components: TemplateHeader[];
+}
+
+export interface QuickReplyButton {
+    text: string; // max 25 chars
+    type: 'QUICK_REPLY';
+}
+
+export interface SPMButton {
     action?: {
         product_retailer_id: string;
     };
-};
+    type: 'SPM';
+}
 
-export type CatalogButton = {
-    type: 'CATALOG';
-    action?: {
-        thumbnail_product_retailer_id: string;
+export interface TemplateBody {
+    example?: {
+        body_text?: string[][]; // For positional parameters
+        body_text_named_params?: {
+            example: string;
+            param_name: string; // lowercase letters and underscores only
+        }[]; // For named parameters
     };
-};
+    text: string; // max 1024 chars
+    type: 'BODY';
+}
 
 export type TemplateButton =
-    | PhoneNumberButton
-    | URLButton
-    | QuickReplyButton
+    | CatalogButton
     | CopyCodeButton
     | FlowButton
     | MPMButton
     | OTPButton
+    | PhoneNumberButton
+    | QuickReplyButton
     | SPMButton
-    | CatalogButton;
+    | URLButton;
 
-export type TemplateHeaderExample = {
-    header_text?: string[];
-    header_text_named_params?: Array<{
-        param_name: string;
-        example: string;
-    }>;
-    header_handle?: string[];
-};
+export interface TemplateButtons {
+    buttons: TemplateButton[];
+    type: 'BUTTONS';
+}
 
-export type TemplateHeader = {
-    type: 'HEADER';
+export interface TemplateCarousel {
+    cards: {
+        card_index: number;
+        components: ComponentTypes[];
+    }[];
+    type: 'CAROUSEL';
+}
+
+export interface TemplateDeleteParams {
+    hsm_id: string;
+    name: string;
+}
+
+export interface TemplateFooter {
+    text: string; // max 60 chars
+    type: 'FOOTER';
+}
+
+export type TemplateFormat = 'DOCUMENT' | 'IMAGE' | 'LOCATION' | 'PRODUCT' | 'TEXT' | 'VIDEO';
+
+export interface TemplateGetParams {
+    after?: string;
+    before?: string;
+    category?: CategoryEnum;
+    language?: LanguagesEnum;
+    limit?: number;
+    name?: string;
+    status?: TemplateStatusEnum;
+}
+
+export interface TemplateHeader {
+    example?: TemplateHeaderExample;
     format: TemplateFormat;
     text?: string; // max 60 chars
-    example?: TemplateHeaderExample;
-};
+    type: 'HEADER';
+}
 
-export type TemplateBody = {
-    type: 'BODY';
-    text: string; // max 1024 chars
-    example?: {
-        body_text?: Array<Array<string>>; // For positional parameters
-        body_text_named_params?: Array<{
-            param_name: string; // lowercase letters and underscores only
-            example: string;
-        }>; // For named parameters
-    };
-};
+export interface TemplateHeaderExample {
+    header_handle?: string[];
+    header_text?: string[];
+    header_text_named_params?: {
+        example: string;
+        param_name: string;
+    }[];
+}
 
-export type TemplateFooter = {
-    type: 'FOOTER';
-    text: string; // max 60 chars
-};
-
-export type TemplateButtons = {
-    type: 'BUTTONS';
-    buttons: TemplateButton[];
-};
-
-export type TemplateLimitedTimeOffer = {
-    type: 'LIMITED_TIME_OFFER';
+export interface TemplateLimitedTimeOffer {
     limited_time_offer: {
         expiration_time_ms: number;
     };
-};
-
-export type TemplateCarousel = {
-    type: 'CAROUSEL';
-    cards: Array<{
-        card_index: number;
-        components: ComponentTypes[];
-    }>;
-};
-
-// Reusable carousel card types
-export type CarouselCard = {
-    card_index: number;
-    components: ComponentTypes[];
-};
-
-export type MediaCarouselCard = {
-    card_index: number;
-    components: (TemplateHeader | TemplateBody | TemplateButtons)[];
-};
-
-export type ProductCarouselCard = {
-    card_index: number;
-    components: TemplateHeader[];
-};
-
-export type ComponentTypes =
-    | TemplateHeader
-    | TemplateBody
-    | TemplateFooter
-    | TemplateButtons
-    | TemplateLimitedTimeOffer
-    | TemplateCarousel;
+    type: 'LIMITED_TIME_OFFER';
+}
 
 export type TemplateRequestBody = GeneralRequestBody & {
-    name: string;
-    language: LanguagesEnum;
     category?: CategoryEnum;
     components?: ComponentTypes[];
-};
-
-export type TemplateResponse = {
-    id: string;
-    status: string;
     language: LanguagesEnum;
-    parameter_format: 'POSITIONAL' | 'NAMED';
+    name: string;
+};
+
+export interface TemplateResponse {
     category: CategoryEnum;
-    name: string;
     components: ComponentTypes[];
-};
-
-export type TemplateGetParams = {
-    limit?: number;
-    after?: string;
-    before?: string;
-    name?: string;
-    language?: LanguagesEnum;
-    category?: CategoryEnum;
-    status?: TemplateStatusEnum;
-};
-
-export type TemplateDeleteParams = {
-    hsm_id: string;
+    id: string;
+    language: LanguagesEnum;
     name: string;
-};
+    parameter_format: 'NAMED' | 'POSITIONAL';
+    status: string;
+}
+
+export interface URLButton {
+    example?: string[]; // Required if url contains variable
+    text: string; // max 25 chars
+    type: 'URL';
+    url: string; // max 2000 chars
+}
 
 export declare class TemplateClass {
-    getTemplate(templateId: string): Promise<TemplateResponse>;
-    updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess>;
-    getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>>;
     createTemplate(template: TemplateRequestBody): Promise<TemplateResponse>;
     deleteTemplate(params: TemplateDeleteParams): Promise<ResponseSuccess>;
+    getTemplate(templateId: string): Promise<TemplateResponse>;
+    getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>>;
+    updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess>;
 }

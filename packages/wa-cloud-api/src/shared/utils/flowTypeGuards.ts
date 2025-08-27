@@ -39,16 +39,16 @@ const ERROR_ACTIONS = [FlowActionEnum.DATA_EXCHANGE, FlowActionEnum.INIT] as con
  */
 export function isFlowDataExchangeRequest(request: FlowEndpointRequest): request is FlowDataExchangeRequest & {
     action: (typeof DATA_EXCHANGE_ACTIONS)[number];
-    screen?: string;
-    flow_token: string;
     data?: Record<string, any>;
+    flow_token: string;
+    screen?: string;
 } {
     // Check for basic required fields
     if (!('flow_token' in request && isString(request.flow_token) && 'action' in request)) {
         return false;
     }
 
-    const { action, version, screen, data } = request;
+    const { action, data, screen, version } = request;
 
     // Validate API version
     const hasValidVersion = version === '3.0';
@@ -75,19 +75,19 @@ export function isFlowDataExchangeRequest(request: FlowEndpointRequest): request
  */
 export function isFlowErrorRequest(request: FlowEndpointRequest): request is FlowErrorNotificationRequest & {
     action: (typeof ERROR_ACTIONS)[number];
-    screen: string;
-    flow_token: string;
     data: {
         error: string;
         error_message: string;
     };
+    flow_token: string;
+    screen: string;
 } {
     // Check for basic required fields
     if (!('flow_token' in request && isString(request.flow_token) && 'action' in request)) {
         return false;
     }
 
-    const { action, screen, data } = request;
+    const { action, data, screen } = request;
 
     // Check if the action is one of the allowed actions for error notifications
     const hasValidAction = ERROR_ACTIONS.includes(action as any);

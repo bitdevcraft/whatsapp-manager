@@ -1,11 +1,12 @@
+import { tagsTable } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
+import { revalidateTag } from "next/cache";
+import { NextResponse } from "next/server";
+
+import { getTags } from "@/features/tags/_lib/actions";
 import { TagsFormValues } from "@/features/tags/_lib/schema";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { tagsTable } from "@workspace/db/schema";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { NextResponse } from "next/server";
-import { getTags } from "@/features/tags/_lib/actions";
-import { revalidateTag } from "next/cache";
 
 export async function GET() {
   const tags = await getTags();

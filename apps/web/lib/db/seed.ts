@@ -1,6 +1,5 @@
+import { faker } from "@faker-js/faker";
 import { db } from "@workspace/db/config";
-import { stripe } from "../payments/stripe";
-import { hashPassword } from "@/lib/auth/session";
 import {
   contactsTable,
   NewContact,
@@ -10,47 +9,50 @@ import {
   teamsTable,
   usersTable,
 } from "@workspace/db/schema";
-import { faker } from "@faker-js/faker";
 import { withTenantTransaction } from "@workspace/db/tenant";
+
+import { hashPassword } from "@/lib/auth/session";
 import { logger } from "@/lib/logger";
+
+import { stripe } from "../payments/stripe";
 
 async function createStripeProducts() {
   logger.log("Creating Stripe products and prices...");
 
   const baseProduct = await stripe.products.create({
-    name: "Starter",
     description: "Starter subscription plan",
+    name: "Starter",
   });
 
   await stripe.prices.create({
-    product: baseProduct.id,
-    unit_amount: 800, // $8 in cents
     currency: "usd",
-    recurring: {
-      interval: "month",
-      trial_period_days: 0,
-    },
     metadata: {
       limit: 1000,
     },
-  });
-
-  const plusProduct = await stripe.products.create({
-    name: "Plus",
-    description: "Plus subscription plan",
-  });
-
-  await stripe.prices.create({
-    product: plusProduct.id,
-    unit_amount: 1200, // $12 in cents
-    currency: "usd",
+    product: baseProduct.id,
     recurring: {
       interval: "month",
       trial_period_days: 0,
     },
+    unit_amount: 800, // $8 in cents
+  });
+
+  const plusProduct = await stripe.products.create({
+    description: "Plus subscription plan",
+    name: "Plus",
+  });
+
+  await stripe.prices.create({
+    currency: "usd",
     metadata: {
       limit: 10000,
     },
+    product: plusProduct.id,
+    recurring: {
+      interval: "month",
+      trial_period_days: 0,
+    },
+    unit_amount: 1200, // $12 in cents
   });
 
   logger.log("Stripe products and prices created successfully.");

@@ -1,8 +1,9 @@
-import { getUserWithTeam } from "@/lib/db/queries";
 import { conversationsTable, withTenantTransaction } from "@workspace/db";
 import { and, eq, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,8 +26,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           data: [],
-          previousOffset: null,
           nextOffset: null,
+          previousOffset: null,
         },
         { status: 200 }
       );
@@ -36,15 +37,15 @@ export async function GET(request: NextRequest) {
       teamId,
       async (tx) => {
         const conversations = await tx.query.conversationsTable.findMany({
+          limit: limit + 1,
+          offset,
+          orderBy: (conversationsTable, { asc }) => [
+            asc(conversationsTable.createdAt),
+          ],
           where: and(
             or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
             eq(conversationsTable.contactId, contactId)
           ),
-          orderBy: (conversationsTable, { asc }) => [
-            asc(conversationsTable.createdAt),
-          ],
-          offset,
-          limit: limit + 1,
           with: {
             contact: {
               columns: {
@@ -73,8 +74,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         data,
-        previousOffset,
         nextOffset,
+        previousOffset,
       },
       { status: 200 }
     );

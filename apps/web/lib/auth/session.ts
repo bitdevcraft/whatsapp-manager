@@ -1,15 +1,18 @@
-import { env } from "@/env/server";
 import { NewUser, Team } from "@workspace/db/schema";
 import { compare, hash } from "bcryptjs";
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+
+import { env } from "@/env/server";
 
 const key = new TextEncoder().encode(env.AUTH_SECRET);
 const SALT_ROUNDS = 10;
 
-export async function hashPassword(password: string) {
-  return hash(password, SALT_ROUNDS);
-}
+type SessionData = {
+  currentTeam?: { id: string };
+  expires: string;
+  user: { id: string };
+};
 
 export async function comparePasswords(
   plainTextPassword: string,
@@ -18,11 +21,35 @@ export async function comparePasswords(
   return compare(plainTextPassword, hashedPassword);
 }
 
-type SessionData = {
-  user: { id: string };
-  currentTeam?: { id: string };
-  expires: string;
-};
+export async function getSession() {
+  const session = (await cookies()).get("session")?.value;
+  if (!session) return null;
+  return await verifyToken(session);
+}
+
+export async function hashPassword(password: string) {
+  return hash(password, SALT_ROUNDS);
+}
+
+export async function setSession(user: NewUser, team?: null | Team) {
+  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const session: SessionData = {
+    expires: expiresInOneDay.toISOString(),
+    user: { id: user.id! },
+  };
+
+  if (team) {
+    session.currentTeam = { id: team.id };
+  }
+
+  const encryptedSession = await signToken(session);
+  (await cookies()).set("session", encryptedSession, {
+    expires: expiresInOneDay,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true,
+  });
+}
 
 export async function signToken(payload: SessionData) {
   return await new SignJWT(payload)
@@ -37,30 +64,4 @@ export async function verifyToken(input: string) {
     algorithms: ["HS256"],
   });
   return payload as SessionData;
-}
-
-export async function getSession() {
-  const session = (await cookies()).get("session")?.value;
-  if (!session) return null;
-  return await verifyToken(session);
-}
-
-export async function setSession(user: NewUser, team?: Team | null) {
-  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const session: SessionData = {
-    user: { id: user.id! },
-    expires: expiresInOneDay.toISOString(),
-  };
-
-  if (team) {
-    session.currentTeam = { id: team.id };
-  }
-
-  const encryptedSession = await signToken(session);
-  (await cookies()).set("session", encryptedSession, {
-    expires: expiresInOneDay,
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-  });
 }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useWatch } from "react-hook-form";
+
 import { HeaderEditor } from "./template-header-editor";
 import { HeaderAutoExamples } from "./template-header-examples";
 import { HeaderFileField } from "./template-header-file-field";
@@ -13,16 +14,16 @@ export function HeaderField({
 }: {
   control: any;
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: {
-    headerTextOverride?: string;
     bodyTextOverride?: string;
+    headerTextOverride?: string;
   }) => void;
 }) {
   const format = useWatch({
     control,
     name: `components.${index}.format` as const,
-  }) as "TEXT" | "IMAGE" | "VIDEO" | "DOCUMENT" | "LOCATION" | "PRODUCT";
+  }) as "DOCUMENT" | "IMAGE" | "LOCATION" | "PRODUCT" | "TEXT" | "VIDEO";
 
   return (
     <div className="rounded-lg border p-3 space-y-3">

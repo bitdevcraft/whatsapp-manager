@@ -1,8 +1,9 @@
 "use server";
 
-import { unstable_noStore } from "next/cache";
-import { getUserWithTeam } from "./queries";
 import { UsageLimitRepository } from "@workspace/db";
+import { unstable_noStore } from "next/cache";
+
+import { getUserWithTeam } from "./queries";
 
 export async function getUsage() {
   unstable_noStore();

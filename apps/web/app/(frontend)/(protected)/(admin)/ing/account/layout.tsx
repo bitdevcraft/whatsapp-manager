@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { IconMoneybag } from "@tabler/icons-react";
+import { Button } from "@workspace/ui/components/button";
+import { Activity, Menu, Settings, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@workspace/ui/components/button";
-import { Users, Settings, Shield, Activity, Menu } from "lucide-react";
-import { IconMoneybag } from "@tabler/icons-react";
+import { useState } from "react";
 
 export default function DashboardLayout({
   children,
@@ -52,8 +52,8 @@ export default function DashboardLayout({
         </div>
         <Button
           className="-mr-3"
-          variant="ghost"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          variant="ghost"
         >
           <Menu className="h-6 w-6" />
           <span className="sr-only">Toggle sidebar</span>
@@ -71,13 +71,13 @@ export default function DashboardLayout({
         >
           <nav className="h-full overflow-y-auto p-4">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href} passHref>
+              <Link href={item.href} key={item.href} passHref>
                 <Button
-                  variant={pathname === item.href ? "secondary" : "ghost"}
                   className={`shadow-none my-1 w-full justify-start ${
                     pathname === item.href ? "border" : ""
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
+                  variant={pathname === item.href ? "secondary" : "ghost"}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}

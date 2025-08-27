@@ -1,9 +1,10 @@
+import * as dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import * as dotenv from "dotenv";
-import { getConfig } from "./environments";
+
 import * as schema from "../schema";
+import { getConfig } from "./environments";
 
 // dotenv.config({ path: "../../.env" });
 
@@ -25,8 +26,8 @@ export const migrationClient = postgres(connectionString, {
 
 // Client for queries
 export const queryClient = postgres(connectionString, {
-  max: config.database.maxConnections,
   idle_timeout: config.database.idleTimeout,
+  max: config.database.maxConnections,
   ssl: config.database.ssl,
 });
 

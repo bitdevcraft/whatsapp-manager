@@ -1,6 +1,7 @@
 import { auth } from "@workspace/auth";
 import { headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { AccountInformation } from "./account-information";
 
 export default async function GeneralPage() {

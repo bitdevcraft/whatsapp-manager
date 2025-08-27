@@ -1,7 +1,8 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { DataLocalizationRegionEnum, HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 
 import type * as registration from './types';
 
@@ -15,6 +16,23 @@ import type * as registration from './types';
 export default class RegistrationApi extends BaseAPI implements registration.RegistrationClass {
     constructor(config: WabaConfigType, client: RequesterClass) {
         super(config, client);
+    }
+
+    /**
+     * Deregister a WhatsApp Business Account.
+     *
+     * @returns Response indicating success or failure
+     *
+     * @example
+     * await whatsappClient.registration.deregister();
+     */
+    async deregister(): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
     }
 
     /**
@@ -39,23 +57,6 @@ export default class RegistrationApi extends BaseAPI implements registration.Reg
             `${this.config[WabaConfigEnum.PhoneNumberId]}/register`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
-        );
-    }
-
-    /**
-     * Deregister a WhatsApp Business Account.
-     *
-     * @returns Response indicating success or failure
-     *
-     * @example
-     * await whatsappClient.registration.deregister();
-     */
-    async deregister(): Promise<ResponseSuccess> {
-        return this.sendJson(
-            HttpMethodsEnum.Post,
-            `${this.config[WabaConfigEnum.PhoneNumberId]}/deregister`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
         );
     }
 }

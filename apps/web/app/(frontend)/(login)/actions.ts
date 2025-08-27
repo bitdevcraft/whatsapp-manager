@@ -1,22 +1,23 @@
 "use server";
 
-import { z } from "zod";
-import { and, eq } from "drizzle-orm";
 import { db } from "@workspace/db/config";
-import {
-  usersTable,
-  teamMembersTable,
-  activityLogsTable,
-  type NewActivityLog,
-  invitationsTable,
-} from "@workspace/db/schema";
 import { ActivityType } from "@workspace/db/enums";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { validatedActionWithUser } from "@/lib/auth/middleware";
+import {
+  activityLogsTable,
+  invitationsTable,
+  type NewActivityLog,
+  teamMembersTable,
+  usersTable,
+} from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
+
+import { validatedActionWithUser } from "@/lib/auth/middleware";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 async function logActivity(
-  teamId: string | null | undefined,
+  teamId: null | string | undefined,
   userId: string,
   type: ActivityType,
   ipAddress?: string
@@ -25,10 +26,10 @@ async function logActivity(
     return;
   }
   const newActivity: NewActivityLog = {
-    teamId,
-    userId,
     action: type,
     ipAddress: ipAddress || "",
+    teamId,
+    userId,
   };
 
   await withTenantTransaction(teamId, async (tx) => {
@@ -119,11 +120,11 @@ export const inviteTeamMember = validatedActionWithUser(
 
     // Create a new invitation
     await db.insert(invitationsTable).values({
-      teamId: userWithTeam?.teamId,
       email,
-      role,
       invitedBy: user.id,
+      role,
       status: "pending",
+      teamId: userWithTeam?.teamId,
     });
 
     await logActivity(

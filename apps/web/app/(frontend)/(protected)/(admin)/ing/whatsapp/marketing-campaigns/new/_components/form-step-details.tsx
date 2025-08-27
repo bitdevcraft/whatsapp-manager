@@ -1,21 +1,17 @@
 "use client";
 
-import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox"; // or Switch, if you prefer
+import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
-import { DateTimePicker } from "@workspace/ui/components/datetimepicker";
-import { Checkbox } from "@workspace/ui/components/checkbox"; // or Switch, if you prefer
-import { ArrowRight } from "lucide-react";
-import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
-import { getSelectPhoneNumber } from "./queries";
 import {
   Select,
   SelectContent,
@@ -23,13 +19,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { ArrowRight } from "lucide-react";
+
+import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+
+import { getSelectPhoneNumber } from "./queries";
 
 interface DetailsStepFormProps {
   phoneNumbers: Awaited<ReturnType<typeof getSelectPhoneNumber>>;
 }
 
 export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
-  const { form, nextStep, isStepValid } =
+  const { form, isStepValid, nextStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
   const { control } = form;
 
@@ -39,10 +41,10 @@ export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
         <div>
           <div className="flex justify-end gap-2">
             <Button
-              type="button"
-              size="icon"
-              variant="outline"
               onClick={nextStep}
+              size="icon"
+              type="button"
+              variant="outline"
             >
               <ArrowRight />
             </Button>
@@ -114,7 +116,7 @@ export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
                 <FormItem>
                   <FormLabel>Schedule Date</FormLabel>
                   <FormControl>
-                    <DateTimePicker name={field.name} control={form.control} />
+                    <DateTimePicker control={form.control} name={field.name} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,7 +143,7 @@ export default function DetailsStep({ phoneNumbers }: DetailsStepFormProps) {
         {/* navigation */}
 
         <div className="flex justify-end gap-2">
-          <Button onClick={nextStep} disabled={!isStepValid()}>
+          <Button disabled={!isStepValid()} onClick={nextStep}>
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

@@ -1,7 +1,8 @@
-import { getUserWithTeam } from "@/lib/db/queries";
 import { conversationMembersTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { and, eq } from "drizzle-orm";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();

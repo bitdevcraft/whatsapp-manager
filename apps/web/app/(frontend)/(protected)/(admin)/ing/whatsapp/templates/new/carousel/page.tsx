@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import TemplateCarouselCreateForm from "../_components/template-create-carousel-form";
 import { ArrowLeft } from "lucide-react";
+
+import TemplateCarouselCreateForm from "../_components/template-create-carousel-form";
 
 export default function NewTemplatePage() {
   return (

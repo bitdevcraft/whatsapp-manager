@@ -1,32 +1,34 @@
 "use client";
 
-import React from "react";
 import {
   QueryFunctionContext,
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import InfiniteScroll from "react-infinite-scroll-component";
-import axios from "axios";
 import { ConversationBody } from "@workspace/db/schema";
+import axios from "axios";
 import { useQueryState } from "nuqs";
-import { useSearchMessageStore } from "../_store/message-store";
+import React from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+
 import { formatMessageTimestamp } from "@/utils/format-message-timestamp";
+
+import { useSearchMessageStore } from "../_store/message-store";
 
 interface PageResponse {
   data: {
-    id: string | null;
-    message: ConversationBody | null;
-    createdAt: Date;
     contact: {
-      name: string | null;
-      phone: string | null;
+      name: null | string;
+      phone: null | string;
     };
+    createdAt: Date;
+    id: null | string;
     isUnread: boolean;
+    message: ConversationBody | null;
     rn: number;
   }[];
-  nextOffset: number | null;
-  previousOffset: number | null;
+  nextOffset: null | number;
+  previousOffset: null | number;
 }
 
 export function ScrollableContacts() {
@@ -44,15 +46,15 @@ export function ScrollableContacts() {
 
   const initialPageParam = 0;
 
-  const { status, data, error, fetchNextPage, hasNextPage } =
+  const { data, error, fetchNextPage, hasNextPage, status } =
     useInfiniteQuery<PageResponse>({
-      queryKey,
-      queryFn,
-      initialPageParam,
+      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
       getPreviousPageParam: (firstPage) => {
         return firstPage.previousOffset ?? undefined;
       },
-      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+      initialPageParam,
+      queryFn,
+      queryKey,
     });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,28 +78,28 @@ export function ScrollableContacts() {
       <div
         id="scrollable_contact"
         style={{
-          height: "70vh",
-          overflow: "auto",
           display: "flex",
           flexDirection: "column",
+          height: "70vh",
+          overflow: "auto",
         }}
       >
         <InfiniteScroll
           dataLength={messages ? messages.length : 0}
+          hasMore={hasNextPage}
+          loader={<h4 className="text-center">Loading...</h4>}
           next={() => fetchNextPage()}
+          scrollableTarget="scrollable_contact"
           style={{
             display: "flex",
             flexDirection: "column",
             gap: "0.5rem",
           }}
-          hasMore={hasNextPage}
-          loader={<h4 className="text-center">Loading...</h4>}
-          scrollableTarget="scrollable_contact"
         >
           {data.pages?.map((page) => (
             <React.Fragment key={page.nextOffset}>
               {page.data.map((el) => (
-                <ContactMessageItem key={el.id} item={el} />
+                <ContactMessageItem item={el} key={el.id} />
               ))}
             </React.Fragment>
           ))}
@@ -112,14 +114,14 @@ function ContactMessageItem({
   ...props
 }: React.ComponentProps<"div"> & {
   item: {
-    id: string | null;
-    message: ConversationBody | null;
-    createdAt: Date;
     contact: {
-      name: string | null;
-      phone: string | null;
+      name: null | string;
+      phone: null | string;
     };
+    createdAt: Date;
+    id: null | string;
     isUnread: boolean;
+    message: ConversationBody | null;
     rn: number;
   };
 }) {

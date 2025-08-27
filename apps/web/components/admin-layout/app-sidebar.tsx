@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
 import {
-  IconBell,
   IconCirclePlusFilled,
   IconDashboard,
   IconMessages,
@@ -13,11 +11,6 @@ import {
   IconUserCircle,
   IconUsers,
 } from "@tabler/icons-react";
-
-import { NavSubMain } from "@/components/admin-layout/nav-submain";
-import { NavMain } from "@/components/admin-layout/nav-main";
-import { NavSecondary } from "@/components/admin-layout/nav-secondary";
-import { NavUser } from "@/components/admin-layout/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -27,62 +20,91 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
-import { TeamSwitcher } from "./team-switcher";
 import { Organization } from "better-auth/plugins/organization";
-import { Button } from "@workspace/ui/components/button";
+import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import Link from "next/link";
-import { Progress } from "@workspace/ui/components/progress";
-import { UsageProgress } from "./usage-progress";
+import * as React from "react";
+
+import { NavMain } from "@/components/admin-layout/nav-main";
+import { NavSubMain } from "@/components/admin-layout/nav-submain";
+import { NavUser } from "@/components/admin-layout/nav-user";
 import { getUsage } from "@/lib/db/usage-queries";
 
+import { TeamSwitcher } from "./team-switcher";
+import { UsageProgress } from "./usage-progress";
+
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
+  ads: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      icon: IconSpeakerphone,
+      name: "Ads Manager",
+      url: "/ing/ads/ads-manager",
+    },
+  ],
+  management: [
+    {
+      access: "business",
+      icon: IconUserCircle,
+      name: "Business Account",
+      url: "/ing/business-account",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
+      icon: IconUsers,
+      name: "Contacts",
+      url: "/ing/contacts",
     },
     {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      icon: IconTag,
+      name: "Tags",
+      url: "/ing/tags",
     },
   ],
   navMain: [
     {
+      icon: IconDashboard,
       title: "Dashboard",
       url: "/ing/dashboard",
-      icon: IconDashboard,
     },
   ],
   navSecondary: [
     {
+      icon: IconSettings,
       title: "Settings",
       url: "/ing/account/general",
-      icon: IconSettings,
     },
   ],
-  whatsapp: [
+  teams: [
     {
-      name: "Marketing Campaigns",
-      url: "/ing/whatsapp/marketing-campaigns",
-      icon: IconSpeakerphone,
+      logo: GalleryVerticalEnd,
+      name: "Acme Inc",
+      plan: "Enterprise",
     },
     {
+      logo: AudioWaveform,
+      name: "Acme Corp.",
+      plan: "Startup",
+    },
+    {
+      logo: Command,
+      name: "Evil Corp.",
+      plan: "Free",
+    },
+  ],
+  user: {
+    avatar: "/avatars/shadcn.jpg",
+    email: "m@example.com",
+    name: "shadcn",
+  },
+  whatsapp: [
+    {
+      icon: IconSpeakerphone,
+      name: "Marketing Campaigns",
+      url: "/ing/whatsapp/marketing-campaigns",
+    },
+    {
+      icon: IconMessages,
       name: "Conversations",
       url: "/ing/whatsapp/conversations",
-      icon: IconMessages,
     },
     // {
     //   name: "Ads Manager",
@@ -90,55 +112,30 @@ const data = {
     //   icon: IconAd,
     // },
     {
+      icon: IconTemplate,
       name: "Templates",
       url: "/ing/whatsapp/templates",
-      icon: IconTemplate,
-    },
-  ],
-  ads: [
-    {
-      name: "Ads Manager",
-      url: "/ing/ads/ads-manager",
-      icon: IconSpeakerphone,
-    },
-  ],
-  management: [
-    {
-      name: "Business Account",
-      url: "/ing/business-account",
-      icon: IconUserCircle,
-      access: "business",
-    },
-    {
-      name: "Contacts",
-      url: "/ing/contacts",
-      icon: IconUsers,
-    },
-    {
-      name: "Tags",
-      url: "/ing/tags",
-      icon: IconTag,
     },
   ],
 };
 
 export function AppSidebar({
+  promises,
   teams,
   user,
-  promises,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
+  promises: Promise<[Awaited<ReturnType<typeof getUsage>>]>;
   teams: Organization[];
   user: {
-    id: string;
-    name: string;
-    emailVerified: boolean;
-    email: string;
     createdAt: Date;
+    email: string;
+    emailVerified: boolean;
+    id: string;
+    image?: null | string | undefined | undefined | undefined;
+    name: string;
     updatedAt: Date;
-    image?: string | null | undefined | undefined | undefined;
   };
-  promises: Promise<[Awaited<ReturnType<typeof getUsage>>]>;
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -148,15 +145,13 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavSubMain
-          title="WhatsApp"
-          items={data.whatsapp}
           actionMenu={
             <SidebarMenu>
               <SidebarMenuItem className="flex items-center gap-2">
                 <SidebarMenuButton
-                  tooltip="Quick Create"
-                  className="border-2"
                   asChild
+                  className="border-2"
+                  tooltip="Quick Create"
                 >
                   <Link href={"/ing/whatsapp/marketing-campaigns/new"}>
                     <IconCirclePlusFilled />
@@ -166,12 +161,14 @@ export function AppSidebar({
               </SidebarMenuItem>
             </SidebarMenu>
           }
+          items={data.whatsapp}
+          title="WhatsApp"
         ></NavSubMain>
         {/* <NavSubMain title="Ads" items={data.ads} /> */}
-        <NavSubMain title="Management" items={data.management} />
+        <NavSubMain items={data.management} title="Management" />
       </SidebarContent>
       <SidebarFooter>
-        <UsageProgress promises={promises}/>
+        <UsageProgress promises={promises} />
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

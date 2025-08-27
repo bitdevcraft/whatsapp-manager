@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@workspace/ui/components/button";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
+import { type ControllerRenderProps, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
-import { useFormContext, type ControllerRenderProps } from "react-hook-form";
+
 import { insertAtCursor } from "../_lib/utils";
 
 export function HeaderEditor({
@@ -19,7 +20,7 @@ export function HeaderEditor({
   syncExamples,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: { headerTextOverride?: string }) => void;
 }) {
   const { control } = useFormContext();
@@ -46,7 +47,7 @@ function HeaderEditorField({
   syncExamples,
 }: {
   field: ControllerRenderProps<any, any>;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: { headerTextOverride?: string }) => void;
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -116,18 +117,18 @@ function HeaderEditorField({
       <FormControl>
         <Input
           {...field}
-          ref={setRefs}
-          placeholder="e.g. Hello {{1}} or Hello {{name}}"
           onChange={onChange}
+          placeholder="e.g. Hello {{1}} or Hello {{name}}"
+          ref={setRefs}
         />
       </FormControl>
       <div className="mt-1 flex justify-end">
         <Button
+          className="border"
+          onClick={onAddVariable}
+          size="sm"
           type="button"
           variant="ghost"
-          size="sm"
-          onClick={onAddVariable}
-          className="border"
         >
           Add Variable
         </Button>

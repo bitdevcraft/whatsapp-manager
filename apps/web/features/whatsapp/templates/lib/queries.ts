@@ -5,7 +5,6 @@ import { filterColumns } from "@workspace/ui/lib/filter-columns";
 import { GetTemplateSchema } from "./validations";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { TemplateResponse } from "@workspace/wa-cloud-api";
 import { Template } from "@workspace/db";
 
 export async function getTemplates(input: GetTemplateSchema) {

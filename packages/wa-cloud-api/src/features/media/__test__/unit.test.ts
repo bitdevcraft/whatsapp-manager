@@ -8,18 +8,18 @@ describe('Media API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
         mockRequestSend.mockResolvedValue({
+            file_size: 102400,
             id: 'media_123',
-            url: 'https://example.com/media.jpg',
+            messaging_product: 'whatsapp',
             mime_type: 'image/jpeg',
             sha256: 'abcd1234',
-            file_size: 102400,
-            messaging_product: 'whatsapp',
+            url: 'https://example.com/media.jpg',
         });
     });
 

@@ -1,14 +1,13 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
 } from "@workspace/ui/components/card";
 import {
   Form,
@@ -23,6 +22,8 @@ import { Loader2, Lock } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 
+import { authClient } from "@/lib/auth/auth-client";
+
 const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters long")
@@ -34,9 +35,9 @@ const passwordSchema = z
 // 2️⃣ Change‑password form schema
 export const changePasswordSchema = z
   .object({
-    oldPassword: z.string().min(1, "Current password is required"),
-    newPassword: passwordSchema,
     confirmPassword: z.string(),
+    newPassword: passwordSchema,
+    oldPassword: z.string().min(1, "Current password is required"),
   })
   .superRefine((data, ctx) => {
     // a) new vs confirm
@@ -65,8 +66,8 @@ const useChangePassword = () => {
   return useMutation({
     mutationFn: async (payload: ChangePasswordForm) => {
       const { data, error } = await authClient.changePassword({
-        newPassword: payload.newPassword,
         currentPassword: payload.oldPassword,
+        newPassword: payload.newPassword,
         revokeOtherSessions: true,
       });
 
@@ -79,12 +80,12 @@ const useChangePassword = () => {
 
 export function ChangePassword() {
   const form = useForm<ChangePasswordForm>({
-    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      oldPassword: "",
-      newPassword: "",
       confirmPassword: "",
+      newPassword: "",
+      oldPassword: "",
     },
+    resolver: zodResolver(changePasswordSchema),
   });
 
   const changePassword = useChangePassword();
@@ -102,7 +103,7 @@ export function ChangePassword() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="oldPassword"
@@ -143,9 +144,9 @@ export function ChangePassword() {
               )}
             />
             <Button
-              type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white"
               disabled={changePassword.isPending}
+              type="submit"
             >
               {changePassword.isPending ? (
                 <>

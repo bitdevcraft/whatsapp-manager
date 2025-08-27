@@ -1,8 +1,6 @@
 "use client";
 
-import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
-
 import { Badge } from "@workspace/ui/components/badge";
 import {
   Card,
@@ -14,12 +12,14 @@ import {
 } from "@workspace/ui/components/card";
 import React from "react";
 
+import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
+
 export interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getDashboardAnalytics>>]>;
 }
 
 export function SectionCards({ promises }: Props) {
-  const [{ totalContacts, totalNewContacts, totalMessagesSent, totalReplies, openRate, replyRate }] =
+  const [{ openRate, replyRate, totalContacts, totalMessagesSent, totalNewContacts, totalReplies }] =
     React.use(promises);
 
   return (

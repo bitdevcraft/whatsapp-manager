@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 
 export default function Home() {
   const { systemTheme } = useTheme();
-  const onComplete = async (data: { url: string; size: number }[]) => {
+  const onComplete = async (data: { size: number; url: string; }[]) => {
   };
 
   return <S3FileUploader onComplete={onComplete} theme={systemTheme} />;

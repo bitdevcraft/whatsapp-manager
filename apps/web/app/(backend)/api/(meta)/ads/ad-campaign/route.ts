@@ -1,10 +1,11 @@
-import { env } from "@/env/server";
-import { getUserWithTeam } from "@/lib/db/queries";
 import {
   AdAccount,
   Campaign,
   FacebookAdsApi,
 } from "facebook-nodejs-business-sdk";
+
+import { env } from "@/env/server";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function POST() {
   try {
@@ -23,13 +24,13 @@ export async function POST() {
     const account = new AdAccount(`act_${ad_account_id}`, api);
 
     account.createCampaign([Campaign.Fields.id], {
-      [Campaign.Fields.name]: "Page likes campaign",
-      [Campaign.Fields.status]: Campaign.Status.paused,
-      [Campaign.Fields.objective]: Campaign.Objective.outcome_leads,
       [Campaign.Fields.bid_strategy]:
         Campaign.BidStrategy.lowest_cost_with_bid_cap,
-      [Campaign.Fields.special_ad_categories]: [],
       [Campaign.Fields.daily_budget]: 500,
+      [Campaign.Fields.name]: "Page likes campaign",
+      [Campaign.Fields.objective]: Campaign.Objective.outcome_leads,
+      [Campaign.Fields.special_ad_categories]: [],
+      [Campaign.Fields.status]: Campaign.Status.paused,
     });
 
     return new Response("", { status: 200 });

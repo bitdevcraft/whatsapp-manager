@@ -1,8 +1,10 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponsePagination, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import { objectToQueryString } from '@shared/utils/objectToQueryString';
+
 import type {
     TemplateClass,
     TemplateDeleteParams,
@@ -16,28 +18,6 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
 
     constructor(config: WabaConfigType, client: RequesterClass) {
         super(config, client);
-    }
-
-    async getTemplate(templateId: string): Promise<TemplateResponse> {
-        return this.sendJson(HttpMethodsEnum.Get, `${templateId}`, this.config[WabaConfigEnum.RequestTimeout], null);
-    }
-
-    async updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess> {
-        return this.sendJson(
-            HttpMethodsEnum.Post,
-            `${templateId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            JSON.stringify(template),
-        );
-    }
-
-    async getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>> {
-        return this.sendJson(
-            HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params ?? {})}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
-        );
     }
 
     async createTemplate(template: TemplateRequestBody): Promise<TemplateResponse> {
@@ -55,6 +35,28 @@ export default class TemplateApi extends BaseAPI implements TemplateClass {
             `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params)}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
+        );
+    }
+
+    async getTemplate(templateId: string): Promise<TemplateResponse> {
+        return this.sendJson(HttpMethodsEnum.Get, templateId, this.config[WabaConfigEnum.RequestTimeout], null);
+    }
+
+    async getTemplates(params?: TemplateGetParams): Promise<ResponsePagination<TemplateResponse>> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}/${this.endpoint}${objectToQueryString(params ?? {})}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    async updateTemplate(templateId: string, template: Partial<TemplateRequestBody>): Promise<ResponseSuccess> {
+        return this.sendJson(
+            HttpMethodsEnum.Post,
+            templateId,
+            this.config[WabaConfigEnum.RequestTimeout],
+            JSON.stringify(template),
         );
     }
 }

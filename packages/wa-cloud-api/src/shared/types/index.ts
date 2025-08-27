@@ -3,7 +3,7 @@ export { BaseAPI, BaseClass } from './base';
 
 export type { WabaConfigType, WhatsAppConfig } from './config';
 
-export type { LoggerInterface } from './logger';
+export * from './enums';
 
 export type {
     HttpsClientClass,
@@ -12,6 +12,8 @@ export type {
     ResponseHeaderValue,
     ResponseJSONBody,
 } from './httpsClient';
+
+export type { LoggerInterface } from './logger';
 
 export type {
     GeneralHeaderInterface,
@@ -23,5 +25,3 @@ export type {
     ResponsePagination,
     ResponseSuccess,
 } from './request';
-
-export * from './enums';

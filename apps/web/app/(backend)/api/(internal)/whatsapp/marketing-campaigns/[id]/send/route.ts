@@ -1,7 +1,8 @@
-import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { IJobMessageOutgoing, WhatsAppEvents } from "@workspace/shared";
 import { NextResponse } from "next/server";
+
+import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function POST(
   request: Request,
@@ -33,14 +34,14 @@ export async function POST(
   );
 
   const jobData: IJobMessageOutgoing = {
-    teamId: userWithTeam.teamId,
     marketingCampaignId: id,
+    teamId: userWithTeam.teamId,
     userId: userWithTeam.user.id,
   };
 
   await waBulkMessagesOutgoingQueue.add(jobId, jobData, {
-    jobId,
     delay,
+    jobId,
   });
 
   return new Response("", { status: 200 });

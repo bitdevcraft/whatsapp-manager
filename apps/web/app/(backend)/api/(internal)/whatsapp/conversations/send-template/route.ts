@@ -1,29 +1,28 @@
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { templateSendSchema } from "@/types/validations/templates/template-send-schema";
 import {
-  baseConversation,
   conversationsTable,
   MessageStatus,
   templatesTable,
   withTenantTransaction,
 } from "@workspace/db";
+import { UsageLimitRepository } from "@workspace/db/repositories";
 import {
-  ConversationBody,
   NewConversation,
   whatsAppBusinessAccountsTable,
 } from "@workspace/db/schema";
 import WhatsApp, {
   ComponentTypesEnum,
   MessageTemplateObject,
-  ParametersTypesEnum,
   WhatsAppConfig,
 } from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
-import { generateConversationComponentBody, interpolate } from "../../actions";
-import { UsageLimitRepository } from "@workspace/db/repositories";
+
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
+import { templateSendSchema } from "@/types/validations/templates/template-send-schema";
+
+import { generateConversationComponentBody } from "../../actions";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +40,7 @@ export async function POST(request: NextRequest) {
       teamId,
       async (tx) => {
         const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
+          where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
           with: {
             team: {
               with: {
@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-          where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
         });
 
         const template = await tx.query.templatesTable.findFirst({
@@ -69,8 +68,8 @@ export async function POST(request: NextRequest) {
     const { data, iv } = account.accessToken;
 
     const decryptAccessToken = await decryptApiKey({
-      iv,
       data,
+      iv,
     });
 
     const config: WhatsAppConfig = {
@@ -97,21 +96,21 @@ export async function POST(request: NextRequest) {
 
     await withTenantTransaction(teamId, async (tx) => {
       const conv: NewConversation = {
-        userId: user.id,
-        teamId,
+        body: conversationBody,
         contactId: input.contactId,
         content: {
           body: input.template
             .messageTemplate! as MessageTemplateObject<ComponentTypesEnum>,
           to: input.phone.replace(/\D/g, ""),
         },
-        from: null,
-        wamid: response?.messages[0]?.id,
-        status: isSuccess ? MessageStatus.DELIVERED : null,
-        isMarketingCampaign: true,
-        success: isSuccess,
-        body: conversationBody,
         direction: "outbound",
+        from: null,
+        isMarketingCampaign: true,
+        status: isSuccess ? MessageStatus.DELIVERED : null,
+        success: isSuccess,
+        teamId,
+        userId: user.id,
+        wamid: response?.messages[0]?.id,
       };
       await tx.insert(conversationsTable).values(conv);
     });

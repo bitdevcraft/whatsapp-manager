@@ -1,38 +1,38 @@
 "use client";
 
-import FacebookLogin from "@/components/facebook-login";
-import Script from "next/script";
-import axios from "axios";
-import React from "react";
-
 import {
   banner,
   clearPersistedBanner,
   getPersistedBanner,
 } from "@workspace/ui/components/banner";
+import axios from "axios";
+import Script from "next/script";
+import React from "react";
+
+import FacebookLogin from "@/components/facebook-login";
 
 const waBannerId = "wa:missing:auth";
 
 export default function AuthenticateWaba() {
   React.useEffect(() => {
     const fetchData = async () => {
-      const response = await axios.get<{
-        id: string | null;
+      const response = await axios.get<null | {
+        id: null | string;
         teamId: string;
-      } | null>("/api/whatsapp/business-account");
+      }>("/api/whatsapp/business-account");
 
       const isBannerPersisted = getPersistedBanner(waBannerId);
       if (isBannerPersisted) {
         banner.warning(<AuthenticateNotice />, {
-          dismissible: true,
           autoClose: false,
+          dismissible: true,
           persistId: waBannerId,
         });
       }
       if (!response.data?.id && !isBannerPersisted) {
         banner.warning(<AuthenticateNotice />, {
-          dismissible: true,
           autoClose: false,
+          dismissible: true,
           persistId: waBannerId,
         });
       }
@@ -52,10 +52,10 @@ function AuthenticateNotice() {
   return (
     <>
       <Script
-        src="https://connect.facebook.net/en_US/sdk.js"
         async
-        defer
         crossOrigin="anonymous"
+        defer
+        src="https://connect.facebook.net/en_US/sdk.js"
       />
       <div className="flex flex-col md:flex-row justify-between p-4 items-center gap-4">
         <div>

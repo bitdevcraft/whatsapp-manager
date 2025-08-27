@@ -1,7 +1,6 @@
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { contactsTable } from "@workspace/db";
 import { MessageStatus } from "@workspace/db/enums";
+import { UsageLimitRepository } from "@workspace/db/repositories";
 import {
   conversationsTable,
   marketingCampaignsTable,
@@ -19,9 +18,11 @@ import WhatsApp, {
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import z from "zod";
+
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
+
 import { generateConversationComponentBody } from "../../../actions";
-import { UsageLimitRepository } from "@workspace/db/repositories";
-import { nanoid } from "nanoid";
 
 export async function POST(
   request: Request,
@@ -67,10 +68,11 @@ export async function POST(
 
     const { messageTemplate, templateId } = marketingCampaign;
 
-    const { account, template, contact } = await withTenantTransaction(
+    const { account, contact, template } = await withTenantTransaction(
       teamId,
       async (tx) => {
         const account = await tx.query.whatsAppBusinessAccountsTable.findFirst({
+          where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
           with: {
             team: {
               with: {
@@ -78,7 +80,6 @@ export async function POST(
               },
             },
           },
-          where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
         });
 
         const template = await tx.query.templatesTable.findFirst({
@@ -95,17 +96,17 @@ export async function POST(
         if (!contact) {
           const tempContact: NewContact = {
             email: "",
-            name: "",
-            teamId,
             message: "",
+            name: "",
             phone: body.phone.replace(/\D/g, ""),
+            teamId,
           };
           contact = (
             await tx.insert(contactsTable).values(tempContact).returning()
           )[0];
         }
 
-        return { account, template, contact };
+        return { account, contact, template };
       }
     );
 
@@ -119,8 +120,8 @@ export async function POST(
     const { data, iv } = account.accessToken;
 
     const decryptAccessToken = await decryptApiKey({
-      iv,
       data,
+      iv,
     });
 
     const config: WhatsAppConfig = {
@@ -147,20 +148,20 @@ export async function POST(
 
     await withTenantTransaction(teamId, async (tx) => {
       const conv: NewConversation = {
-        userId: user.id,
-        teamId,
+        body: conversationBody,
         contactId: contact?.id,
         content: {
           body: messageTemplate as MessageTemplateObject<ComponentTypesEnum>,
           to: body.phone.replace(/\D/g, ""),
         },
-        from: null,
-        wamid: response?.messages[0]?.id,
-        status: isSuccess ? MessageStatus.DELIVERED : null,
-        isMarketingCampaign: true,
-        success: isSuccess,
-        body: conversationBody,
         direction: "outbound",
+        from: null,
+        isMarketingCampaign: true,
+        status: isSuccess ? MessageStatus.DELIVERED : null,
+        success: isSuccess,
+        teamId,
+        userId: user.id,
+        wamid: response?.messages[0]?.id,
       };
       await tx.insert(conversationsTable).values(conv);
     });

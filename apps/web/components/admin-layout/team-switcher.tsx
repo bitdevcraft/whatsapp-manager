@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { Building, ChevronsUpDown, Plus } from "lucide-react";
-
+import { Badge } from "@workspace/ui/components/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,16 +17,18 @@ import {
   useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Organization } from "better-auth/plugins/organization";
-import { useOrganization } from "../provider/organization-provider";
-import { Badge } from "@workspace/ui/components/badge";
+import { Building, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import * as React from "react";
+
+import { useOrganization } from "../provider/organization-provider";
 
 export function TeamSwitcher({ teams }: { teams: Organization[] }) {
   const { isMobile } = useSidebar();
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
 
   const router = useRouter();
-  const { organizations, activeOrganization, setActiveOrganization } =
+  const { activeOrganization, organizations, setActiveOrganization } =
     useOrganization();
 
   if (!activeTeam) {
@@ -47,8 +47,8 @@ export function TeamSwitcher({ teams }: { teams: Organization[] }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              size="lg"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                 <Building className="size-4" />
@@ -63,8 +63,8 @@ export function TeamSwitcher({ teams }: { teams: Organization[] }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             align="start"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
@@ -73,9 +73,9 @@ export function TeamSwitcher({ teams }: { teams: Organization[] }) {
             </DropdownMenuLabel>
             {organizations.map((team, index) => (
               <DropdownMenuItem
+                className="gap-2 p-2"
                 key={team.name}
                 onClick={() => onChange(team)}
-                className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <Building className="size-3.5 shrink-0" />

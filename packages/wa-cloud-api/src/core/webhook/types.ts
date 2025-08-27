@@ -1,49 +1,43 @@
 import type { MessageTypesEnum } from '@shared/types/enums';
 
-export interface WebhookContact {
-    /**
-     * WhatsApp ID of the contact. Business can respond to this contact using this ID.
-     */
-    wa_id: string;
-    /**
-     *  Additional unique, alphanumeric identifier for a WhatsApp user
-     */
-    user_id?: string;
-    /**
-     * Profile of Whatsapp user
-     */
-    profile: {
+/**
+ * Message status enum
+ */
+export enum MessageStatus {
+    DELIVERED = 'delivered',
+    READ = 'read',
+    SENT = 'sent',
+}
+
+/**
+ * Audio message interface
+ */
+export interface AudioMessage extends BaseMessage {
+    audio: {
         /**
-         * The display name of the contact
+         * The ID for the audio file
          */
-        name: string;
+        id: string;
+        /**
+         * The MIME type of the audio file
+         */
+        mime_type: string;
+        /**
+         * Whether the audio is a voice message
+         */
+        voice?: boolean;
     };
+    type: MessageTypesEnum.Audio;
 }
 
 /**
  * Base message interface with common properties
  */
 export interface BaseMessage {
-    id: string;
-    from: string;
-    timestamp: string;
-    type: MessageTypesEnum;
     /**
      * Context object, included when a user replies or interacts
      */
     context?: {
-        /**
-         * ID of the message
-         */
-        id?: string;
-        /**
-         * ID of the sender
-         */
-        from?: string;
-        /**
-         * ID of the message being replied to or interacted with
-         */
-        message_id: string;
         /**
          * ID of the forwarded message, if applicable
          */
@@ -52,6 +46,18 @@ export interface BaseMessage {
          * Frequently forwarded status
          */
         frequently_forwarded?: boolean;
+        /**
+         * ID of the sender
+         */
+        from?: string;
+        /**
+         * ID of the message
+         */
+        id?: string;
+        /**
+         * ID of the message being replied to or interacted with
+         */
+        message_id: string;
         /**
          * Original message information if the message was referred
          */
@@ -69,19 +75,11 @@ export interface BaseMessage {
     /**
      * Errors array, if the message had errors
      */
-    errors?: Array<{
+    errors?: {
         /**
          * Error code
          */
         code: number;
-        /**
-         * Error title
-         */
-        title: string;
-        /**
-         * Error message
-         */
-        message: string;
         /**
          * Error details object
          */
@@ -91,99 +89,126 @@ export interface BaseMessage {
              */
             details: string;
         };
-    }>;
+        /**
+         * Error message
+         */
+        message: string;
+        /**
+         * Error title
+         */
+        title: string;
+    }[];
+    from: string;
+    id: string;
+    timestamp: string;
+    type: MessageTypesEnum;
 }
 
 /**
- * Text message interface
+ * Button message interface
  */
-export interface TextMessage extends BaseMessage {
-    type: MessageTypesEnum.Text;
-    text: {
+export interface ButtonMessage extends BaseMessage {
+    button: {
         /**
-         * The text content of the message
+         * The payload for the button
          */
-        body: string;
-        preview_url?: boolean;
+        payload: string;
+        /**
+         * Button text
+         */
+        text: string;
     };
+    type: MessageTypesEnum.Button;
 }
 
 /**
- * Image message interface
+ * Contacts message interface
  */
-export interface ImageMessage extends BaseMessage {
-    type: MessageTypesEnum.Image;
-    image: {
+export interface ContactsMessage extends BaseMessage {
+    contacts: {
         /**
-         * The image caption (if provided)
+         * The contact's addresses
          */
-        caption?: string;
+        addresses?: {
+            city?: string;
+            country?: string;
+            country_code?: string;
+            state?: string;
+            street?: string;
+            type?: string;
+            zip?: string;
+        }[];
         /**
-         * The SHA256 hash of the image
+         * The contact's birthday (YYYY-MM-DD format)
          */
-        sha256?: string;
+        birthday?: string;
         /**
-         * The ID for the image
+         * The contact's emails
          */
-        id: string;
+        emails?: {
+            email: string;
+            type?: string;
+        }[];
         /**
-         * The MIME type of the image
+         * The contact's name
          */
-        mime_type: string;
-    };
-}
-
-/**
- * Video message interface
- */
-export interface VideoMessage extends BaseMessage {
-    type: MessageTypesEnum.Video;
-    video: {
+        name: {
+            /**
+             * The first name
+             */
+            first_name?: string;
+            /**
+             * The formatted name
+             */
+            formatted_name: string;
+            /**
+             * The last name
+             */
+            last_name?: string;
+            /**
+             * The middle name
+             */
+            middle_name?: string;
+            /**
+             * The prefix
+             */
+            prefix?: string;
+            /**
+             * The suffix
+             */
+            suffix?: string;
+        };
         /**
-         * The video caption (if provided)
+         * The contact's organizations
          */
-        caption?: string;
+        org?: {
+            company?: string;
+            department?: string;
+            title?: string;
+        };
         /**
-         * The SHA256 hash of the video
+         * The contact's phone numbers
          */
-        sha256?: string;
+        phones?: {
+            phone: string;
+            type?: string;
+            wa_id?: string;
+        }[];
         /**
-         * The ID for the video
+         * The contact's URLs
          */
-        id: string;
-        /**
-         * The MIME type of the video
-         */
-        mime_type: string;
-    };
-}
-
-/**
- * Audio message interface
- */
-export interface AudioMessage extends BaseMessage {
-    type: MessageTypesEnum.Audio;
-    audio: {
-        /**
-         * The ID for the audio file
-         */
-        id: string;
-        /**
-         * The MIME type of the audio file
-         */
-        mime_type: string;
-        /**
-         * Whether the audio is a voice message
-         */
-        voice?: boolean;
-    };
+        urls?: {
+            type?: string;
+            url: string;
+        }[];
+    }[];
+    type: MessageTypesEnum.Contacts;
 }
 
 /**
  * Document message interface
  */
 export interface DocumentMessage extends BaseMessage {
-    type: MessageTypesEnum.Document;
     document: {
         /**
          * The document caption (if provided)
@@ -194,10 +219,6 @@ export interface DocumentMessage extends BaseMessage {
          */
         filename: string;
         /**
-         * The SHA256 hash of the document
-         */
-        sha256?: string;
-        /**
          * The ID for the document
          */
         id: string;
@@ -205,137 +226,94 @@ export interface DocumentMessage extends BaseMessage {
          * The MIME type of the document
          */
         mime_type: string;
+        /**
+         * The SHA256 hash of the document
+         */
+        sha256?: string;
     };
+    type: MessageTypesEnum.Document;
 }
 
 /**
- * Sticker message interface
+ * Image message interface
  */
-export interface StickerMessage extends BaseMessage {
-    type: MessageTypesEnum.Sticker;
-    sticker: {
+export interface ImageMessage extends BaseMessage {
+    image: {
         /**
-         * The ID for the sticker
+         * The image caption (if provided)
+         */
+        caption?: string;
+        /**
+         * The ID for the image
          */
         id: string;
         /**
-         * Whether this is an animated sticker
-         */
-        animated: boolean;
-        /**
-         * The MIME type of the sticker
+         * The MIME type of the image
          */
         mime_type: string;
+        /**
+         * The SHA256 hash of the image
+         */
+        sha256?: string;
     };
+    type: MessageTypesEnum.Image;
 }
 
 /**
- * Reaction message interface
+ * Interactive message interface
  */
-export interface ReactionMessage extends BaseMessage {
-    type: MessageTypesEnum.Reaction;
-    reaction: {
+export interface InteractiveMessage extends BaseMessage {
+    interactive: {
         /**
-         * The ID of the message being reacted to
+         * ID for the button that was clicked
          */
-        message_id: string;
+        button_reply?: {
+            id: string;
+            title: string;
+        };
         /**
-         * Emoji used for the reaction
+         * ID for the list item that was selected
          */
-        emoji: string;
+        list_reply?: {
+            description?: string;
+            id: string;
+            title: string;
+        };
+        /**
+         * NFM (No-Code Flow Message) reply data
+         */
+        nfm_reply?: {
+            /**
+             * Body text of the reply
+             */
+            body: string;
+            /**
+             * Name of the flow
+             */
+            name: string;
+            /**
+             * Response data in JSON format
+             */
+            response_json: string;
+        };
+        /**
+         * Type of the interactive message
+         * Can be: button_reply, list_reply, flow, nfm_reply, etc.
+         */
+        type: string;
     };
-}
-
-/**
- * Contacts message interface
- */
-export interface ContactsMessage extends BaseMessage {
-    type: MessageTypesEnum.Contacts;
-    contacts: Array<{
-        /**
-         * The contact's name
-         */
-        name: {
-            /**
-             * The formatted name
-             */
-            formatted_name: string;
-            /**
-             * The first name
-             */
-            first_name?: string;
-            /**
-             * The last name
-             */
-            last_name?: string;
-            /**
-             * The middle name
-             */
-            middle_name?: string;
-            /**
-             * The suffix
-             */
-            suffix?: string;
-            /**
-             * The prefix
-             */
-            prefix?: string;
-        };
-        /**
-         * The contact's phone numbers
-         */
-        phones?: Array<{
-            phone: string;
-            type?: string;
-            wa_id?: string;
-        }>;
-        /**
-         * The contact's emails
-         */
-        emails?: Array<{
-            email: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's addresses
-         */
-        addresses?: Array<{
-            street?: string;
-            city?: string;
-            state?: string;
-            zip?: string;
-            country?: string;
-            country_code?: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's organizations
-         */
-        org?: {
-            company?: string;
-            department?: string;
-            title?: string;
-        };
-        /**
-         * The contact's URLs
-         */
-        urls?: Array<{
-            url: string;
-            type?: string;
-        }>;
-        /**
-         * The contact's birthday (YYYY-MM-DD format)
-         */
-        birthday?: string;
-    }>;
+    type: MessageTypesEnum.Interactive;
 }
 
 /**
  * Location message interface
  */
 export interface LocationMessage extends BaseMessage {
-    type: MessageTypesEnum.Location;
     location: {
+        /**
+         * Address of the location
+         */
+        address?: string;
         /**
          * Latitude of the location
          */
@@ -348,73 +326,96 @@ export interface LocationMessage extends BaseMessage {
          * Name of the location
          */
         name?: string;
-        /**
-         * Address of the location
-         */
-        address?: string;
     };
+    type: MessageTypesEnum.Location;
 }
 
 /**
- * Interactive message interface
+ * Message handler function type
  */
-export interface InteractiveMessage extends BaseMessage {
-    type: MessageTypesEnum.Interactive;
-    interactive: {
+export type MessageHandler = (message: WebhookMessage) => Promise<void> | void;
+
+/**
+ * Order message interface
+ */
+export interface OrderMessage extends BaseMessage {
+    order: {
         /**
-         * Type of the interactive message
-         * Can be: button_reply, list_reply, flow, nfm_reply, etc.
+         * Catalog ID
          */
-        type: string;
+        catalog_id: string;
         /**
-         * ID for the button that was clicked
+         * Product items in the order
          */
-        button_reply?: {
-            id: string;
-            title: string;
-        };
-        /**
-         * ID for the list item that was selected
-         */
-        list_reply?: {
-            id: string;
-            title: string;
-            description?: string;
-        };
-        /**
-         * NFM (No-Code Flow Message) reply data
-         */
-        nfm_reply?: {
+        product_items: {
             /**
-             * Response data in JSON format
+             * Currency code
              */
-            response_json: string;
+            currency: string;
             /**
-             * Body text of the reply
+             * Item price
              */
-            body: string;
+            item_price: number;
             /**
-             * Name of the flow
+             * Product ID
              */
-            name: string;
-        };
+            product_retailer_id: string;
+            /**
+             * Quantity of the product
+             */
+            quantity: number;
+        }[];
+        /**
+         * Text message included with the order
+         */
+        text?: string;
     };
+    type: MessageTypesEnum.Order;
+}
+
+/**
+ * Reaction message interface
+ */
+export interface ReactionMessage extends BaseMessage {
+    reaction: {
+        /**
+         * Emoji used for the reaction
+         */
+        emoji: string;
+        /**
+         * The ID of the message being reacted to
+         */
+        message_id: string;
+    };
+    type: MessageTypesEnum.Reaction;
+}
+
+/**
+ * Sticker message interface
+ */
+export interface StickerMessage extends BaseMessage {
+    sticker: {
+        /**
+         * Whether this is an animated sticker
+         */
+        animated: boolean;
+        /**
+         * The ID for the sticker
+         */
+        id: string;
+        /**
+         * The MIME type of the sticker
+         */
+        mime_type: string;
+    };
+    type: MessageTypesEnum.Sticker;
 }
 
 /**
  * System message interface
  */
 export interface SystemMessage extends BaseMessage {
-    type: MessageTypesEnum.System;
     system: {
-        /**
-         * The type of system update
-         */
-        type: string;
-        /**
-         * User's identity if the update is a customer identity change
-         */
-        identity?: string;
         /**
          * Old and new phone numbers if the update is a phone number change
          */
@@ -428,152 +429,95 @@ export interface SystemMessage extends BaseMessage {
              */
             wa_id: string;
         };
+        /**
+         * User's identity if the update is a customer identity change
+         */
+        identity?: string;
+        /**
+         * The type of system update
+         */
+        type: string;
     };
+    type: MessageTypesEnum.System;
 }
 
 /**
- * Order message interface
+ * Text message interface
  */
-export interface OrderMessage extends BaseMessage {
-    type: MessageTypesEnum.Order;
-    order: {
+export interface TextMessage extends BaseMessage {
+    text: {
         /**
-         * Catalog ID
+         * The text content of the message
          */
-        catalog_id: string;
-        /**
-         * Product items in the order
-         */
-        product_items: Array<{
-            /**
-             * Product ID
-             */
-            product_retailer_id: string;
-            /**
-             * Quantity of the product
-             */
-            quantity: number;
-            /**
-             * Item price
-             */
-            item_price: number;
-            /**
-             * Currency code
-             */
-            currency: string;
-        }>;
-        /**
-         * Text message included with the order
-         */
-        text?: string;
+        body: string;
+        preview_url?: boolean;
     };
+    type: MessageTypesEnum.Text;
 }
 
 /**
- * Button message interface
+ * Video message interface
  */
-export interface ButtonMessage extends BaseMessage {
-    type: MessageTypesEnum.Button;
-    button: {
+export interface VideoMessage extends BaseMessage {
+    type: MessageTypesEnum.Video;
+    video: {
         /**
-         * The payload for the button
+         * The video caption (if provided)
          */
-        payload: string;
+        caption?: string;
         /**
-         * Button text
-         */
-        text: string;
-    };
-}
-
-/**
- * Union type for all message types
- */
-export type WhatsAppMessage =
-    | TextMessage
-    | ImageMessage
-    | VideoMessage
-    | AudioMessage
-    | DocumentMessage
-    | StickerMessage
-    | ReactionMessage
-    | ContactsMessage
-    | LocationMessage
-    | InteractiveMessage
-    | SystemMessage
-    | OrderMessage
-    | ButtonMessage;
-
-export interface WebhookMessageValue {
-    /**
-     * The messaging product
-     */
-    messaging_product: string;
-    /**
-     * The metadata
-     */
-    metadata: {
-        /**
-         * The display phone number of the whatsapp business account
-         */
-        display_phone_number: string;
-        /**
-         * The phone number ID of the whatsapp business account
-         */
-        phone_number_id: string;
-    };
-    contacts?: Array<{
-        profile: {
-            /**
-             * The display name of the whatsapp user
-             */
-            name: string;
-        };
-        /**
-         * The whatsapp ID of the user
-         */
-        wa_id: string;
-    }>;
-    messages: Array<WhatsAppMessage>;
-
-    statuses?: Array<{
-        /**
-         * The ID of the message
+         * The ID for the video
          */
         id: string;
         /**
-         * The status of the message
+         * The MIME type of the video
          */
-        status: MessageStatus;
+        mime_type: string;
         /**
-         * The timestamp of the message
+         * The SHA256 hash of the video
          */
-        timestamp: string;
-        /**
-         * The recipient ID ( phone number of the user )
-         */
-        recipient_id: string;
-    }>;
+        sha256?: string;
+    };
+}
 
-    errors?: Array<{
+export interface WebhookContact {
+    /**
+     * Profile of Whatsapp user
+     */
+    profile: {
         /**
-         * The error code
+         * The display name of the contact
          */
-        code: number;
-        /**
-         * The error title
-         */
-        title: string;
-        /**
-         * The error data
-         */
-        error_data?: {
-            /**
-             * The error details
-             */
-            details: string;
-        };
-    }>;
+        name: string;
+    };
+    /**
+     *  Additional unique, alphanumeric identifier for a WhatsApp user
+     */
+    user_id?: string;
+    /**
+     * WhatsApp ID of the contact. Business can respond to this contact using this ID.
+     */
+    wa_id: string;
+}
+
+/**
+ * Webhook event received from WhatsApp
+ */
+export interface WebhookEvent {
+    /**
+     * The field type of the event
+     */
+    field: string;
+
+    /**
+     * The timestamp when the event was received
+     */
+    timestamp: number;
+
+    /**
+     * The event data
+     */
+    value: any;
 }
 
 /**
@@ -581,15 +525,18 @@ export interface WebhookMessageValue {
  * Based on Meta's documentation: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object
  */
 export interface WebhookMessage {
-    /**
-     * The WhatsApp Business Account ID
-     */
-    wabaId: string;
+    audio?: AudioMessage['audio'];
+
+    button?: ButtonMessage['button'];
+
+    contacts?: ContactsMessage['contacts'];
 
     /**
-     * The message ID
+     * The display phone number that received the message
      */
-    id: string;
+    displayPhoneNumber: string;
+
+    document?: DocumentMessage['document'];
 
     /**
      * The sender's phone number
@@ -597,44 +544,28 @@ export interface WebhookMessage {
     from: string;
 
     /**
-     * The timestamp of the message
+     * The message ID
      */
-    timestamp: string;
+    id: string;
 
+    image?: ImageMessage['image'];
+
+    interactive?: InteractiveMessage['interactive'];
+    location?: LocationMessage['location'];
+    order?: OrderMessage['order'];
     /**
-     * The type of message (text, image, etc.)
+     * The original message data as received from the webhook
      */
-    type: MessageTypesEnum;
-
+    originalData: any;
     /**
      * The phone number ID that received the message
      */
     phoneNumberId: string;
-
-    /**
-     * The display phone number that received the message
-     */
-    displayPhoneNumber: string;
-
     /**
      * The profile name of the sender
      */
     profileName: string;
-
-    text?: TextMessage['text'];
-    image?: ImageMessage['image'];
-    video?: VideoMessage['video'];
-    audio?: AudioMessage['audio'];
-    document?: DocumentMessage['document'];
-    sticker?: StickerMessage['sticker'];
-    location?: LocationMessage['location'];
-    contacts?: ContactsMessage['contacts'];
-    interactive?: InteractiveMessage['interactive'];
-    button?: ButtonMessage['button'];
-    order?: OrderMessage['order'];
-    system?: SystemMessage['system'];
     reaction?: ReactionMessage['reaction'];
-
     statuses?: {
         /**
          * Arbitrary string included in sent message
@@ -645,6 +576,10 @@ export interface WebhookMessage {
          * Information about the conversation
          */
         conversation?: {
+            /**
+             * Date when the conversation expires. Only present for messages with status 'sent'
+             */
+            expiration_timestamp?: string;
             /**
              * Represents the ID of the conversation the given status notification belongs to
              */
@@ -661,30 +596,18 @@ export interface WebhookMessage {
                  * - service: Conversation opened by business replying to customer within service window
                  * - referral_conversion: Free entry point conversation
                  */
-                type: 'authentication' | 'marketing' | 'utility' | 'service' | 'referral_conversion';
+                type: 'authentication' | 'marketing' | 'referral_conversion' | 'service' | 'utility';
             };
-            /**
-             * Date when the conversation expires. Only present for messages with status 'sent'
-             */
-            expiration_timestamp?: string;
         };
 
         /**
          * Array of error objects describing the error
          */
-        errors?: Array<{
+        errors?: {
             /**
              * Error code
              */
             code: number;
-            /**
-             * Error code title
-             */
-            title: string;
-            /**
-             * Error code message
-             */
-            message: string;
             /**
              * Error details object
              */
@@ -694,7 +617,15 @@ export interface WebhookMessage {
                  */
                 details: string;
             };
-        }>;
+            /**
+             * Error code message
+             */
+            message: string;
+            /**
+             * Error code title
+             */
+            title: string;
+        }[];
 
         /**
          * The ID for the message that the business sent to a customer
@@ -723,9 +654,9 @@ export interface WebhookMessage {
                 | 'authentication'
                 | 'authentication_international'
                 | 'marketing'
-                | 'utility'
+                | 'referral_conversion'
                 | 'service'
-                | 'referral_conversion';
+                | 'utility';
             /**
              * Type of pricing model used by the business. Current supported value is CBP
              */
@@ -751,42 +682,111 @@ export interface WebhookMessage {
          */
         timestamp: string;
     };
+    sticker?: StickerMessage['sticker'];
+    system?: SystemMessage['system'];
+    text?: TextMessage['text'];
     /**
-     * The original message data as received from the webhook
+     * The timestamp of the message
      */
-    originalData: any;
+    timestamp: string;
+    /**
+     * The type of message (text, image, etc.)
+     */
+    type: MessageTypesEnum;
+
+    video?: VideoMessage['video'];
+    /**
+     * The WhatsApp Business Account ID
+     */
+    wabaId: string;
+}
+
+export interface WebhookMessageValue {
+    contacts?: {
+        profile: {
+            /**
+             * The display name of the whatsapp user
+             */
+            name: string;
+        };
+        /**
+         * The whatsapp ID of the user
+         */
+        wa_id: string;
+    }[];
+    errors?: {
+        /**
+         * The error code
+         */
+        code: number;
+        /**
+         * The error data
+         */
+        error_data?: {
+            /**
+             * The error details
+             */
+            details: string;
+        };
+        /**
+         * The error title
+         */
+        title: string;
+    }[];
+    messages: WhatsAppMessage[];
+    /**
+     * The messaging product
+     */
+    messaging_product: string;
+
+    /**
+     * The metadata
+     */
+    metadata: {
+        /**
+         * The display phone number of the whatsapp business account
+         */
+        display_phone_number: string;
+        /**
+         * The phone number ID of the whatsapp business account
+         */
+        phone_number_id: string;
+    };
+
+    statuses?: {
+        /**
+         * The ID of the message
+         */
+        id: string;
+        /**
+         * The recipient ID ( phone number of the user )
+         */
+        recipient_id: string;
+        /**
+         * The status of the message
+         */
+        status: MessageStatus;
+        /**
+         * The timestamp of the message
+         */
+        timestamp: string;
+    }[];
 }
 
 /**
- * Webhook event received from WhatsApp
+ * Union type for all message types
  */
-export interface WebhookEvent {
-    /**
-     * The field type of the event
-     */
-    field: string;
-
-    /**
-     * The event data
-     */
-    value: any;
-
-    /**
-     * The timestamp when the event was received
-     */
-    timestamp: number;
-}
-
-/**
- * Message handler function type
- */
-export type MessageHandler = (message: WebhookMessage) => void | Promise<void>;
-
-/**
- * Message status enum
- */
-export enum MessageStatus {
-    DELIVERED = 'delivered',
-    READ = 'read',
-    SENT = 'sent',
-}
+export type WhatsAppMessage =
+    | AudioMessage
+    | ButtonMessage
+    | ContactsMessage
+    | DocumentMessage
+    | ImageMessage
+    | InteractiveMessage
+    | LocationMessage
+    | OrderMessage
+    | ReactionMessage
+    | StickerMessage
+    | SystemMessage
+    | TextMessage
+    | VideoMessage;

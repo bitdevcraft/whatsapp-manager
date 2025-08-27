@@ -13,7 +13,6 @@ export { default as FlowApi } from './flow';
 export type {
     CreateFlowResponse,
     Flow,
-    FlowType,
     FlowActionEnum,
     FlowAssetsResponse,
     FlowCategoryEnum,
@@ -24,6 +23,7 @@ export type {
     FlowPreviewResponse,
     FlowsListResponse,
     FlowStatusEnum,
+    FlowType,
     FlowTypeEnum,
     FlowValidationError,
     UpdateFlowResponse,

@@ -1,7 +1,5 @@
 import { HttpMethodsEnum } from './enums';
 
-export type GeneralRequestBody = Record<string, unknown>;
-
 export interface GeneralHeaderInterface {
     /**
      * Authorization token. This is required for all HTTP requests made to the graph API.
@@ -23,12 +21,19 @@ export interface GeneralHeaderInterface {
     'User-Agent': string;
 }
 
-export interface RequesterResponseInterface<T> {
-    json: () => Promise<T>;
+export type GeneralRequestBody = Record<string, unknown>;
+
+export interface Paging {
+    cursors: {
+        after: string;
+        before: string;
+    };
+    next?: string;
+    previous?: string;
 }
 
-export interface ResponseSuccess {
-    success: boolean;
+export interface RequesterResponseInterface<T> {
+    json: () => Promise<T>;
 }
 
 export interface ResponseData<T> {
@@ -40,24 +45,11 @@ export interface ResponsePagination<T> {
     paging: Paging;
 }
 
-export interface Paging {
-    cursors: {
-        before: string;
-        after: string;
-    };
-    next?: string;
-    previous?: string;
+export interface ResponseSuccess {
+    success: boolean;
 }
 
 export declare class RequesterClass {
-    constructor(
-        apiVersion: string,
-        phoneNumberId: number,
-        accessToken: string,
-        businessAcctId: string,
-        userAgent: string,
-    );
-
     sendRequest: (
         method: HttpMethodsEnum,
         path: string,
@@ -66,6 +58,14 @@ export declare class RequesterClass {
         contentType?: string,
         additionalHeaders?: Record<string, string>,
     ) => Promise<RequesterResponseInterface<unknown>>;
+
+    constructor(
+        apiVersion: string,
+        phoneNumberId: number,
+        accessToken: string,
+        businessAcctId: string,
+        userAgent: string,
+    );
 
     getJson<T>(
         method: HttpMethodsEnum,

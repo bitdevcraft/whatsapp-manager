@@ -1,7 +1,9 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
+
 import type { EncryptionClass, EncryptionPublicKeyResponse } from './types';
 
 export default class EncryptionApi extends BaseAPI implements EncryptionClass {

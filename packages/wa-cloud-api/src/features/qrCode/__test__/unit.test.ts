@@ -8,15 +8,15 @@ describe('QrCode API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
         mockRequestSend.mockResolvedValue({
             code: 'qr_123',
-            prefilled_message: 'Hello from QR Code!',
             deep_link_url: 'https://wa.me/qr/ABC123',
+            prefilled_message: 'Hello from QR Code!',
             qr_image_url: 'https://scontent.whatsapp.net/qr_image.png',
         });
     });
@@ -24,8 +24,8 @@ describe('QrCode API - Unit Tests', () => {
     describe('QrCode Operations', () => {
         it('should create QR code with correct endpoint and body', async () => {
             const createRequest = {
-                prefilled_message: 'Welcome to our service!',
                 generate_qr_image: 'PNG' as const,
+                prefilled_message: 'Welcome to our service!',
             };
 
             await whatsApp.qrCode.createQrCode(createRequest);
@@ -114,8 +114,8 @@ describe('QrCode API - Unit Tests', () => {
     describe('Request Body Structure Validation', () => {
         it('should create correct request body for QR code with PNG image', async () => {
             const request = {
-                prefilled_message: 'PNG QR Code Test',
                 generate_qr_image: 'PNG' as const,
+                prefilled_message: 'PNG QR Code Test',
             };
 
             await whatsApp.qrCode.createQrCode(request);
@@ -129,8 +129,8 @@ describe('QrCode API - Unit Tests', () => {
 
         it('should create correct request body for QR code with SVG image', async () => {
             const request = {
-                prefilled_message: 'SVG QR Code Test',
                 generate_qr_image: 'SVG' as const,
+                prefilled_message: 'SVG QR Code Test',
             };
 
             await whatsApp.qrCode.createQrCode(request);
@@ -173,8 +173,8 @@ describe('QrCode API - Unit Tests', () => {
 
         it('should handle special characters in prefilled message', async () => {
             const request = {
-                prefilled_message: 'Hello! 👋 Welcome to our service. Visit https://example.com for more info.',
                 generate_qr_image: 'PNG' as const,
+                prefilled_message: 'Hello! 👋 Welcome to our service. Visit https://example.com for more info.',
             };
 
             await whatsApp.qrCode.createQrCode(request);

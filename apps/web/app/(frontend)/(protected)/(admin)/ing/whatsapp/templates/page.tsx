@@ -1,12 +1,12 @@
-import { SearchParams } from "@/types";
-import TemplatePage from "./template-page";
-import { templateSearchParamsCache } from "@/features/whatsapp/templates/lib/validations";
-import { getValidFilters } from "@workspace/ui/lib/data-table";
-import { getTemplates } from "@/features/whatsapp/templates/lib/queries";
-import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
-import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
+import { getValidFilters } from "@workspace/ui/lib/data-table";
+import React from "react";
+
+import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
 import TemplateTable from "@/features/whatsapp/templates/data-table/template-table";
+import { getTemplates } from "@/features/whatsapp/templates/lib/queries";
+import { templateSearchParamsCache } from "@/features/whatsapp/templates/lib/validations";
+import { SearchParams } from "@/types";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
@@ -29,8 +29,6 @@ export default async function Home(props: IndexPageProps) {
           <React.Suspense
             fallback={
               <DataTableSkeleton
-                columnCount={7}
-                filterCount={2}
                 cellWidths={[
                   "10rem",
                   "30rem",
@@ -40,6 +38,8 @@ export default async function Home(props: IndexPageProps) {
                   "6rem",
                   "6rem",
                 ]}
+                columnCount={7}
+                filterCount={2}
                 shrinkZero
               />
             }

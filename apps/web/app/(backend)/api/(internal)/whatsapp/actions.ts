@@ -1,8 +1,8 @@
-import { ConversationBody, baseConversation } from "@workspace/db";
+import { baseConversation, ConversationBody } from "@workspace/db";
 import { Template } from "@workspace/db/schema";
 import {
-  MessageTemplateObject,
   ComponentTypesEnum,
+  MessageTemplateObject,
   ParametersTypesEnum,
 } from "@workspace/wa-cloud-api";
 
@@ -17,29 +17,21 @@ export function generateConversationComponentBody(
 
     components.forEach((component) => {
       switch (component.type) {
-        case "HEADER":
-          conversationBody.header = {
-            text: component.text,
-          };
-          break;
         case "BODY":
           conversationBody.body = {
             text: component.text,
           };
           break;
-        case "FOOTER":
-          conversationBody.footer = component.text;
-          break;
         case "BUTTONS":
           conversationBody.buttons = component.buttons.map((button) => {
             switch (button.type) {
-              case "PHONE_NUMBER":
-              case "URL":
-              case "QUICK_REPLY":
               case "FLOW":
+              case "PHONE_NUMBER":
+              case "QUICK_REPLY":
+              case "URL":
                 return {
-                  type: button.type,
                   text: button.text,
+                  type: button.type,
                 };
 
               default:
@@ -48,6 +40,14 @@ export function generateConversationComponentBody(
                 };
             }
           });
+          break;
+        case "FOOTER":
+          conversationBody.footer = component.text;
+          break;
+        case "HEADER":
+          conversationBody.header = {
+            text: component.text,
+          };
           break;
 
         default:
@@ -68,20 +68,20 @@ export function generateConversationComponentBody(
       const indexName: string[] = [];
       component.parameters.forEach((parameter) => {
         switch (parameter.type) {
+          case ParametersTypesEnum.Document:
+          case ParametersTypesEnum.Image:
+          case ParametersTypesEnum.Video:
+            baseConversation.media = {
+              caption: parameter.caption,
+              id: parameter.id,
+              url: parameter.link,
+            };
+
+            break;
           case ParametersTypesEnum.Text:
             if (parameter.parameter_name)
               parameterName[parameter.parameter_name] = parameter.text;
             else indexName.push(parameter.text);
-            break;
-          case ParametersTypesEnum.Image:
-          case ParametersTypesEnum.Document:
-          case ParametersTypesEnum.Video:
-            baseConversation.media = {
-              url: parameter.link,
-              id: parameter.id,
-              caption: parameter.caption,
-            };
-
             break;
           default:
             break;

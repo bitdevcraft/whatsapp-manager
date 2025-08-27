@@ -1,16 +1,29 @@
 /**
- * Upload session information for creating upload sessions.
+ * Request parameters for creating upload session.
  */
-export interface UploadSession {
-    id: string;
-    video?: boolean;
+export interface CreateUploadSessionParams {
+    /**
+     * Length of the file to be uploaded in bytes.
+     */
+    fileLength: number;
+    /**
+     * Name of the file with extension.
+     */
+    fileName: string;
+    /**
+     * MIME type of the file (e.g., 'image/jpeg').
+     */
+    fileType: string;
 }
 
 /**
- * Response from creating an upload session.
+ * Request parameters for getting upload handle.
  */
-export interface UploadSessionResponse {
-    id: string;
+export interface GetUploadHandleParams {
+    /**
+     * The upload session ID from createUploadSession response.
+     */
+    uploadId: string;
 }
 
 /**
@@ -24,8 +37,8 @@ export interface UploadBusinessProfileResponse {
  * Upload handle information containing file details and handle.
  */
 export interface UploadHandle {
-    handle: string;
     file_size: number;
+    handle: string;
     upload_result: {
         handle_type: string;
         name: string;
@@ -33,43 +46,30 @@ export interface UploadHandle {
 }
 
 /**
- * Request parameters for creating upload session.
- */
-export interface CreateUploadSessionParams {
-    /**
-     * Length of the file to be uploaded in bytes.
-     */
-    fileLength: number;
-    /**
-     * MIME type of the file (e.g., 'image/jpeg').
-     */
-    fileType: string;
-    /**
-     * Name of the file with extension.
-     */
-    fileName: string;
-}
-
-/**
  * Request parameters for uploading media.
  */
 export interface UploadMediaParams {
     /**
-     * The upload session ID from createUploadSession response.
-     */
-    uploadId: string;
-    /**
      * The binary data of the file (Buffer).
      */
     file: Buffer;
-}
-
-/**
- * Request parameters for getting upload handle.
- */
-export interface GetUploadHandleParams {
     /**
      * The upload session ID from createUploadSession response.
      */
     uploadId: string;
+}
+
+/**
+ * Upload session information for creating upload sessions.
+ */
+export interface UploadSession {
+    id: string;
+    video?: boolean;
+}
+
+/**
+ * Response from creating an upload session.
+ */
+export interface UploadSessionResponse {
+    id: string;
 }

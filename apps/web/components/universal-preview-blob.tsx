@@ -2,65 +2,65 @@
 // /components/universal-preview-blob.tsx
 "use client";
 
-import * as React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useObjectURL } from "@/hooks/use-object-url";
-import { usePanZoom } from "@/hooks/use-pan-zoom";
-
-import { Button } from "@workspace/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@workspace/ui/components/dialog";
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-} from "@workspace/ui/components/tooltip";
-import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@workspace/ui/components/alert";
 import { AspectRatio } from "@workspace/ui/components/aspect-ratio";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@workspace/ui/components/dialog";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import clsx from "clsx";
+import * as React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useObjectURL } from "@/hooks/use-object-url";
+import { usePanZoom } from "@/hooks/use-pan-zoom";
 
 export type UniversalPreviewBlobProps = {
-  src: string;
-  modalOnClick?: boolean;
-  initialScale?: number;
-  videoProps?: React.ComponentProps<"video">;
-  imgProps?: React.ComponentProps<"img">;
   allowDownload?: boolean;
-  className?: string;
   "aria-label"?: string;
+  className?: string;
+  imgProps?: React.ComponentProps<"img">;
+  initialScale?: number;
+  modalOnClick?: boolean;
   onError?: (err: unknown) => void;
+  src: string;
+  videoProps?: React.ComponentProps<"video">;
 };
 
 type FetchedMeta = {
   blob: Blob;
-  mime: string;
   filename?: string;
+  mime: string;
   size?: number;
 };
 
 const LARGE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function UniversalPreviewBlob({
-  src,
-  modalOnClick = true,
-  initialScale = 1,
-  videoProps,
-  imgProps,
   allowDownload = true,
-  className,
   "aria-label": ariaLabel,
+  className,
+  imgProps,
+  initialScale = 1,
+  modalOnClick = true,
   onError,
+  src,
+  videoProps,
 }: UniversalPreviewBlobProps) {
   const [meta, setMeta] = useState<FetchedMeta | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -118,7 +118,7 @@ export function UniversalPreviewBlob({
         const mime = blob.type || ct || "application/octet-stream";
 
         if (!mounted) return;
-        setMeta({ blob, mime, filename, size });
+        setMeta({ blob, filename, mime, size });
         setLoading(false);
       } catch (err: any) {
         if (err?.name === "AbortError") return;
@@ -191,10 +191,10 @@ export function UniversalPreviewBlob({
   };
 
   // Modal pan/zoom
-  const { containerRef, contentRef, reset, zoomBy, handlers } = usePanZoom({
+  const { containerRef, contentRef, handlers, reset, zoomBy } = usePanZoom({
     initialScale,
-    minScale: 1,
     maxScale: 5,
+    minScale: 1,
   });
 
   const toggleFullscreen = async () => {
@@ -248,11 +248,11 @@ export function UniversalPreviewBlob({
 
         {/* Error state */}
         {error && (
-          <Alert variant="destructive" className="mb-3">
+          <Alert className="mb-3" variant="destructive">
             <AlertTitle>Failed to load</AlertTitle>
             <AlertDescription className="flex items-center gap-3">
               {error.message}
-              <a href={retryHref} className="ml-auto">
+              <a className="ml-auto" href={retryHref}>
                 <Button size="sm" variant="secondary">
                   Retry
                 </Button>
@@ -264,9 +264,9 @@ export function UniversalPreviewBlob({
         {/* Loading skeleton */}
         {loading && !error && (
           <div
-            className={inlineFrameClasses}
             aria-busy="true"
             aria-live="polite"
+            className={inlineFrameClasses}
           >
             <AspectRatio ratio={16 / 9}>
               <Skeleton className="h-full w-full" />
@@ -283,7 +283,7 @@ export function UniversalPreviewBlob({
                 <p className="text-xs text-muted-foreground">{mime}</p>
               </div>
               {allowDownload && url && (
-                <Button size="sm" onClick={doDownload}>
+                <Button onClick={doDownload} size="sm">
                   Download
                 </Button>
               )}
@@ -294,10 +294,8 @@ export function UniversalPreviewBlob({
         {/* Image inline */}
         {!loading && !error && meta && isImage && url && (
           <div
-            className={inlineFrameClasses}
-            role={modalOnClick ? "button" : undefined}
             aria-label={ariaLabel ?? "Open zoom viewer"}
-            tabIndex={modalOnClick ? 0 : -1}
+            className={inlineFrameClasses}
             onClick={() => modalOnClick && setOpen(true)}
             onKeyDown={(e) => {
               if (!modalOnClick) return;
@@ -306,14 +304,16 @@ export function UniversalPreviewBlob({
                 setOpen(true);
               }
             }}
+            role={modalOnClick ? "button" : undefined}
+            tabIndex={modalOnClick ? 0 : -1}
           >
             <AspectRatio ratio={16 / 9}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={url}
                 alt={imgProps?.alt ?? meta.filename ?? "preview"}
                 className="h-full w-full object-contain select-none"
                 draggable={false}
+                src={url}
                 {...imgProps}
               />
             </AspectRatio>
@@ -338,11 +338,11 @@ export function UniversalPreviewBlob({
                   <TooltipTrigger asChild>
                     <button
                       className={toolbarBtn + " pointer-events-auto"}
-                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         doDownload();
                       }}
+                      type="button"
                     >
                       Download
                     </button>
@@ -357,10 +357,8 @@ export function UniversalPreviewBlob({
         {/* Video inline */}
         {!loading && !error && meta && isVideo && url && (
           <div
-            className={inlineFrameClasses}
-            role={modalOnClick ? "button" : undefined}
             aria-label={ariaLabel ?? "Open zoom viewer"}
-            tabIndex={modalOnClick ? 0 : -1}
+            className={inlineFrameClasses}
             onClick={() => modalOnClick && setOpen(true)}
             onKeyDown={(e) => {
               if (!modalOnClick) return;
@@ -369,16 +367,18 @@ export function UniversalPreviewBlob({
                 setOpen(true);
               }
             }}
+            role={modalOnClick ? "button" : undefined}
+            tabIndex={modalOnClick ? 0 : -1}
           >
             <AspectRatio ratio={16 / 9}>
               <video
+                className="h-full w-full rounded-2xl object-contain"
+                controls
+                muted={videoProps?.muted}
+                playsInline
+                preload={videoProps?.preload ?? "metadata"}
                 ref={videoRef}
                 src={url}
-                className="h-full w-full rounded-2xl object-contain"
-                preload={videoProps?.preload ?? "metadata"}
-                controls
-                playsInline
-                muted={videoProps?.muted}
                 {...videoProps}
                 onClick={(e) => {
                   // prevent click-to-zoom from firing when user interacts with controls area
@@ -409,11 +409,11 @@ export function UniversalPreviewBlob({
                   <TooltipTrigger asChild>
                     <button
                       className={toolbarBtn + " pointer-events-auto"}
-                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         doDownload();
                       }}
+                      type="button"
                     >
                       Download
                     </button>
@@ -426,7 +426,7 @@ export function UniversalPreviewBlob({
         )}
 
         {/* Zoom Viewer (Dialog) */}
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog onOpenChange={setOpen} open={open}>
           <DialogHeader className="sr-only">
             <DialogTitle>Zoom viewer</DialogTitle>
             <DialogDescription>Pan and zoom media</DialogDescription>
@@ -434,31 +434,31 @@ export function UniversalPreviewBlob({
           <DialogContent className="min-w-[96vw] p-0 sm:p-0 flex flex-col items-center">
             {/* Toolbar */}
             <div className="flex items-center justify-end gap-2 p-2 sm:p-3">
-              <Button size="sm" variant="secondary" onClick={() => zoomBy(1.1)}>
+              <Button onClick={() => zoomBy(1.1)} size="sm" variant="secondary">
                 +
               </Button>
               <Button
+                onClick={() => zoomBy(1 / 1.1)}
                 size="sm"
                 variant="secondary"
-                onClick={() => zoomBy(1 / 1.1)}
               >
                 -
               </Button>
-              <Button size="sm" variant="secondary" onClick={reset}>
+              <Button onClick={reset} size="sm" variant="secondary">
                 Reset
               </Button>
-              <Button size="sm" variant="secondary" onClick={toggleFullscreen}>
+              <Button onClick={toggleFullscreen} size="sm" variant="secondary">
                 Fullscreen
               </Button>
               {allowDownload && url && (
-                <Button size="sm" onClick={doDownload}>
+                <Button onClick={doDownload} size="sm">
                   Download
                 </Button>
               )}
               <Button
+                onClick={() => setOpen(false)}
                 size="sm"
                 variant="outline"
-                onClick={() => setOpen(false)}
               >
                 Close
               </Button>
@@ -466,33 +466,33 @@ export function UniversalPreviewBlob({
 
             {/* Interactive canvas */}
             <div
-              ref={containerRef}
               className="relative h-[80vh] w-[96vw] touch-pan-y overflow-hidden bg-black/90 outline-none sm:rounded-b-2xl"
+              ref={containerRef}
               tabIndex={0}
               {...handlers}
             >
               <div
-                ref={contentRef}
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                ref={contentRef}
                 style={{ transformOrigin: "0 0" }}
               >
                 {isImage && url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={url}
                     alt={imgProps?.alt ?? meta?.filename ?? "zoomed image"}
                     className="pointer-events-none select-none max-h-[80vh] max-w-[96vw]"
                     draggable={false}
+                    src={url}
                   />
                 )}
                 {isVideo && url && (
                   <video
                     className="pointer-events-none select-none max-h-[80vh] max-w-[96vw] rounded-lg"
-                    src={url}
-                    preload="metadata"
                     controls={false}
-                    playsInline
                     muted
+                    playsInline
+                    preload="metadata"
+                    src={url}
                   />
                 )}
               </div>
@@ -512,6 +512,18 @@ export function UniversalPreviewBlob({
 // Separate ref to avoid function-ref typing pitfalls
 const videoRef = React.createRef<HTMLVideoElement>();
 
+function guessFilenameFromType(mime: string): string {
+  if (mime.startsWith("image/")) {
+    const ext = mime.split("/")[1] || "jpg";
+    return `file.${ext}`;
+  }
+  if (mime.startsWith("video/")) {
+    const ext = mime.split("/")[1] || "mp4";
+    return `file.${ext}`;
+  }
+  return "file.bin";
+}
+
 function parseContentDispositionFilename(header: string): string | undefined {
   // Examples: attachment; filename="file.jpg"
   //           inline; filename*=UTF-8''my%20file.jpg
@@ -528,16 +540,4 @@ function parseContentDispositionFilename(header: string): string | undefined {
     /* empty */
   }
   return undefined;
-}
-
-function guessFilenameFromType(mime: string): string {
-  if (mime.startsWith("image/")) {
-    const ext = mime.split("/")[1] || "jpg";
-    return `file.${ext}`;
-  }
-  if (mime.startsWith("video/")) {
-    const ext = mime.split("/")[1] || "mp4";
-    return `file.${ext}`;
-  }
-  return "file.bin";
 }

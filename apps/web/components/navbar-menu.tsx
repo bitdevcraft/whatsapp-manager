@@ -1,8 +1,5 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-
 // import { Icons } from "@/components/icons"
 import {
   NavigationMenu,
@@ -13,6 +10,8 @@ import {
   NavigationMenuTrigger,
 } from "@workspace/ui/components/navigation-menu";
 import { cn } from "@workspace/ui/lib/utils";
+import Link from "next/link";
+import * as React from "react";
 
 export function NavbarMenu() {
   return (
@@ -60,16 +59,16 @@ export function NavbarMenu() {
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+>(({ children, className, title, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
         <a
-          ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
+          ref={ref}
           {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>

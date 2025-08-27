@@ -1,20 +1,21 @@
 "use client";
 
-import React from "react";
 import { QueryFunctionContext, useInfiniteQuery } from "@tanstack/react-query";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { Contact, ConversationWithContact } from "@workspace/db/schema";
 import { cn } from "@workspace/ui/lib/utils";
 import axios from "axios";
-import { ConversationWithContact, Contact } from "@workspace/db/schema";
-import { useSearchStore } from "../_store/search-store";
-import { useSearchMessageStore } from "../_store/message-store";
 import { useQueryState } from "nuqs";
+import React from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+
+import { useSearchMessageStore } from "../_store/message-store";
+import { useSearchStore } from "../_store/search-store";
 
 interface PageResponse {
-  data: ConversationWithContact[];
   contacts: Contact[];
-  nextOffset: number | null;
-  previousOffset: number | null;
+  data: ConversationWithContact[];
+  nextOffset: null | number;
+  previousOffset: null | number;
 }
 
 export function SearchResult() {
@@ -40,16 +41,16 @@ export function SearchResult() {
 
   const initialPageParam = 0;
 
-  const { status, data, error, fetchNextPage, hasNextPage } =
+  const { data, error, fetchNextPage, hasNextPage, status } =
     useInfiniteQuery<PageResponse>({
-      queryKey,
-      queryFn,
-      initialPageParam,
+      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
       getPreviousPageParam: (firstPage) => {
         return firstPage.previousOffset ?? undefined;
       },
-      getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+      initialPageParam,
       meta: { search },
+      queryFn,
+      queryKey,
     });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,10 +77,10 @@ export function SearchResult() {
       <div
         id="scrollable_search_result"
         style={{
-          height: "70vh",
-          overflow: "auto",
           display: "flex",
           flexDirection: "column",
+          height: "70vh",
+          overflow: "auto",
         }}
       >
         <h1 className="text-center font-semibold">Contacts</h1>
@@ -87,8 +88,8 @@ export function SearchResult() {
           <React.Fragment key={page.nextOffset}>
             {page.contacts.map((el) => (
               <div
-                key={el.id}
                 className={cn(`mb-2 border-b p-2 rounded hover:bg-muted`)}
+                key={el.id}
                 onClick={(e) => {
                   e.stopPropagation();
                   setContact(el.id);
@@ -108,20 +109,20 @@ export function SearchResult() {
 
         <InfiniteScroll
           dataLength={messages ? messages.length : 0}
-          next={() => fetchNextPage()}
-          style={{ display: "flex", flexDirection: "column" }}
           hasMore={hasNextPage}
           loader={<h4 className="text-center">Loading...</h4>}
+          next={() => fetchNextPage()}
           scrollableTarget="scrollable_search_result"
+          style={{ display: "flex", flexDirection: "column" }}
         >
           {data.pages.map((page) => (
             <React.Fragment key={page.nextOffset}>
               {page.data.map((el) => (
                 <div
-                  key={el.id}
                   className={cn(
                     `mb-2 border-b text-sm p-2 rounded hover:bg-muted`
                   )}
+                  key={el.id}
                   onClick={(e) => {
                     e.stopPropagation();
                     setContact(el.contact.id);

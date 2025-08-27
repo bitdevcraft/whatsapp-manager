@@ -5,8 +5,9 @@ import pluginReact from "eslint-plugin-react"
 import pluginReactHooks from "eslint-plugin-react-hooks"
 import globals from "globals"
 import tseslint from "typescript-eslint"
+import perfectionist from "eslint-plugin-perfectionist";
 
-import { config as baseConfig } from "./base.js"
+import { config as baseConfig } from "./base.js";
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -48,4 +49,5 @@ export const nextJsConfig = [
       "react/prop-types": "off",
     },
   },
-]
+  perfectionist.configs["recommended-natural"],
+];

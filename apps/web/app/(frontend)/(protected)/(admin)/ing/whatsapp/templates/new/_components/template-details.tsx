@@ -1,25 +1,26 @@
 "use client";
 
-import { toSnake } from "@/utils/string-helper";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@workspace/ui/components/select";
-import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { useFormContext } from "react-hook-form";
-import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import React from "react";
+import { useFormContext } from "react-hook-form";
+
 import { BaseCreateValue } from "@/types/validations/templates/template-schema";
+import { toSnake } from "@/utils/string-helper";
 
 export function TemplateDetails() {
   const { control } = useFormContext<BaseCreateValue>();
@@ -88,8 +89,8 @@ export function TemplateDetails() {
               <FormLabel>Language</FormLabel>
               <FormControl>
                 <Select
-                  onValueChange={(v) => field.onChange(v)}
                   defaultValue={field.value as unknown as string | undefined}
+                  onValueChange={(v) => field.onChange(v)}
                   value={field.value as unknown as string | undefined}
                 >
                   <SelectTrigger>

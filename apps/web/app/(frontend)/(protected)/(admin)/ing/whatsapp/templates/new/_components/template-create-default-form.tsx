@@ -1,64 +1,65 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { DevTool } from "@hookform/devtools";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
+import { Form } from "@workspace/ui/components/form";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import {
-  useForm,
   useFieldArray,
-  useWatch,
+  useForm,
   useFormContext,
+  useWatch,
 } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DevTool } from "@hookform/devtools";
-import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import z from "zod";
+
 import {
+  defaultValue,
   HeaderComponentSchema,
   TemplateCreateSchema,
   type TemplateCreateValue,
-  defaultValue,
 } from "@/types/validations/templates/template-schema";
-
-import { Form } from "@workspace/ui/components/form";
-import { Button } from "@workspace/ui/components/button";
-import { toast } from "sonner";
-import axios, { AxiosError } from "axios";
 import { pruneObject } from "@/utils/prune";
-import { ButtonsArray } from "./template-button";
-import { BodyAutoExamples } from "./template-body-examples";
-import { BodyEditor } from "./template-body-editor";
-import { FooterEditor } from "./template-footer-editor";
 import { toSnake } from "@/utils/string-helper";
+
 import { parseNamed, parsePositional } from "../_lib/utils";
-import { HeaderField } from "./template-header";
+import { BodyEditor } from "./template-body-editor";
+import { BodyAutoExamples } from "./template-body-examples";
+import { ButtonsArray } from "./template-button";
 import { TemplateDetails } from "./template-details";
-import z from "zod";
-import { useRouter } from "next/navigation";
+import { FooterEditor } from "./template-footer-editor";
+import { HeaderField } from "./template-header";
 
 /* -----------------------------
  * Component
  * --------------------------- */
 export default function TemplateCreateForm({
-  initialValues,
   id,
+  initialValues,
 }: {
-  initialValues?: Partial<TemplateCreateValue>;
   id?: string;
+  initialValues?: Partial<TemplateCreateValue>;
 }) {
   const router = useRouter();
 
   const form = useForm<TemplateCreateValue>({
-    resolver: zodResolver(TemplateCreateSchema),
     defaultValues: { ...defaultValue, ...initialValues },
     mode: "onChange",
+    resolver: zodResolver(TemplateCreateSchema),
   });
 
-  const { control, handleSubmit, watch, setValue, getValues } = form;
+  const { control, getValues, handleSubmit, setValue, watch } = form;
 
   // Only allow adding BUTTONS; HEADER/BODY/FOOTER are fixed
   const componentsFA = useFieldArray({ control, name: "components" });
 
   // Helper: find current indices for header/body/footer to be robust even if BUTTONS are inserted
-  const findIndexByType = (t: "HEADER" | "BODY" | "FOOTER" | "BUTTONS") => {
+  const findIndexByType = (t: "BODY" | "BUTTONS" | "FOOTER" | "HEADER") => {
     const comps = getValues("components");
     return comps.findIndex((c: any) => c?.type === t);
   };
@@ -83,7 +84,7 @@ export default function TemplateCreateForm({
       headerIdx >= 0
         ? (`components.${headerIdx}.format` as any)
         : (undefined as any),
-  }) as "TEXT" | "IMAGE" | undefined;
+  }) as "IMAGE" | "TEXT" | undefined;
 
   const headerText = useWatch({
     control,
@@ -112,17 +113,17 @@ export default function TemplateCreateForm({
    * --------------------------- */
   const syncExamples = React.useCallback(
     ({
-      headerTextOverride,
       bodyTextOverride,
-    }: { headerTextOverride?: string; bodyTextOverride?: string } = {}) => {
+      headerTextOverride,
+    }: { bodyTextOverride?: string; headerTextOverride?: string; } = {}) => {
       const hIdx = findIndexByType("HEADER");
       const bIdx = findIndexByType("BODY");
       if (hIdx < 0 || bIdx < 0) return;
 
       const pf = getValues("parameter_format");
       const hFormat = getValues(`components.${hIdx}.format`) as
-        | "TEXT"
         | "IMAGE"
+        | "TEXT"
         | undefined;
 
       const hText = headerTextOverride ?? getValues(`components.${hIdx}.text`);
@@ -200,14 +201,14 @@ export default function TemplateCreateForm({
           const names = parseNamed(hText);
           const current = (getValues(
             `components.${hIdx}.example.header_text_named_params`
-          ) || []) as Array<{ param_name: string; example: string }>;
+          ) || []) as Array<{ example: string; param_name: string; }>;
           const map = new Map(current.map((o) => [o.param_name, o.example]));
           const next =
             names.length === 0
               ? undefined
               : names.map((n) => ({
-                  param_name: n,
                   example: map.get(n) ?? "",
+                  param_name: n,
                 }));
           setValue(
             `components.${hIdx}.example.header_text_named_params`,
@@ -222,14 +223,14 @@ export default function TemplateCreateForm({
         const namesB = parseNamed(bText);
         const currentB = (getValues(
           `components.${bIdx}.example.body_text_named_params`
-        ) || []) as Array<{ param_name: string; example: string }>;
+        ) || []) as Array<{ example: string; param_name: string; }>;
         const mapB = new Map(currentB.map((o) => [o.param_name, o.example]));
         const nextB =
           namesB.length === 0
             ? undefined
             : namesB.map((n) => ({
-                param_name: n,
                 example: mapB.get(n) ?? "",
+                param_name: n,
               }));
         setValue(`components.${bIdx}.example.body_text_named_params`, nextB, {
           shouldDirty: true,
@@ -297,8 +298,8 @@ export default function TemplateCreateForm({
   const mutation = useMutation({
     mutationFn: async (payload: TemplateCreateValue) => {
       const cleanPayload = pruneObject(payload, {
-        removeEmptyObjects: true,
         removeEmptyArrays: true,
+        removeEmptyObjects: true,
         removeEmptyStrings: true,
         trimStrings: true,
       });
@@ -348,10 +349,6 @@ export default function TemplateCreateForm({
 
       return result.data;
     },
-    onSuccess: () => {
-      toast.success("Saved");
-      router.push("/ing/whatsapp/templates");
-    },
     onError: (error: AxiosError) => {
       toast.error(
         <div>
@@ -362,6 +359,10 @@ export default function TemplateCreateForm({
           </p>
         </div>
       );
+    },
+    onSuccess: () => {
+      toast.success("Saved");
+      router.push("/ing/whatsapp/templates");
     },
   });
 
@@ -374,8 +375,8 @@ export default function TemplateCreateForm({
       return; // already have one → do nothing
     }
     componentsFA.append({
+      buttons: [{ text: "Quick Reply", type: "QUICK_REPLY" }],
       type: "BUTTONS",
-      buttons: [{ type: "QUICK_REPLY", text: "Quick Reply" }],
     } as any);
   };
 
@@ -383,9 +384,9 @@ export default function TemplateCreateForm({
     <>
       <Form {...form}>
         <form
-          onSubmit={handleSubmit(onSubmit)}
           className="space-y-6"
           noValidate
+          onSubmit={handleSubmit(onSubmit)}
         >
           <TemplateDetails />
 
@@ -396,8 +397,8 @@ export default function TemplateCreateForm({
             <div className="space-y-4">
               {componentsFA.fields.map((comp, idx) => (
                 <ComponentItem
-                  key={comp.id}
                   index={idx}
+                  key={comp.id}
                   parameterFormat={parameterFormat}
                   syncExamples={syncExamples}
                 />
@@ -406,13 +407,13 @@ export default function TemplateCreateForm({
 
             <div className="flex flex-wrap gap-2">
               {!hasButtons && (
-                <Button type="button" variant="secondary" onClick={addButtons}>
+                <Button onClick={addButtons} type="button" variant="secondary">
                   Add Buttons
                 </Button>
               )}
             </div>
           </div>
-          <Button type="submit" disabled={mutation.isPending}>
+          <Button disabled={mutation.isPending} type="submit">
             {mutation.isPending ? "Loading…" : "Submit"}
           </Button>
         </form>
@@ -428,10 +429,10 @@ function ComponentItem({
   syncExamples,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: {
-    headerTextOverride?: string;
     bodyTextOverride?: string;
+    headerTextOverride?: string;
   }) => void;
 }) {
   const { control } = useFormContext();
@@ -439,7 +440,7 @@ function ComponentItem({
   const type = useWatch({
     control,
     name: `components.${index}.type` as const,
-  }) as "HEADER" | "BODY" | "FOOTER" | "BUTTONS";
+  }) as "BODY" | "BUTTONS" | "FOOTER" | "HEADER";
 
   return (
     <div className="rounded-lg border p-3 space-y-3">

@@ -10,24 +10,24 @@ export function MarketingCampaignSkeleton() {
     <section className="p-8 grid gap-4 animate-pulse">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="flex gap-2 items-center">
-          <Badge variant="outline" className="w-16 h-6 bg-muted" />
+          <Badge className="w-16 h-6 bg-muted" variant="outline" />
           <p className="text-muted-foreground text-sm bg-muted h-4 w-32 rounded" />
         </div>
         <div className="flex justify-end gap-2">
           <Button
-            size="sm"
-            variant="outline"
             className="bg-muted w-24 h-8"
             disabled
+            size="sm"
+            variant="outline"
           >
             <SendHorizontal className="h-4 w-4" />
             <span className="ml-2">Send</span>
           </Button>
           <Button
-            size="sm"
-            variant="destructive"
             className="bg-muted w-8 h-8"
             disabled
+            size="sm"
+            variant="destructive"
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -57,31 +57,12 @@ function SkeletonAnalytics() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       {Array.from({ length: 5 }).map((_, i) => (
         <div
-          key={i}
           className="min-h-16 border rounded flex flex-col p-4 gap-2 bg-background"
+          key={i}
         >
           <div className="bg-muted h-4 w-1/2 rounded" />
           <div className="bg-muted h-6 w-1/3 rounded" />
           <div className="bg-muted h-3 w-2/3 rounded" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function SkeletonDeliveryStatus() {
-  return (
-    <div className="rounded border p-4 grid gap-4 bg-background">
-      <h3 className="text-secondary-foreground text-sm font-semibold">
-        Delivery Status
-      </h3>
-      {[0, 1].map((i) => (
-        <div key={i} className="grid gap-2">
-          <div className="flex gap-2">
-            <div className="h-4 w-4 bg-muted rounded-full" />
-            <div className="h-4 w-20 bg-muted rounded" />
-          </div>
-          <Progress value={0} />
         </div>
       ))}
     </div>
@@ -97,13 +78,32 @@ function SkeletonCampaignDetails() {
       <div className="flex gap-2 flex-wrap items-center">
         <Tag size={15} />
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="w-12 h-6 bg-muted rounded " />
+          <div className="w-12 h-6 bg-muted rounded " key={i} />
         ))}
       </div>
       <div className="flex gap-2 flex-wrap items-center">
         <Calendar size={15} />
         <div className="h-4 w-48 bg-muted rounded" />
       </div>
+    </div>
+  );
+}
+
+function SkeletonDeliveryStatus() {
+  return (
+    <div className="rounded border p-4 grid gap-4 bg-background">
+      <h3 className="text-secondary-foreground text-sm font-semibold">
+        Delivery Status
+      </h3>
+      {[0, 1].map((i) => (
+        <div className="grid gap-2" key={i}>
+          <div className="flex gap-2">
+            <div className="h-4 w-4 bg-muted rounded-full" />
+            <div className="h-4 w-20 bg-muted rounded" />
+          </div>
+          <Progress value={0} />
+        </div>
+      ))}
     </div>
   );
 }
