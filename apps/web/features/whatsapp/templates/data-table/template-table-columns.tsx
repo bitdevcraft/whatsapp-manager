@@ -1,21 +1,21 @@
+/* eslint-disable perfectionist/sort-objects */
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Template } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
-import { DataTableColumnHeader } from "@workspace/ui/data-table";
-import { formatDate } from "@workspace/ui/lib/format";
-import { CalendarIcon, Ellipsis, Text } from "lucide-react";
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { DataTableColumnHeader } from "@workspace/ui/data-table";
+import { formatDate } from "@workspace/ui/lib/format";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { Template } from "@workspace/db/schema";
-import { useRouter } from "next/navigation";
+import { CalendarIcon, Ellipsis, Text } from "lucide-react";
+import Link from "next/link";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
@@ -31,21 +31,21 @@ export function getTableColumns({
       id: "select",
       header: ({ table }) => (
         <Checkbox
+          aria-label="Select all"
           checked={
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
           className="translate-y-0.5"
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          checked={row.getIsSelected()}
           className="translate-y-0.5"
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
         />
       ),
       enableSorting: false,
@@ -67,10 +67,10 @@ export function getTableColumns({
       cell: ({ row }) => {
         return (
           <Button
-            variant="link"
+            className="text-foreground font-normal"
             onClick={() => setRowAction({ row, variant: "preview" })}
             size={"sm"}
-            className="text-foreground font-normal"
+            variant="link"
           >
             <p>{row.original.name}</p>
           </Button>
@@ -100,7 +100,7 @@ export function getTableColumns({
       cell: ({ cell }) => formatDate(cell.getValue<Date>()),
       meta: {
         label: "Created At",
-        variant: "dateRange",
+        variant: "date",
         icon: CalendarIcon,
       },
       enableColumnFilter: true,
@@ -114,10 +114,10 @@ export function getTableColumns({
               <DropdownMenuTrigger asChild>
                 <Button
                   aria-label="Open menu"
-                  variant="ghost"
                   className="flex size-8 p-0 data-[state=open]:bg-muted"
+                  variant="ghost"
                 >
-                  <Ellipsis className="size-4" aria-hidden="true" />
+                  <Ellipsis aria-hidden="true" className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>

@@ -2,8 +2,15 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Contact } from "@workspace/db/schema/contacts";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
   Popover,
   PopoverContent,
@@ -11,16 +18,10 @@ import {
 } from "@workspace/ui/components/popover";
 import { DataTableColumnHeader } from "@workspace/ui/data-table";
 import { formatDate } from "@workspace/ui/lib/format";
-import { CalendarIcon, CircleDashed, Ellipsis, Text } from "lucide-react";
-import { Badge } from "@workspace/ui/components/badge";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
+import { CalendarIcon, CircleDashed, Ellipsis, Text } from "lucide-react";
+
 import { getSelectTags } from "@/features/tags/_lib/queries";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
@@ -153,7 +154,7 @@ export function getTableColumns({
       cell: ({ cell }) => formatDate(cell.getValue<Date>()),
       meta: {
         label: "Created At",
-        variant: "dateRange",
+        variant: "date",
         icon: CalendarIcon,
       },
       enableColumnFilter: true,
@@ -167,7 +168,7 @@ export function getTableColumns({
       cell: ({ cell }) => formatDate(cell.getValue<Date>()),
       meta: {
         label: "Updated At",
-        variant: "dateRange",
+        variant: "date",
         icon: CalendarIcon,
       },
       enableColumnFilter: true,
