@@ -41,6 +41,14 @@ export interface ConversationBody {
     text?: string;
     type: string;
   }[];
+  cards?: {
+    body?: baseConversation;
+    buttons?: {
+      text?: string;
+      type: string;
+    }[];
+    header?: baseConversation;
+  }[];
   footer?: string;
   header?: baseConversation;
   location?: {

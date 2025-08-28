@@ -28,13 +28,17 @@ export interface ChatInfiniteScrollProps {
   previous: () => void;
   /** If true, scroll to the middle on mount */
   showMiddle: boolean;
+  /** Optional delay (ms) before applying any scroll anchoring after new data arrives */
+  anchorDelayMs?: number;
+  /** If true, disable any automatic scroll anchoring on new data (no auto-adjust at all) */
+  disableAutoAnchor?: boolean;
 }
 
 /**
  * ChatInfiniteScroll
  * A reusable infinite scroll container for chat/message lists.
- * Prevents overlapping loads, maintains view position on prepend or append,
- * and supports loading indicators.
+ * Prevents overlapping loads, maintains view on prepend/append (no auto-jumps),
+ * supports loading indicators, and anchors to the element currently in view.
  */
 export function ChatInfiniteScroll({
   children,
@@ -47,8 +51,11 @@ export function ChatInfiniteScroll({
   next,
   previous,
   showMiddle,
+  anchorDelayMs = 0,
+  disableAutoAnchor = false,
 }: ChatInfiniteScrollProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const topSentinelRef = useRef<HTMLDivElement | null>(null);
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,12 +66,59 @@ export function ChatInfiniteScroll({
   const lastLoadPrependRef = useRef<boolean>(false);
   const lastLoadAppendRef = useRef<boolean>(false);
 
+  // Timer for delayed anchoring
+  const anchorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Anchor the exact element currently in view (closest to container center)
+  const anchorRef = useRef<{ el: HTMLElement | null; offset: number }>({
+    el: null,
+    offset: 0,
+  });
+
   // Mirror the current children count into a ref so the observer effect
   // doesn't need to depend directly on `children`.
   const childrenCountRef = useRef<number>(React.Children.count(children));
   useEffect(() => {
     childrenCountRef.current = React.Children.count(children);
   }, [children]);
+
+  // Helper: capture the element near the center of the viewport inside `contentRef`
+  const captureAnchor = () => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    let el = document.elementFromPoint(x, y) as HTMLElement | null;
+    // Ensure the element belongs to our content container
+    while (el && el !== content && el.parentElement) {
+      if (el.parentElement === content) break;
+      el = el.parentElement as HTMLElement | null;
+    }
+    // Fallback: pick first child intersecting the center line
+    if (!el || (el.parentElement && el.parentElement !== content)) {
+      // find a direct child around scrollTop
+      const childrenEls = Array.from(content.children) as HTMLElement[];
+      const centerY = container.scrollTop + container.clientHeight / 2;
+      el =
+        childrenEls.find(
+          (c) =>
+            c.offsetTop <= centerY && c.offsetTop + c.offsetHeight >= centerY
+        ) ||
+        childrenEls[0] ||
+        null;
+    }
+    if (el) {
+      anchorRef.current = {
+        el,
+        offset: el.offsetTop - container.scrollTop,
+      };
+    } else {
+      anchorRef.current = { el: null, offset: 0 };
+    }
+  };
 
   // Initial scroll: middle, bottom, or top
   useEffect(() => {
@@ -83,22 +137,61 @@ export function ChatInfiniteScroll({
   // After new items: adjust scroll if prepend or append occurred
   useLayoutEffect(() => {
     const container = containerRef.current;
+    const content = contentRef.current;
     const currentCount = React.Children.count(children);
 
-    if (container) {
-      if (
-        lastLoadPrependRef.current &&
-        currentCount > prevChildrenCountRef.current
-      ) {
-        // Prepend: preserve view by offsetting scrollTop
+    // Clear any pending delayed anchor from a previous change
+    if (anchorTimerRef.current) {
+      clearTimeout(anchorTimerRef.current);
+      anchorTimerRef.current = null;
+    }
+
+    const shouldPrependAdjust =
+      lastLoadPrependRef.current && currentCount > prevChildrenCountRef.current;
+    const shouldAppendAdjust =
+      lastLoadAppendRef.current && currentCount > prevChildrenCountRef.current;
+
+    const runAnchor = () => {
+      if (!container) return;
+      if (disableAutoAnchor) return; // Do nothing if disabled
+
+      // First try to anchor to the previously visible element
+      const anchorEl = anchorRef.current.el;
+      if (anchorEl && content && content.contains(anchorEl)) {
+        container.scrollTop = anchorEl.offsetTop - anchorRef.current.offset;
+      } else if (shouldPrependAdjust) {
+        // Fallback: Prepend — preserve by height delta
         const delta = container.scrollHeight - prevScrollHeightRef.current;
         container.scrollTop = prevScrollTopRef.current + delta;
-      } else if (
-        lastLoadAppendRef.current &&
-        currentCount > prevChildrenCountRef.current
-      ) {
-        // Append: keep scrollTop steady
+      } else if (shouldAppendAdjust) {
+        // Fallback: Append — keep previous scrollTop
         container.scrollTop = prevScrollTopRef.current;
+      }
+
+      // Nudge away from sentinels by h-1 to avoid re-intersection loops
+      if (shouldPrependAdjust) {
+        const bump = Math.max(
+          0,
+          (topSentinelRef.current?.offsetHeight ?? 0) - 1
+        );
+        if (bump > 0) container.scrollTop += bump;
+      } else if (shouldAppendAdjust) {
+        const bump = Math.max(
+          0,
+          (bottomSentinelRef.current?.offsetHeight ?? 0) - 1
+        );
+        if (bump > 0) container.scrollTop -= bump;
+      }
+
+      // Reset anchor
+      anchorRef.current = { el: null, offset: 0 };
+    };
+
+    if (shouldPrependAdjust || shouldAppendAdjust) {
+      if (anchorDelayMs > 0) {
+        anchorTimerRef.current = setTimeout(runAnchor, anchorDelayMs);
+      } else {
+        runAnchor();
       }
     }
 
@@ -106,7 +199,14 @@ export function ChatInfiniteScroll({
     prevChildrenCountRef.current = currentCount;
     lastLoadPrependRef.current = false;
     lastLoadAppendRef.current = false;
-  }, [children]);
+
+    return () => {
+      if (anchorTimerRef.current) {
+        clearTimeout(anchorTimerRef.current);
+        anchorTimerRef.current = null;
+      }
+    };
+  }, [children, anchorDelayMs, disableAutoAnchor]);
 
   // Stable options object (optional micro-opt)
   const observerOptions = useMemo<IntersectionObserverInit>(
@@ -140,8 +240,10 @@ export function ChatInfiniteScroll({
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
 
-          // Prepend (older) scenario: top sentinel in normal, bottom in reverse
+          // Prepend (older) scenario: triggered by top sentinel
           if (entry.target === topEl && canLoadOlder) {
+            // Capture the element currently in view BEFORE we load
+            captureAnchor();
             prevChildrenCountRef.current = childrenCountRef.current;
             prevScrollHeightRef.current = container.scrollHeight;
             prevScrollTopRef.current = container.scrollTop;
@@ -149,8 +251,10 @@ export function ChatInfiniteScroll({
             loadOlder();
           }
 
-          // Append (newer) scenario
+          // Append (newer) scenario: triggered by bottom sentinel
           if (entry.target === bottomEl && canLoadNewer) {
+            // Capture the element currently in view BEFORE we load
+            captureAnchor();
             prevChildrenCountRef.current = childrenCountRef.current;
             prevScrollTopRef.current = container.scrollTop;
             lastLoadAppendRef.current = true;
@@ -165,7 +269,6 @@ export function ChatInfiniteScroll({
     observer.observe(bottomEl);
 
     return () => {
-      // Use the snapshots captured at effect mount
       observer.unobserve(topEl);
       observer.unobserve(bottomEl);
       observer.disconnect();
@@ -192,7 +295,7 @@ export function ChatInfiniteScroll({
   return (
     <div
       aria-busy={loadingNext || loadingPrevious}
-      className={`overflow-y-auto flex flex-col ${className}`}
+      className={`overflow-y-auto overscroll-contain flex flex-col ${className}`}
       ref={containerRef}
       role="feed"
       style={{ height: "100%" }}
@@ -204,6 +307,7 @@ export function ChatInfiniteScroll({
 
       {/* Content container */}
       <div
+        ref={contentRef}
         className={`flex-1 flex flex-col ${isReverse ? "flex-col-reverse" : ""}`}
       >
         {children}

@@ -107,6 +107,7 @@ export function ScrollableChats() {
         }}
       >
         <ChatInfiniteScroll
+          anchorDelayMs={300}
           className=" p-4"
           hasNext={hasNextPage}
           hasPrevious={hasPreviousPage}

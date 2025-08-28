@@ -128,9 +128,13 @@ export const ComponentSchema = z.discriminatedUnion("type", [
   CarouselComponentSchema,
 ]);
 
+export const ComponentsSchema = z.array(ComponentSchema);
+
+export type ComponentsValue = z.infer<typeof ComponentSchema>;
+
 // Main MessageTemplateObject Schema
 export const MessageTemplateSchema = z.object({
-  components: z.array(ComponentSchema).optional(),
+  components: ComponentsSchema.optional(),
   language: LanguageObjectSchema,
   name: z.string(),
 });

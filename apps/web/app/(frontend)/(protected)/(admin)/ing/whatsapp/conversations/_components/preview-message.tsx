@@ -21,7 +21,7 @@ export function PreviewMessage({
   return (
     <div
       className={cn(
-        "border rounded max-w-md text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2",
+        "border rounded max-w-sm text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2",
         className
       )}
       {...props}
@@ -37,12 +37,12 @@ export function PreviewMessage({
       )}
       <div>{input.header?.text}</div>
       <div>{input.body?.text}</div>
-      <div className="text-sm font-light text-muted">{input.footer}</div>
+      <div className="text-sm font-light">{input.footer}</div>
       <div className="flex flex-col items-center gap-4">
         <Separator />
         {input.buttons?.map((el, i) => (
           <div key={i}>
-            <button className="text-black/50 bg-[#dcf8c6] text-sm hover:text-black">
+            <button className="text-black bg-[#dcf8c6] text-sm hover:text-black">
               {el.text}
             </button>
           </div>
