@@ -2,7 +2,7 @@
 import { contactsTable, conversationMembersTable } from "@workspace/db";
 import { conversationsTable } from "@workspace/db/schema/conversations";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { and, count, eq, gt, ilike, or, sql } from "drizzle-orm";
+import { and, count, eq, gt, ilike, isNull, or, sql } from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
@@ -25,7 +25,10 @@ export async function getContactConversation(contact: string) {
       try {
         const data = await withTenantTransaction(teamId, async (tx) => {
           const data = await tx.query.conversationsTable.findMany({
-            where: eq(conversationsTable.contactId, contact),
+            where: and(
+              eq(conversationsTable.contactId, contact),
+              isNull(conversationsTable.deletedAt)
+            ),
             orderBy: (conversationsTable, { asc }) => [
               asc(conversationsTable.createdAt),
             ],
@@ -93,6 +96,7 @@ export async function getConversations(
                   phone: contactsTable.phone,
                 },
                 createdAt: conversationsTable.createdAt,
+                deletedAt: contactsTable.deletedAt,
                 id: contactsTable.id,
                 isUnread: sql<boolean>`
                       (${conversationsTable.createdAt} > ${conversationMembersTable.lastReadAt})
@@ -129,7 +133,9 @@ export async function getConversations(
             const data = await tx
               .select()
               .from(messages)
-              .where(eq(sql<number>`"sub"."rn"`, 1))
+              .where(
+                and(eq(sql<number>`"sub"."rn"`, 1), isNull(messages.deletedAt))
+              )
               .limit(input.perPage)
               .offset(offset);
 
@@ -138,7 +144,9 @@ export async function getConversations(
                 count: count(),
               })
               .from(messages)
-              .where(eq(sql<number>`"sub"."rn"`, 1))
+              .where(
+                and(eq(sql<number>`"sub"."rn"`, 1), isNull(messages.deletedAt))
+              )
               .execute()
               .then((res) => res[0]?.count ?? 0);
 
@@ -185,9 +193,12 @@ export async function getConversationSearch(searchInput: string) {
               .select()
               .from(contactsTable)
               .where(
-                or(
-                  ilike(contactsTable.name, `%${searchInput}%`),
-                  ilike(contactsTable.phone, `%${searchInput}%`)
+                and(
+                  or(
+                    ilike(contactsTable.name, `%${searchInput}%`),
+                    ilike(contactsTable.phone, `%${searchInput}%`)
+                  ),
+                  isNull(contactsTable.deletedAt)
                 )
               )
               .limit(10);
@@ -195,7 +206,12 @@ export async function getConversationSearch(searchInput: string) {
             const conversations = await tx
               .select()
               .from(conversationsTable)
-              .where(or(sql`similarity (body::text, '${searchInput}') > 0.1`))
+              .where(
+                and(
+                  or(sql`similarity (body::text, '${searchInput}') > 0.1`),
+                  isNull(conversationsTable.deletedAt)
+                )
+              )
               .limit(10);
 
             return {

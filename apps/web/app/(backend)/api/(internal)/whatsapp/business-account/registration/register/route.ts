@@ -4,7 +4,7 @@ import {
 } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/index";
 import WhatsApp from "@workspace/wa-cloud-api";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 
 import { RESPONSE_CODE } from "@/lib/constants/response-code";
@@ -33,7 +33,10 @@ export async function POST(request: Request) {
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
-      where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
+      where: and(
+        eq(whatsAppBusinessAccountsTable.teamId, teamId),
+        isNull(whatsAppBusinessAccountsTable.deletedAt)
+      ),
     });
 
     return data;

@@ -12,6 +12,7 @@ import {
   gte,
   ilike,
   isNotNull,
+  isNull,
   lte,
   ne,
 } from "drizzle-orm";
@@ -157,9 +158,9 @@ export async function getMarketingCampaignById(id: string) {
     [`marketing-campaigns:${teamId}:${id}`],
     {
       tags: [
-        `marketing-campaigns`,
-        `marketing-campaigns:${teamId}:${id}`,
         `marketing-campaigns:${teamId}`,
+        `marketing-campaigns:${teamId}:${id}`,
+        `marketing-campaigns`,
       ],
       revalidate: 10,
     }
@@ -234,16 +235,8 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
         const { data, total } = await withTenantTransaction(
           userWithTeam?.teamId,
           async (tx) => {
-            // const data = await tx
-            //   .select()
-            //   .from(marketingCampaignsTable)
-            //   .where(where)
-            //   .limit(input.perPage)
-            //   .offset(offset)
-            //   .orderBy(...orderBy);
-
             const data = await tx.query.marketingCampaignsTable.findMany({
-              where,
+              where: and(where, isNull(marketingCampaignsTable.deletedAt)),
               limit: input.perPage,
               offset,
               orderBy,
@@ -257,7 +250,7 @@ export async function getMarketingCampaigns(input: GetMarketingCampaignSchema) {
                 count: count(),
               })
               .from(marketingCampaignsTable)
-              .where(where)
+              .where(and(where, isNull(marketingCampaignsTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 

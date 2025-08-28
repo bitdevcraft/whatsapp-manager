@@ -28,31 +28,31 @@ export function getTableColumns({
   setRowAction,
 }: TableColumnsProps): ColumnDef<MarketingCampaignWithTemplate>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          aria-label="Select all"
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          className="translate-y-0.5"
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          aria-label="Select row"
-          checked={row.getIsSelected()}
-          className="translate-y-0.5"
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      size: 40,
-    },
+    // {
+    //   id: "select",
+    //   header: ({ table }) => (
+    //     <Checkbox
+    //       aria-label="Select all"
+    //       checked={
+    //         table.getIsAllPageRowsSelected() ||
+    //         (table.getIsSomePageRowsSelected() && "indeterminate")
+    //       }
+    //       className="translate-y-0.5"
+    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    //     />
+    //   ),
+    //   cell: ({ row }) => (
+    //     <Checkbox
+    //       aria-label="Select row"
+    //       checked={row.getIsSelected()}
+    //       className="translate-y-0.5"
+    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //     />
+    //   ),
+    //   enableSorting: false,
+    //   enableHiding: false,
+    //   size: 40,
+    // },
     {
       id: "name",
       accessorKey: "name",
@@ -68,7 +68,13 @@ export function getTableColumns({
       cell: ({ row }) => {
         return (
           <Link href={`/ing/whatsapp/marketing-campaigns/${row.id}`}>
-            {row.original.name}
+            <Button
+              className="text-foreground font-normal"
+              size={"sm"}
+              variant={"link"}
+            >
+              {row.original.name}
+            </Button>
           </Link>
         );
       },

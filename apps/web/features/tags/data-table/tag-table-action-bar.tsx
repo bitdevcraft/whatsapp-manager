@@ -12,6 +12,8 @@ import {
 import { exportTableToCSV } from "@workspace/ui/lib/export";
 import { Download, Trash2 } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
+import { deleteTags } from "../_lib/actions";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,30 +40,20 @@ export function TagsTableActionBar({ table }: TagsTableActionBarProps) {
     [isPending, currentAction]
   );
 
-  const onTaskExport = React.useCallback(() => {
-    setCurrentAction("export");
-    startTransition(() => {
-      exportTableToCSV(table, {
-        excludeColumns: ["select", "actions"],
-        onlySelected: true,
-      });
-    });
-  }, [table]);
-
   const onTaskDelete = React.useCallback(() => {
     setCurrentAction("delete");
     startTransition(async () => {
-      //   const { error } = await deleteTasks({
-      //     ids: rows.map((row) => row.original.id),
-      //   });
+      const { error } = await deleteTags({
+        ids: rows.map((row) => row.original.id),
+      });
 
-      //   if (error) {
-      //     toast.error(error);
-      //     return;
-      //   }
+      if (error) {
+        toast.error(error);
+        return;
+      }
       table.toggleAllRowsSelected(false);
     });
-  }, [table]);
+  }, [rows, table]);
 
   return (
     <DataTableActionBar table={table} visible={rows.length > 0}>
@@ -71,14 +63,6 @@ export function TagsTableActionBar({ table }: TagsTableActionBarProps) {
         orientation="vertical"
       />
       <div className="flex items-center gap-1.5">
-        <DataTableActionBarAction
-          isPending={getIsActionPending("export")}
-          onClick={onTaskExport}
-          size="icon"
-          tooltip="Export Tags"
-        >
-          <Download />
-        </DataTableActionBarAction>
         <DataTableActionBarAction
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}

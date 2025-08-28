@@ -8,7 +8,8 @@ import WhatsApp, {
   TemplateResponse,
   WhatsAppConfig,
 } from "@workspace/wa-cloud-api";
-import { eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 
 import { env } from "@/env/server";
 import { decryptApiKey } from "@/lib/crypto";
@@ -82,6 +83,8 @@ export async function syncTemplate() {
               name: template.name,
               content: template,
               teamId,
+              updatedAt: new Date(),
+              deletedAt: null,
             }) as Template
         );
 
@@ -96,14 +99,29 @@ export async function syncTemplate() {
       }
 
       // const response = await whatsapp.templates.getTemplates({});
-      await tx
+      const rows = await tx
         .insert(templatesTable)
         .values(templates)
         .onConflictDoUpdate({
           target: [templatesTable.id],
           set: buildConflictUpdateColumns(templatesTable, ["name", "content"]),
-        });
+        })
+        .returning();
+
+      const ids = rows.map((r) => r.id);
+
+      await tx
+        .update(templatesTable)
+        .set({ deletedAt: new Date() })
+        .where(
+          and(
+            eq(templatesTable.teamId, teamId),
+            notInArray(templatesTable.id, ids)
+          )
+        );
     });
+
+    revalidateTag(`templates:${teamId}`);
   } catch (error) {
     logger.error(error);
   }

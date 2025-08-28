@@ -33,31 +33,6 @@ export function getTableColumns({
 }: TableColumnsProps): ColumnDef<WhatsAppBusinessAccountPhoneNumber>[] {
   return [
     {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          aria-label="Select all"
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          className="translate-y-0.5"
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          aria-label="Select row"
-          checked={row.getIsSelected()}
-          className="translate-y-0.5"
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      size: 40,
-    },
-    {
       id: "displayPhoneNumber",
       accessorKey: "displayPhoneNumber",
       header: ({ column }) => (

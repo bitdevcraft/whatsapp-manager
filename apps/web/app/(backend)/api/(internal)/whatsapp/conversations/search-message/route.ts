@@ -1,5 +1,5 @@
 import { conversationsTable, withTenantTransaction } from "@workspace/db";
-import { and, eq, or, sql } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
           ],
           where: and(
             or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
-            eq(conversationsTable.contactId, contactId)
+            eq(conversationsTable.contactId, contactId),
+            isNull(conversationsTable.deletedAt)
           ),
           with: {
             contact: {

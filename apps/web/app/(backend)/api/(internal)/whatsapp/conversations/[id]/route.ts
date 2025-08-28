@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { conversationMembersTable, conversationsTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { and, count, eq, gt, lt, ne } from "drizzle-orm";
+import { and, count, eq, gt, isNull, lt, ne } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -56,7 +56,8 @@ export async function GET(
           const target = await tx.query.conversationsTable.findFirst({
             where: and(
               eq(conversationsTable.contactId, id),
-              eq(conversationsTable.id, messageId)
+              eq(conversationsTable.id, messageId),
+              isNull(conversationsTable.deletedAt)
             ),
             with: {
               user: true,
@@ -71,7 +72,8 @@ export async function GET(
             where: and(
               eq(conversationsTable.contactId, id),
               gt(conversationsTable.createdAt, target!.createdAt),
-              ne(conversationsTable.id, target!.id)
+              ne(conversationsTable.id, target!.id),
+              isNull(conversationsTable.deletedAt)
             ),
             with: {
               user: true,
@@ -87,7 +89,8 @@ export async function GET(
               and(
                 eq(conversationsTable.contactId, id),
                 gt(conversationsTable.createdAt, target!.createdAt),
-                ne(conversationsTable.id, target!.id)
+                ne(conversationsTable.id, target!.id),
+                isNull(conversationsTable.deletedAt)
               )
             )
             .execute()
@@ -101,7 +104,8 @@ export async function GET(
             where: and(
               eq(conversationsTable.contactId, id),
               lt(conversationsTable.createdAt, target!.createdAt),
-              ne(conversationsTable.id, target!.id)
+              ne(conversationsTable.id, target!.id),
+              isNull(conversationsTable.deletedAt)
             ),
             with: {
               user: true,
@@ -117,7 +121,8 @@ export async function GET(
               and(
                 eq(conversationsTable.contactId, id),
                 lt(conversationsTable.createdAt, target!.createdAt),
-                ne(conversationsTable.id, target!.id)
+                ne(conversationsTable.id, target!.id),
+                isNull(conversationsTable.deletedAt)
               )
             )
             .execute()
@@ -131,7 +136,10 @@ export async function GET(
             orderBy: (conversationsTable, { desc }) => [
               desc(conversationsTable.createdAt),
             ],
-            where: eq(conversationsTable.contactId, id),
+            where: and(
+              eq(conversationsTable.contactId, id),
+              isNull(conversationsTable.deletedAt)
+            ),
             with: {
               user: true,
             },
@@ -145,7 +153,12 @@ export async function GET(
             count: count(),
           })
           .from(conversationsTable)
-          .where(eq(conversationsTable.contactId, id))
+          .where(
+            and(
+              eq(conversationsTable.contactId, id),
+              isNull(conversationsTable.deletedAt)
+            )
+          )
           .execute()
           .then((res) => res[0]?.count ?? 0);
 

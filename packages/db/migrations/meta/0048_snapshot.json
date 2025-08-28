@@ -1,0 +1,3287 @@
+{
+  "id": "05ac65cd-03f5-4f39-b403-82326bd387b8",
+  "prevId": "117dfdd8-dfec-4682-84f1-7c1f89939566",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.activity_logs": {
+      "name": "activity_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "activity_logs_team_id_teams_id_fk": {
+          "name": "activity_logs_team_id_teams_id_fk",
+          "tableFrom": "activity_logs",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "activity_logs_user_id_users_id_fk": {
+          "name": "activity_logs_user_id_users_id_fk",
+          "tableFrom": "activity_logs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contacts": {
+      "name": "contacts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "assigned_to": {
+          "name": "assigned_to",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "interests": {
+          "name": "interests",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "last_message_date": {
+          "name": "last_message_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized_phone": {
+          "name": "normalized_phone",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "regexp_replace(\"contacts\".\"phone\", '\\D', '', 'g')",
+            "type": "stored"
+          }
+        },
+        "opt_in": {
+          "name": "opt_in",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tags": {
+          "name": "tags",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "contacts_team_phone_unique": {
+          "name": "contacts_team_phone_unique",
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "phone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "contacts_assigned_to_users_id_fk": {
+          "name": "contacts_assigned_to_users_id_fk",
+          "tableFrom": "contacts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "assigned_to"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "contacts_team_id_teams_id_fk": {
+          "name": "contacts_team_id_teams_id_fk",
+          "tableFrom": "contacts",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "contacts_select_tenant": {
+          "name": "contacts_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"contacts\".\"deleted_at\" IS NULL"
+        },
+        "contacts_insert_tenant": {
+          "name": "contacts_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "contacts_update_tenant": {
+          "name": "contacts_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "contacts_delete_tenant": {
+          "name": "contacts_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"contacts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.conversation_members": {
+      "name": "conversation_members",
+      "schema": "",
+      "columns": {
+        "contact_id": {
+          "name": "contact_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_read_at": {
+          "name": "last_read_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'1970-01-01'"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "cm_user_idx": {
+          "name": "cm_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "cm_conv_idx": {
+          "name": "cm_conv_idx",
+          "columns": [
+            {
+              "expression": "contact_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "conversation_members_contact_id_contacts_id_fk": {
+          "name": "conversation_members_contact_id_contacts_id_fk",
+          "tableFrom": "conversation_members",
+          "tableTo": "contacts",
+          "columnsFrom": [
+            "contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversation_members_team_id_teams_id_fk": {
+          "name": "conversation_members_team_id_teams_id_fk",
+          "tableFrom": "conversation_members",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversation_members_user_id_users_id_fk": {
+          "name": "conversation_members_user_id_users_id_fk",
+          "tableFrom": "conversation_members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "conversation_members_user_id_contact_id_pk": {
+          "name": "conversation_members_user_id_contact_id_pk",
+          "columns": [
+            "user_id",
+            "contact_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.conversations": {
+      "name": "conversations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "body": {
+          "name": "body",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "direction": {
+          "name": "direction",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from": {
+          "name": "from",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_marketing_campaign": {
+          "name": "is_marketing_campaign",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "marketing_campaign_id": {
+          "name": "marketing_campaign_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replied_to": {
+          "name": "replied_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "message_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "success": {
+          "name": "success",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wamid": {
+          "name": "wamid",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wa_response": {
+          "name": "wa_response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "conversation_search": {
+          "name": "conversation_search",
+          "type": "tsvector",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        }
+      },
+      "indexes": {
+        "idx_conversation_search": {
+          "name": "idx_conversation_search",
+          "columns": [
+            {
+              "expression": "conversation_search",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "idx_conversations_body_trgm": {
+          "name": "idx_conversations_body_trgm",
+          "columns": [
+            {
+              "expression": "(\"body\"::text) gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "conversations_contact_id_contacts_id_fk": {
+          "name": "conversations_contact_id_contacts_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "contacts",
+          "columnsFrom": [
+            "contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_marketing_campaign_id_marketing_campaigns_id_fk": {
+          "name": "conversations_marketing_campaign_id_marketing_campaigns_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "marketing_campaigns",
+          "columnsFrom": [
+            "marketing_campaign_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_team_id_teams_id_fk": {
+          "name": "conversations_team_id_teams_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_user_id_users_id_fk": {
+          "name": "conversations_user_id_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "conversations_wamid_unique": {
+          "name": "conversations_wamid_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "wamid"
+          ]
+        }
+      },
+      "policies": {
+        "conversations_select_tenant": {
+          "name": "conversations_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"conversations\".\"deleted_at\" IS NULL"
+        },
+        "conversations_insert_tenant": {
+          "name": "conversations_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "conversations_update_tenant": {
+          "name": "conversations_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "conversations_delete_tenant": {
+          "name": "conversations_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"conversations\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.events": {
+      "name": "events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "aggregate_id": {
+          "name": "aggregate_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aggregate_type": {
+          "name": "aggregate_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "events_team_id_teams_id_fk": {
+          "name": "events_team_id_teams_id_fk",
+          "tableFrom": "events",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "events_select_tenant": {
+          "name": "events_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "events_insert_tenant": {
+          "name": "events_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "events_update_tenant": {
+          "name": "events_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "events_delete_tenant": {
+          "name": "events_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"events\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.file_attachment": {
+      "name": "file_attachment",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "expires_in": {
+          "name": "expires_in",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fileLocation": {
+          "name": "fileLocation",
+          "type": "file-location",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_size": {
+          "name": "file_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "file_attachment_team_id_teams_id_fk": {
+          "name": "file_attachment_team_id_teams_id_fk",
+          "tableFrom": "file_attachment",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.invitations": {
+      "name": "invitations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invited_at": {
+          "name": "invited_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "invited_by": {
+          "name": "invited_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invitations_invited_by_users_id_fk": {
+          "name": "invitations_invited_by_users_id_fk",
+          "tableFrom": "invitations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "invited_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "invitations_team_id_teams_id_fk": {
+          "name": "invitations_team_id_teams_id_fk",
+          "tableFrom": "invitations",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.leads": {
+      "name": "leads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assignedTo": {
+          "name": "assignedTo",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "interests": {
+          "name": "interests",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "message": {
+          "name": "message",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opt_in": {
+          "name": "opt_in",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "leads_assignedTo_users_id_fk": {
+          "name": "leads_assignedTo_users_id_fk",
+          "tableFrom": "leads",
+          "tableTo": "users",
+          "columnsFrom": [
+            "assignedTo"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "leads_team_id_teams_id_fk": {
+          "name": "leads_team_id_teams_id_fk",
+          "tableFrom": "leads",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "leads_select_tenant": {
+          "name": "leads_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"leads\".\"deleted_at\" IS NULL"
+        },
+        "leads_insert_tenant": {
+          "name": "leads_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "leads_update_tenant": {
+          "name": "leads_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "leads_delete_tenant": {
+          "name": "leads_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"leads\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.list_views": {
+      "name": "list_views",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity": {
+          "name": "entity",
+          "type": "entity",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "list_views_team_id_teams_id_fk": {
+          "name": "list_views_team_id_teams_id_fk",
+          "tableFrom": "list_views",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "list_views_select_tenant": {
+          "name": "list_views_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"list_views\".\"deleted_at\" IS NULL"
+        },
+        "list_views_insert_tenant": {
+          "name": "list_views_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "list_views_update_tenant": {
+          "name": "list_views_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "list_views_delete_tenant": {
+          "name": "list_views_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"list_views\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.marketing_campaigns": {
+      "name": "marketing_campaigns",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "analytics": {
+          "name": "analytics",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(65535)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enable_tracking": {
+          "name": "enable_tracking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "message_template": {
+          "name": "message_template",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recipients": {
+          "name": "recipients",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule_at": {
+          "name": "schedule_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_id": {
+          "name": "template_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_recipients": {
+          "name": "total_recipients",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "marketing_campaigns_created_by_users_id_fk": {
+          "name": "marketing_campaigns_created_by_users_id_fk",
+          "tableFrom": "marketing_campaigns",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "marketing_campaigns_team_id_teams_id_fk": {
+          "name": "marketing_campaigns_team_id_teams_id_fk",
+          "tableFrom": "marketing_campaigns",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "marketing_campaigns_template_id_templates_id_fk": {
+          "name": "marketing_campaigns_template_id_templates_id_fk",
+          "tableFrom": "marketing_campaigns",
+          "tableTo": "templates",
+          "columnsFrom": [
+            "template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "marketing_campaigns_select_tenant": {
+          "name": "marketing_campaigns_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"marketing_campaigns\".\"deleted_at\" IS NULL"
+        },
+        "marketing_campaigns_insert_tenant": {
+          "name": "marketing_campaigns_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "marketing_campaigns_update_tenant": {
+          "name": "marketing_campaigns_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "marketing_campaigns_delete_tenant": {
+          "name": "marketing_campaigns_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"marketing_campaigns\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.outbox": {
+      "name": "outbox",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "outbox_event_id_events_id_fk": {
+          "name": "outbox_event_id_events_id_fk",
+          "tableFrom": "outbox",
+          "tableTo": "events",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "outbox_team_id_teams_id_fk": {
+          "name": "outbox_team_id_teams_id_fk",
+          "tableFrom": "outbox",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tags": {
+      "name": "tags",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized_name": {
+          "name": "normalized_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\n      lower(                                      \n        replace(                                  \n          regexp_replace(                         \n            trim(\"tags\".\"name\"),              \n            '\\s+', ' ', 'g'\n          ),\n          ' ', '-'\n        )\n      )\n    ",
+            "type": "stored"
+          }
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tags_team_id_teams_id_fk": {
+          "name": "tags_team_id_teams_id_fk",
+          "tableFrom": "tags",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "tags_per_team": {
+          "name": "tags_per_team",
+          "nullsNotDistinct": false,
+          "columns": [
+            "team_id",
+            "name"
+          ]
+        }
+      },
+      "policies": {
+        "tags_select_tenant": {
+          "name": "tags_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"tags\".\"deleted_at\" IS NULL"
+        },
+        "tags_insert_tenant": {
+          "name": "tags_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "tags_update_tenant": {
+          "name": "tags_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "tags_delete_tenant": {
+          "name": "tags_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"tags\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_invitations": {
+      "name": "team_invitations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inviter_id": {
+          "name": "inviter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "team_invitations_inviter_id_users_id_fk": {
+          "name": "team_invitations_inviter_id_users_id_fk",
+          "tableFrom": "team_invitations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "inviter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "team_invitations_organization_id_teams_id_fk": {
+          "name": "team_invitations_organization_id_teams_id_fk",
+          "tableFrom": "team_invitations",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_member_limits": {
+      "name": "team_member_limits",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "limitType": {
+          "name": "limitType",
+          "type": "limit_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'inherited'"
+        },
+        "max_limit": {
+          "name": "max_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_limit_type": {
+          "name": "max_limit_type",
+          "type": "max_limit_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'recurring'"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "team_member_limits_unique": {
+          "name": "team_member_limits_unique",
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "team_member_limits_team_id_teams_id_fk": {
+          "name": "team_member_limits_team_id_teams_id_fk",
+          "tableFrom": "team_member_limits",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "team_member_limits_user_id_users_id_fk": {
+          "name": "team_member_limits_user_id_users_id_fk",
+          "tableFrom": "team_member_limits",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "team_member_limits_select_tenant": {
+          "name": "team_member_limits_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_member_limits\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"team_member_limits\".\"deleted_at\" IS NULL"
+        },
+        "team_member_limits_insert_tenant": {
+          "name": "team_member_limits_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"team_member_limits\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "team_member_limits_update_tenant": {
+          "name": "team_member_limits_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_member_limits\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"team_member_limits\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "team_member_limits_delete_tenant": {
+          "name": "team_member_limits_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_member_limits\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_members_usage_tracking": {
+      "name": "team_members_usage_tracking",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "period_end": {
+          "name": "period_end",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "period_start": {
+          "name": "period_start",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "usage_count": {
+          "name": "usage_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "team_members_usage_tracking_unique": {
+          "name": "team_members_usage_tracking_unique",
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "period_end",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "period_start",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "team_members_usage_tracking_team_id_teams_id_fk": {
+          "name": "team_members_usage_tracking_team_id_teams_id_fk",
+          "tableFrom": "team_members_usage_tracking",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "team_members_usage_tracking_user_id_users_id_fk": {
+          "name": "team_members_usage_tracking_user_id_users_id_fk",
+          "tableFrom": "team_members_usage_tracking",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "team_members_usage_tracking_select_tenant": {
+          "name": "team_members_usage_tracking_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_members_usage_tracking\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"team_members_usage_tracking\".\"deleted_at\" IS NULL"
+        },
+        "team_members_usage_tracking_insert_tenant": {
+          "name": "team_members_usage_tracking_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"team_members_usage_tracking\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "team_members_usage_tracking_update_tenant": {
+          "name": "team_members_usage_tracking_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_members_usage_tracking\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"team_members_usage_tracking\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "team_members_usage_tracking_delete_tenant": {
+          "name": "team_members_usage_tracking_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"team_members_usage_tracking\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_members": {
+      "name": "team_members",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "joined_at": {
+          "name": "joined_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "whatsapp_limit": {
+          "name": "whatsapp_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1000
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "team_members_organization_id_teams_id_fk": {
+          "name": "team_members_organization_id_teams_id_fk",
+          "tableFrom": "team_members",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "team_members_user_id_users_id_fk": {
+          "name": "team_members_user_id_users_id_fk",
+          "tableFrom": "team_members",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.teams": {
+      "name": "teams",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_file_storage_size": {
+          "name": "current_file_storage_size",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "max_file_storage_size": {
+          "name": "max_file_storage_size",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 2147483648
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plan_name": {
+          "name": "plan_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'demo'"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_metadata": {
+          "name": "stripe_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_product_id": {
+          "name": "stripe_product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_subscription_id": {
+          "name": "stripe_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscription_status": {
+          "name": "subscription_status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "whatsapp_limit": {
+          "name": "whatsapp_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 20
+        },
+        "whatsapp_subscribe_at": {
+          "name": "whatsapp_subscribe_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "teams_stripe_customer_id_unique": {
+          "name": "teams_stripe_customer_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_customer_id"
+          ]
+        },
+        "teams_stripe_subscription_id_unique": {
+          "name": "teams_stripe_subscription_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_subscription_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.templates": {
+      "name": "templates",
+      "schema": "",
+      "columns": {
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "templates_team_id_teams_id_fk": {
+          "name": "templates_team_id_teams_id_fk",
+          "tableFrom": "templates",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "templates_select_tenant": {
+          "name": "templates_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"templates\".\"deleted_at\" IS NULL"
+        },
+        "templates_insert_tenant": {
+          "name": "templates_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "templates_update_tenant": {
+          "name": "templates_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "templates_delete_tenant": {
+          "name": "templates_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"templates\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_accounts": {
+      "name": "user_accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_accounts_user_id_users_id_fk": {
+          "name": "user_accounts_user_id_users_id_fk",
+          "tableFrom": "user_accounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_activity_logs": {
+      "name": "user_activity_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(45)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_activity_logs_user_id_users_id_fk": {
+          "name": "user_activity_logs_user_id_users_id_fk",
+          "tableFrom": "user_activity_logs",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_sessions": {
+      "name": "user_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_organization_id": {
+          "name": "active_organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_sessions_active_organization_id_teams_id_fk": {
+          "name": "user_sessions_active_organization_id_teams_id_fk",
+          "tableFrom": "user_sessions",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "active_organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_sessions_user_id_users_id_fk": {
+          "name": "user_sessions_user_id_users_id_fk",
+          "tableFrom": "user_sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_verifications": {
+      "name": "user_verifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.whatsapp_business_account_phone_numbers": {
+      "name": "whatsapp_business_account_phone_numbers",
+      "schema": "",
+      "columns": {
+        "account_mode": {
+          "name": "account_mode",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificate": {
+          "name": "certificate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code_verification_status": {
+          "name": "code_verification_status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conversational_automation": {
+          "name": "conversational_automation",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "display_phone_number": {
+          "name": "display_phone_number",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "health_status": {
+          "name": "health_status",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "is_official_business_account": {
+          "name": "is_official_business_account",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_on_biz_app": {
+          "name": "is_on_biz_app",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_pin_enabled": {
+          "name": "is_pin_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_preverified_number": {
+          "name": "is_preverified_number",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_registered": {
+          "name": "is_registered",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_onboard_time": {
+          "name": "last_onboard_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messaging_limit_tier": {
+          "name": "messaging_limit_tier",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name_status": {
+          "name": "name_status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_certificate": {
+          "name": "new_certificate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_name_status": {
+          "name": "new_name_status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platform_type": {
+          "name": "platform_type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_rating": {
+          "name": "quality_rating",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_score": {
+          "name": "quality_score",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_visibility": {
+          "name": "search_visibility",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "throughput": {
+          "name": "throughput",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_name": {
+          "name": "verified_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "whatsapp_business_account_phone_numbers_team_id_teams_id_fk": {
+          "name": "whatsapp_business_account_phone_numbers_team_id_teams_id_fk",
+          "tableFrom": "whatsapp_business_account_phone_numbers",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "whatsapp_business_account_phone_numbers_select_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"whatsapp_business_account_phone_numbers\".\"deleted_at\" IS NULL"
+        },
+        "whatsapp_business_account_phone_numbers_insert_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_account_phone_numbers_update_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_account_phone_numbers_delete_tenant": {
+          "name": "whatsapp_business_account_phone_numbers_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_account_phone_numbers\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.whatsapp_business_accounts": {
+      "name": "whatsapp_business_accounts",
+      "schema": "",
+      "columns": {
+        "auth_token": {
+          "name": "auth_token",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ad_account_id": {
+          "name": "ad_account_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "auth_response": {
+          "name": "auth_response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "business_id": {
+          "name": "business_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_business_id": {
+          "name": "owner_business_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_business_name": {
+          "name": "owner_business_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number_id": {
+          "name": "phone_number_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "waba_id": {
+          "name": "waba_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "whatsapp_business_accounts_team_id_teams_id_fk": {
+          "name": "whatsapp_business_accounts_team_id_teams_id_fk",
+          "tableFrom": "whatsapp_business_accounts",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "whatsapp_business_accounts_waba_id_unique": {
+          "name": "whatsapp_business_accounts_waba_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "waba_id"
+          ]
+        }
+      },
+      "policies": {
+        "whatsapp_business_accounts_select_tenant": {
+          "name": "whatsapp_business_accounts_select_tenant",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid AND \"whatsapp_business_accounts\".\"deleted_at\" IS NULL"
+        },
+        "whatsapp_business_accounts_insert_tenant": {
+          "name": "whatsapp_business_accounts_insert_tenant",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "app_user"
+          ],
+          "withCheck": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_accounts_update_tenant": {
+          "name": "whatsapp_business_accounts_update_tenant",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid",
+          "withCheck": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        },
+        "whatsapp_business_accounts_delete_tenant": {
+          "name": "whatsapp_business_accounts_delete_tenant",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "app_user"
+          ],
+          "using": "\"whatsapp_business_accounts\".\"team_id\" = current_setting('app.current_tenant')::uuid"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.message_status": {
+      "name": "message_status",
+      "schema": "public",
+      "values": [
+        "delivered",
+        "read",
+        "sent"
+      ]
+    },
+    "public.file-location": {
+      "name": "file-location",
+      "schema": "public",
+      "values": [
+        "aws_s3",
+        "local"
+      ]
+    },
+    "public.entity": {
+      "name": "entity",
+      "schema": "public",
+      "values": [
+        "Contact",
+        "Conversation",
+        "Event",
+        "Lead",
+        "Outbox",
+        "User"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "disabled",
+        "draft",
+        "failed",
+        "pending",
+        "processing",
+        "success"
+      ]
+    },
+    "public.limit_type": {
+      "name": "limit_type",
+      "schema": "public",
+      "values": [
+        "inherited",
+        "custom"
+      ]
+    },
+    "public.max_limit_type": {
+      "name": "max_limit_type",
+      "schema": "public",
+      "values": [
+        "one-time",
+        "recurring"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

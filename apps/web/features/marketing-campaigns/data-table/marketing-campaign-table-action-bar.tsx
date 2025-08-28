@@ -74,18 +74,10 @@ export function MarketingCampaignsTableActionBar({
       />
       <div className="flex items-center gap-1.5">
         <DataTableActionBarAction
-          isPending={getIsActionPending("export")}
-          onClick={onTaskExport}
-          size="icon"
-          tooltip="Export Contacts"
-        >
-          <Download />
-        </DataTableActionBarAction>
-        <DataTableActionBarAction
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}
           size="icon"
-          tooltip="Delete Contacts"
+          tooltip="Delete Marketing Campaigns"
         >
           <Trash2 />
         </DataTableActionBarAction>

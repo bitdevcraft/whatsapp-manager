@@ -1,5 +1,9 @@
-import { contactsTable, withTenantTransaction } from "@workspace/db";
-import { ilike, or, sql } from "drizzle-orm";
+import {
+  contactsTable,
+  conversationsTable,
+  withTenantTransaction,
+} from "@workspace/db";
+import { and, ilike, isNull, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
@@ -40,9 +44,12 @@ export async function GET(request: NextRequest) {
           .select()
           .from(contactsTable)
           .where(
-            or(
-              ilike(contactsTable.name, `%${searchInput}%`),
-              ilike(contactsTable.phone, `%${searchInput}%`)
+            and(
+              or(
+                ilike(contactsTable.name, `%${searchInput}%`),
+                ilike(contactsTable.phone, `%${searchInput}%`)
+              ),
+              isNull(contactsTable.deletedAt)
             )
           )
           .limit(limit);
@@ -53,7 +60,10 @@ export async function GET(request: NextRequest) {
           orderBy: (conversationsTable, { asc }) => [
             asc(conversationsTable.createdAt),
           ],
-          where: or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
+          where: and(
+            or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
+            isNull(conversationsTable.deletedAt)
+          ),
           with: {
             contact: {
               columns: {

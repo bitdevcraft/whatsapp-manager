@@ -2,7 +2,18 @@ import { Template } from "@workspace/db";
 import { templatesTable } from "@workspace/db/schema/templates";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { and, asc, count, desc, eq, gte, ilike, lte } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
 import { unstable_cache } from "@/lib/unstable-cache";
@@ -76,7 +87,7 @@ export async function getAllTemplates(input: GetTemplateSchema) {
             const data = await tx
               .select()
               .from(templatesTable)
-              .where(where)
+              .where(and(where, isNull(templatesTable.deletedAt)))
               .limit(input.perPage)
               .orderBy(...orderBy);
 
@@ -85,7 +96,7 @@ export async function getAllTemplates(input: GetTemplateSchema) {
                 count: count(),
               })
               .from(templatesTable)
-              .where(where)
+              .where(and(where, isNull(templatesTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 
@@ -197,11 +208,23 @@ export async function getTemplates(input: GetTemplateSchema) {
 
         const orderBy =
           input.sort.length > 0
-            ? input.sort.map((item) =>
-                item.desc
+            ? input.sort.map((item) => {
+                const [column, property] = item.id.split(".");
+
+                if (column !== undefined && property !== undefined) {
+                  console.log(column, property);
+                  
+                  return item.desc
+                    ? // @ts-expect-error implicit
+                      sql`${templatesTable[column]} ->> ${property} DESC`
+                    : // @ts-expect-error implicit
+                      sql`${templatesTable[column]} ->> ${property} ASC`;
+                }
+
+                return item.desc
                   ? desc(templatesTable[item.id])
-                  : asc(templatesTable[item.id])
-              )
+                  : asc(templatesTable[item.id]);
+              })
             : [asc(templatesTable.createdAt)];
 
         const { data, total } = await withTenantTransaction(
@@ -210,7 +233,7 @@ export async function getTemplates(input: GetTemplateSchema) {
             const data = await tx
               .select()
               .from(templatesTable)
-              .where(where)
+              .where(and(where, isNull(templatesTable.deletedAt)))
               .limit(input.perPage)
               .offset(offset)
               .orderBy(...orderBy);
@@ -220,7 +243,7 @@ export async function getTemplates(input: GetTemplateSchema) {
                 count: count(),
               })
               .from(templatesTable)
-              .where(where)
+              .where(and(where, isNull(templatesTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 

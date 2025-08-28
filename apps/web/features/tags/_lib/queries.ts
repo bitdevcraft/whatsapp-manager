@@ -1,7 +1,7 @@
 import { tagsTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
+import { and, asc, count, desc, gte, ilike, isNull, lte } from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
@@ -28,6 +28,7 @@ export async function getSelectTags() {
               value: tagsTable.normalizedName,
             })
             .from(tagsTable)
+            .where(isNull(tagsTable.deletedAt))
             .orderBy(tagsTable.name);
 
           const tags: { label: string; value: string }[] = data.map((t) => ({
@@ -116,7 +117,7 @@ export async function getTags(input: GetTagSchema) {
             const data = await tx
               .select()
               .from(tagsTable)
-              .where(where)
+              .where(and(where, isNull(tagsTable.deletedAt)))
               .limit(input.perPage)
               .offset(offset)
               .orderBy(...orderBy);
@@ -126,7 +127,7 @@ export async function getTags(input: GetTagSchema) {
                 count: count(),
               })
               .from(tagsTable)
-              .where(where)
+              .where(and(where, isNull(tagsTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 

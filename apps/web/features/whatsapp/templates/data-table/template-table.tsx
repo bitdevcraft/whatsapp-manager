@@ -127,7 +127,7 @@ export default function TemplateTable({ promises }: Props) {
       </ResponsiveDialog>
 
       <DataTable
-        actionBar={<TemplateTableActionBar table={table} />}
+        // actionBar={<TemplateTableActionBar table={table} />}
         table={table}
       >
         {enableAdvancedFilter ? (

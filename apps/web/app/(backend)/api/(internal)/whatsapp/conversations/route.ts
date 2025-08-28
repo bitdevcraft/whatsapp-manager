@@ -9,7 +9,7 @@ import {
 import { UsageLimitRepository } from "@workspace/db/repositories";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import WhatsApp, { WebhookMessage } from "@workspace/wa-cloud-api";
-import { and, count, desc, eq, gt, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
             phone: contactsTable.phone,
           },
           createdAt: conversationsTable.createdAt,
+          deletedAt: contactsTable.deletedAt,
           // ...getTableColumns(conversationsTable),
           id: contactsTable.id,
           isUnread: sql<boolean>`
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
       const batch = await tx
         .select()
         .from(messages)
-        .where(eq(sql<number>`"sub"."rn"`, 1))
+        .where(and(eq(sql<number>`"sub"."rn"`, 1), isNull(messages.deletedAt)))
         .orderBy(desc(messages.createdAt))
         .limit(limit + 1)
         .offset(offset);
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
           count: count(),
         })
         .from(messages)
-        .where(eq(sql<number>`"sub"."rn"`, 1))
+        .where(and(eq(sql<number>`"sub"."rn"`, 1), isNull(messages.deletedAt)))
         .execute()
         .then((res) => res[0]?.count ?? 0);
 
@@ -153,7 +154,8 @@ export async function POST(request: Request) {
             desc(conversationsTable.createdAt),
           where: and(
             eq(conversationsTable.contactId, contactId),
-            eq(conversationsTable.direction, "inbound")
+            eq(conversationsTable.direction, "inbound"),
+            isNull(conversationsTable.deletedAt)
           ),
           with: {
             contact: true,

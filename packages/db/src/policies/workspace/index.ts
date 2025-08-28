@@ -5,6 +5,7 @@ import { ExtraConfigColumn, pgPolicy } from "drizzle-orm/pg-core";
 // 1) Build a generic Organization‐policy factory
 export function createOrganizationPolicies<
   T extends {
+    deletedAt?: ExtraConfigColumn;
     teamId: ExtraConfigColumn;
   },
 >(tableName: string, t: T) {

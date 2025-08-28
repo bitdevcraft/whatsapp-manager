@@ -38,10 +38,18 @@ export async function POST(request: Request) {
     const data = await withTenantTransaction(
       userWithTeam?.teamId,
       async (tx) => {
-        const data = await tx.insert(tagsTable).values({
-          name: body.name,
-          teamId: userWithTeam.teamId!,
-        });
+        const data = await tx
+          .insert(tagsTable)
+          .values({
+            name: body.name,
+            teamId: userWithTeam.teamId!,
+          })
+          .onConflictDoUpdate({
+            set: {
+              deletedAt: null,
+            },
+            target: [tagsTable.name, tagsTable.teamId],
+          });
 
         return {
           data,

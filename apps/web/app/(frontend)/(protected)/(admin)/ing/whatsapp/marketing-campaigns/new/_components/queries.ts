@@ -4,7 +4,7 @@ import {
   withTenantTransaction,
 } from "@workspace/db";
 import { Template } from "@workspace/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
@@ -33,7 +33,13 @@ export async function getSelectPhoneNumber() {
               })
               .from(whatsAppBusinessAccountPhoneNumbersTable)
               .where(
-                eq(whatsAppBusinessAccountPhoneNumbersTable.isRegistered, true)
+                and(
+                  eq(
+                    whatsAppBusinessAccountPhoneNumbersTable.isRegistered,
+                    true
+                  ),
+                  isNull(whatsAppBusinessAccountPhoneNumbersTable.deletedAt)
+                )
               )
               .orderBy(
                 whatsAppBusinessAccountPhoneNumbersTable.displayPhoneNumber
@@ -76,7 +82,10 @@ export async function getSelectTemplates(): Promise<{ templates: Template[] }> {
               .select()
               .from(templatesTable)
               .where(
-                sql`${templatesTable.content} ->> 'status' ILIKE 'approved'`
+                and(
+                  sql`${templatesTable.content} ->> 'status' ILIKE 'approved'`,
+                  isNull(templatesTable.deletedAt)
+                )
               )
               .orderBy(templatesTable.name);
 

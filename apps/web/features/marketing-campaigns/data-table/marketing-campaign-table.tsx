@@ -86,7 +86,7 @@ export default function MarketingCampaignTable({
       )}
 
       <DataTable
-        actionBar={<MarketingCampaignsTableActionBar table={table} />}
+        // actionBar={<MarketingCampaignsTableActionBar table={table} />}
         table={table}
       >
         {enableAdvancedFilter ? (
