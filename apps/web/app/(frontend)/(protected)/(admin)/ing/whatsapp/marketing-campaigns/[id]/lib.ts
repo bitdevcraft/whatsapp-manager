@@ -6,6 +6,11 @@ import {
 
 import { ComponentsValue } from "@/features/whatsapp/templates/lib/schema";
 
+export interface MergeData {
+  message?: ComponentsValue;
+  template?: ComponentTypes;
+}
+
 export interface TemplateData extends Base {
   cards: Base[];
   footer: MergeData;
@@ -15,15 +20,6 @@ export interface TemplateData extends Base {
   cards: Base[];
   footer: MergeData;
 }
-
-interface Base {
-  body: MergeData;
-  buttons: {
-    message?: ComponentsValue;
-    template?: TemplateButton;
-  }[];
-  header: MergeData;
-}
 interface Base {
   body: MergeData;
   buttons: {
@@ -33,14 +29,13 @@ interface Base {
   header: MergeData;
 }
 
-interface MergeData {
-  message?: ComponentsValue;
-  template?: ComponentTypes;
-}
-
-interface MergeData {
-  message?: ComponentsValue;
-  template?: ComponentTypes;
+interface Base {
+  body: MergeData;
+  buttons: {
+    message?: ComponentsValue;
+    template?: TemplateButton;
+  }[];
+  header: MergeData;
 }
 
 function buildFromTemplate(

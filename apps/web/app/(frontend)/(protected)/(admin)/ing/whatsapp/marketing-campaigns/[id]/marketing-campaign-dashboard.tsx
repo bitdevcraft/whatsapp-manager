@@ -53,7 +53,9 @@ import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/qu
 import { logger } from "@/lib/logger";
 
 import { getEstimatedRecipients, hasRemainingUsage } from "./action";
+import { handleMergeTemplateMessage } from "./lib";
 import { SingleTemplatePreview } from "./template-preview";
+import { BubbleChatPreview } from "./bubble-chat-preview";
 
 interface Props {
   promises: Promise<
@@ -83,6 +85,9 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
     estRecipients,
     remainingUsage,
   ] = React.use(promises);
+
+  if (data && data.template.content && data.messageTemplate)
+    handleMergeTemplateMessage(data.template.content, data.messageTemplate);
 
   const sendMarketingCampaign = async () => {
     try {
@@ -222,6 +227,19 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
           />
         </div>
         <CampaignTemplatePreview template={data?.template} />
+
+        <div>
+          {data && data.template.content && data.messageTemplate ? (
+            <>
+              <BubbleChatPreview
+                messageTemplate={data.messageTemplate}
+                template={data.template.content}
+              />
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       </section>
     </>
   );
@@ -297,7 +315,7 @@ function CampaignDetails({
   schedule,
   tags,
 }: {
-  contacts: null | { id: string; name: string; phone: string; }[];
+  contacts: null | { id: string; name: string; phone: string }[];
   schedule?: Date | null;
   tags?: null | string[];
 }) {

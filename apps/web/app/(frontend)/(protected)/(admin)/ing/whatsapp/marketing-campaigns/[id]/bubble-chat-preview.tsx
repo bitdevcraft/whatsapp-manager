@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { Button } from '@workspace/ui/components/button';
-import { Separator } from '@workspace/ui/components/separator';
-import { TemplateResponse } from '@workspace/wa-cloud-api';
-import React from 'react';
+import { Button } from "@workspace/ui/components/button";
+import { Separator } from "@workspace/ui/components/separator";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
+import React from "react";
 
 import {
   ComponentsValue,
   ParameterValues,
-} from '@/features/whatsapp/templates/lib/schema';
+} from "@/features/whatsapp/templates/lib/schema";
 
-import { handleMergeTemplateMessage, TemplateData } from './lib';
+import { handleMergeTemplateMessage, MergeData, TemplateData } from "./lib";
 
 interface Props {
   messageTemplate?: { components?: ComponentsValue[] };
@@ -43,7 +43,10 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
               type="button"
               variant="ghost"
             >
-              {btn.template?.text}
+              {
+                // @ts-expect-error text
+                btn.template?.text
+              }
             </Button>
           ))}
         </div>
@@ -60,27 +63,25 @@ function applyParameters(text: string, params: ParameterValues[]): string {
   }, text);
 }
 
-function buildText(section: TemplateData['body']): string {
+function buildText(section: MergeData): string {
   const templateText = (
-    (section.template as unknown as undefined | { text?: string })?.text
-  );
-  if (!templateText) return '';
+    section.template as unknown as undefined | { text?: string }
+  )?.text;
+  if (!templateText) return "";
   const params = (
-    (section.message as unknown as undefined | { parameters?: ParameterValues[] })
-      ?.parameters
-  );
+    section.message as unknown as undefined | { parameters?: ParameterValues[] }
+  )?.parameters;
   if (!params) return templateText;
   return applyParameters(templateText, params);
 }
 
 function extractParam(p: ParameterValues): string {
-  if ('text' in p) return p.text;
-  if ('coupon_code' in p) return p.coupon_code;
-  if ('currency' in p) return p.currency.fallback_value;
-  if ('date_time' in p) return p.date_time.fallback_value;
-  if ('document' in p) return p.document.caption ?? '';
-  if ('image' in p) return p.image.caption ?? '';
-  if ('video' in p) return p.video.caption ?? '';
-  return '';
+  if ("text" in p) return p.text;
+  if ("coupon_code" in p) return p.coupon_code;
+  if ("currency" in p) return p.currency.fallback_value;
+  if ("date_time" in p) return p.date_time.fallback_value;
+  if ("document" in p) return p.document.caption ?? "";
+  if ("image" in p) return p.image.caption ?? "";
+  if ("video" in p) return p.video.caption ?? "";
+  return "";
 }
-
