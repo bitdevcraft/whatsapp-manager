@@ -6,6 +6,12 @@ import { cn } from "@workspace/ui/lib/utils";
 import React from "react";
 
 import { UniversalPreviewBlob } from "@/components/universal-preview-blob";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@workspace/ui/components/card";
 
 export function PreviewMessage({
   className,
@@ -19,44 +25,37 @@ export function PreviewMessage({
   user?: null | User;
 }) {
   return (
-    <div
+    <Card
       className={cn(
         "border rounded max-w-sm text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2",
-        className
+        className,
+        input.body?.media?.id ? "pt-0" : ""
       )}
       {...props}
     >
       {input.body?.media?.id && (
-        <div className="w-72">
+        <CardHeader className="w-72 p-0">
           <UniversalPreviewBlob
             allowDownload
             modalOnClick
             src={`/api/whatsapp/files?mediaId=${input.body?.media?.id}`} // replace with your endpoint
           />
+        </CardHeader>
+      )}
+      {input.header?.text && <CardHeader>{input.header?.text}</CardHeader>}
+      <CardContent>{input.body?.text}</CardContent>
+      <CardFooter className="text-sm font-light">{input.footer}</CardFooter>
+      {input.buttons && input.buttons?.length > 0 && (
+        <div className="flex flex-col items-center gap-4">
+          {input.buttons?.map((el, i) => (
+            <div key={i}>
+              <button className="text-black bg-[#dcf8c6] text-sm hover:text-black">
+                {el.text}
+              </button>
+            </div>
+          ))}
         </div>
       )}
-      <div>{input.header?.text}</div>
-      <div>{input.body?.text}</div>
-      <div className="text-sm font-light">{input.footer}</div>
-      <div className="flex flex-col items-center gap-4">
-        <Separator />
-        {input.buttons?.map((el, i) => (
-          <div key={i}>
-            <button className="text-black bg-[#dcf8c6] text-sm hover:text-black">
-              {el.text}
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4">
-        {user?.email && (
-          <div className="text-xs text-right">Sent by:{user?.email}</div>
-        )}
-        <div className="text-xs font-light text-right">
-          {new Date(date).toLocaleDateString()}&nbsp;
-          {new Date(date).toLocaleTimeString()}
-        </div>
-      </div>
-    </div>
+    </Card>
   );
 }

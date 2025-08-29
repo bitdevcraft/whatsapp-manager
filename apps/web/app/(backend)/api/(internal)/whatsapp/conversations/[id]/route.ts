@@ -76,6 +76,11 @@ export async function GET(
               isNull(conversationsTable.deletedAt)
             ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
               user: true,
             },
           });
@@ -108,6 +113,11 @@ export async function GET(
               isNull(conversationsTable.deletedAt)
             ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
               user: true,
             },
           });
@@ -141,6 +151,11 @@ export async function GET(
               isNull(conversationsTable.deletedAt)
             ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
               user: true,
             },
           });

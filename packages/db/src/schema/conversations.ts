@@ -20,6 +20,7 @@ import { contactsTable } from "./contacts";
 import { marketingCampaignsTable } from "./marketing-campaigns";
 import { teamsTable } from "./teams";
 import { usersTable } from "./users";
+import { templatesTable } from "./templates";
 
 export const conversationStatusEnum = pgEnum(
   "message_status",
@@ -94,6 +95,7 @@ export const conversationsTable = pgTable(
     waResponse: jsonb("wa_response"),
     ...timestamps,
     conversationSearch: tsvector("conversation_search").notNull().default(""),
+    templateId: varchar("template_id").references(() => templatesTable.id),
   },
   (t) => [
     ...createOrganizationPolicies("conversations", t),
@@ -124,6 +126,10 @@ export const conversationsRelations = relations(
     team: one(teamsTable, {
       fields: [conversationsTable.teamId],
       references: [teamsTable.id],
+    }),
+    template: one(templatesTable, {
+      fields: [conversationsTable.templateId],
+      references: [templatesTable.id],
     }),
     user: one(usersTable, {
       fields: [conversationsTable.userId],

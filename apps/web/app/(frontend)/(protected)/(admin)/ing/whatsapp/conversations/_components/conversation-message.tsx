@@ -43,6 +43,8 @@ import {
 
 import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
 import { useSearchMessageStore } from "../_store/message-store";
+import { MessageTemplateFormV2 } from "../../marketing-campaigns/new/_components/template-form/message-template-form";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
@@ -283,11 +285,13 @@ function TemplateMessage({
               />
 
               {selectedTemplate && (
-                <MessageTemplateForm
-                  initialTemplate={selectedTemplate.content!}
-                  namePrefix="template.messageTemplate"
-                  preview
-                />
+                <ScrollArea className="h-[70vh]">
+                  <MessageTemplateFormV2
+                    initialValue={selectedTemplate.content!}
+                    prefix="template.messageTemplate"
+                    preview
+                  />
+                </ScrollArea>
               )}
 
               <div className="flex justify-end gap-2">

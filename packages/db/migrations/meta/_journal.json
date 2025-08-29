@@ -365,6 +365,13 @@
       "when": 1756286037766,
       "tag": "0051_lowly_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1756453349277,
+      "tag": "0052_right_ultron",
+      "breakpoints": true
     }
   ]
 }

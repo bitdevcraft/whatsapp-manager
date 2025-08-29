@@ -36,7 +36,7 @@ export function ResponsiveDialog({
   if (isDesktop) {
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="max-w-[425px] md:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (

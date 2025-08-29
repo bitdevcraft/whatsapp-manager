@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
         status: isSuccess ? MessageStatus.DELIVERED : null,
         success: isSuccess,
         teamId,
+        templateId: input.templateId,
         userId: user.id,
         wamid: response?.messages[0]?.id,
       };

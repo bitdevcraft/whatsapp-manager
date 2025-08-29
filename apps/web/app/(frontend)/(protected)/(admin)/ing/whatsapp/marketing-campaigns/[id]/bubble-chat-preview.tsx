@@ -23,6 +23,7 @@ import {
 } from "@/features/whatsapp/templates/lib/schema";
 
 import { handleMergeTemplateMessage, MergeData } from "./lib";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface Props {
   messageTemplate?: { components?: ComponentsValue[] };
@@ -40,11 +41,16 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
   const footer = buildInterpolatedText(data.footer);
 
   return (
-    <div className="p-4">
-      <Card className="text-foreground bg-[#dcf8c6] max-w-sm">
+    <div className="">
+      <Card
+        className={cn(
+          "text-foreground bg-[#dcf8c6] max-w-sm",
+          getHeaderMediaSrc(data.header) ? "pt-0" : ""
+        )}
+      >
         {/* Header media (if any) */}
         {getHeaderMediaSrc(data.header) && (
-          <CardHeader className="w-full p-2">
+          <CardHeader className="w-full p-0">
             <UniversalPreviewBlob
               allowDownload
               modalOnClick
@@ -79,16 +85,21 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
       </Card>
       {data.cards.length > 0 && (
         <div className="mt-2 grid gap-3 ">
-          <Carousel>
+          <Carousel className="w-sm">
             <CarouselContent>
               {data.cards.map((card, idx) => {
                 const cHeader = buildInterpolatedText(card.header);
                 const cBody = buildInterpolatedText(card.body);
                 return (
                   <CarouselItem className="basis-3/4 max-w-sm" key={idx}>
-                    <Card className="bg-[#dcf8c6]">
+                    <Card
+                      className={cn(
+                        "bg-[#dcf8c6]",
+                        getHeaderMediaSrc(card.header) ? "pt-0" : ""
+                      )}
+                    >
                       {getHeaderMediaSrc(card.header) && (
-                        <CardHeader className="w-full">
+                        <CardHeader className="w-full p-0">
                           <UniversalPreviewBlob
                             allowDownload
                             modalOnClick

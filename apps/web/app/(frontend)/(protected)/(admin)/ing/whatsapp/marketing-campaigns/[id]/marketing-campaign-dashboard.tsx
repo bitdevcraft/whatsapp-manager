@@ -390,7 +390,7 @@ function CampaignTemplatePreview({
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Template Preview
       </h3>
-      <div className="min-h-16 bg-muted">
+      <div className="min-h-16 bg-muted p-6">
         <BubbleChatPreview
           messageTemplate={messageTemplate}
           template={template}

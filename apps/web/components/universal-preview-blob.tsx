@@ -225,7 +225,7 @@ export function UniversalPreviewBlob({
   };
 
   const inlineFrameClasses =
-    "relative group isolate overflow-hidden rounded-2xl border bg-muted/30 shadow-sm";
+    "relative group isolate overflow-hidden rounded-lg rounded-b-none border bg-muted/30 shadow-sm";
 
   const toolbarBtn =
     "h-8 px-3 rounded-full border bg-background text-sm shadow hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";

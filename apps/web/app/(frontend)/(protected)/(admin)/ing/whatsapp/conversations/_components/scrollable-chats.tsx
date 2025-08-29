@@ -10,6 +10,13 @@ import { useContactStore } from "../_store/contact-store";
 import { useSearchMessageStore } from "../_store/message-store";
 import { ChatInfiniteScroll } from "./chat-infinite-scroll";
 import { PreviewMessage } from "./preview-message";
+import { MarketingCampaign } from "@workspace/db";
+import { BubbleChatPreview } from "../../marketing-campaigns/[id]/bubble-chat-preview";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -36,7 +43,9 @@ export function ScrollableChats() {
     isFetchingNextPage,
     isFetchingPreviousPage,
     status,
-  } = useInfiniteQuery<PaginatedResponse<Conversation>>({
+  } = useInfiniteQuery<
+    PaginatedResponse<Conversation & { marketingCampaign?: MarketingCampaign }>
+  >({
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     getPreviousPageParam: (firstPage) => {
       return Number(firstPage.previousOffset) > 0
@@ -48,7 +57,11 @@ export function ScrollableChats() {
     initialPageParam: 0,
     queryFn: async ({
       pageParam,
-    }): Promise<PaginatedResponse<Conversation>> => {
+    }): Promise<
+      PaginatedResponse<
+        Conversation & { marketingCampaign?: MarketingCampaign }
+      >
+    > => {
       let url = `/api/whatsapp/conversations/${contactId}?offset=${pageParam}`;
 
       if (loading && searchMessageId) {
@@ -71,6 +84,7 @@ export function ScrollableChats() {
       if (data.previousOffset === null) {
         setRemaining(0);
       }
+      console.log(data);
 
       return data;
     },
@@ -132,16 +146,56 @@ export function ScrollableChats() {
                   )}
                   key={el.id}
                 >
-                  {el.body && (
-                    <PreviewMessage
-                      className={
-                        searchMessageId === el.id ? "bg-yellow-200" : ""
-                      }
-                      date={el.createdAt}
-                      input={el.body}
-                      user={el.user}
-                    />
-                  )}
+                  <Tooltip delayDuration={500}>
+                    <TooltipTrigger>
+                      <div className="mb-4 text-left">
+                        {el.marketingCampaign ? (
+                          <BubbleChatPreview
+                            messageTemplate={
+                              el.marketingCampaign.messageTemplate
+                            }
+                            template={el.marketingCampaign.template.content}
+                          />
+                        ) : (
+                          <>
+                            {el.body && (
+                              <PreviewMessage
+                                className={
+                                  searchMessageId === el.id
+                                    ? "bg-yellow-200"
+                                    : ""
+                                }
+                                date={el.createdAt}
+                                input={el.body}
+                                user={el.user}
+                              />
+                            )}
+                          </>
+                        )}
+                        <div className="text-xs font-light text-right">
+                          {new Date(el.createdAt).toLocaleDateString()}
+                          &nbsp;
+                          {new Date(el.createdAt).toLocaleTimeString()}
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    {el.direction !== "inbound" && (
+                      <TooltipContent
+                        data-side="left"
+                        side="left"
+                        sticky="always"
+                      >
+                        <div>
+                          {el.user?.email && (
+                            <div className="text-xs text-right">
+                              <p>Sent by:</p>
+                              <p>{el.user?.email}</p>
+                            </div>
+                          )}
+                        </div>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </div>
               ))}
             </React.Fragment>
