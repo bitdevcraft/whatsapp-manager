@@ -1,6 +1,5 @@
 "use client";
 
-import { Template } from "@workspace/db/schema/templates";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -18,13 +17,14 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useWatch } from "react-hook-form";
 
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 
-import { SingleTemplatePreview } from "../../[id]/template-preview";
+import { BubbleChatPreview } from "../../[id]/bubble-chat-preview";
 import { getSelectTemplates } from "./queries";
+import { useTemplateStore } from "./store";
 import { MessageTemplateFormV2 } from "./template-form/message-template-form";
 
 interface TemplateStepFormProps {
@@ -32,12 +32,15 @@ interface TemplateStepFormProps {
 }
 
 function TemplateStep({ templates }: TemplateStepFormProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<null | Template>(
-    null
-  );
+  const { setTemplate, template } = useTemplateStore();
 
   const { form, nextStep, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
+
+  const message = useWatch({
+    control: form.control,
+    name: "template.messageTemplate",
+  });
 
   return (
     <Form {...form}>
@@ -73,7 +76,7 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
                       const match = templates.templates.find(
                         (t) => t.id === value
                       );
-                      setSelectedTemplate(match ?? null);
+                      setTemplate(match ?? null);
                     }}
                     value={field.value}
                   >
@@ -94,9 +97,9 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
             )}
           />
 
-          {selectedTemplate && (
+          {template && (
             <MessageTemplateFormV2
-              initialValue={selectedTemplate.content!}
+              initialValue={template.content!}
               prefix="template.messageTemplate"
               preview
             />
@@ -110,8 +113,11 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
           </div>
         </div>
         <div className="w-full sticky top-4">
-          {selectedTemplate?.content && (
-            <SingleTemplatePreview template={selectedTemplate?.content} />
+          {template?.content && (
+            <BubbleChatPreview
+              messageTemplate={message}
+              template={template?.content}
+            />
           )}
         </div>
       </div>

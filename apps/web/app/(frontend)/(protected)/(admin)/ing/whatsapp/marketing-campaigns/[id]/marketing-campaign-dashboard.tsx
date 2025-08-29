@@ -56,6 +56,8 @@ import { getEstimatedRecipients, hasRemainingUsage } from "./action";
 import { handleMergeTemplateMessage } from "./lib";
 import { SingleTemplatePreview } from "./template-preview";
 import { BubbleChatPreview } from "./bubble-chat-preview";
+import { ComponentsValue } from "@/features/whatsapp/templates/lib/schema";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
 
 interface Props {
   promises: Promise<
@@ -226,19 +228,14 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             tags={data?.tags}
           />
         </div>
-        <CampaignTemplatePreview template={data?.template} />
 
         <div>
           {data && data.template.content && data.messageTemplate ? (
-            <>
-              <BubbleChatPreview
-                messageTemplate={data.messageTemplate}
-                template={data.template.content}
-              />
-            </>
-          ) : (
-            <></>
-          )}
+            <CampaignTemplatePreview
+              messageTemplate={data.messageTemplate}
+              template={data.template.content}
+            />
+          ) : null}
         </div>
       </section>
     </>
@@ -381,16 +378,23 @@ function CampaignDetails({
   );
 }
 
-function CampaignTemplatePreview({ template }: { template?: Template }) {
-  if (!template?.content) return null;
-
+function CampaignTemplatePreview({
+  messageTemplate,
+  template,
+}: {
+  messageTemplate: { components?: ComponentsValue[] };
+  template: TemplateResponse;
+}) {
   return (
     <div className="min-h-16 bg-background border rounded p-4 flex flex-col gap-4">
       <h3 className="text-secondary-foreground text-sm font-semibold">
         Template Preview
       </h3>
-      <div className="min-h-16 ">
-        <SingleTemplatePreview template={template.content} />
+      <div className="min-h-16 bg-muted">
+        <BubbleChatPreview
+          messageTemplate={messageTemplate}
+          template={template}
+        />
       </div>
     </div>
   );

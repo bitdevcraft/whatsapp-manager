@@ -1,16 +1,28 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@workspace/ui/components/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@workspace/ui/components/carousel";
 import { Separator } from "@workspace/ui/components/separator";
 import { TemplateResponse } from "@workspace/wa-cloud-api";
 import React from "react";
 
+import { UniversalPreviewBlob } from "@/components/universal-preview-blob";
 import {
   ComponentsValue,
   ParameterValues,
 } from "@/features/whatsapp/templates/lib/schema";
 
-import { handleMergeTemplateMessage, MergeData, TemplateData } from "./lib";
+import { handleMergeTemplateMessage, MergeData } from "./lib";
 
 interface Props {
   messageTemplate?: { components?: ComponentsValue[] };
@@ -28,64 +40,91 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
   const footer = buildInterpolatedText(data.footer);
 
   return (
-    <div className="border rounded max-w-sm text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2">
-      {header && <div>{header}</div>}
-      {body && <div>{body}</div>}
-      {footer && <div className="text-sm font-light">{footer}</div>}
-      {data.buttons.length > 0 && (
-        <div className="flex flex-col items-center gap-4">
-          <Separator />
-          {data.buttons.map((btn, i) => (
-            <Button
-              className="text-green-900"
-              key={i}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              {
-                // @ts-expect-error text
-                btn.template?.text
-              }
-            </Button>
-          ))}
-        </div>
-      )}
+    <div className="p-4">
+      <Card className="text-foreground bg-[#dcf8c6] max-w-sm">
+        {/* Header media (if any) */}
+        {getHeaderMediaSrc(data.header) && (
+          <CardHeader className="w-full p-2">
+            <UniversalPreviewBlob
+              allowDownload
+              modalOnClick
+              src={getHeaderMediaSrc(data.header)!}
+            />
+          </CardHeader>
+        )}
+        {header && <CardHeader>{header}</CardHeader>}
+        {body && <CardContent>{body}</CardContent>}
+        <CardFooter className="grid">
+          {footer && <div className="text-sm font-light">{footer}</div>}
+          {data.buttons.length > 0 && (
+            <div className="flex flex-col items-center gap-4">
+              <Separator />
+              {data.buttons.map((btn, i) => (
+                <Button
+                  className="text-green-900"
+                  key={i}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  {
+                    // @ts-expect-error text
+                    btn.template?.text
+                  }
+                </Button>
+              ))}
+            </div>
+          )}
+        </CardFooter>
+      </Card>
       {data.cards.length > 0 && (
-        <div className="mt-2 grid gap-3">
-          <Separator />
-          {data.cards.map((card, idx) => {
-            const cHeader = buildInterpolatedText(card.header);
-            const cBody = buildInterpolatedText(card.body);
-            return (
-              <div
-                key={idx}
-                className="border rounded text-wrap p-3 text-black bg-white/70 grid gap-2"
-              >
-                {cHeader && <div>{cHeader}</div>}
-                {cBody && <div>{cBody}</div>}
-                {card.buttons.length > 0 && (
-                  <div className="flex flex-col items-center gap-2">
-                    <Separator />
-                    {card.buttons.map((btn, i) => (
-                      <Button
-                        className="text-green-900"
-                        key={i}
-                        size="sm"
-                        type="button"
-                        variant="ghost"
-                      >
-                        {
-                          // @ts-expect-error text
-                          btn.template?.text
-                        }
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="mt-2 grid gap-3 ">
+          <Carousel>
+            <CarouselContent>
+              {data.cards.map((card, idx) => {
+                const cHeader = buildInterpolatedText(card.header);
+                const cBody = buildInterpolatedText(card.body);
+                return (
+                  <CarouselItem className="basis-3/4 max-w-sm" key={idx}>
+                    <Card className="bg-[#dcf8c6]">
+                      {getHeaderMediaSrc(card.header) && (
+                        <CardHeader className="w-full">
+                          <UniversalPreviewBlob
+                            allowDownload
+                            modalOnClick
+                            src={getHeaderMediaSrc(card.header)!}
+                          />
+                        </CardHeader>
+                      )}
+                      {cHeader && <CardHeader>{cHeader}</CardHeader>}
+
+                      {cBody && <CardContent>{cBody}</CardContent>}
+
+                      {card.buttons.length > 0 && (
+                        <CardFooter className="flex flex-col items-center gap-2">
+                          <Separator />
+                          {card.buttons.map((btn, i) => (
+                            <Button
+                              className="text-green-900"
+                              key={i}
+                              size="sm"
+                              type="button"
+                              variant="ghost"
+                            >
+                              {
+                                // @ts-expect-error text
+                                btn.template?.text
+                              }
+                            </Button>
+                          ))}
+                        </CardFooter>
+                      )}
+                    </Card>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+          </Carousel>
         </div>
       )}
     </div>
@@ -121,6 +160,32 @@ function buildInterpolatedText(section: MergeData): string {
   if (Object.keys(byName).length > 0) out = interpolate(out, byName);
   if (byIndex.length > 0) out = interpolate(out, byIndex);
   return out;
+}
+
+function getHeaderMediaSrc(section: MergeData): string | undefined {
+  const params = (
+    section.message as unknown as undefined | { parameters?: ParameterValues[] }
+  )?.parameters;
+  if (!params) return undefined;
+
+  for (const p of params) {
+    if ("image" in p && p.image) {
+      const id = p.image.id;
+      const link = p.image.link;
+      return id ? `/api/whatsapp/files?mediaId=${id}` : (link ?? undefined);
+    }
+    if ("video" in p && p.video) {
+      const id = p.video.id;
+      const link = p.video.link;
+      return id ? `/api/whatsapp/files?mediaId=${id}` : (link ?? undefined);
+    }
+    if ("document" in p && p.document) {
+      const id = p.document.id;
+      const link = p.document.link;
+      return id ? `/api/whatsapp/files?mediaId=${id}` : (link ?? undefined);
+    }
+  }
+  return undefined;
 }
 
 // Interpolate similar to apps/web/app/(backend)/api/(internal)/whatsapp/actions.ts

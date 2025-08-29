@@ -307,11 +307,11 @@ export function UniversalPreviewBlob({
             role={modalOnClick ? "button" : undefined}
             tabIndex={modalOnClick ? 0 : -1}
           >
-            <AspectRatio ratio={16 / 9}>
+            <AspectRatio ratio={4 / 3}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={imgProps?.alt ?? meta.filename ?? "preview"}
-                className="h-full w-full object-contain select-none"
+                className="h-full w-full object-contain select-none object-cover"
                 draggable={false}
                 src={url}
                 {...imgProps}
