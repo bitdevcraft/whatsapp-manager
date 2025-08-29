@@ -81,6 +81,7 @@ export async function GET(
                   template: true,
                 },
               },
+              template: true,
               user: true,
             },
           });
@@ -118,6 +119,7 @@ export async function GET(
                   template: true,
                 },
               },
+              template: true,
               user: true,
             },
           });
@@ -156,6 +158,7 @@ export async function GET(
                   template: true,
                 },
               },
+              template: true,
               user: true,
             },
           });

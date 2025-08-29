@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
         direction: "outbound",
         from: null,
         isMarketingCampaign: true,
+        messageTemplate: input.template.messageTemplate,
         status: isSuccess ? MessageStatus.DELIVERED : null,
         success: isSuccess,
         teamId,

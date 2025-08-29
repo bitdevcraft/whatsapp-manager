@@ -3,7 +3,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Contact, Template } from "@workspace/db/schema";
+import { Contact, Conversation, Template } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -52,6 +52,7 @@ const FormSchema = z.object({
 
 export interface Props {
   contact: Contact;
+  conversation?: Conversation;
   lastMessageDate?: Date;
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
@@ -59,6 +60,7 @@ export interface Props {
 type FormValues = z.infer<typeof FormSchema>;
 export default function ConversationMessage({
   contact,
+  conversation,
   lastMessageDate,
   templates,
 }: Props) {
@@ -111,6 +113,7 @@ export default function ConversationMessage({
         >
           <TemplateMessage
             contact={contact}
+            conversation={conversation}
             setIsOpen={setTemplateDialog}
             templates={templates}
           />
@@ -167,18 +170,31 @@ function isWithinLast24Hours(createdAt: Date | string): boolean {
 
 function TemplateMessage({
   contact,
+  conversation,
   setIsOpen,
   templates,
 }: {
   contact: Contact;
+  conversation?: Conversation;
   setIsOpen: (state: boolean) => void;
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }) {
   const queryClient = useQueryClient();
 
+  const phoneNumber =
+    conversation &&
+    // @ts-expect-error content
+    "phoneNumberId" in conversation.content &&
+    conversation.content.phoneNumberId
+      ? (conversation.content.phoneNumberId as string)
+      : "";
+
   const form = useForm<TemplateSendValue>({
     defaultValues: {
       contactId: contact.id,
+      details: {
+        phoneNumber,
+      },
       phone: contact.phone,
       template: {
         messageTemplate: {
@@ -191,6 +207,7 @@ function TemplateMessage({
         },
         template: "",
       },
+
       templateId: "",
     },
     resolver: zodResolver(templateSendSchema),
@@ -240,6 +257,14 @@ function TemplateMessage({
     });
   };
 
+  if (!phoneNumber || phoneNumber === "")
+    return (
+      <p className="text-sm font-light">
+        You can&apos;t message the contact personally, contact should message
+        first before proceeding
+      </p>
+    );
+
   return (
     <div>
       <MultiStepForm
@@ -285,7 +310,7 @@ function TemplateMessage({
               />
 
               {selectedTemplate && (
-                <ScrollArea className="h-[70vh]">
+                <ScrollArea className="max-h-[70vh]">
                   <MessageTemplateFormV2
                     initialValue={selectedTemplate.content!}
                     prefix="template.messageTemplate"
@@ -295,7 +320,11 @@ function TemplateMessage({
               )}
 
               <div className="flex justify-end gap-2">
-                <Button type="submit" variant="outline">
+                <Button
+                  disabled={!phoneNumber || phoneNumber === ""}
+                  type="submit"
+                  variant="outline"
+                >
                   Send
                 </Button>
               </div>

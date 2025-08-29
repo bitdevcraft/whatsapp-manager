@@ -2,7 +2,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Conversation } from "@workspace/db/schema";
+import { Conversation, Template } from "@workspace/db/schema";
 import { cn } from "@workspace/ui/lib/utils";
 import React from "react";
 
@@ -44,7 +44,12 @@ export function ScrollableChats() {
     isFetchingPreviousPage,
     status,
   } = useInfiniteQuery<
-    PaginatedResponse<Conversation & { marketingCampaign?: MarketingCampaign }>
+    PaginatedResponse<
+      Conversation & {
+        marketingCampaign?: MarketingCampaign;
+        template: Template;
+      }
+    >
   >({
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     getPreviousPageParam: (firstPage) => {
@@ -59,7 +64,10 @@ export function ScrollableChats() {
       pageParam,
     }): Promise<
       PaginatedResponse<
-        Conversation & { marketingCampaign?: MarketingCampaign }
+        Conversation & {
+          marketingCampaign?: MarketingCampaign;
+          template: Template;
+        }
       >
     > => {
       let url = `/api/whatsapp/conversations/${contactId}?offset=${pageParam}`;
@@ -158,21 +166,32 @@ export function ScrollableChats() {
                           />
                         ) : (
                           <>
-                            {el.body && (
-                              <PreviewMessage
-                                className={
-                                  searchMessageId === el.id
-                                    ? "bg-yellow-200"
-                                    : ""
-                                }
-                                date={el.createdAt}
-                                input={el.body}
-                                user={el.user}
-                              />
+                            {el.templateId ? (
+                              <>
+                                <BubbleChatPreview
+                                  messageTemplate={el.messageTemplate}
+                                  template={el.template}
+                                />
+                              </>
+                            ) : (
+                              <>
+                                {el.body && (
+                                  <PreviewMessage
+                                    className={
+                                      searchMessageId === el.id
+                                        ? "bg-yellow-200"
+                                        : ""
+                                    }
+                                    date={el.createdAt}
+                                    input={el.body}
+                                    user={el.user}
+                                  />
+                                )}
+                              </>
                             )}
                           </>
                         )}
-                        <div className="text-xs font-light text-right">
+                        <div className="text-xs font-light text-right mt-1">
                           {new Date(el.createdAt).toLocaleDateString()}
                           &nbsp;
                           {new Date(el.createdAt).toLocaleTimeString()}

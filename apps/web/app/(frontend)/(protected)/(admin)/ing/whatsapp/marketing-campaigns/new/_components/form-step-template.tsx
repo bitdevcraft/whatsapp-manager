@@ -97,9 +97,9 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
             )}
           />
 
-          {template && (
+          {template?.content && (
             <MessageTemplateFormV2
-              initialValue={template.content!}
+              initialValue={template.content}
               prefix="template.messageTemplate"
               preview
             />

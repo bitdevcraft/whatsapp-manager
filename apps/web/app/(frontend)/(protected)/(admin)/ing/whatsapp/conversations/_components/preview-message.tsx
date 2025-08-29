@@ -27,7 +27,7 @@ export function PreviewMessage({
   return (
     <Card
       className={cn(
-        "border rounded max-w-sm text-wrap p-4 text-black bg-[#dcf8c6] grid gap-2",
+        "border rounded max-w-sm text-wrap text-black bg-[#dcf8c6] grid gap-2",
         className,
         input.body?.media?.id ? "pt-0" : ""
       )}

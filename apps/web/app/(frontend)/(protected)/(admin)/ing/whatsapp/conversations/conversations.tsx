@@ -117,6 +117,7 @@ export function Conversations({ promises, searchContact }: Props) {
                 <CardFooter className="absolute bottom-6 w-full">
                   <ConversationMessage
                     contact={contact.data}
+                    conversation={contact.conversation}
                     lastMessageDate={contact.conversation?.createdAt}
                     templates={templates}
                   />

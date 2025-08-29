@@ -4,6 +4,9 @@ import { MessageTemplateSchema } from "@/features/whatsapp/templates/lib/schema"
 
 export const templateSendSchema = z.object({
   contactId: z.string(),
+  details: z.object({
+    phoneNumber: z.string(),
+  }),
   phone: z.string(),
   template: z.object({
     messageTemplate: MessageTemplateSchema,
