@@ -41,9 +41,13 @@ export function generateConversationComponentBody(
             }
           });
           break;
+        case "CAROUSEL":
+          component.cards;
+          break;
         case "FOOTER":
           conversationBody.footer = component.text;
           break;
+
         case "HEADER":
           conversationBody.header = {
             text: component.text,
