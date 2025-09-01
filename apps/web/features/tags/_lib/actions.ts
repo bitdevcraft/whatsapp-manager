@@ -69,7 +69,6 @@ export async function deleteTags(input: { ids: string[] }) {
       error: null,
     };
   } catch (error) {
-    console.log(error);
     return {
       data: null,
       error: getErrorMessage(error),

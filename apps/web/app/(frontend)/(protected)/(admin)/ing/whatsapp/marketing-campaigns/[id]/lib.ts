@@ -138,8 +138,6 @@ function applyMessage(
         break;
     }
   }
-
-  console.log(out);
 }
 
 function getOrCreate<T>(arr: T[], i: number, factory: () => T): T {

@@ -92,7 +92,6 @@ export function ScrollableChats() {
       if (data.previousOffset === null) {
         setRemaining(0);
       }
-      console.log(data);
 
       return data;
     },

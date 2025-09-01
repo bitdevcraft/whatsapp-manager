@@ -212,8 +212,6 @@ export async function getTemplates(input: GetTemplateSchema) {
                 const [column, property] = item.id.split(".");
 
                 if (column !== undefined && property !== undefined) {
-                  console.log(column, property);
-                  
                   return item.desc
                     ? // @ts-expect-error implicit
                       sql`${templatesTable[column]} ->> ${property} DESC`

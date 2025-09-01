@@ -1,4 +1,3 @@
- 
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
@@ -326,8 +325,6 @@ function CarouselCardComponents({
     control,
     name: componentsPath,
   });
-
-  console.log(componentsPath);
 
   const componentTypes = Object.values(ComponentTypesEnum);
   const buttonTypes = Object.values(SubTypeEnum);

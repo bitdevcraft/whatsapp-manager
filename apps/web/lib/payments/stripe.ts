@@ -35,8 +35,6 @@ export async function createCheckoutSession({
   const product = await stripe.products.retrieve(productId);
   const productMetadata = product.metadata;
 
-  console.log(productMetadata);
-
   const session = await stripe.checkout.sessions.create({
     allow_promotion_codes: true,
     cancel_url: `${env.BASE_URL}/pricing`,

@@ -475,7 +475,6 @@ export function MessageTemplateFormV2({
 
     componentsFA.replace(defaultValue().components);
 
-    console.log(JSON.stringify(getValues()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValue, prefix, setValue, values]);
 

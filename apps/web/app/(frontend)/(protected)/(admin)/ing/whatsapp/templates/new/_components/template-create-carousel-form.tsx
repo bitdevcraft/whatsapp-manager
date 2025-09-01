@@ -114,7 +114,7 @@ export default function TemplateCarouselCreateForm({
         const current =
           (getValues(
             `components.${bIdx}.example.body_text_named_params`
-          ) as Array<{ example: string; param_name: string; }>) || [];
+          ) as Array<{ example: string; param_name: string }>) || [];
         const map = new Map(current.map((o) => [o.param_name, o.example]));
         const next =
           names.length === 0
@@ -148,8 +148,6 @@ export default function TemplateCarouselCreateForm({
         ? `/api/whatsapp/templates/edit/${id}`
         : `/api/whatsapp/templates/create`;
 
-      console.log(url);
-
       const result = await axios.post(url, cleanPayload);
       return result.data;
     },
@@ -171,7 +169,6 @@ export default function TemplateCarouselCreateForm({
 
       if (error instanceof z.ZodError) {
         //
-        console.log(error);
       }
     },
     onSuccess: () => {

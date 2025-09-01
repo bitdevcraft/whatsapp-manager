@@ -115,7 +115,7 @@ export default function TemplateCreateForm({
     ({
       bodyTextOverride,
       headerTextOverride,
-    }: { bodyTextOverride?: string; headerTextOverride?: string; } = {}) => {
+    }: { bodyTextOverride?: string; headerTextOverride?: string } = {}) => {
       const hIdx = findIndexByType("HEADER");
       const bIdx = findIndexByType("BODY");
       if (hIdx < 0 || bIdx < 0) return;
@@ -201,7 +201,7 @@ export default function TemplateCreateForm({
           const names = parseNamed(hText);
           const current = (getValues(
             `components.${hIdx}.example.header_text_named_params`
-          ) || []) as Array<{ example: string; param_name: string; }>;
+          ) || []) as Array<{ example: string; param_name: string }>;
           const map = new Map(current.map((o) => [o.param_name, o.example]));
           const next =
             names.length === 0
@@ -223,7 +223,7 @@ export default function TemplateCreateForm({
         const namesB = parseNamed(bText);
         const currentB = (getValues(
           `components.${bIdx}.example.body_text_named_params`
-        ) || []) as Array<{ example: string; param_name: string; }>;
+        ) || []) as Array<{ example: string; param_name: string }>;
         const mapB = new Map(currentB.map((o) => [o.param_name, o.example]));
         const nextB =
           namesB.length === 0
@@ -342,8 +342,6 @@ export default function TemplateCreateForm({
       const url = id
         ? `/api/whatsapp/templates/edit/${id}`
         : `/api/whatsapp/templates/create`;
-
-      console.log(url);
 
       const result = await axios.post(url, cleanPayload);
 

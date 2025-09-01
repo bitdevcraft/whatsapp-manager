@@ -20,8 +20,6 @@ export async function getEstimatedRecipients(id: string) {
     async () => {
       const contactRepo = new ContactRepository(teamId);
 
-      console.log(await contactRepo.countContactByMarketingCampaignId(id));
-
       return contactRepo.countContactByMarketingCampaignId(id);
     },
     [id],
