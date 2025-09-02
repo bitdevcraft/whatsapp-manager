@@ -154,7 +154,7 @@ export function ScrollableChats() {
                   key={el.id}
                 >
                   <Tooltip delayDuration={500}>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <div className="mb-4 text-left">
                         {el.marketingCampaign ? (
                           <BubbleChatPreview

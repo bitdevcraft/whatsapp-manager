@@ -43,8 +43,10 @@ import {
 
 import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
 import { useSearchMessageStore } from "../_store/message-store";
-import { MessageTemplateFormV2 } from "../../marketing-campaigns/new/_components/template-form/message-template-form";
+import { MessagesTemplateFormV2 } from "../../marketing-campaigns/new/_components/template-form/message-template-form";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { useTemplateStore } from "../../marketing-campaigns/new/_components/store";
+import { DevTool } from "@hookform/devtools";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
@@ -213,27 +215,17 @@ function TemplateMessage({
     resolver: zodResolver(templateSendSchema),
   });
 
-  const [selectedTemplate, setSelectedTemplate] =
-    React.useState<null | Template>(null);
-
-  const defaultMessageTemplate = React.useMemo(() => {
-    return selectedTemplate
-      ? transformTemplateResponseToFormValues(selectedTemplate.content!)
-      : undefined;
-  }, [selectedTemplate]);
+  const { setTemplate, template } = useTemplateStore();
 
   // Patch messageTemplate values when template changes
   React.useEffect(() => {
-    if (defaultMessageTemplate) {
-      form.setValue("template.messageTemplate", defaultMessageTemplate);
-    }
     const templateId = form.getValues().template.template;
 
     if (templateId) {
       const match = templates.templates.find((t: any) => t.id === templateId);
-      setSelectedTemplate(match ?? null);
+      setTemplate(match ?? null);
     }
-  }, [defaultMessageTemplate, form, templates.templates]);
+  }, [form, setTemplate, templates.templates]);
 
   const { setSearchMessageId } = useSearchMessageStore();
 
@@ -241,7 +233,7 @@ function TemplateMessage({
     try {
       await axios.post("/api/whatsapp/conversations/send-template", {
         ...data,
-        templateId: selectedTemplate?.id,
+        templateId: template?.id,
       });
 
       toast.success("Sent");
@@ -267,71 +259,67 @@ function TemplateMessage({
 
   return (
     <div>
-      <MultiStepForm
-        className={"space-y-10"}
-        form={form}
-        onSubmit={onSubmit}
-        schema={templateSendSchema}
-      >
-        <MultiStepFormStep name="templates">
-          <Form {...form}>
-            <div className={"flex flex-col gap-4"}>
-              <FormField
-                name="template.template"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Select Template</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          const match = templates.templates.find(
-                            (t) => t.id === value
-                          );
-                          setSelectedTemplate(match ?? null);
-                        }}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {templates.templates.map((template) => (
-                            <SelectItem key={template.id} value={template.id}>
-                              {template.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <Form {...form}>
+        <form
+          className={"flex flex-col gap-4"}
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FormField
+            name="template.template"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Template</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      const match = templates.templates.find(
+                        (t) => t.id === value
+                      );
+                      setTemplate(match ?? null);
+                    }}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {template?.content && (
+            <ScrollArea className="h-[70vh]">
+              <MessagesTemplateFormV2
+                initialValue={template.content}
+                key={template.id}
+                prefix="template.messageTemplate"
+                preview
               />
+            </ScrollArea>
+          )}
 
-              {selectedTemplate && (
-                <ScrollArea className="max-h-[70vh]">
-                  <MessageTemplateFormV2
-                    initialValue={selectedTemplate.content!}
-                    prefix="template.messageTemplate"
-                    preview
-                  />
-                </ScrollArea>
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  disabled={!phoneNumber || phoneNumber === ""}
-                  type="submit"
-                  variant="outline"
-                >
-                  Send
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </MultiStepFormStep>
-      </MultiStepForm>
+          <div className="flex justify-end gap-2">
+            <Button
+              disabled={!phoneNumber || phoneNumber === ""}
+              type="submit"
+              variant="outline"
+            >
+              Send
+            </Button>
+          </div>
+        </form>
+      </Form>
+      <DevTool control={form.control} />
     </div>
   );
 }

@@ -64,6 +64,72 @@ interface Props {
   preview?: boolean;
 }
 
+export function MessagesTemplateFormV2({
+  initialValue,
+  prefix,
+  preview = false,
+}: Props) {
+  const { control, getValues, setValue } = useFormContext();
+
+  const values = React.useMemo(
+    () => (initialValue ? { ...initialValue } : undefined),
+    [initialValue]
+  );
+
+  const setPreview = usePreviewStore((state) => state.setPreview);
+  const setComponents = usePreviewStore((state) => state.setComponents);
+
+  const defaultValue = React.useCallback(() => {
+    if (values) return TranslateTemplateResponseToMessageTemplate(values);
+
+    return {
+      components: [],
+      language: {
+        code: LanguagesEnum.English,
+        policy: "deterministic",
+      },
+      name: "",
+    };
+  }, [values]);
+
+  const componentsFA = useFieldArray({
+    control,
+    name: `${prefix}.components` as const,
+  });
+
+  useEffect(() => {
+    setPreview(preview);
+    setValue(prefix, defaultValue());
+
+    componentsFA.replace(defaultValue().components);
+    setComponents(defaultValue().components);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultValue, prefix, setValue, values]);
+
+  return (
+    <>
+      {/* <Switch
+        id="airplane-mode"
+        onCheckedChange={(checked) => setPreview(checked)}
+      /> */}
+
+      <MessageTemplateNameField prefix={`${prefix}`} />
+      <MessageTemplateLanguageCodeField prefix={`${prefix}`} />
+
+      {componentsFA.fields.length === 0 && <p>No Components</p>}
+
+      {componentsFA.fields.map((comp, idx) => (
+        <div key={comp.id}>
+          <MessageTemplateComponentItemField
+            prefix={`${prefix}.components.${idx}`}
+          />
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function MessageTemplateComponentItemCardComponent({
   prefix,
 }: {
@@ -97,16 +163,15 @@ export function MessageTemplateComponentItemCards({
 
   const cardsFA = useFieldArray({ control, name: `${prefix}.cards` as const });
 
-  if (cardsFA.fields.length === 0) return null;
-
   return (
     <Carousel>
       <CarouselContent>
-        {cardsFA.fields.map((card, idx) => (
+        {cardsFA?.fields.map((card, idx) => (
           <CarouselItem className="basis-3/4" key={card.id}>
             <MessageTemplateComponentItemCardComponent
               prefix={`${prefix}.cards.${idx}`}
             />
+            Test
           </CarouselItem>
         ))}
       </CarouselContent>
@@ -434,70 +499,6 @@ export function MessageTemplateComponentItemParameterTextType({
         </FormItem>
       )}
     />
-  );
-}
-
-export function MessageTemplateFormV2({
-  initialValue,
-  prefix,
-  preview = false,
-}: Props) {
-  const { control, getValues, setValue } = useFormContext();
-
-  const values = React.useMemo(
-    () => (initialValue ? { ...initialValue } : undefined),
-    [initialValue]
-  );
-
-  const setPreview = usePreviewStore((state) => state.setPreview);
-
-  const defaultValue = React.useCallback(() => {
-    if (values) return TranslateTemplateResponseToMessageTemplate(values);
-
-    return {
-      components: [],
-      language: {
-        code: LanguagesEnum.English,
-        policy: "deterministic",
-      },
-      name: "",
-    };
-  }, [values]);
-
-  const componentsFA = useFieldArray({
-    control,
-    name: `${prefix}.components` as const,
-  });
-
-  useEffect(() => {
-    setPreview(preview);
-    setValue(prefix, defaultValue());
-
-    componentsFA.replace(defaultValue().components);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue, prefix, setValue, values]);
-
-  return (
-    <>
-      {/* <Switch
-        id="airplane-mode"
-        onCheckedChange={(checked) => setPreview(checked)}
-      /> */}
-
-      <MessageTemplateNameField prefix={`${prefix}`} />
-      <MessageTemplateLanguageCodeField prefix={`${prefix}`} />
-
-      {componentsFA.fields.length === 0 && <p>No Components</p>}
-
-      {componentsFA.fields.map((comp, idx) => (
-        <div key={comp.id}>
-          <MessageTemplateComponentItemField
-            prefix={`${prefix}.components.${idx}`}
-          />
-        </div>
-      ))}
-    </>
   );
 }
 

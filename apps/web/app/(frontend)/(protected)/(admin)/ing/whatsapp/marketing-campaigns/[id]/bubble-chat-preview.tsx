@@ -70,7 +70,6 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
                   className="text-green-900"
                   key={i}
                   size="sm"
-                  type="button"
                   variant="ghost"
                 >
                   {
@@ -119,7 +118,6 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
                               className="text-green-900"
                               key={i}
                               size="sm"
-                              type="button"
                               variant="ghost"
                             >
                               {

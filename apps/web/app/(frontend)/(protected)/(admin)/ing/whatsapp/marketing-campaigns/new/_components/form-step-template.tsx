@@ -25,7 +25,7 @@ import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib
 import { BubbleChatPreview } from "../../[id]/bubble-chat-preview";
 import { getSelectTemplates } from "./queries";
 import { useTemplateStore } from "./store";
-import { MessageTemplateFormV2 } from "./template-form/message-template-form";
+import { MessagesTemplateFormV2 } from "./template-form/message-template-form";
 
 interface TemplateStepFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
@@ -98,8 +98,9 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
           />
 
           {template?.content && (
-            <MessageTemplateFormV2
+            <MessagesTemplateFormV2
               initialValue={template.content}
+              key={template.id}
               prefix="template.messageTemplate"
               preview
             />

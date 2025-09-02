@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm db:migrate && tsup",
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
