@@ -14,6 +14,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { formatMessageTimestamp } from "@/utils/format-message-timestamp";
 
 import { useSearchMessageStore } from "../_store/message-store";
+import { useContactStore } from "../_store/contact-store";
 
 interface PageResponse {
   data: {
@@ -125,28 +126,40 @@ function ContactMessageItem({
     rn: number;
   };
 }) {
-  const [contact, setContact] = useQueryState("contact", {
+  const [, setContact] = useQueryState("contact", {
     defaultValue: "",
     shallow: false,
   });
 
   const queryClient = useQueryClient();
 
-  const onRead = async () => {
-    try {
-      await axios.post("/api/whatsapp/conversations/members", {
-        contactId: contact,
-        markAsRead: true,
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      //
-    }
+  const [, startTransaction] = React.useTransition();
 
-    queryClient.invalidateQueries({
-      queryKey: ["conversation_contacts"], // prefix
-    });
-  };
+  const onRead = React.useCallback(
+    (id: string) => {
+      startTransaction(async () => {
+        try {
+          console.log({
+            contactId: id,
+            markAsRead: true,
+          });
+
+          await axios.post("/api/whatsapp/conversations/members", {
+            contactId: id,
+            markAsRead: true,
+          });
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          //
+        }
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["conversation_contacts"], // prefix
+      });
+    },
+    [queryClient]
+  );
 
   const { clearSearchMessageId } = useSearchMessageStore();
 
@@ -159,7 +172,7 @@ function ContactMessageItem({
         e.stopPropagation();
         setContact(item.id!);
         clearSearchMessageId();
-        onRead();
+        if (item.id) onRead(item.id);
       }}
       {...props}
     >

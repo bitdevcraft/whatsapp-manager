@@ -3,6 +3,8 @@ import { withTenantTransaction } from "@workspace/db/tenant";
 import { and, eq } from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
+import z from "zod";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();
@@ -16,10 +18,7 @@ export async function POST(request: Request) {
 
   const { teamId, user } = userWithTeam;
 
-  const body = (await request.json()) as {
-    contactId: string;
-    markAsRead: boolean;
-  };
+  const body = BodySchema.parse(await request.json());
 
   try {
     await withTenantTransaction(teamId, async (tx) => {
@@ -35,14 +34,23 @@ export async function POST(request: Request) {
           )
         );
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    return new Response("", {
-      status: 400,
-    });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ errors: error.flatten() }, { status: 400 });
+    }
+
+    // 5. Log & return generic 500
+    console.error("POST /api/posts error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 
-  return new Response("", {
-    status: 200,
-  });
+  return NextResponse.json("", { status: 200 });
 }
+
+const BodySchema = z.object({
+  contactId: z.string().uuid(),
+  markAsRead: z.boolean(),
+});
