@@ -1,7 +1,8 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 
 import type * as qrCode from './types';
 
@@ -44,17 +45,18 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     }
 
     /**
-     * Get all QR codes for the current phone number.
+     * Delete a QR code.
      *
-     * @returns List of all QR codes
+     * @param qrCodeId The QR code ID to delete
+     * @returns Response indicating success or failure
      *
      * @example
-     * const qrCodes = await whatsappClient.qrCode.getQrCodes();
+     * await whatsappClient.qrCode.deleteQrCode('qr_code_123');
      */
-    async getQrCodes(): Promise<qrCode.QrCodesResponse> {
+    async deleteQrCode(qrCodeId: string): Promise<ResponseSuccess> {
         return this.sendJson(
-            HttpMethodsEnum.Get,
-            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            HttpMethodsEnum.Delete,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
         );
@@ -79,6 +81,23 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
     }
 
     /**
+     * Get all QR codes for the current phone number.
+     *
+     * @returns List of all QR codes
+     *
+     * @example
+     * const qrCodes = await whatsappClient.qrCode.getQrCodes();
+     */
+    async getQrCodes(): Promise<qrCode.QrCodesResponse> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
+    }
+
+    /**
      * Update an existing QR code's prefilled message.
      *
      * @param request The QR code update request containing code and new message
@@ -96,24 +115,6 @@ export default class QrCodeApi extends BaseAPI implements qrCode.QrCodeClass {
             `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(request),
-        );
-    }
-
-    /**
-     * Delete a QR code.
-     *
-     * @param qrCodeId The QR code ID to delete
-     * @returns Response indicating success or failure
-     *
-     * @example
-     * await whatsappClient.qrCode.deleteQrCode('qr_code_123');
-     */
-    async deleteQrCode(qrCodeId: string): Promise<ResponseSuccess> {
-        return this.sendJson(
-            HttpMethodsEnum.Delete,
-            `${this.config[WabaConfigEnum.PhoneNumberId]}/${this.endpoint}/${qrCodeId}`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
         );
     }
 }

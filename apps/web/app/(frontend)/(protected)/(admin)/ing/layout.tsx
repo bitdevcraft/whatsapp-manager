@@ -1,20 +1,21 @@
-import { cookies, headers as nextHeaders } from "next/headers";
-
-import { AppSidebar } from "@/components/admin-layout/app-sidebar";
-import { SiteHeader } from "@/components/admin-layout/site-header";
-import { TitleProvider } from "@/components/provider/title-provider";
+import { auth } from "@workspace/auth";
+import { BannerList } from "@workspace/ui/components/banner";
 import {
   SidebarInset,
   SidebarProvider,
 } from "@workspace/ui/components/sidebar";
-import { BannerList } from "@workspace/ui/components/banner";
-import { Toaster } from "sonner";
-import AuthenticateWaba from "./_components/authenticate-waba";
-import { SocketProvider } from "@/components/provider/socket-provider";
+import { cookies, headers as nextHeaders } from "next/headers";
 import { redirect } from "next/navigation";
-import Notification from "./notification";
-import { auth } from "@workspace/auth";
+import { Toaster } from "sonner";
+
+import { AppSidebar } from "@/components/admin-layout/app-sidebar";
+import { SiteHeader } from "@/components/admin-layout/site-header";
+import { SocketProvider } from "@/components/provider/socket-provider";
+import { TitleProvider } from "@/components/provider/title-provider";
 import { getUsage } from "@/lib/db/usage-queries";
+
+import AuthenticateWaba from "./_components/authenticate-waba";
+import Notification from "./notification";
 
 export default async function Layout({
   children,
@@ -42,8 +43,8 @@ export default async function Layout({
   return (
     <div>
       <SocketProvider
-        userId={authSession.user.id}
         teamId={authSession.session.activeOrganizationId!}
+        userId={authSession.user.id}
       >
         <AuthenticateWaba />
         <TitleProvider defaultTitle="">
@@ -51,17 +52,17 @@ export default async function Layout({
             defaultOpen={defaultOpen}
             style={
               {
-                "--sidebar-width": "calc(var(--spacing) * 72)",
                 "--header-height": "calc(var(--spacing) * 12)",
+                "--sidebar-width": "calc(var(--spacing) * 72)",
               } as React.CSSProperties
             }
           >
             <div className="flex flex-1">
               <AppSidebar
-                variant="inset"
+                promises={promises}
                 teams={data}
                 user={authSession.user}
-                promises={promises}
+                variant="inset"
               />
               <SidebarInset>
                 <div className="px-1">
@@ -88,19 +89,19 @@ export default async function Layout({
           </SidebarProvider>
           <Toaster
             toastOptions={{
-              duration: 10_000,
-              closeButton: true,
-              style: {
-                fontWeight: "lighter",
-              },
               classNames: {
-                toast: "text-[15px] pr-16",
                 closeButton: "bg-white",
                 error: "bg-red-50 text-red-700 border border-red-400",
+                info: "bg-blue-50 text-blue-700 border border-blue-400",
+                success: "bg-indigo-500 text-white border border-indigo-800",
+                toast: "text-[15px] pr-16",
                 warning:
                   "bg-orange-50 text-orange-700 border border-orange-400",
-                success: "bg-indigo-500 text-white border border-indigo-800",
-                info: "bg-blue-50 text-blue-700 border border-blue-400",
+              },
+              closeButton: true,
+              duration: 10_000,
+              style: {
+                fontWeight: "lighter",
               },
             }}
           />

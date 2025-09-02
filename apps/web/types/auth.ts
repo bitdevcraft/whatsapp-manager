@@ -1,22 +1,22 @@
 import { z } from "zod";
 
 export const SIGN_UP_METHODS = ["password", "google", "facebook"] as const;
-export type SignUpMethod = (typeof SIGN_UP_METHODS)[number];
-
 // Declarations
 export interface AuthUser {
-  id: string;
-  name: string;
   email_address: string;
+  id: string;
   is_email_address_verified: boolean;
+  name: string;
 }
 
-type SignUpResponse = AuthUser;
+export type SignUpMethod = (typeof SIGN_UP_METHODS)[number];
+
 type LoginResponse = AuthUser;
+type SignUpResponse = AuthUser;
 
 export const SignUpWithPasswordSchema = z.object({
-  name: z.string(),
   email: z.string().email(),
+  name: z.string(),
   password: z.string().min(8).max(255),
 });
 export type SignUpWithPasswordPayload = z.infer<
@@ -36,8 +36,8 @@ export type LoginWithEmailPasswordResponse = LoginResponse;
 
 // Login with username and password
 export const LoginWithUsernamePasswordSchema = z.object({
-  username: z.string(),
   password: z.string().min(8).max(255),
+  username: z.string(),
 });
 export type LoginWithUsernamePasswordPayload = z.infer<
   typeof LoginWithUsernamePasswordSchema
@@ -53,9 +53,9 @@ export type ForgotPasswordResponse = true;
 
 // Reset password
 export const ResetPasswordSchema = z.object({
-  token: z.string(),
   password: z.string().min(8).max(255),
   passwordAgain: z.string().min(8).max(255),
+  token: z.string(),
 });
 export type ResetPasswordPayload = z.infer<typeof ResetPasswordSchema>;
 export type ResetPasswordResponse = boolean;

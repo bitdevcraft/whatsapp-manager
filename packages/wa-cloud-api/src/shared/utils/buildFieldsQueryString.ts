@@ -1,4 +1,4 @@
-export function buildFieldsQueryString(fields?: string[] | string): string {
+export function buildFieldsQueryString(fields?: string | string[]): string {
     if (!fields) return '';
 
     let fieldParams = '';

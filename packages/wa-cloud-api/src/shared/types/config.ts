@@ -1,23 +1,16 @@
 import { WabaConfigEnum } from './enums';
 
-export type WhatsAppConfig = {
-    accessToken: string;
-    appId?: string;
-    appSecret?: string;
-    phoneNumberId?: number;
-    businessAcctId?: string;
-    apiVersion?: string;
-    webhookEndpoint?: string;
-    webhookVerificationToken?: string;
-    listenerPort?: number;
-    debug?: boolean;
-    maxRetriesAfterWait?: number;
-    requestTimeout?: number;
-    privatePem?: string;
-    passphrase?: string;
-};
+export interface WabaConfigType {
+    /**
+     * The access token to make calls on behalf of the signed in Meta for Developers account or business.
+     */
+    [WabaConfigEnum.AccessToken]: string;
 
-export type WabaConfigType = {
+    /**
+     * The version of the Cloud API being used. Starts with a "v" and follows the major number.
+     */
+    [WabaConfigEnum.APIVersion]: string;
+
     /**
      * The Meta for Developers business application Id for this registered application.
      */
@@ -27,6 +20,30 @@ export type WabaConfigType = {
      * The Meta for Developers business application secret for this registered application.
      */
     [WabaConfigEnum.AppSecret]: string;
+    /**
+     * The Meta for Developers business id for the registered business.
+     */
+    [WabaConfigEnum.BusinessAcctId]: string;
+
+    /**
+     * To turn on global debugging of the logger to print verbose output across the APIs.
+     */
+    [WabaConfigEnum.Debug]: boolean;
+
+    /**
+     * The listener port for the webhook web server.
+     */
+    [WabaConfigEnum.ListenerPort]: number;
+
+    /**
+     * The total number of times a request should be retried after the wait period if it fails.
+     */
+    [WabaConfigEnum.MaxRetriesAfterWait]: number;
+
+    /**
+     * The passphrase for the Meta for Developers business.
+     */
+    [WabaConfigEnum.Passphrase]: string;
 
     /**
      * The Meta for Developers phone number id used by the registered business.
@@ -34,18 +51,14 @@ export type WabaConfigType = {
     [WabaConfigEnum.PhoneNumberId]: number;
 
     /**
-     * The Meta for Developers business id for the registered business.
+     * The private key for the Meta for Developers business.
      */
-    [WabaConfigEnum.BusinessAcctId]: string;
-    /**
-     * The version of the Cloud API being used. Starts with a "v" and follows the major number.
-     */
-    [WabaConfigEnum.APIVersion]: string;
+    [WabaConfigEnum.PrivatePem]: string;
 
     /**
-     * The access token to make calls on behalf of the signed in Meta for Developers account or business.
+     * The timeout period for a request to quit and destroy the attempt in ms.
      */
-    [WabaConfigEnum.AccessToken]: string;
+    [WabaConfigEnum.RequestTimeout]: number;
 
     /**
      * The endpoint path (e.g. if the value here is webhook, the webhook URL would look like http/https://{host}/webhook).
@@ -56,34 +69,21 @@ export type WabaConfigType = {
      * The verification token that needs to match what is sent by the Cloud API webhook in order to subscribe.
      */
     [WabaConfigEnum.WebhookVerificationToken]: string;
+}
 
-    /**
-     * The listener port for the webhook web server.
-     */
-    [WabaConfigEnum.ListenerPort]: number;
-
-    /**
-     * To turn on global debugging of the logger to print verbose output across the APIs.
-     */
-    [WabaConfigEnum.Debug]: boolean;
-
-    /**
-     * The total number of times a request should be retried after the wait period if it fails.
-     */
-    [WabaConfigEnum.MaxRetriesAfterWait]: number;
-
-    /**
-     * The timeout period for a request to quit and destroy the attempt in ms.
-     */
-    [WabaConfigEnum.RequestTimeout]: number;
-
-    /**
-     * The private key for the Meta for Developers business.
-     */
-    [WabaConfigEnum.PrivatePem]: string;
-
-    /**
-     * The passphrase for the Meta for Developers business.
-     */
-    [WabaConfigEnum.Passphrase]: string;
-};
+export interface WhatsAppConfig {
+    accessToken: string;
+    apiVersion?: string;
+    appId?: string;
+    appSecret?: string;
+    businessAcctId?: string;
+    debug?: boolean;
+    listenerPort?: number;
+    maxRetriesAfterWait?: number;
+    passphrase?: string;
+    phoneNumberId?: number;
+    privatePem?: string;
+    requestTimeout?: number;
+    webhookEndpoint?: string;
+    webhookVerificationToken?: string;
+}

@@ -1,41 +1,42 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Stepper } from "@workspace/ui/components/stepper";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   MultiStepForm,
   MultiStepFormContextProvider,
   MultiStepFormHeader,
   MultiStepFormStep,
 } from "@/components/forms/multi-step-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Stepper } from "@workspace/ui/components/stepper";
-import { useForm } from "react-hook-form";
-import TemplateStep from "./form-step-template";
-import AudienceStep from "./form-step-audience";
-import DetailsStep from "./form-step-details";
 import { useTitle } from "@/components/provider/title-provider";
-import { useEffect } from "react";
 import {
   MarketingCampaignFormSchema,
   MarketingCampaignFormValues,
 } from "@/features/marketing-campaigns/_lib/schema";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
-import axios from "axios";
-import { LanguagesEnum } from "@workspace/wa-cloud-api";
-import { getSelectPhoneNumber, getSelectTemplates } from "./queries";
 import { getSelectTags } from "@/features/tags/_lib/queries";
 
+import AudienceStep from "./form-step-audience";
+import DetailsStep from "./form-step-details";
+import TemplateStep from "./form-step-template";
+import { getSelectPhoneNumber, getSelectTemplates } from "./queries";
+
 interface MarketingCampaignFormProps {
-  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
-  tags: Awaited<ReturnType<typeof getSelectTags>>;
   phoneNumbers: Awaited<ReturnType<typeof getSelectPhoneNumber>>;
+  tags: Awaited<ReturnType<typeof getSelectTags>>;
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
 
 export default function MarketingCampaignForm({
-  templates,
-  tags,
   phoneNumbers,
+  tags,
+  templates,
 }: MarketingCampaignFormProps) {
   const router = useRouter();
 
@@ -46,22 +47,10 @@ export default function MarketingCampaignForm({
   }, [setTitle]);
 
   const form = useForm<MarketingCampaignFormValues>({
-    resolver: zodResolver(MarketingCampaignFormSchema),
     defaultValues: {
-      template: {
-        template: "",
-        messageTemplate: {
-          name: "",
-          language: {
-            policy: "deterministic",
-            code: LanguagesEnum.English,
-          },
-          components: [],
-        },
-      },
       audience: {
-        tags: [],
         phone: [],
+        tags: [],
       },
       details: {
         campaignName: "",
@@ -70,9 +59,21 @@ export default function MarketingCampaignForm({
         schedule: null,
         track: false,
       },
+      template: {
+        messageTemplate: {
+          components: [],
+          language: {
+            code: LanguagesEnum.English,
+            policy: "deterministic",
+          },
+          name: "",
+        },
+        template: "",
+      },
     },
     // reValidateMode: "onBlur",
     mode: "onChange",
+    resolver: zodResolver(MarketingCampaignFormSchema),
   });
 
   const onSubmit = async (data: MarketingCampaignFormValues) => {
@@ -98,9 +99,9 @@ export default function MarketingCampaignForm({
   return (
     <MultiStepForm
       className={"space-y-10"}
-      schema={MarketingCampaignFormSchema}
       form={form}
       onSubmit={onSubmit}
+      schema={MarketingCampaignFormSchema}
     >
       <MultiStepFormHeader
         className={"flex w-full flex-col justify-center space-y-6"}
@@ -111,16 +112,16 @@ export default function MarketingCampaignForm({
           {({ currentStepIndex }) => (
             <div className="">
               <Stepper
-                variant={"numbers"}
-                steps={["Details", "Template", "Audience"]}
                 currentStep={currentStepIndex}
+                steps={["Details", "Template", "Audience"]}
+                variant={"numbers"}
               />
             </div>
           )}
         </MultiStepFormContextProvider>
       </MultiStepFormHeader>
 
-      <MultiStepFormStep name="details" className="max-w-xl mx-auto">
+      <MultiStepFormStep className="max-w-xl mx-auto" name="details">
         <DetailsStep phoneNumbers={phoneNumbers} />
       </MultiStepFormStep>
 
@@ -128,7 +129,7 @@ export default function MarketingCampaignForm({
         <TemplateStep templates={templates} />
       </MultiStepFormStep>
 
-      <MultiStepFormStep name="audience" className="max-w-xl mx-auto">
+      <MultiStepFormStep className="max-w-xl mx-auto" name="audience">
         <AudienceStep tags={tags} />
       </MultiStepFormStep>
     </MultiStepForm>

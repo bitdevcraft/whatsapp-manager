@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
@@ -15,28 +16,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Button } from "@workspace/ui/components/button";
-import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useWatch } from "react-hook-form";
 
-import { Template } from "@workspace/db/schema/templates";
 import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
 import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
+
+import { BubbleChatPreview } from "../../[id]/bubble-chat-preview";
 import { getSelectTemplates } from "./queries";
-import { SingleTemplatePreview } from "../../[id]/template-preview";
-import { MessageTemplateFormV2 } from "./template-form/message-template-form";
+import { useTemplateStore } from "./store";
+import { MessagesTemplateFormV2 } from "./template-form/message-template-form";
 
 interface TemplateStepFormProps {
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
 
 function TemplateStep({ templates }: TemplateStepFormProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null
-  );
+  const { setTemplate, template } = useTemplateStore();
 
   const { form, nextStep, prevStep } =
     useMultiStepFormContext<typeof MarketingCampaignFormSchema>();
+
+  const message = useWatch({
+    control: form.control,
+    name: "template.messageTemplate",
+  });
 
   return (
     <Form {...form}>
@@ -44,18 +48,18 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
         <div className={"flex flex-col gap-4 max-w-xl w-full"}>
           <div className="flex justify-end gap-2">
             <Button
-              type="button"
-              size="icon"
-              variant="outline"
               onClick={prevStep}
+              size="icon"
+              type="button"
+              variant="outline"
             >
               <ArrowLeft />
             </Button>
             <Button
-              type="button"
-              size="icon"
-              variant="outline"
               onClick={nextStep}
+              size="icon"
+              type="button"
+              variant="outline"
             >
               <ArrowRight />
             </Button>
@@ -72,7 +76,7 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
                       const match = templates.templates.find(
                         (t) => t.id === value
                       );
-                      setSelectedTemplate(match ?? null);
+                      setTemplate(match ?? null);
                     }}
                     value={field.value}
                   >
@@ -93,24 +97,28 @@ function TemplateStep({ templates }: TemplateStepFormProps) {
             )}
           />
 
-          {selectedTemplate && (
-            <MessageTemplateFormV2
+          {template?.content && (
+            <MessagesTemplateFormV2
+              initialValue={template.content}
+              key={template.id}
               prefix="template.messageTemplate"
-              initialValue={selectedTemplate.content!}
               preview
             />
           )}
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={prevStep}>
+            <Button onClick={prevStep} type="button" variant="outline">
               Previous
             </Button>
             <Button onClick={nextStep}>Next</Button>
           </div>
         </div>
         <div className="w-full sticky top-4">
-          {selectedTemplate?.content && (
-            <SingleTemplatePreview template={selectedTemplate?.content} />
+          {template?.content && (
+            <BubbleChatPreview
+              messageTemplate={message}
+              template={template?.content}
+            />
           )}
         </div>
       </div>

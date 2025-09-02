@@ -1,36 +1,6 @@
 "use client";
 
-import {
-  ComponentTypesEnum,
-  LanguagesEnum,
-  TemplateResponse,
-} from "@workspace/wa-cloud-api";
-import { useEffect } from "react";
-import {
-  ControllerRenderProps,
-  useFieldArray,
-  useFormContext,
-  useWatch,
-} from "react-hook-form";
-import { TranslateTemplateResponseToMessageTemplate } from "./message-template-actions";
-import React from "react";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
-import { Switch } from "@workspace/ui/components/switch";
-import { LoaderCircle, Upload, X } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import {
   Card,
   CardContent,
@@ -42,7 +12,6 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@workspace/ui/components/carousel";
-import { usePreviewStore } from "./message-template-store";
 import {
   FileUpload,
   FileUploadClear,
@@ -54,23 +23,53 @@ import {
   FileUploadList,
   FileUploadTrigger,
 } from "@workspace/ui/components/data-importer/file-upload";
-import { onWhatsAppMediaFileUpload } from "./message-template-utils";
-import { Button } from "@workspace/ui/components/button";
-import { startTask } from "better-auth/react";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import { Input } from "@workspace/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import {
+  ComponentTypesEnum,
+  LanguagesEnum,
+  TemplateResponse,
+} from "@workspace/wa-cloud-api";
+import { Upload, X } from "lucide-react";
+import { useEffect } from "react";
+import React from "react";
+import {
+  ControllerRenderProps,
+  useFieldArray,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import { toast } from "sonner";
 
+import { TranslateTemplateResponseToMessageTemplate } from "./message-template-actions";
+import { usePreviewStore } from "./message-template-store";
+import { onWhatsAppMediaFileUpload } from "./message-template-utils";
+
 interface Props {
-  prefix: string;
   initialValue?: TemplateResponse;
+  prefix: string;
   preview?: boolean;
 }
 
-export function MessageTemplateFormV2({
-  prefix,
+export function MessagesTemplateFormV2({
   initialValue,
+  prefix,
   preview = false,
 }: Props) {
-  const { setValue, control, getValues } = useFormContext();
+  const { control, getValues, setValue } = useFormContext();
 
   const values = React.useMemo(
     () => (initialValue ? { ...initialValue } : undefined),
@@ -78,17 +77,18 @@ export function MessageTemplateFormV2({
   );
 
   const setPreview = usePreviewStore((state) => state.setPreview);
+  const setComponents = usePreviewStore((state) => state.setComponents);
 
   const defaultValue = React.useCallback(() => {
     if (values) return TranslateTemplateResponseToMessageTemplate(values);
 
     return {
-      name: "",
-      language: {
-        policy: "deterministic",
-        code: LanguagesEnum.English,
-      },
       components: [],
+      language: {
+        code: LanguagesEnum.English,
+        policy: "deterministic",
+      },
+      name: "",
     };
   }, [values]);
 
@@ -102,8 +102,8 @@ export function MessageTemplateFormV2({
     setValue(prefix, defaultValue());
 
     componentsFA.replace(defaultValue().components);
+    setComponents(defaultValue().components);
 
-    console.log(JSON.stringify(getValues()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValue, prefix, setValue, values]);
 
@@ -130,83 +130,52 @@ export function MessageTemplateFormV2({
   );
 }
 
-export function MessageTemplateNameField({ prefix }: { prefix: string }) {
-  const { control } = useFormContext();
-
-  const preview = usePreviewStore((state) => state.preview);
-
-  return (
-    <FormField
-      control={control}
-      name={`${prefix}.name` as const}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Template Name</FormLabel>
-          <FormControl>
-            <Input
-              placeholder="Template Name"
-              {...field}
-              className={
-                preview
-                  ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
-                  : ``
-              }
-              disabled={preview}
-              readOnly={preview}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
-export function MessageTemplateLanguageCodeField({
+export function MessageTemplateComponentItemCardComponent({
   prefix,
 }: {
   prefix: string;
 }) {
   const { control } = useFormContext();
-  const languageOptions = Object.values(LanguagesEnum);
-  const preview = usePreviewStore((state) => state.preview);
+  const componentsFA = useFieldArray({
+    control,
+    name: `${prefix}.components` as const,
+  });
 
   return (
-    <FormField
-      control={control}
-      name={`${prefix}.language.code` as const}
-      render={({ field }) => (
-        <FormItem className="basis-1/6">
-          <FormLabel
-            className={preview ? `font-light text-muted-foreground` : ""}
-          >
-            Language
-          </FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl>
-              <SelectTrigger
-                className={
-                  preview
-                    ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
-                    : ``
-                }
-                disabled={preview}
-              >
-                <SelectValue placeholder="Select language" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {languageOptions.map((lang) => (
-                <SelectItem key={lang} value={lang}>
-                  {lang}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <>
+      {componentsFA.fields.map((comp, idx) => (
+        <div key={comp.id}>
+          <MessageTemplateComponentItemField
+            prefix={`${prefix}.components.${idx}`}
+          />
+        </div>
+      ))}
+    </>
+  );
+}
+
+export function MessageTemplateComponentItemCards({
+  prefix,
+}: {
+  prefix: string;
+}) {
+  const { control } = useFormContext();
+
+  const cardsFA = useFieldArray({ control, name: `${prefix}.cards` as const });
+
+  return (
+    <Carousel>
+      <CarouselContent>
+        {cardsFA?.fields.map((card, idx) => (
+          <CarouselItem className="basis-3/4" key={card.id}>
+            <MessageTemplateComponentItemCardComponent
+              prefix={`${prefix}.cards.${idx}`}
+            />
+            Test
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 }
 
@@ -273,40 +242,12 @@ export function MessageTemplateComponentItemField({
   );
 }
 
-export function MessageTemplateComponentItemParameters({
-  prefix,
-}: {
-  prefix: string;
-}) {
-  const { control } = useFormContext();
-
-  const parametersFA = useFieldArray({
-    control,
-    name: `${prefix}.parameters` as const,
-  });
-
-  if (parametersFA.fields.length === 0) return null;
-
-  return (
-    <ul className="space-y-4">
-      {parametersFA.fields.map((parameter, idx) => (
-        <li key={parameter.id}>
-          <MessageTemplateComponentItemParameterItem
-            prefix={`${prefix}.parameters.${idx}`}
-            index={idx}
-          />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function MessageTemplateComponentItemParameterItem({
-  prefix,
   index,
+  prefix,
 }: {
-  prefix: string;
   index: number;
+  prefix: string;
 }) {
   const { control } = useFormContext();
 
@@ -327,49 +268,24 @@ export function MessageTemplateComponentItemParameterItem({
       )}
       {(type === "IMAGE" || type === "VIDEO" || type === "DOCUMENT") && (
         <MessageTemplateComponentItemParameterMediaType
-          prefix={prefix}
           mediaType={type}
+          prefix={prefix}
         />
       )}
     </>
   );
 }
 
-export function MessageTemplateComponentItemParameterTextType({
-  prefix,
-}: {
-  prefix: string;
-}) {
-  const { control } = useFormContext();
-
-  return (
-    <FormField
-      control={control}
-      name={`${prefix}.text`}
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <Input placeholder="Enter New Value" {...field} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
 export function MessageTemplateComponentItemParameterMediaType({
-  prefix,
   mediaType,
+  prefix,
 }: {
+  mediaType: "DOCUMENT" | "IMAGE" | "VIDEO";
   prefix: string;
-  mediaType: "IMAGE" | "VIDEO" | "DOCUMENT";
 }) {
   const { control } = useFormContext();
 
   const phoneNumber = useWatch({ control, name: "details.phoneNumber" });
-
-  const fileClearRef = React.useRef<HTMLButtonElement>(null);
 
   const mediaPath = `${prefix}.${mediaType.toLowerCase()}`;
 
@@ -403,7 +319,7 @@ export function MessageTemplateComponentItemParameterMediaType({
   }, []);
 
   const onFileValidate = React.useCallback(
-    (file: File): string | null => {
+    (file: File): null | string => {
       // Validate max files
       if (files.length >= 1) {
         return "You can only upload up to 1 files";
@@ -411,10 +327,6 @@ export function MessageTemplateComponentItemParameterMediaType({
 
       const isValid = (() => {
         switch (mediaType) {
-          case "IMAGE":
-            return file.type.startsWith("image/");
-          case "VIDEO":
-            return file.type.startsWith("video/");
           case "DOCUMENT":
             // allow common doc mimetypes (pdf, docx, etc.)
             return (
@@ -426,6 +338,10 @@ export function MessageTemplateComponentItemParameterMediaType({
               file.type ===
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             );
+          case "IMAGE":
+            return file.type.startsWith("image/");
+          case "VIDEO":
+            return file.type.startsWith("video/");
           default:
             return false;
         }
@@ -460,14 +376,14 @@ export function MessageTemplateComponentItemParameterMediaType({
             <FormLabel>Image</FormLabel>
             <FormControl>
               <FileUpload
-                value={files}
+                className="w-full max-w-sm mx-auto relative"
+                maxSize={5 * 1024 * 1024}
+                onFileReject={onFileReject}
+                onFileValidate={onFileValidate}
                 onValueChange={(next) => {
                   onUpload(next, field);
                 }}
-                maxSize={5 * 1024 * 1024}
-                className="w-full max-w-sm mx-auto relative"
-                onFileReject={onFileReject}
-                onFileValidate={onFileValidate}
+                value={files}
               >
                 {isPending && (
                   <div className="absolute z-99 size-full bg-background/50 rounded"></div>
@@ -485,7 +401,7 @@ export function MessageTemplateComponentItemParameterMediaType({
                     </p>
                   </div>
                   <FileUploadTrigger asChild>
-                    <Button variant="outline" size="sm" className="mt-2 w-fit">
+                    <Button className="mt-2 w-fit" size="sm" variant="outline">
                       Browse files
                     </Button>
                   </FileUploadTrigger>
@@ -498,10 +414,10 @@ export function MessageTemplateComponentItemParameterMediaType({
                       <FileUploadItemMetadata />
                       <FileUploadItemDelete asChild>
                         <Button
-                          variant="ghost"
-                          size="icon"
                           className="size-7"
                           onClick={onDelete}
+                          size="icon"
+                          variant="ghost"
                         >
                           <X />
                         </Button>
@@ -535,53 +451,133 @@ export function MessageTemplateComponentItemParameterMediaType({
   );
 }
 
-export function MessageTemplateComponentItemCards({
+export function MessageTemplateComponentItemParameters({
   prefix,
 }: {
   prefix: string;
 }) {
   const { control } = useFormContext();
-  const preview = usePreviewStore((state) => state.preview);
 
-  const cardsFA = useFieldArray({ control, name: `${prefix}.cards` as const });
+  const parametersFA = useFieldArray({
+    control,
+    name: `${prefix}.parameters` as const,
+  });
 
-  if (cardsFA.fields.length === 0) return null;
+  if (parametersFA.fields.length === 0) return null;
 
   return (
-    <Carousel>
-      <CarouselContent>
-        {cardsFA.fields.map((card, idx) => (
-          <CarouselItem key={card.id} className="basis-3/4">
-            <MessageTemplateComponentItemCardComponent
-              prefix={`${prefix}.cards.${idx}`}
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
+    <ul className="space-y-4">
+      {parametersFA.fields.map((parameter, idx) => (
+        <li key={parameter.id}>
+          <MessageTemplateComponentItemParameterItem
+            index={idx}
+            prefix={`${prefix}.parameters.${idx}`}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
-export function MessageTemplateComponentItemCardComponent({
+export function MessageTemplateComponentItemParameterTextType({
   prefix,
 }: {
   prefix: string;
 }) {
   const { control } = useFormContext();
-  const componentsFA = useFieldArray({
-    control,
-    name: `${prefix}.components` as const,
-  });
 
   return (
-    <>
-      {componentsFA.fields.map((comp, idx) => (
-        <div key={comp.id}>
-          <MessageTemplateComponentItemField
-            prefix={`${prefix}.components.${idx}`}
-          />
-        </div>
-      ))}
-    </>
+    <FormField
+      control={control}
+      name={`${prefix}.text`}
+      render={({ field }) => (
+        <FormItem>
+          <FormControl>
+            <Input placeholder="Enter New Value" {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+export function MessageTemplateLanguageCodeField({
+  prefix,
+}: {
+  prefix: string;
+}) {
+  const { control } = useFormContext();
+  const languageOptions = Object.values(LanguagesEnum);
+  const preview = usePreviewStore((state) => state.preview);
+
+  return (
+    <FormField
+      control={control}
+      name={`${prefix}.language.code` as const}
+      render={({ field }) => (
+        <FormItem className="basis-1/6">
+          <FormLabel
+            className={preview ? `font-light text-muted-foreground` : ""}
+          >
+            Language
+          </FormLabel>
+          <Select onValueChange={field.onChange} value={field.value}>
+            <FormControl>
+              <SelectTrigger
+                className={
+                  preview
+                    ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                    : ``
+                }
+                disabled={preview}
+              >
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {languageOptions.map((lang) => (
+                <SelectItem key={lang} value={lang}>
+                  {lang}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+export function MessageTemplateNameField({ prefix }: { prefix: string }) {
+  const { control } = useFormContext();
+
+  const preview = usePreviewStore((state) => state.preview);
+
+  return (
+    <FormField
+      control={control}
+      name={`${prefix}.name` as const}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Template Name</FormLabel>
+          <FormControl>
+            <Input
+              placeholder="Template Name"
+              {...field}
+              className={
+                preview
+                  ? `disabled:opacity-100 disabled:bg-background disabled:border-0 disabled:dark:bg-background disabled:font-semibold  disabled:cursor-default`
+                  : ``
+              }
+              disabled={preview}
+              readOnly={preview}
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }

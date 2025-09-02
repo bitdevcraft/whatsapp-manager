@@ -1,7 +1,8 @@
-import { BaseAPI } from '@shared/types/base';
 import type { WabaConfigType } from '@shared/types/config';
-import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import type { RequesterClass, ResponseSuccess } from '@shared/types/request';
+
+import { BaseAPI } from '@shared/types/base';
+import { HttpMethodsEnum, WabaConfigEnum } from '@shared/types/enums';
 import { buildFieldsQueryString } from '@shared/utils/buildFieldsQueryString';
 
 import type * as waba from './types';
@@ -18,6 +19,23 @@ import type * as waba from './types';
 export default class WabaApi extends BaseAPI implements waba.WABAClass {
     constructor(config: WabaConfigType, client: RequesterClass) {
         super(config, client);
+    }
+
+    /**
+     * Get all WABA subscriptions for the business account.
+     *
+     * @returns List of all subscribed apps and their configurations
+     *
+     * @example
+     * const subscriptions = await whatsappClient.waba.getAllWabaSubscriptions();
+     */
+    async getAllWabaSubscriptions(): Promise<waba.WabaSubscriptions> {
+        return this.sendJson(
+            HttpMethodsEnum.Get,
+            `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
+            this.config[WabaConfigEnum.RequestTimeout],
+            null,
+        );
     }
 
     /**
@@ -41,16 +59,16 @@ export default class WabaApi extends BaseAPI implements waba.WABAClass {
     }
 
     /**
-     * Get all WABA subscriptions for the business account.
+     * Unsubscribe from WABA webhooks.
      *
-     * @returns List of all subscribed apps and their configurations
+     * @returns Response indicating success or failure
      *
      * @example
-     * const subscriptions = await whatsappClient.waba.getAllWabaSubscriptions();
+     * await whatsappClient.waba.unsubscribeFromWaba();
      */
-    async getAllWabaSubscriptions(): Promise<waba.WabaSubscriptions> {
+    async unsubscribeFromWaba(): Promise<ResponseSuccess> {
         return this.sendJson(
-            HttpMethodsEnum.Get,
+            HttpMethodsEnum.Delete,
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
             null,
@@ -82,23 +100,6 @@ export default class WabaApi extends BaseAPI implements waba.WABAClass {
             `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
             this.config[WabaConfigEnum.RequestTimeout],
             JSON.stringify(body),
-        );
-    }
-
-    /**
-     * Unsubscribe from WABA webhooks.
-     *
-     * @returns Response indicating success or failure
-     *
-     * @example
-     * await whatsappClient.waba.unsubscribeFromWaba();
-     */
-    async unsubscribeFromWaba(): Promise<ResponseSuccess> {
-        return this.sendJson(
-            HttpMethodsEnum.Delete,
-            `${this.config[WabaConfigEnum.BusinessAcctId]}/subscribed_apps`,
-            this.config[WabaConfigEnum.RequestTimeout],
-            null,
         );
     }
 }

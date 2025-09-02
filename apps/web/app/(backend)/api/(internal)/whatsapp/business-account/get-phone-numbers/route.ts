@@ -1,17 +1,18 @@
-import { RESPONSE_CODE } from "@/lib/constants/response-code";
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { logger } from "@/lib/logger";
 import {
-  withTenantTransaction,
-  whatsAppBusinessAccountsTable,
   NewWhatsAppBusinessAccountPhoneNumber,
   whatsAppBusinessAccountPhoneNumbersTable,
+  whatsAppBusinessAccountsTable,
+  withTenantTransaction,
 } from "@workspace/db";
 import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import WhatsApp, { PhoneNumberResponse } from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
+
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   const userWithTeam = await getUserWithTeam();
@@ -43,8 +44,8 @@ export async function GET() {
   }
 
   const decryptedToken = await decryptApiKey({
-    iv: data.accessToken?.iv,
     data: data.accessToken.data,
+    iv: data.accessToken?.iv,
   });
 
   const config = {
@@ -60,19 +61,13 @@ export async function GET() {
     const newPhoneNumbers: NewWhatsAppBusinessAccountPhoneNumber[] =
       phoneNumbers.data.map((phoneNumber: PhoneNumberResponse) => {
         const temp: NewWhatsAppBusinessAccountPhoneNumber = {
-          id: Number(phoneNumber.id),
-          teamId: userWithTeam.teamId!,
-          displayPhoneNumber: phoneNumber.display_phone_number,
-          verifiedName: phoneNumber.verified_name,
-          status: phoneNumber.status,
-          qualityRating: phoneNumber.quality_rating,
-          searchVisibility: phoneNumber.search_visibility,
-          platformType: phoneNumber.platform_type,
-          codeVerificationStatus: phoneNumber.code_verification_status,
           accountMode: phoneNumber.account_mode,
           certificate: phoneNumber.certificate,
+          codeVerificationStatus: phoneNumber.code_verification_status,
           conversationalAutomation: phoneNumber.conversational_automation,
+          displayPhoneNumber: phoneNumber.display_phone_number,
           healthStatus: phoneNumber.health_status,
+          id: Number(phoneNumber.id),
           isOfficialBusinessAccount: phoneNumber.is_official_business_account,
           isOnBizApp: phoneNumber.is_on_biz_app,
           isPinEnabled: phoneNumber.is_pin_enabled,
@@ -82,8 +77,14 @@ export async function GET() {
           nameStatus: phoneNumber.name_status,
           newCertificate: phoneNumber.new_certificate,
           newNameStatus: phoneNumber.new_name_status,
+          platformType: phoneNumber.platform_type,
+          qualityRating: phoneNumber.quality_rating,
           qualityScore: phoneNumber.quality_score,
+          searchVisibility: phoneNumber.search_visibility,
+          status: phoneNumber.status,
+          teamId: userWithTeam.teamId!,
           throughput: phoneNumber.throughput,
+          verifiedName: phoneNumber.verified_name,
         };
         return temp;
       });
@@ -94,7 +95,6 @@ export async function GET() {
           .insert(whatsAppBusinessAccountPhoneNumbersTable)
           .values(newPhoneNumbers)
           .onConflictDoUpdate({
-            target: whatsAppBusinessAccountPhoneNumbersTable.id,
             set: buildConflictUpdateColumns(
               whatsAppBusinessAccountPhoneNumbersTable,
               [
@@ -116,6 +116,7 @@ export async function GET() {
                 "newNameStatus",
               ]
             ),
+            target: whatsAppBusinessAccountPhoneNumbersTable.id,
           });
     });
 

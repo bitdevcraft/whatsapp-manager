@@ -1,5 +1,5 @@
 export interface IJobMessageOutgoing {
-  teamId: string;
   marketingCampaignId: string;
+  teamId: string;
   userId: string;
 }

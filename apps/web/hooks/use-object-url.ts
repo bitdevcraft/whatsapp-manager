@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-union-types */
 // /lib/use-object-url.ts
 import { useEffect, useRef, useState } from "react";
 

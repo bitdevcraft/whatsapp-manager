@@ -1,30 +1,30 @@
-export type FileStartSessionResponse = {
-    id: string;
-};
-
-export type FileStartResumeUploadResponse = {
-    h: string;
-};
-
-export type FileInterruptedUploadResponse = {
-    id: string;
+export interface FileInterruptedUploadResponse {
     file_offset: number;
-};
+    id: string;
+}
 
-export type FileSessionDetails = {
-    file_name: string;
+export interface FileSessionDetails {
     file_length: string;
+    file_name: string;
     file_type: string;
-};
+}
 
-export type FileUploadDetails = {
-    file_offset?: number;
-    upload_session_id: string;
-    body: Buffer<ArrayBuffer>;
-};
+export interface FileStartResumeUploadResponse {
+    h: string;
+}
+
+export interface FileStartSessionResponse {
+    id: string;
+}
 
 export interface FileUploadClass {
-    startSession(input: FileSessionDetails): Promise<FileStartSessionResponse>;
-    startResumeUpload(input: FileUploadDetails): Promise<FileStartResumeUploadResponse>;
     getInterruptedUpload(uploadSessionId: string): Promise<FileInterruptedUploadResponse>;
+    startResumeUpload(input: FileUploadDetails): Promise<FileStartResumeUploadResponse>;
+    startSession(input: FileSessionDetails): Promise<FileStartSessionResponse>;
+}
+
+export interface FileUploadDetails {
+    body: Buffer<ArrayBuffer>;
+    file_offset?: number;
+    upload_session_id: string;
 }

@@ -1,12 +1,87 @@
-import { unstable_cache } from "@/lib/unstable-cache";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { and, asc, count, desc, eq, gte, ilike, lte, sql } from "drizzle-orm";
+/* eslint-disable perfectionist/sort-objects */
+import { Contact, Conversation, conversationsTable } from "@workspace/db";
 import { contactsTable } from "@workspace/db/schema/contacts";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { GetContactSchema } from "./validations";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
+
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
-import { Contact, Conversation, conversationsTable } from "@workspace/db";
+import { unstable_cache } from "@/lib/unstable-cache";
+
+import { GetContactSchema } from "./validations";
+
+export async function getContactById(id: string): Promise<{
+  conversation: Conversation | undefined;
+  data: Contact | undefined;
+}> {
+  const defaultValue: {
+    conversation: Conversation | undefined;
+    data: Contact | undefined;
+  } = { conversation: undefined, data: undefined };
+
+  if (!id) return defaultValue;
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return defaultValue;
+  }
+
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const { contact, conversation } = await withTenantTransaction(
+          teamId,
+          async (tx) => {
+            const contact = await tx.query.contactsTable.findFirst({
+              where: and(
+                eq(contactsTable.id, id),
+                isNull(contactsTable.deletedAt)
+              ),
+            });
+
+            const conversation = await tx.query.conversationsTable.findFirst({
+              where: and(
+                eq(conversationsTable.contactId, id),
+                eq(conversationsTable.direction, "inbound"),
+                isNull(conversationsTable.deletedAt)
+              ),
+              orderBy: (conversationsTable, { desc }) => [
+                desc(conversationsTable.createdAt),
+              ],
+            });
+
+            return { contact, conversation };
+          }
+        );
+
+        return { data: contact, conversation };
+      } catch (error) {
+        console.error(error);
+        return defaultValue;
+      }
+    },
+    [id],
+    {
+      tags: [id],
+      revalidate: 1,
+    }
+  )();
+}
 
 export async function getContacts(input: GetContactSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -30,8 +105,6 @@ export async function getContacts(input: GetContactSchema) {
           filters: input.filters,
           joinOperator: input.joinOperator,
         });
-
-        logger.log("RYAN", input.tags);
 
         const where = advancedTable
           ? advancedWhere
@@ -86,7 +159,7 @@ export async function getContacts(input: GetContactSchema) {
             const data = await tx
               .select()
               .from(contactsTable)
-              .where(where)
+              .where(and(where, isNull(contactsTable.deletedAt)))
               .limit(input.perPage)
               .offset(offset)
               .orderBy(...orderBy);
@@ -96,7 +169,7 @@ export async function getContacts(input: GetContactSchema) {
                 count: count(),
               })
               .from(contactsTable)
-              .where(where)
+              .where(and(where, isNull(contactsTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 
@@ -118,63 +191,6 @@ export async function getContacts(input: GetContactSchema) {
     {
       revalidate: 10,
       tags: [`contacts:${userWithTeam?.teamId}`, "contacts"],
-    }
-  )();
-}
-
-export async function getContactById(id: string): Promise<{
-  data: Contact | undefined;
-  conversation: Conversation | undefined;
-}> {
-  const defaultValue: {
-    data: Contact | undefined;
-    conversation: Conversation | undefined;
-  } = { data: undefined, conversation: undefined };
-
-  if (!id) return defaultValue;
-
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    return defaultValue;
-  }
-
-  const { teamId } = userWithTeam;
-
-  return await unstable_cache(
-    async () => {
-      try {
-        const { contact, conversation } = await withTenantTransaction(
-          teamId,
-          async (tx) => {
-            const contact = await tx.query.contactsTable.findFirst({
-              where: eq(contactsTable.id, id),
-            });
-
-            const conversation = await tx.query.conversationsTable.findFirst({
-              where: and(
-                eq(conversationsTable.contactId, id),
-                eq(conversationsTable.direction, "inbound")
-              ),
-              orderBy: (conversationsTable, { desc }) => [
-                desc(conversationsTable.createdAt),
-              ],
-            });
-
-            return { contact, conversation };
-          }
-        );
-
-        return { data: contact, conversation };
-      } catch (error) {
-        console.error(error);
-        return defaultValue;
-      }
-    },
-    [id],
-    {
-      tags: [id],
-      revalidate: 1,
     }
   )();
 }

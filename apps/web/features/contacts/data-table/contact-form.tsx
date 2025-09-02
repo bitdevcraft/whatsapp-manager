@@ -1,39 +1,40 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { Button } from "@workspace/ui/components/button";
-import { ContactFormValues, ContactFormSchema } from "../_lib/schema";
-import { PhoneInput } from "@workspace/ui/components/phone-input";
-import { getSelectTags } from "@/features/tags/_lib/queries";
 import { MultiSelect } from "@workspace/ui/components/multi-select";
+import { PhoneInput } from "@workspace/ui/components/phone-input";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+
+import { getSelectTags } from "@/features/tags/_lib/queries";
+
+import { ContactFormSchema, ContactFormValues } from "../_lib/schema";
 
 interface TagsFormProps {
-  onSubmit: (values: ContactFormValues) => void;
   initialValues?: Partial<ContactFormValues>;
+  onSubmit: (values: ContactFormValues) => void;
   tags: Awaited<ReturnType<typeof getSelectTags>>;
 }
 
-export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
+export function ContactForm({ initialValues, onSubmit, tags }: TagsFormProps) {
   const form = useForm<ContactFormValues>({
-    resolver: zodResolver(ContactFormSchema),
     defaultValues: {
+      email: initialValues?.email ?? "",
       name: initialValues?.name ?? "",
       phoneNumber: initialValues?.phoneNumber ?? "",
-      email: initialValues?.email ?? "",
       tags: initialValues?.tags ?? [],
     },
+    resolver: zodResolver(ContactFormSchema),
   });
 
   function handleFormSubmit(data: ContactFormValues) {
@@ -44,8 +45,8 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleFormSubmit)}
         className="space-y-4"
+        onSubmit={form.handleSubmit(handleFormSubmit)}
       >
         <FormField
           control={form.control}
@@ -98,13 +99,13 @@ export function ContactForm({ onSubmit, initialValues, tags }: TagsFormProps) {
               <FormLabel>Tags</FormLabel>
               <FormControl>
                 <MultiSelect
-                  options={tags}
-                  onValueChange={field.onChange}
-                  value={field.value || []}
                   defaultValue={field.value || []}
-                  placeholder="Select tags"
-                  variant="default"
                   maxCount={3}
+                  onValueChange={field.onChange}
+                  options={tags}
+                  placeholder="Select tags"
+                  value={field.value || []}
+                  variant="default"
                 />
               </FormControl>
               <FormMessage />

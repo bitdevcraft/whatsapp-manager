@@ -1,6 +1,7 @@
 import { WhatsApp } from '@core/whatsapp';
 import { BusinessVerticalEnum } from '@shared/types/enums';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { UpdateBusinessProfileRequest } from '../types';
 
 describe('Business Profile API - Unit Tests', () => {
@@ -10,8 +11,8 @@ describe('Business Profile API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
@@ -25,14 +26,14 @@ describe('Business Profile API - Unit Tests', () => {
             mockRequestSend.mockResolvedValue({
                 data: [
                     {
-                        messaging_product: 'whatsapp',
                         about: 'We provide excellent service',
                         address: '123 Business St, City, State',
                         description: 'A comprehensive business description',
                         email: 'contact@example.com',
+                        messaging_product: 'whatsapp',
                         profile_picture_url: 'https://example.com/profile.jpg',
-                        websites: ['https://example.com'],
                         vertical: BusinessVerticalEnum.RETAIL,
+                        websites: ['https://example.com'],
                     },
                 ],
             });
@@ -42,9 +43,9 @@ describe('Business Profile API - Unit Tests', () => {
             expect(mockRequestSend).toHaveBeenCalled();
             expect(profile.data).toHaveLength(1);
             expect(profile.data[0]).toMatchObject({
-                messaging_product: 'whatsapp',
                 about: 'We provide excellent service',
                 email: 'contact@example.com',
+                messaging_product: 'whatsapp',
                 vertical: BusinessVerticalEnum.RETAIL,
             });
         });
@@ -85,13 +86,13 @@ describe('Business Profile API - Unit Tests', () => {
 
         it('should update business profile with correct schema', async () => {
             const updateRequest: UpdateBusinessProfileRequest = {
-                messaging_product: 'whatsapp',
                 about: 'Updated business description',
-                email: 'newemail@example.com',
-                websites: ['https://newwebsite.com'],
-                vertical: BusinessVerticalEnum.RESTAURANT,
                 address: '456 New Address Ave',
                 description: 'A new comprehensive description',
+                email: 'newemail@example.com',
+                messaging_product: 'whatsapp',
+                vertical: BusinessVerticalEnum.RESTAURANT,
+                websites: ['https://newwebsite.com'],
             };
 
             await whatsApp.businessProfile.updateBusinessProfile(updateRequest);
@@ -102,20 +103,20 @@ describe('Business Profile API - Unit Tests', () => {
             const requestBody = JSON.parse(body);
 
             expect(requestBody).toMatchObject({
-                messaging_product: 'whatsapp',
                 about: 'Updated business description',
-                email: 'newemail@example.com',
-                websites: ['https://newwebsite.com'],
-                vertical: BusinessVerticalEnum.RESTAURANT,
                 address: '456 New Address Ave',
                 description: 'A new comprehensive description',
+                email: 'newemail@example.com',
+                messaging_product: 'whatsapp',
+                vertical: BusinessVerticalEnum.RESTAURANT,
+                websites: ['https://newwebsite.com'],
             });
         });
 
         it('should update business profile with minimal fields', async () => {
             const updateRequest: UpdateBusinessProfileRequest = {
-                messaging_product: 'whatsapp',
                 about: 'Just about text',
+                messaging_product: 'whatsapp',
             };
 
             await whatsApp.businessProfile.updateBusinessProfile(updateRequest);
@@ -126,8 +127,8 @@ describe('Business Profile API - Unit Tests', () => {
             const requestBody = JSON.parse(body);
 
             expect(requestBody).toMatchObject({
-                messaging_product: 'whatsapp',
                 about: 'Just about text',
+                messaging_product: 'whatsapp',
             });
         });
     });
@@ -171,8 +172,8 @@ describe('Business Profile API - Unit Tests', () => {
 
         it('should get upload handle information', async () => {
             mockRequestSend.mockResolvedValue({
-                handle: 'final_handle_123',
                 file_size: 1024000,
+                handle: 'final_handle_123',
                 upload_result: {
                     handle_type: 'image',
                     name: 'profile.jpg',
@@ -187,8 +188,8 @@ describe('Business Profile API - Unit Tests', () => {
             const [_, endpoint] = mockRequestSend.mock.calls[0];
             expect(endpoint).toBe(uploadId);
             expect(handleInfo).toMatchObject({
-                handle: 'final_handle_123',
                 file_size: 1024000,
+                handle: 'final_handle_123',
                 upload_result: {
                     handle_type: 'image',
                     name: 'profile.jpg',
@@ -201,8 +202,8 @@ describe('Business Profile API - Unit Tests', () => {
             const createSessionMock = vi.fn().mockResolvedValue({ id: 'session_123' });
             const uploadMediaMock = vi.fn().mockResolvedValue({ h: 'temp_handle' });
             const getHandleMock = vi.fn().mockResolvedValue({
-                handle: 'final_handle_123',
                 file_size: 1024000,
+                handle: 'final_handle_123',
                 upload_result: { handle_type: 'image', name: 'profile.jpg' },
             });
             const updateProfileMock = vi.fn().mockResolvedValue({ success: true });
@@ -234,9 +235,9 @@ describe('Business Profile API - Unit Tests', () => {
 
             // Step 4: Update profile with new picture
             const updateRequest: UpdateBusinessProfileRequest = {
+                about: 'Business with new profile picture',
                 messaging_product: 'whatsapp',
                 profile_picture_handle: handleInfo.handle,
-                about: 'Business with new profile picture',
             };
 
             const updateResponse = await whatsApp.businessProfile.updateBusinessProfile(updateRequest);
@@ -289,9 +290,9 @@ describe('Business Profile API - Unit Tests', () => {
 
         it('should handle business vertical enum correctly', async () => {
             const updateRequest: UpdateBusinessProfileRequest = {
+                about: 'Healthcare business',
                 messaging_product: 'whatsapp',
                 vertical: BusinessVerticalEnum.HEALTH,
-                about: 'Healthcare business',
             };
 
             await whatsApp.businessProfile.updateBusinessProfile(updateRequest);
@@ -305,9 +306,9 @@ describe('Business Profile API - Unit Tests', () => {
 
         it('should handle custom vertical string correctly', async () => {
             const updateRequest: UpdateBusinessProfileRequest = {
+                about: 'Custom business type',
                 messaging_product: 'whatsapp',
                 vertical: 'CUSTOM_BUSINESS_TYPE',
-                about: 'Custom business type',
             };
 
             await whatsApp.businessProfile.updateBusinessProfile(updateRequest);
@@ -321,9 +322,9 @@ describe('Business Profile API - Unit Tests', () => {
 
         it('should handle multiple websites correctly', async () => {
             const updateRequest: UpdateBusinessProfileRequest = {
+                about: 'Business with multiple websites',
                 messaging_product: 'whatsapp',
                 websites: ['https://main-site.com', 'https://shop.com'],
-                about: 'Business with multiple websites',
             };
 
             await whatsApp.businessProfile.updateBusinessProfile(updateRequest);

@@ -5,11 +5,11 @@ export type FlagConfig = typeof flagConfig;
 export const flagConfig = {
   featureFlags: [
     {
-      label: "",
-      value: "advancedFilters" as const,
       icon: Filter,
-      tooltipTitle: "Advanced filters",
+      label: "",
       tooltipDescription: "",
+      tooltipTitle: "Advanced filters",
+      value: "advancedFilters" as const,
     },
   ],
 };

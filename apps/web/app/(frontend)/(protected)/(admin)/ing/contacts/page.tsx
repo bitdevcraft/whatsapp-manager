@@ -1,12 +1,13 @@
-import { getContacts } from "@/features/contacts/_lib/queries";
-import ContactTable from "@/features/contacts/data-table/contact-table";
-import React from "react";
 import { DataTableSkeleton } from "@workspace/ui/components/data-table";
 import { getValidFilters } from "@workspace/ui/lib/data-table";
-import { SearchParams } from "@/types";
-import { contactSearchParamsCache } from "@/features/contacts/_lib/validations";
+import React from "react";
+
 import { FeatureFlagsProvider } from "@/components/provider/feature-flags-provider";
+import { getContacts } from "@/features/contacts/_lib/queries";
+import { contactSearchParamsCache } from "@/features/contacts/_lib/validations";
+import ContactTable from "@/features/contacts/data-table/contact-table";
 import { getSelectTags } from "@/features/tags/_lib/queries";
+import { SearchParams } from "@/types";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;
@@ -29,8 +30,6 @@ export default async function Home(props: IndexPageProps) {
         <React.Suspense
           fallback={
             <DataTableSkeleton
-              columnCount={7}
-              filterCount={2}
               cellWidths={[
                 "10rem",
                 "30rem",
@@ -40,6 +39,8 @@ export default async function Home(props: IndexPageProps) {
                 "6rem",
                 "6rem",
               ]}
+              columnCount={7}
+              filterCount={2}
               shrinkZero
             />
           }

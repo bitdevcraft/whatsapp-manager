@@ -1,14 +1,40 @@
 "use server";
 
-import { getUserWithTeam } from "@/lib/db/queries";
 import { ContactRepository, UsageLimitRepository } from "@workspace/db";
 import { unstable_cache, unstable_noStore } from "next/cache";
 
+import { getUserWithTeam } from "@/lib/db/queries";
+
+export async function getEstimatedRecipients(id: string) {
+  unstable_noStore();
+
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return 0;
+  }
+
+  const { teamId } = userWithTeam;
+
+  return unstable_cache(
+    async () => {
+      const contactRepo = new ContactRepository(teamId);
+
+      return contactRepo.countContactByMarketingCampaignId(id);
+    },
+    [id],
+    {
+      revalidate: 10,
+      tags: [id],
+    }
+  )();
+}
+
 export async function hasRemainingUsage(id: string): Promise<{
-  success: boolean;
+  contactCount?: number;
   message?: string;
   remaining?: number;
-  contactCount?: number;
+  success: boolean;
 }> {
   unstable_noStore();
 
@@ -16,8 +42,8 @@ export async function hasRemainingUsage(id: string): Promise<{
 
   if (!userWithTeam?.teamId) {
     return {
-      success: false,
       message: "No Team",
+      success: false,
     };
   }
 
@@ -40,41 +66,14 @@ export async function hasRemainingUsage(id: string): Promise<{
 
   if (remaining < contactCount) {
     return {
-      success: false,
+      contactCount,
       message: `Remaining Balance is Limited (Remaining:${remaining}). Please limit your recipients`,
       remaining,
-      contactCount,
+      success: false,
     };
   }
 
   return {
     success: true,
   };
-}
-
-export async function getEstimatedRecipients(id: string) {
-  unstable_noStore();
-
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    return 0;
-  }
-
-  const { teamId } = userWithTeam;
-
-  return unstable_cache(
-    async () => {
-      const contactRepo = new ContactRepository(teamId);
-
-      console.log(await contactRepo.countContactByMarketingCampaignId(id));
-
-      return contactRepo.countContactByMarketingCampaignId(id);
-    },
-    [id],
-    {
-      tags: [id],
-      revalidate: 10,
-    }
-  )();
 }

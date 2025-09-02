@@ -1,6 +1,6 @@
 "use client";
 
-import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
@@ -9,13 +9,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { Button } from "@workspace/ui/components/button";
-import { PhoneInput } from "@workspace/ui/components/phone-input";
 import { MultiSelect } from "@workspace/ui/components/multi-select";
-import { useFieldArray } from "react-hook-form";
+import { PhoneInput } from "@workspace/ui/components/phone-input";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import * as React from "react";
+import { useFieldArray } from "react-hook-form";
+
+import { useMultiStepFormContext } from "@/components/forms/multi-step-form";
+import { MarketingCampaignFormSchema } from "@/features/marketing-campaigns/_lib/schema";
 import { getSelectTags } from "@/features/tags/_lib/queries";
 
 interface AudienceStepFormProps {
@@ -40,14 +41,14 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
         <div>
           <div className="flex justify-end gap-2">
             <Button
-              type="button"
-              size="icon"
-              variant="outline"
               onClick={prevStep}
+              size="icon"
+              type="button"
+              variant="outline"
             >
               <ArrowLeft />
             </Button>
-            <Button type="button" size="icon" variant="outline" disabled>
+            <Button disabled size="icon" type="button" variant="outline">
               <ArrowRight />
             </Button>
           </div>
@@ -64,12 +65,12 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
                   </FormLabel>
                   <FormControl>
                     <MultiSelect
-                      options={tags}
-                      onValueChange={field.onChange}
-                      value={field.value || []}
-                      placeholder="Select tags"
-                      variant="default"
                       maxCount={3}
+                      onValueChange={field.onChange}
+                      options={tags}
+                      placeholder="Select tags"
+                      value={field.value || []}
+                      variant="default"
                     />
                   </FormControl>
                   <FormMessage />
@@ -80,8 +81,8 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
             {/* ——— Phones ——— */}
             {phonesArray.fields.map((field, idx) => (
               <FormField
-                key={field.id}
                 control={control}
+                key={field.id}
                 name={`audience.phone.${idx}.value`}
                 render={({ field }) => (
                   <FormItem className="flex items-center space-x-2">
@@ -93,10 +94,10 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
                       />
                     </FormControl>
                     <Button
+                      onClick={() => phonesArray.remove(idx)}
+                      size="icon"
                       type="button"
                       variant="destructive"
-                      size="icon"
-                      onClick={() => phonesArray.remove(idx)}
                     >
                       ×
                     </Button>
@@ -106,16 +107,16 @@ function AudienceStep({ tags }: AudienceStepFormProps) {
               />
             ))}
             <Button
+              onClick={() => phonesArray.append({ value: "" })}
               type="button"
               variant="outline"
-              onClick={() => phonesArray.append({ value: "" })}
             >
               + Add Phone
             </Button>
           </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">
-          <Button type="button" variant="outline" onClick={prevStep}>
+          <Button onClick={prevStep} type="button" variant="outline">
             Previous
           </Button>
           <Button type="submit">Submit</Button>

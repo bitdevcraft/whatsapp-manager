@@ -1,10 +1,11 @@
-import { RESPONSE_CODE } from "@/lib/constants/response-code";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { marketingCampaignsTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(
   request: Request,
@@ -79,17 +80,17 @@ export async function POST(
   try {
     const result = await withTenantTransaction(teamId, async (tx) => {
       const data = await tx.query.marketingCampaignsTable.findFirst({
-        where: eq(marketingCampaignsTable.id, id),
         columns: {
+          enableTracking: true,
+          messageTemplate: true,
           name: true,
-          templateId: true,
+          phoneNumber: true,
           recipients: true,
           tags: true,
-          enableTracking: true,
-          phoneNumber: true,
-          messageTemplate: true,
           teamId: true,
+          templateId: true,
         },
+        where: eq(marketingCampaignsTable.id, id),
       });
 
       if (data) {

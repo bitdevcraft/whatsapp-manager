@@ -1,5 +1,6 @@
 import { WhatsApp } from '@core/whatsapp';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { FlowCategoryEnum, FlowStatusEnum } from '../types/common';
 
 describe('Flow API - Unit Tests', () => {
@@ -9,16 +10,16 @@ describe('Flow API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
         mockRequestSend.mockResolvedValue({
+            categories: [FlowCategoryEnum.SignUp],
             id: 'flow_123',
             name: 'Test Flow',
             status: FlowStatusEnum.Draft,
-            categories: [FlowCategoryEnum.SignUp],
             validation_errors: [],
         });
     });
@@ -41,10 +42,10 @@ describe('Flow API - Unit Tests', () => {
         it('should create flow with correct payload structure', async () => {
             const wabaId = 'waba_123';
             const flowData = {
-                name: 'Test Flow',
                 categories: [FlowCategoryEnum.SignUp, FlowCategoryEnum.LeadGeneration],
                 endpoint_uri: 'https://example.com/flow-endpoint',
                 flow_json: '{"version": "3.0"}',
+                name: 'Test Flow',
                 publish: false,
             };
 
@@ -128,10 +129,10 @@ describe('Flow API - Unit Tests', () => {
         it('should update flow metadata with correct payload', async () => {
             const flowId = 'flow_123';
             const updateData = {
-                name: 'Updated Flow Name',
+                application_id: 'app_456',
                 categories: [FlowCategoryEnum.CustomerSupport],
                 endpoint_uri: 'https://updated-endpoint.com',
-                application_id: 'app_456',
+                name: 'Updated Flow Name',
             };
 
             await whatsApp.flow.updateFlowMetadata(flowId, updateData);
@@ -213,7 +214,7 @@ describe('Flow API - Unit Tests', () => {
             mockSendFormData.mockResolvedValue({ success: true });
 
             const flowId = 'flow_123';
-            const jsonObject = { version: '3.0', screens: [] };
+            const jsonObject = { screens: [], version: '3.0' };
 
             await whatsApp.flow.updateFlowJson(flowId, {
                 file: jsonObject,
@@ -268,7 +269,7 @@ describe('Flow API - Unit Tests', () => {
             });
 
             const flowId = 'flow_123';
-            const jsonObject = { version: '3.0', screens: [] };
+            const jsonObject = { screens: [], version: '3.0' };
 
             const result = await whatsApp.flow.validateFlowJson(flowId, jsonObject);
 
@@ -284,13 +285,13 @@ describe('Flow API - Unit Tests', () => {
             const mockUpdateFlowJson = vi.spyOn(whatsApp.flow, 'updateFlowJson');
             const validationErrors = [
                 {
+                    column_end: 20,
+                    column_start: 15,
                     error: 'INVALID_VERSION',
                     error_type: 'validation',
-                    message: 'Invalid version specified',
-                    line_start: 1,
                     line_end: 1,
-                    column_start: 15,
-                    column_end: 20,
+                    line_start: 1,
+                    message: 'Invalid version specified',
                     pointers: [],
                 },
             ];
@@ -345,8 +346,8 @@ describe('Flow API - Unit Tests', () => {
         it('should migrate flows with correct payload', async () => {
             const destinationWabaId = 'dest_waba_123';
             const migrationData = {
-                source_waba_id: 'source_waba_456',
                 source_flow_names: ['Flow 1', 'Flow 2'],
+                source_waba_id: 'source_waba_456',
             };
 
             await whatsApp.flow.migrateFlows(destinationWabaId, migrationData);

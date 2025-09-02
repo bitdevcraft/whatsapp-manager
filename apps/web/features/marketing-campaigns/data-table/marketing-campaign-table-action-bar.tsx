@@ -1,17 +1,17 @@
 "use client";
 
 import type { Table } from "@tanstack/react-table";
-import { Download, Trash2 } from "lucide-react";
-import * as React from "react";
 
+import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@workspace/ui/data-table";
-import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
-import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
+import { Download, Trash2 } from "lucide-react";
+import * as React from "react";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,29 +63,21 @@ export function MarketingCampaignsTableActionBar({
       //   }
       table.toggleAllRowsSelected(false);
     });
-  }, [rows, table]);
+  }, [table]);
 
   return (
     <DataTableActionBar table={table} visible={rows.length > 0}>
       <DataTableActionBarSelection table={table} />
       <Separator
-        orientation="vertical"
         className="hidden data-[orientation=vertical]:h-5 sm:block"
+        orientation="vertical"
       />
       <div className="flex items-center gap-1.5">
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Export Contacts"
-          isPending={getIsActionPending("export")}
-          onClick={onTaskExport}
-        >
-          <Download />
-        </DataTableActionBarAction>
-        <DataTableActionBarAction
-          size="icon"
-          tooltip="Delete Contacts"
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}
+          size="icon"
+          tooltip="Delete Marketing Campaigns"
         >
           <Trash2 />
         </DataTableActionBarAction>

@@ -1,5 +1,6 @@
 import type { HttpMethodsEnum } from '../types/enums';
 import type { RequesterClass } from '../types/request';
+
 import { isMetaError, MetaError } from '../utils/isMetaError';
 import Logger from '../utils/logger';
 import HttpsClient from './httpsClient';
@@ -9,14 +10,14 @@ const LOG_LOCAL = false;
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true' || LOG_LOCAL);
 
 export default class Requester implements RequesterClass {
-    client: Readonly<HttpsClient>;
     accessToken: Readonly<string>;
-    phoneNumberId: Readonly<number>;
-    businessAcctId: Readonly<string>;
     apiVersion: Readonly<string>;
-    userAgent: Readonly<string>;
+    businessAcctId: Readonly<string>;
+    client: Readonly<HttpsClient>;
     host: Readonly<string>;
+    phoneNumberId: Readonly<number>;
     protocol: Readonly<string> = 'https:';
+    userAgent: Readonly<string>;
 
     constructor(
         apiVersion: string,
@@ -32,6 +33,10 @@ export default class Requester implements RequesterClass {
         this.accessToken = accessToken;
         this.businessAcctId = businessAcctId;
         this.userAgent = userAgent;
+    }
+
+    buildCAPIPath(endpoint: string): string {
+        return `v${this.apiVersion}.0/${endpoint}`;
     }
 
     buildHeader(contentType: string, additionalHeaders?: Record<string, string>): HeadersInit {
@@ -51,8 +56,33 @@ export default class Requester implements RequesterClass {
         return headers;
     }
 
-    buildCAPIPath(endpoint: string): string {
-        return `v${this.apiVersion}.0/${endpoint}`;
+    async getJson<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        body?: any,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T> {
+        const res = await this.sendRequest(method, endpoint, timeout, body, 'application/json', additionalHeaders);
+        return (await res.json()) as T;
+    }
+
+    async sendFormData<T>(
+        method: HttpMethodsEnum,
+        endpoint: string,
+        timeout: number,
+        formData: FormData,
+        additionalHeaders?: Record<string, string>,
+    ): Promise<T> {
+        const res = await this.sendRequest(
+            method,
+            endpoint,
+            timeout,
+            formData,
+            'multipart/form-data',
+            additionalHeaders,
+        );
+        return (await res.json()) as T;
     }
 
     async sendRequest(
@@ -60,7 +90,7 @@ export default class Requester implements RequesterClass {
         endpoint: string,
         timeout: number,
         body?: any,
-        contentType: string = 'application/json',
+        contentType = 'application/json',
         additionalHeaders?: Record<string, string>,
     ) {
         let effectiveContentType = contentType;
@@ -92,14 +122,14 @@ export default class Requester implements RequesterClass {
                 }
                 // If the error doesn't match Meta's format, create a generic MetaError
                 throw {
-                    name: 'MetaError',
-                    message: 'Unknown error occurred',
                     error: {
-                        message: errorData.message || 'Unknown error occurred',
-                        type: 'UnknownError',
                         code: response.statusCode(),
                         fbtrace_id: '',
+                        message: errorData.message || 'Unknown error occurred',
+                        type: 'UnknownError',
                     },
+                    message: 'Unknown error occurred',
+                    name: 'MetaError',
                 } as MetaError;
             }
 
@@ -110,45 +140,16 @@ export default class Requester implements RequesterClass {
             }
             // Handle network errors or other unexpected errors
             throw {
-                name: 'MetaError',
-                message: error instanceof Error ? error.message : 'Network error occurred',
                 error: {
-                    message: error instanceof Error ? error.message : 'Network error occurred',
-                    type: 'NetworkError',
                     code: 500,
                     fbtrace_id: '',
+                    message: error instanceof Error ? error.message : 'Network error occurred',
+                    type: 'NetworkError',
                 },
+                message: error instanceof Error ? error.message : 'Network error occurred',
+                name: 'MetaError',
             } as MetaError;
         }
-    }
-
-    async getJson<T>(
-        method: HttpMethodsEnum,
-        endpoint: string,
-        timeout: number,
-        body?: any,
-        additionalHeaders?: Record<string, string>,
-    ): Promise<T> {
-        const res = await this.sendRequest(method, endpoint, timeout, body, 'application/json', additionalHeaders);
-        return (await res.json()) as T;
-    }
-
-    async sendFormData<T>(
-        method: HttpMethodsEnum,
-        endpoint: string,
-        timeout: number,
-        formData: FormData,
-        additionalHeaders?: Record<string, string>,
-    ): Promise<T> {
-        const res = await this.sendRequest(
-            method,
-            endpoint,
-            timeout,
-            formData,
-            'multipart/form-data',
-            additionalHeaders,
-        );
-        return (await res.json()) as T;
     }
 
     async sendUrlEncodedForm<T>(

@@ -1,6 +1,5 @@
 "use client";
 
-import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import {
   Card,
   CardContent,
@@ -18,18 +17,20 @@ import {
 import React from "react";
 import { LabelList, Pie, PieChart } from "recharts";
 
+import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
+
 export interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getDashboardAnalytics>>]>;
 }
 
 const chartConfig = {
   delivered: {
-    label: "delivered",
     color: "var(--color-green-400)",
+    label: "delivered",
   },
   failed: {
-    label: "Failed",
     color: "var(--color-red-400)",
+    label: "Failed",
   },
 } satisfies ChartConfig;
 
@@ -44,20 +45,20 @@ export default function DeliveryStatus({ promises }: Props) {
       </CardHeader>
       <CardContent>
         <ChartContainer
-          config={chartConfig}
           className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0"
+          config={chartConfig}
         >
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent />} />
             <Pie data={deliveryStatus} dataKey="value" nameKey="status">
               <LabelList
-                dataKey="status"
                 className="fill-background"
-                stroke="none"
+                dataKey="status"
                 fontSize={12}
                 formatter={(value: keyof typeof chartConfig) =>
                   chartConfig[value]?.label
                 }
+                stroke="none"
               />
             </Pie>
           </PieChart>

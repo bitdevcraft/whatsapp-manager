@@ -1,8 +1,8 @@
 import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { baseModel } from "../abstract/baseModel";
-import { usersTable } from "./users";
 import { teamsTable } from "../teams";
+import { usersTable } from "./users";
 const { name, ...model } = baseModel;
 
 export const userSessionsTable = pgTable("user_sessions", {

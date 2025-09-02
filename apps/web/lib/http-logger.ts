@@ -2,9 +2,9 @@
 import { getUserWithTeam } from "./db/queries";
 
 // lib/httpLogger.ts
-type Handler = (req: Request, ctx: any) => Response | Promise<Response>;
+type Handler = (req: Request, ctx: any) => Promise<Response> | Response;
 type Handlers = Partial<
-  Record<"GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS", Handler>
+  Record<"DELETE" | "GET" | "OPTIONS" | "PATCH" | "POST" | "PUT", Handler>
 >;
 
 const SENSITIVE_HEADERS = [
@@ -14,31 +14,6 @@ const SENSITIVE_HEADERS = [
   "x-api-key",
   "x-secret-key",
 ];
-
-function cleanHeaders(h: Headers) {
-  const out: Record<string, string> = {};
-  h.forEach((v, k) => {
-    out[k] = SENSITIVE_HEADERS.includes(k.toLowerCase()) ? "[redacted]" : v;
-  });
-  return out;
-}
-
-function canLogBody(headers: Headers, max = 10_000) {
-  const ct = headers.get("content-type") || "";
-  const clRaw = headers.get("content-length");
-  const cl = clRaw ? Number(clRaw) : NaN;
-  const isTexty =
-    /application\/json|text\/|application\/x-www-form-urlencoded/.test(ct);
-  return isTexty && (!Number.isFinite(cl) || cl <= max);
-}
-
-function maybeParseJson(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-}
 
 export function withLogging<T extends Handlers>(
   handlers: T,
@@ -82,22 +57,22 @@ export function withLogging<T extends Handlers>(
       }
 
       sink({
-        ts: new Date().toISOString(),
+        durationMs: Date.now() - start,
         id: rid,
         method: req.method,
         path: url.pathname + url.search,
-        durationMs: Date.now() - start,
-        status: res.status,
         request: {
-          headers: cleanHeaders(req.headers),
           body: requestBody,
+          headers: cleanHeaders(req.headers),
         },
         response: {
-          headers: cleanHeaders(res.headers),
           body: responseBody,
+          headers: cleanHeaders(res.headers),
         },
-        userId: userWithTeam?.user.id,
+        status: res.status,
         teamId: userWithTeam?.teamId,
+        ts: new Date().toISOString(),
+        userId: userWithTeam?.user.id,
       });
 
       // ensure the request id is on the way out
@@ -108,11 +83,36 @@ export function withLogging<T extends Handlers>(
   };
 
   return {
+    DELETE: wrap(handlers.DELETE),
     GET: wrap(handlers.GET),
+    OPTIONS: wrap(handlers.OPTIONS),
+    PATCH: wrap(handlers.PATCH),
     POST: wrap(handlers.POST),
     PUT: wrap(handlers.PUT),
-    PATCH: wrap(handlers.PATCH),
-    DELETE: wrap(handlers.DELETE),
-    OPTIONS: wrap(handlers.OPTIONS),
   } as T;
+}
+
+function canLogBody(headers: Headers, max = 10_000) {
+  const ct = headers.get("content-type") || "";
+  const clRaw = headers.get("content-length");
+  const cl = clRaw ? Number(clRaw) : NaN;
+  const isTexty =
+    /application\/json|text\/|application\/x-www-form-urlencoded/.test(ct);
+  return isTexty && (!Number.isFinite(cl) || cl <= max);
+}
+
+function cleanHeaders(h: Headers) {
+  const out: Record<string, string> = {};
+  h.forEach((v, k) => {
+    out[k] = SENSITIVE_HEADERS.includes(k.toLowerCase()) ? "[redacted]" : v;
+  });
+  return out;
+}
+
+function maybeParseJson(text: string) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }

@@ -1,8 +1,9 @@
-import { getUserWithTeam } from "@/lib/db/queries";
-import { unstable_cache } from "@/lib/unstable-cache";
 import { TeamMemberDetail, teamMembersTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq } from "drizzle-orm";
+
+import { getUserWithTeam } from "@/lib/db/queries";
+import { unstable_cache } from "@/lib/unstable-cache";
 
 export async function getMember() {
   const userWithTeam = await getUserWithTeam();

@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
@@ -30,7 +31,8 @@ export function AutoArrayInputs({
       cur = cur[p];
     }
     setLen(Array.isArray(cur) ? cur.length : 0);
-  });
+  }, [control._formValues, baseName]);
+
   return (
     <div className="space-y-2">
       {len === 0 ? null : (
@@ -38,8 +40,8 @@ export function AutoArrayInputs({
           <div className="text-sm">{label}</div>
           {Array.from({ length: len }).map((_, i) => (
             <FormField
-              key={i}
               control={control}
+              key={i}
               name={`${baseName}.${i}`}
               render={({ field }) => (
                 <FormItem>

@@ -1,15 +1,17 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import { ArrowLeft } from "lucide-react";
+import React from "react";
+
 import { getTemplateById } from "@/features/whatsapp/templates/lib/queries";
 import {
   TemplateCarouselCreateSchema,
   TemplateCreateSchema,
 } from "@/types/validations/templates/template-schema";
-import React from "react";
-import TemplateCreateForm from "../../new/_components/template-create-default-form";
+
 import TemplateCarouselCreateForm from "../../new/_components/template-create-carousel-form";
-import { Button } from "@workspace/ui/components/button";
-import { ArrowLeft } from "lucide-react";
+import TemplateCreateForm from "../../new/_components/template-create-default-form";
 
 interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getTemplateById>>]>;
@@ -39,8 +41,8 @@ export function EditPage({ promises }: Props) {
 
         <div className="rounded-lg border p-6 bg-background/60">
           <TemplateCarouselCreateForm
-            initialValues={carouselTemplate.data}
             id={data.id}
+            initialValues={carouselTemplate.data}
           />
         </div>
       </div>
@@ -63,8 +65,8 @@ export function EditPage({ promises }: Props) {
 
         <div className="rounded-lg border p-6 bg-background/60">
           <TemplateCreateForm
-            initialValues={defaultTemplate.data}
             id={data.id}
+            initialValues={defaultTemplate.data}
           />
         </div>
       </div>

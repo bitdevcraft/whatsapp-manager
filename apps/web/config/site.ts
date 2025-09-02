@@ -1,8 +1,8 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Admin",
   description: "",
-  url: "",
   links: { github: "" },
+  name: "Admin",
+  url: "",
 };

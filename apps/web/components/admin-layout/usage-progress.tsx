@@ -1,7 +1,5 @@
 "use client";
 
-import { getUsage } from "@/lib/db/usage-queries";
-import { Progress } from "@workspace/ui/components/progress";
 import { ProgressCircle } from "@workspace/ui/components/progress-circle";
 import {
   SidebarMenu,
@@ -10,10 +8,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import React from "react";
 
-interface Limits {
-  limit: number;
-  usage: number;
-}
+import { getUsage } from "@/lib/db/usage-queries";
 
 export function UsageProgress({
   promises,

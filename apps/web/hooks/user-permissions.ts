@@ -1,6 +1,6 @@
-// hooks/usePermission.ts
-import { authClient } from "@/lib/auth/auth-client";
 import { useQuery } from "@tanstack/react-query"; // or SWR, Zustand, etc.
+
+import { authClient } from "@/lib/auth/auth-client";
 
 type Permissions = Parameters<
   typeof authClient.organization.hasPermission
@@ -15,7 +15,6 @@ export function usePermission(
   organizationId: string
 ) {
   return useQuery({
-    queryKey: ["permission", permissions, organizationId], // memoised per-scope
     queryFn: async () => {
       const { data, error } = await authClient.organization.hasPermission({
         permissions,
@@ -23,6 +22,7 @@ export function usePermission(
 
       return !data || error ? false : data.success;
     },
+    queryKey: ["permission", permissions, organizationId], // memoised per-scope
 
     staleTime: 5 * 60 * 1000,
   });

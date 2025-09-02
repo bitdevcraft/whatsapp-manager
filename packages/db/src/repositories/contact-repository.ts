@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { contactsTable, marketingCampaignsTable } from "../schema";
 import { withTenantTransaction } from "../tenant";
@@ -24,10 +24,13 @@ export class ContactRepository {
         })
         .from(contactsTable)
         .where(
-          sql`${contactsTable.tags} ?| ARRAY[${sql.join(
-            marketingCampaign.tags.map((v) => sql`${v}`),
-            sql`, `
-          )}]`
+          and(
+            sql`${contactsTable.tags} ?| ARRAY[${sql.join(
+              marketingCampaign.tags.map((v) => sql`${v}`),
+              sql`, `
+            )}]`,
+            isNull(contactsTable.deletedAt)
+          )
         );
 
       return (
@@ -39,16 +42,20 @@ export class ContactRepository {
 
   async countContactByTags(tags: string[]) {
     return withTenantTransaction(this.teamId, async (tx) => {
+      if (tags.length === 0) return 0;
       const result = await tx
         .select({
           count: sql<number>`COUNT(*)`,
         })
         .from(contactsTable)
         .where(
-          sql`${contactsTable.tags} ?| ARRAY[${sql.join(
-            tags.map((v) => sql`${v}`),
-            sql`, `
-          )}]`
+          and(
+            sql`${contactsTable.tags} ?| ARRAY[${sql.join(
+              tags.map((v) => sql`${v}`),
+              sql`, `
+            )}]`,
+            isNull(contactsTable.deletedAt)
+          )
         );
 
       return result[0]?.count ?? 0;

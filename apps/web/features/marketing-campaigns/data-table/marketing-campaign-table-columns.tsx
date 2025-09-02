@@ -1,20 +1,22 @@
+/* eslint-disable perfectionist/sort-objects */
 import { ColumnDef } from "@tanstack/react-table";
 import { MarketingCampaignWithTemplate } from "@workspace/db/schema/marketing-campaigns";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Checkbox } from "@workspace/ui/components/checkbox";
-import { DataTableColumnHeader } from "@workspace/ui/data-table";
-import { formatDate } from "@workspace/ui/lib/format";
-import { CalendarIcon, Ellipsis, Text } from "lucide-react";
-import Link from "next/link";
-import { getMarketingCampaignStatusIcon } from "../_lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { DataTableColumnHeader } from "@workspace/ui/data-table";
+import { formatDate } from "@workspace/ui/lib/format";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
+import { CalendarIcon, Ellipsis, Text } from "lucide-react";
+import Link from "next/link";
+
+import { getMarketingCampaignStatusIcon } from "../_lib/utils";
 
 interface TableColumnsProps {
   setRowAction: React.Dispatch<
@@ -26,31 +28,31 @@ export function getTableColumns({
   setRowAction,
 }: TableColumnsProps): ColumnDef<MarketingCampaignWithTemplate>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-0.5"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-0.5"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      size: 40,
-    },
+    // {
+    //   id: "select",
+    //   header: ({ table }) => (
+    //     <Checkbox
+    //       aria-label="Select all"
+    //       checked={
+    //         table.getIsAllPageRowsSelected() ||
+    //         (table.getIsSomePageRowsSelected() && "indeterminate")
+    //       }
+    //       className="translate-y-0.5"
+    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    //     />
+    //   ),
+    //   cell: ({ row }) => (
+    //     <Checkbox
+    //       aria-label="Select row"
+    //       checked={row.getIsSelected()}
+    //       className="translate-y-0.5"
+    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //     />
+    //   ),
+    //   enableSorting: false,
+    //   enableHiding: false,
+    //   size: 40,
+    // },
     {
       id: "name",
       accessorKey: "name",
@@ -66,7 +68,13 @@ export function getTableColumns({
       cell: ({ row }) => {
         return (
           <Link href={`/ing/whatsapp/marketing-campaigns/${row.id}`}>
-            {row.original.name}
+            <Button
+              className="text-foreground font-normal"
+              size={"sm"}
+              variant={"link"}
+            >
+              {row.original.name}
+            </Button>
           </Link>
         );
       },
@@ -90,7 +98,7 @@ export function getTableColumns({
         const Icon = getMarketingCampaignStatusIcon(row.original.status || "");
 
         return (
-          <Badge variant="outline" className="py-1 [&>svg]:size-3.5">
+          <Badge className="py-1 [&>svg]:size-3.5" variant="outline">
             <Icon
               className={
                 row.original.status === "processing" ? `animate-spin` : ""
@@ -111,7 +119,7 @@ export function getTableColumns({
       cell: ({ cell }) => formatDate(cell.getValue<Date>()),
       meta: {
         label: "Created At",
-        variant: "dateRange",
+        variant: "date",
         icon: CalendarIcon,
       },
       enableColumnFilter: true,
@@ -124,10 +132,10 @@ export function getTableColumns({
             <DropdownMenuTrigger asChild>
               <Button
                 aria-label="Open menu"
-                variant="ghost"
                 className="flex size-8 p-0 data-[state=open]:bg-muted"
+                variant="ghost"
               >
-                <Ellipsis className="size-4" aria-hidden="true" />
+                <Ellipsis aria-hidden="true" className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>

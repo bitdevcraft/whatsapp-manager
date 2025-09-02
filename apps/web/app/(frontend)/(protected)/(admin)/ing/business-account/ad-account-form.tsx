@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Button } from "@workspace/ui/components/button";
 import {
   Form,
@@ -23,10 +22,10 @@ type FormValue = z.infer<typeof FormSchema>;
 
 export default function AdAccountForm() {
   const form = useForm<FormValue>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       adAccountId: "",
     },
+    resolver: zodResolver(FormSchema),
   });
 
   return (
@@ -45,7 +44,7 @@ export default function AdAccountForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" size="sm">
+          <Button size="sm" type="submit">
             Submit
           </Button>
         </div>

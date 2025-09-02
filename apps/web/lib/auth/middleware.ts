@@ -1,20 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TeamDataWithMembers } from "@workspace/db/schema";
+import { User } from "better-auth";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getTeamForUser, getUser } from "@/lib/db/queries";
-import { redirect } from "next/navigation";
-import { TeamDataWithMembers } from "@workspace/db/schema";
-import { User } from "better-auth";
 
 export type ActionState = {
+  [key: string]: any; // This allows for additional properties
   error?: string;
   success?: string;
-  [key: string]: any; // This allows for additional properties
 };
+
+type ActionWithTeamFunction<T> = (
+  formData: FormData,
+  team: TeamDataWithMembers
+) => Promise<T>;
 
 type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
   formData: FormData
+) => Promise<T>;
+
+type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
+  data: z.infer<S>,
+  formData: FormData,
+  user: User
 ) => Promise<T>;
 
 export function validatedAction<S extends z.ZodType<any, any>, T>(
@@ -30,12 +41,6 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
     return action(result.data, formData);
   };
 }
-
-type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
-  data: z.infer<S>,
-  formData: FormData,
-  user: User
-) => Promise<T>;
 
 export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
   schema: S,
@@ -55,11 +60,6 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
     return action(result.data, formData, user);
   };
 }
-
-type ActionWithTeamFunction<T> = (
-  formData: FormData,
-  team: TeamDataWithMembers
-) => Promise<T>;
 
 export function withTeam<T>(action: ActionWithTeamFunction<T>) {
   return async (formData: FormData): Promise<T> => {

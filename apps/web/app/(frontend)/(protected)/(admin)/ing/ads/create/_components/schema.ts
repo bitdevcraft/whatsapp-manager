@@ -27,41 +27,41 @@ export const AdCampaignSchema = z.object({
 export const TargetingSchema = z.object({
   age_max: z.number().min(13).max(65),
   age_min: z.number().min(13).max(65),
-  genders: z.array(z.number()),
-  interest: z.object({
-    id: z.string(),
-    name: z.string(),
-  }),
-  geo_locations: z.object({
-    countries: z.array(z.string()),
-    regions: z.array(z.string()),
-    cities: z.array(
-      z.object({
-        key: z.string(),
-        radius: z.string(),
-        distance_unit: z.string(),
-      })
-    ),
-    zips: z.array(
-      z.object({
-        key: z.string(),
-      })
-    ),
-    places: z.array(
-      z.object({
-        key: z.string(),
-        radius: z.string(),
-        distance_unit: z.string(),
-      })
-    ),
-    country_groups: z.array(z.string()),
-  }),
   behaviors: z.array(
     z.object({
       id: z.number(),
       name: z.string(),
     })
   ),
+  genders: z.array(z.number()),
+  geo_locations: z.object({
+    cities: z.array(
+      z.object({
+        distance_unit: z.string(),
+        key: z.string(),
+        radius: z.string(),
+      })
+    ),
+    countries: z.array(z.string()),
+    country_groups: z.array(z.string()),
+    places: z.array(
+      z.object({
+        distance_unit: z.string(),
+        key: z.string(),
+        radius: z.string(),
+      })
+    ),
+    regions: z.array(z.string()),
+    zips: z.array(
+      z.object({
+        key: z.string(),
+      })
+    ),
+  }),
+  interest: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
 });
 
 export const AdSetSchema = z
@@ -89,12 +89,12 @@ export const AdSetSchema = z
   })
   .superRefine((data, ctx) => {
     const {
-      start_time,
-      end_time,
-      daily_budget,
-      lifetime_budget,
-      bid_strategy,
       bid_amount,
+      bid_strategy,
+      daily_budget,
+      end_time,
+      lifetime_budget,
+      start_time,
     } = data;
 
     //  Bid Amount
@@ -105,9 +105,9 @@ export const AdSetSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["bid_amount"],
         message:
           "`bid_amount` is required when `bid_strategy` is 'LOWEST_COST_WITH_BID_CAP' or 'COST_CAP'",
+        path: ["bid_amount"],
       });
     }
 
@@ -119,24 +119,24 @@ export const AdSetSchema = z
     if (!hasPositiveDaily && !hasPositiveLifetime) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["daily_budget"],
         message:
           "Either daily_budget or lifetime_budget must be greater than 0",
+        path: ["daily_budget"],
       });
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["lifetime_budget"],
         message:
           "Either daily_budget or lifetime_budget must be greater than 0",
+        path: ["lifetime_budget"],
       });
     }
 
     if (hasPositiveDaily && (!start_time || !end_time)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["daily_budget"],
         message:
           "`daily_budget` is only allowed when end_time – start_time > 24 hours",
+        path: ["daily_budget"],
       });
     }
 
@@ -146,9 +146,9 @@ export const AdSetSchema = z
       if (end - start <= 24 * 60 * 60 * 1000) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["daily_budget"],
           message:
             "daily_budget is only allowed when end_time – start_time > 24 hours",
+          path: ["daily_budget"],
         });
       }
     }
@@ -158,17 +158,17 @@ export const AdSetSchema = z
       if (end_time === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["end_time"],
           message:
             "end_time (as a valid date string or timestamp) is required when lifetime_budget is specified",
+          path: ["end_time"],
         });
       }
     }
   });
 
 export const MultiStepAdsSchema = z.object({
-  campaign: AdCampaignSchema,
   adSet: AdSetSchema,
+  campaign: AdCampaignSchema,
 });
 
 export type MultiStepAdsFormValues = z.infer<typeof MultiStepAdsSchema>;

@@ -1,7 +1,8 @@
-import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { WhatsAppEvents } from "@workspace/shared";
 import { NextResponse } from "next/server";
+
+import { waBulkMessagesOutgoingQueue } from "@/jobs/queues";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function POST(
   request: Request,

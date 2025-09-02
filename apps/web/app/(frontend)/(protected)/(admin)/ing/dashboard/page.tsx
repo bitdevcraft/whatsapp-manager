@@ -1,12 +1,12 @@
-import { ChartAreaInteractive } from "@/app/(frontend)/(protected)/(admin)/ing/dashboard/chart-area-interactive";
-import { SectionCards } from "@/app/(frontend)/(protected)/(admin)/ing/dashboard/section-cards";
+import React from "react";
 
+import { SectionCards } from "@/app/(frontend)/(protected)/(admin)/ing/dashboard/section-cards";
 import { getDashboardAnalytics } from "@/features/dashboard/_lib/queries";
 import { dashboardSearchParams } from "@/features/dashboard/_lib/validations";
 import { SearchParams } from "@/types";
-import React from "react";
-import MarketingCampaignStats from "./marketing-campaign-stats";
+
 import DeliveryStatus from "./delivery-status";
+import MarketingCampaignStats from "./marketing-campaign-stats";
 
 interface IndexPageProps {
   searchParams: Promise<SearchParams>;

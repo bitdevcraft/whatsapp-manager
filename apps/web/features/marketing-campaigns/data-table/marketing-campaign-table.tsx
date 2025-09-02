@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { usePathname } from "next/navigation";
-
-import { useDataTable } from "@workspace/ui/hooks/use-data-table";
+import { MarketingCampaignWithTemplate } from "@workspace/db";
+import { Button } from "@workspace/ui/components/button";
 import {
   DataTable,
   DataTableAdvancedToolbar,
@@ -11,18 +9,21 @@ import {
   DataTableSortList,
   DataTableToolbar,
 } from "@workspace/ui/data-table";
-import { getMarketingCampaigns } from "../_lib/queries";
-import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
-import { getTableColumns } from "./marketing-campaign-table-columns";
-import { MarketingCampaignsTableActionBar } from "./marketing-campaign-table-action-bar";
-import { Button } from "@workspace/ui/components/button";
+import { useDataTable } from "@workspace/ui/hooks/use-data-table";
+import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useTitle } from "@/components/provider/title-provider";
+import { usePathname } from "next/navigation";
+import React, { useEffect } from "react";
+
+import { useFeatureFlags } from "@/components/provider/feature-flags-provider";
 import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
-import { DataTableRowAction } from "@workspace/ui/types/data-table";
-import { MarketingCampaignWithTemplate } from "@workspace/db";
+import { useTitle } from "@/components/provider/title-provider";
+
+import { getMarketingCampaigns } from "../_lib/queries";
 import { CloneMarketingCampaign } from "./marketing-campaign-clone-dialog";
+import { MarketingCampaignsTableActionBar } from "./marketing-campaign-table-action-bar";
+import { getTableColumns } from "./marketing-campaign-table-columns";
 
 export const dynamic = "force-dynamic";
 
@@ -58,19 +59,19 @@ export default function MarketingCampaignTable({
   );
 
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
-    data,
-    columns,
-    pageCount,
-    enableAdvancedFilter: false,
-    initialState: {
-      sorting: [{ id: "createdAt", desc: true }],
-      columnPinning: { right: ["actions"] },
-      pagination: { pageSize: 10, pageIndex: 1 },
-      columnVisibility: {},
-    },
-    getRowId: (row) => row.id,
-    shallow: false,
     clearOnDefault: true,
+    columns,
+    data,
+    enableAdvancedFilter: false,
+    getRowId: (row) => row.id,
+    initialState: {
+      columnPinning: { right: ["actions"] },
+      columnVisibility: {},
+      pagination: { pageIndex: 1, pageSize: 10 },
+      sorting: [{ desc: true, id: "createdAt" }],
+    },
+    pageCount,
+    shallow: false,
   });
 
   return (
@@ -85,17 +86,17 @@ export default function MarketingCampaignTable({
       )}
 
       <DataTable
+        // actionBar={<MarketingCampaignsTableActionBar table={table} />}
         table={table}
-        actionBar={<MarketingCampaignsTableActionBar table={table} />}
       >
         {enableAdvancedFilter ? (
           <DataTableAdvancedToolbar table={table}>
             <DataTableFilterList
-              table={table}
-              shallow={shallow}
-              debounceMs={debounceMs}
-              throttleMs={throttleMs}
               align="end"
+              debounceMs={debounceMs}
+              shallow={shallow}
+              table={table}
+              throttleMs={throttleMs}
             />
             <Link href={`${pathname}/new`}>
               <Button size="sm" variant="outline">
@@ -103,7 +104,7 @@ export default function MarketingCampaignTable({
                 New
               </Button>
             </Link>
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableAdvancedToolbar>
         ) : (
@@ -114,7 +115,7 @@ export default function MarketingCampaignTable({
                 New
               </Button>
             </Link>
-            <DataTableSortList table={table} align="start" />
+            <DataTableSortList align="start" table={table} />
             <FeatureFlagsToggle />
           </DataTableToolbar>
         )}

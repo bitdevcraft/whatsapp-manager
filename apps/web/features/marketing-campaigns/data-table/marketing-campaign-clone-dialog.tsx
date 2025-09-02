@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@workspace/ui/components/button";
-import { Check, X } from "lucide-react";
-import axios from "axios";
-import { toast } from "sonner";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
   FormControl,
@@ -20,6 +12,13 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
+import axios from "axios";
+import { Check, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 const FormSchema = z.object({
   name: z.string().nonempty(),
@@ -37,10 +36,10 @@ export function CloneMarketingCampaign({
   const pathname = usePathname();
 
   const form = useForm<FormValue>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
     },
+    resolver: zodResolver(FormSchema),
   });
 
   const handleFormSubmit = async (data: FormValue) => {
@@ -94,9 +93,9 @@ export function CloneMarketingCampaign({
               Yes <Check />
             </Button>
             <Button
-              variant="destructive"
               className="flex-1 w-full"
               onClick={onNo}
+              variant="destructive"
             >
               No <X />
             </Button>

@@ -9,10 +9,10 @@ export function SubmitButton() {
 
   return (
     <Button
-      type="submit"
-      disabled={pending}
-      variant="outline"
       className="w-full rounded-full"
+      disabled={pending}
+      type="submit"
+      variant="outline"
     >
       {pending ? (
         <>

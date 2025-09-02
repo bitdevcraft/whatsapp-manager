@@ -1,19 +1,19 @@
-import { and, eq } from "drizzle-orm";
-import { setSession } from "@/lib/auth/session";
-import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/payments/stripe";
-import Stripe from "stripe";
 import { db } from "@workspace/db/config";
+import { buildConflictUpdateColumns } from "@workspace/db/lib";
 import {
   teamMemberLimitsTable,
   teamMembersTable,
   teamsTable,
   usersTable,
 } from "@workspace/db/schema";
-import { logger } from "@/lib/logger";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { buildConflictUpdateColumns } from "@workspace/db/lib";
+import { and, eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+
+import { setSession } from "@/lib/auth/session";
+import { logger } from "@/lib/logger";
+import { stripe } from "@/lib/payments/stripe";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -101,13 +101,13 @@ export async function GET(request: NextRequest) {
     const team = await db
       .update(teamsTable)
       .set({
-        stripeCustomerId: customerId,
-        stripeSubscriptionId: subscriptionId,
-        stripeProductId: productId,
         planName: (plan.product as Stripe.Product).name,
+        stripeCustomerId: customerId,
+        stripeMetadata: productMetadata,
+        stripeProductId: productId,
+        stripeSubscriptionId: subscriptionId,
         subscriptionStatus: subscription.status,
         updatedAt: new Date(),
-        stripeMetadata: productMetadata,
         whatsappLimit: Number(productMetadata.limit ?? "0"),
         whatsappSubscribeAt: new Date(),
       })
@@ -132,25 +132,25 @@ export async function GET(request: NextRequest) {
 
         const newMembersLimit: (typeof teamMemberLimitsTable.$inferInsert)[] =
           members.map((member) => ({
-            teamId: member.organizationId,
-            userId: member.userId,
             limitType: "inherited",
             maxLimit: member.team.whatsappLimit,
             maxLimitType: "recurring",
+            teamId: member.organizationId,
+            userId: member.userId,
           }));
 
         await tx
           .insert(teamMemberLimitsTable)
           .values(newMembersLimit)
           .onConflictDoUpdate({
-            target: [
-              teamMemberLimitsTable.userId,
-              teamMemberLimitsTable.teamId,
-            ],
             set: buildConflictUpdateColumns(teamMemberLimitsTable, [
               "userId",
               "teamId",
             ]),
+            target: [
+              teamMemberLimitsTable.userId,
+              teamMemberLimitsTable.teamId,
+            ],
           });
       }
     });

@@ -1,24 +1,23 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { Button } from "@workspace/ui/components/button";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
 } from "@workspace/ui/components/form";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@workspace/ui/components/input-otp";
-import { Button } from "@workspace/ui/components/button";
+import * as React from "react";
+import { useForm } from "react-hook-form";
 import z from "zod";
 
 const FormSchema = z.object({
@@ -35,15 +34,15 @@ interface Props {
 
 export function InputOTPForm({ onSubmit }: Props) {
   const form = useForm<FormValue>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       pin: "",
     },
+    resolver: zodResolver(FormSchema),
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="pin"

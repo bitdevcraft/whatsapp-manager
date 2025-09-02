@@ -8,8 +8,8 @@ describe('PhoneNumber API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');

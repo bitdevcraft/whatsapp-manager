@@ -1,12 +1,12 @@
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@workspace/ui/components/card";
-import { CheckCircle, ArrowRight, Users } from "lucide-react";
+import { ArrowRight, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function InvitationSuccess() {
@@ -48,7 +48,7 @@ export default function InvitationSuccess() {
           <div className="text-center">
             <p className="text-xs text-muted-foreground">
               Need help getting started?{" "}
-              <a href="#" className="text-primary hover:underline">
+              <a className="text-primary hover:underline" href="#">
                 View Documentation
               </a>
             </p>

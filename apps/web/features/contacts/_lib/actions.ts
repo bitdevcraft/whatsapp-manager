@@ -1,11 +1,12 @@
 "use server";
 
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { toast } from "sonner";
 import { contactsTable } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { eq, inArray, sql } from "drizzle-orm";
 import { revalidateTag, unstable_noStore } from "next/cache";
+import { toast } from "sonner";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 import { getErrorMessage } from "@/lib/handle-error";
 
 export async function deleteContact(input: { id: string }) {
@@ -22,7 +23,10 @@ export async function deleteContact(input: { id: string }) {
 
   try {
     await withTenantTransaction(userWithTeam.teamId, async (tx) => {
-      await tx.delete(contactsTable).where(eq(contactsTable.id, input.id));
+      await tx
+        .update(contactsTable)
+        .set({ deletedAt: new Date() })
+        .where(eq(contactsTable.id, input.id));
     });
 
     revalidateTag(`contacts:${userWithTeam?.teamId}`);
@@ -54,7 +58,10 @@ export async function deleteContacts(input: { ids: string[] }) {
   try {
     await withTenantTransaction(userWithTeam.teamId, async (tx) => {
       await tx
-        .delete(contactsTable)
+        .update(contactsTable)
+        .set({
+          deletedAt: new Date(),
+        })
         .where(inArray(contactsTable.id, input.ids));
     });
 
@@ -68,6 +75,48 @@ export async function deleteContacts(input: { ids: string[] }) {
     return {
       data: null,
       error: getErrorMessage(error),
+    };
+  }
+}
+
+export async function removeContactTags(input: { ids: string[]; tag: string }) {
+  unstable_noStore();
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    toast.error("There is no team");
+    return {
+      data: null,
+      error: null,
+    };
+  }
+
+  try {
+    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
+      await tx
+        .update(contactsTable)
+        .set({
+          tags: sql`
+                        (SELECT jsonb_agg(DISTINCT elem)
+                         FROM jsonb_array_elements_text(
+                                      COALESCE(${contactsTable.tags}, '[]'::jsonb) - ${input.tag}
+                              ) elem)
+                    `,
+          updatedAt: new Date(),
+        })
+        .where(inArray(contactsTable.id, input.ids));
+    });
+
+    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+
+    return {
+      data: null,
+      error: null,
+    };
+  } catch (err) {
+    return {
+      data: null,
+      error: getErrorMessage(err),
     };
   }
 }
@@ -95,6 +144,7 @@ export async function updateContact(input: { id: string; tags?: string[] }) {
                                       COALESCE(${contactsTable.tags}, '[]'::jsonb) || ${JSON.stringify(input.tags)}::jsonb
                               ) elem)
                     `,
+          updatedAt: new Date(),
         })
         .where(eq(contactsTable.id, input.id));
     });
@@ -134,52 +184,13 @@ export async function updateContacts(input: {
         .update(contactsTable)
         .set({
           tags: sql`
-                        (SELECT jsonb_agg(DISTINCT elem)
-                         FROM jsonb_array_elements_text(
-                                      COALESCE(${contactsTable.tags}, '[]'::jsonb) || ${JSON.stringify(input.tags)}::jsonb
-                              ) elem)
-                    `,
-        })
-        .where(inArray(contactsTable.id, input.ids));
-    });
-
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
-
-    return {
-      data: null,
-      error: null,
-    };
-  } catch (err) {
-    return {
-      data: null,
-      error: getErrorMessage(err),
-    };
-  }
-}
-
-export async function removeContactTags(input: { ids: string[]; tag: string }) {
-  unstable_noStore();
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    toast.error("There is no team");
-    return {
-      data: null,
-      error: null,
-    };
-  }
-
-  try {
-    await withTenantTransaction(userWithTeam.teamId, async (tx) => {
-      await tx
-        .update(contactsTable)
-        .set({
-          tags: sql`
-                        (SELECT jsonb_agg(DISTINCT elem)
-                         FROM jsonb_array_elements_text(
-                                      COALESCE(${contactsTable.tags}, '[]'::jsonb) - ${input.tag}
-                              ) elem)
-                    `,
+            (
+              SELECT jsonb_agg(DISTINCT elem)
+              FROM jsonb_array_elements_text(
+                COALESCE(${contactsTable.tags}, '[]'::jsonb) || ${JSON.stringify(input.tags)}::jsonb
+              ) elem
+            )`,
+          updatedAt: new Date(),
         })
         .where(inArray(contactsTable.id, input.ids));
     });

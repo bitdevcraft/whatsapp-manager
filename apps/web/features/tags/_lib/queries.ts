@@ -1,11 +1,57 @@
-import { unstable_cache } from "@/lib/unstable-cache";
-import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
 import { tagsTable } from "@workspace/db/schema";
-import { filterColumns } from "@workspace/ui/lib/filter-columns";
-import { GetTagSchema } from "./validations";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
+import { filterColumns } from "@workspace/ui/lib/filter-columns";
+import { and, asc, count, desc, gte, ilike, isNull, lte } from "drizzle-orm";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
+import { unstable_cache } from "@/lib/unstable-cache";
+
+import { GetTagSchema } from "./validations";
+
+export async function getSelectTags() {
+  const userWithTeam = await getUserWithTeam();
+
+  if (!userWithTeam?.teamId) {
+    return [];
+  }
+
+  const { teamId } = userWithTeam;
+
+  return await unstable_cache(
+    async () => {
+      try {
+        const tags = await withTenantTransaction(teamId, async (tx) => {
+          const data = await tx
+            .select({
+              label: tagsTable.name,
+              value: tagsTable.normalizedName,
+            })
+            .from(tagsTable)
+            .where(isNull(tagsTable.deletedAt))
+            .orderBy(tagsTable.name);
+
+          const tags: { label: string; value: string }[] = data.map((t) => ({
+            label: t.label,
+            value: t.value || "",
+          }));
+
+          return tags;
+        });
+
+        return tags;
+      } catch (error) {
+        logger.error(error);
+        return [];
+      }
+    },
+    [`tags:select:${teamId}`],
+    {
+      revalidate: 1,
+      tags: [`tags:select:${teamId}`, "tags:select"],
+    }
+  )();
+}
 
 export async function getTags(input: GetTagSchema) {
   const userWithTeam = await getUserWithTeam();
@@ -23,9 +69,9 @@ export async function getTags(input: GetTagSchema) {
         const advancedTable = input.filterFlag === "advancedFilters";
 
         const advancedWhere = filterColumns({
-          table: tagsTable,
           filters: input.filters,
           joinOperator: input.joinOperator,
+          table: tagsTable,
         });
 
         const where = advancedTable
@@ -71,7 +117,7 @@ export async function getTags(input: GetTagSchema) {
             const data = await tx
               .select()
               .from(tagsTable)
-              .where(where)
+              .where(and(where, isNull(tagsTable.deletedAt)))
               .limit(input.perPage)
               .offset(offset)
               .orderBy(...orderBy);
@@ -81,7 +127,7 @@ export async function getTags(input: GetTagSchema) {
                 count: count(),
               })
               .from(tagsTable)
-              .where(where)
+              .where(and(where, isNull(tagsTable.deletedAt)))
               .execute()
               .then((res) => res[0]?.count ?? 0);
 
@@ -103,49 +149,6 @@ export async function getTags(input: GetTagSchema) {
     {
       revalidate: 10,
       tags: [`tags:${userWithTeam?.teamId}`, "tags"],
-    }
-  )();
-}
-
-export async function getSelectTags() {
-  const userWithTeam = await getUserWithTeam();
-
-  if (!userWithTeam?.teamId) {
-    return [];
-  }
-
-  const { teamId } = userWithTeam;
-
-  return await unstable_cache(
-    async () => {
-      try {
-        const tags = await withTenantTransaction(teamId, async (tx) => {
-          const data = await tx
-            .select({
-              label: tagsTable.name,
-              value: tagsTable.normalizedName,
-            })
-            .from(tagsTable)
-            .orderBy(tagsTable.name);
-
-          const tags: { label: string; value: string }[] = data.map((t) => ({
-            label: t.label,
-            value: t.value || "",
-          }));
-
-          return tags;
-        });
-
-        return tags;
-      } catch (error) {
-        logger.error(error);
-        return [];
-      }
-    },
-    [`tags:select:${teamId}`],
-    {
-      revalidate: 1,
-      tags: [`tags:select:${teamId}`, "tags:select"],
     }
   )();
 }

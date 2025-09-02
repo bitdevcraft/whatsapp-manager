@@ -1,7 +1,9 @@
 import { templatesTable } from "@workspace/db/schema/templates";
-import { syncTemplate } from "./sync-template";
-import { getUserWithTeam } from "@/lib/db/queries";
 import { withTenantTransaction } from "@workspace/db/tenant";
+
+import { getUserWithTeam } from "@/lib/db/queries";
+
+import { syncTemplate } from "./sync-template";
 
 export async function getTemplates(sync = false) {
   if (sync) {

@@ -2,11 +2,13 @@ import js from '@eslint/js';
 import type { Linter } from 'eslint';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
+import { nodeJsConfig } from '@workspace/eslint-config/node-js';
 
 // ? https://github.com/bfanger/eslint-plugin-only-warn/issues/13
 import 'eslint-plugin-only-warn';
 
 const config = [
+    ...nodeJsConfig,
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {

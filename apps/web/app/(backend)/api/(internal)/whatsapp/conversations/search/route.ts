@@ -1,8 +1,13 @@
-import { getUserWithTeam } from "@/lib/db/queries";
-import { withTenantTransaction, contactsTable } from "@workspace/db";
-import { or, ilike, sql } from "drizzle-orm";
+import {
+  contactsTable,
+  conversationsTable,
+  withTenantTransaction,
+} from "@workspace/db";
+import { and, ilike, isNull, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,10 +28,10 @@ export async function GET(request: NextRequest) {
     if (!searchInput) {
       return NextResponse.json(
         {
-          data: [],
           contacts: [],
-          previousOffset: null,
+          data: [],
           nextOffset: null,
+          previousOffset: null,
         },
         { status: 200 }
       );
@@ -39,20 +44,26 @@ export async function GET(request: NextRequest) {
           .select()
           .from(contactsTable)
           .where(
-            or(
-              ilike(contactsTable.name, `%${searchInput}%`),
-              ilike(contactsTable.phone, `%${searchInput}%`)
+            and(
+              or(
+                ilike(contactsTable.name, `%${searchInput}%`),
+                ilike(contactsTable.phone, `%${searchInput}%`)
+              ),
+              isNull(contactsTable.deletedAt)
             )
           )
           .limit(limit);
 
         const conversations = await tx.query.conversationsTable.findMany({
-          where: or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
+          limit: limit + 1,
+          offset,
           orderBy: (conversationsTable, { asc }) => [
             asc(conversationsTable.createdAt),
           ],
-          offset,
-          limit: limit + 1,
+          where: and(
+            or(sql`similarity (body::text, ${searchInput}::text) > 0.1`),
+            isNull(conversationsTable.deletedAt)
+          ),
           with: {
             contact: {
               columns: {
@@ -81,10 +92,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        data,
         contacts,
-        previousOffset,
+        data,
         nextOffset,
+        previousOffset,
       },
       { status: 200 }
     );

@@ -2,10 +2,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
@@ -23,7 +23,7 @@ export function AutoNamedParamsInputs({
   const params = useWatch({
     control,
     name: baseName as any,
-  }) as Array<{ param_name: string; example: string }> | undefined;
+  }) as Array<{ example: string; param_name: string; }> | undefined;
 
   if (!params?.length) return null;
 
@@ -31,7 +31,7 @@ export function AutoNamedParamsInputs({
     <div className="space-y-2">
       <div className="text-sm">{label}</div>
       {params.map((_, i) => (
-        <div key={i} className="grid grid-cols-1 gap-2 rounded-md border p-2">
+        <div className="grid grid-cols-1 gap-2 rounded-md border p-2" key={i}>
           <FormField
             control={control}
             name={`${baseName}.${i}.param_name`}

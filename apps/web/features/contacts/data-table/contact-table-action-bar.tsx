@@ -1,17 +1,9 @@
 "use client";
 
-import { type Contact } from "@workspace/db/schema/contacts";
-import { SelectTrigger } from "@radix-ui/react-select";
 import type { Table } from "@tanstack/react-table";
-import { CheckCircle2, Download, Trash2, XCircle } from "lucide-react";
-import * as React from "react";
-import { toast } from "sonner";
 
-import {
-  DataTableActionBar,
-  DataTableActionBarAction,
-  DataTableActionBarSelection,
-} from "@workspace/ui/data-table";
+import { SelectTrigger } from "@radix-ui/react-select";
+import { type Contact } from "@workspace/db/schema/contacts";
 import {
   Select,
   SelectContent,
@@ -19,14 +11,23 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { Separator } from "@workspace/ui/components/separator";
+import {
+  DataTableActionBar,
+  DataTableActionBarAction,
+  DataTableActionBarSelection,
+} from "@workspace/ui/data-table";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
+import { CheckCircle2, Download, Trash2, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { toast } from "sonner";
+
 import {
   deleteContacts,
   removeContactTags,
   updateContacts,
 } from "@/features/contacts/_lib/actions";
 import { getSelectTags } from "@/features/tags/_lib/queries";
-import { useRouter } from "next/navigation";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = [
@@ -63,26 +64,26 @@ export function ContactsTableActionBar({
   }, [isPending, router]);
 
   const onContactUpdate = React.useCallback(
-    ({ field, value }: { field: "tags" | "priority"; value: string }) => {
+    ({ field, value }: { field: "priority" | "tags"; value: string }) => {
       setCurrentAction(field === "tags" ? "update-tags" : "update-priority");
       startTransition(async () => {
         const { error } = await updateContacts({
-          ids: rows.map((row) => row.original.id),
           [field]: value,
+          ids: rows.map((row) => row.original.id),
         });
 
         if (error) {
           toast.error(error);
           return;
         }
-        toast.success("Tasks updated");
+        toast.success("Contacts updated");
       });
     },
     [rows]
   );
 
   const onContactRemoveTag = React.useCallback(
-    ({ value }: { field: "tags" | "priority"; value: string }) => {
+    ({ value }: { field: "priority" | "tags"; value: string }) => {
       setCurrentAction("remove-tags");
       startTransition(async () => {
         const { error } = await removeContactTags({
@@ -94,7 +95,7 @@ export function ContactsTableActionBar({
           toast.error(error);
           return;
         }
-        toast.success("Tasks updated");
+        toast.success("Contacts updated");
       });
     },
     [rows]
@@ -129,8 +130,8 @@ export function ContactsTableActionBar({
     <DataTableActionBar table={table} visible={rows.length > 0}>
       <DataTableActionBarSelection table={table} />
       <Separator
-        orientation="vertical"
         className="hidden data-[orientation=vertical]:h-5 sm:block"
+        orientation="vertical"
       />
       <div className="flex items-center gap-1.5">
         <Select
@@ -140,9 +141,9 @@ export function ContactsTableActionBar({
         >
           <SelectTrigger asChild>
             <DataTableActionBarAction
+              isPending={getIsActionPending("update-tags")}
               size="icon"
               tooltip="Update Tags"
-              isPending={getIsActionPending("update-tags")}
             >
               <CheckCircle2 />
             </DataTableActionBarAction>
@@ -151,9 +152,9 @@ export function ContactsTableActionBar({
             <SelectGroup>
               {tags.map((tag) => (
                 <SelectItem
+                  className="capitalize"
                   key={tag.value}
                   value={tag.value}
-                  className="capitalize"
                 >
                   {tag.label}
                 </SelectItem>
@@ -168,9 +169,9 @@ export function ContactsTableActionBar({
         >
           <SelectTrigger asChild>
             <DataTableActionBarAction
+              isPending={getIsActionPending("remove-tags")}
               size="icon"
               tooltip="Remove Tags"
-              isPending={getIsActionPending("remove-tags")}
             >
               <XCircle />
             </DataTableActionBarAction>
@@ -179,9 +180,9 @@ export function ContactsTableActionBar({
             <SelectGroup>
               {tags.map((tag) => (
                 <SelectItem
+                  className="capitalize"
                   key={tag.value}
                   value={tag.value}
-                  className="capitalize"
                 >
                   {tag.label}
                 </SelectItem>
@@ -190,19 +191,19 @@ export function ContactsTableActionBar({
           </SelectContent>
         </Select>
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Export Contacts"
+          disabled
           isPending={getIsActionPending("export")}
           onClick={onContactExport}
-          disabled
+          size="icon"
+          tooltip="Export Contacts"
         >
           <Download />
         </DataTableActionBarAction>
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Delete Contacts"
           isPending={getIsActionPending("delete")}
           onClick={onContactDelete}
+          size="icon"
+          tooltip="Delete Contacts"
         >
           <Trash2 />
         </DataTableActionBarAction>

@@ -1,4 +1,5 @@
 import { getTemplateById } from "@/features/whatsapp/templates/lib/queries";
+
 import { EditPage } from "./edit-page";
 
 interface IndexPageProps {

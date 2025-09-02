@@ -1,6 +1,3 @@
-import { RESPONSE_CODE } from "@/lib/constants/response-code";
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
 import {
   whatsAppBusinessAccountsTable,
   withTenantTransaction,
@@ -8,6 +5,10 @@ import {
 import WhatsApp from "@workspace/wa-cloud-api";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function POST(
   request: Request,
@@ -43,6 +44,7 @@ export async function POST(
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
+      where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
       with: {
         team: {
           with: {
@@ -50,7 +52,6 @@ export async function POST(
           },
         },
       },
-      where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
     });
 
     return data;
@@ -64,14 +65,14 @@ export async function POST(
   }
 
   const decryptedToken = await decryptApiKey({
-    iv: data.accessToken?.iv,
     data: data.accessToken.data,
+    iv: data.accessToken?.iv,
   });
 
   const config = {
     accessToken: decryptedToken,
-    phoneNumberId: Number(id),
     businessAcctId: String(data.id),
+    phoneNumberId: Number(id),
   };
 
   const whatsapp = new WhatsApp(config);

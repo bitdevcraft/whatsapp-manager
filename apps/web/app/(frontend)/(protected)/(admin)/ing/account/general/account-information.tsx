@@ -11,13 +11,13 @@ export function AccountInformation({
   user,
 }: {
   user: {
-    id: string;
+    createdAt: Date;
     email: string;
     emailVerified: boolean;
+    id: string;
+    image?: null | string | undefined | undefined | undefined;
     name: string;
-    createdAt: Date;
     updatedAt: Date;
-    image?: string | null | undefined | undefined | undefined;
   };
 }) {
   return (

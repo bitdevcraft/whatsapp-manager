@@ -1,18 +1,20 @@
-import { getTemplates } from "@/features/whatsapp/templates/get-template";
-import { NextRequest, NextResponse } from "next/server";
-import { withTenantTransaction } from "@workspace/db/tenant";
-import { templatesTable } from "@workspace/db/schema";
-import { v4 as uuidv4 } from "uuid";
-import { getUserWithTeam } from "@/lib/db/queries";
 import type { TemplateResponse } from "@workspace/wa-cloud-api";
+
+import { templatesTable } from "@workspace/db/schema";
+import { withTenantTransaction } from "@workspace/db/tenant";
 import { CategoryEnum } from "@workspace/wa-cloud-api";
 import { revalidateTag } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
+
+import { getTemplates } from "@/features/whatsapp/templates/get-template";
+import { getUserWithTeam } from "@/lib/db/queries";
 
 // Extend the TemplateResponse type to include meta
 interface AppTemplateResponse extends Omit<TemplateResponse, "meta"> {
   meta?: {
-    status: string;
     createdAt: string;
+    status: string;
   };
 }
 
@@ -26,14 +28,14 @@ export async function GET(request: NextRequest) {
   if (!userWithTeam?.teamId) {
     return new NextResponse(
       JSON.stringify({
-        error: "Unauthorized: No team found",
         details: "User is not associated with a team",
+        error: "Unauthorized: No team found",
       }),
       {
-        status: 401,
         headers: {
           "Content-Type": "application/json",
         },
+        status: 401,
       }
     );
   }
@@ -45,23 +47,23 @@ export async function GET(request: NextRequest) {
     revalidateTag(`templates:${userWithTeam?.teamId}`);
 
     return new NextResponse(JSON.stringify(result), {
-      status: 200,
       headers: {
         "Content-Type": "application/json",
       },
+      status: 200,
     });
   } catch (error) {
     console.error("Error fetching templates:", error);
     return new NextResponse(
       JSON.stringify({
-        error: "Failed to fetch templates",
         details: error instanceof Error ? error.message : "Unknown error",
+        error: "Failed to fetch templates",
       }),
       {
-        status: 500,
         headers: {
           "Content-Type": "application/json",
         },
+        status: 500,
       }
     );
   }
@@ -74,14 +76,14 @@ export async function POST(request: NextRequest) {
     if (!userWithTeam?.teamId) {
       return new NextResponse(
         JSON.stringify({
-          error: "Unauthorized: No team found",
           details: "User is not associated with a team",
+          error: "Unauthorized: No team found",
         }),
         {
-          status: 401,
           headers: {
             "Content-Type": "application/json",
           },
+          status: 401,
         }
       );
     }
@@ -91,23 +93,23 @@ export async function POST(request: NextRequest) {
     try {
       templateData = (await request.json()) as Omit<
         TemplateResponse,
-        "id" | "status" | "category"
+        "category" | "id" | "status"
       > & {
-        name: string;
         category: string;
+        name: string;
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return new NextResponse(
         JSON.stringify({
-          error: "Invalid request body",
           details: "Failed to parse JSON payload",
+          error: "Invalid request body",
         }),
         {
-          status: 400,
           headers: {
             "Content-Type": "application/json",
           },
+          status: 400,
         }
       );
     }
@@ -127,15 +129,15 @@ export async function POST(request: NextRequest) {
       const templateContent: AppTemplateResponse = {
         ...templateData,
         category, // Use validated category
-        meta: {
-          status: "DRAFT",
-          createdAt: new Date().toISOString(),
-        },
+        components: templateData.components || [],
         // Ensure required fields from TemplateResponse are included
         id: templateId,
-        status: "PENDING",
+        meta: {
+          createdAt: new Date().toISOString(),
+          status: "DRAFT",
+        },
         parameter_format: templateData.parameter_format || "NAMED",
-        components: templateData.components || [],
+        status: "PENDING",
       };
 
       // Create the template in the database
@@ -145,9 +147,9 @@ export async function POST(request: NextRequest) {
           return tx
             .insert(templatesTable)
             .values({
+              content: templateContent,
               id: templateId,
               name: templateData.name,
-              content: templateContent,
               teamId: userWithTeam.teamId!,
               updatedAt: new Date(),
             })
@@ -156,17 +158,17 @@ export async function POST(request: NextRequest) {
       );
 
       return new NextResponse(JSON.stringify(newTemplate), {
-        status: 201,
         headers: {
           "Content-Type": "application/json",
         },
+        status: 201,
       });
     } catch (dbError) {
       console.error("Database error creating template:", dbError);
       return new NextResponse(
         JSON.stringify({
-          error: "Failed to create template",
           details: dbError instanceof Error ? dbError.message : "Unknown error",
+          error: "Failed to create template",
         }),
         { status: 500 }
       );
@@ -175,14 +177,14 @@ export async function POST(request: NextRequest) {
     console.error("Unexpected error in template creation:", error);
     return new Response(
       JSON.stringify({
-        error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
+        error: "Internal server error",
       }),
       {
-        status: 500,
         headers: {
           "Content-Type": "application/json",
         },
+        status: 500,
       }
     );
   }

@@ -30,13 +30,13 @@ export default class HttpsClient implements HttpsClientClass {
     ): Promise<HttpsClientResponseClass> {
         const url = `https://${hostname}/${path}`;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        const timeoutId = setTimeout(() => { controller.abort(); }, timeout);
 
         try {
             const response = await fetch(url, {
-                method,
-                headers,
                 body,
+                headers,
+                method,
                 signal: controller.signal,
             });
             LOGGER.log(`${method} : ${url} - ${JSON.stringify(response)}`);
@@ -52,8 +52,8 @@ export default class HttpsClient implements HttpsClientClass {
 
 export class HttpsClientResponse implements HttpsClientResponseClass {
     res: Response;
-    respStatusCode: number;
     respHeaders: ResponseHeaders;
+    respStatusCode: number;
 
     constructor(resp: Response) {
         this.res = resp;
@@ -61,16 +61,8 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
         this.respHeaders = Object.fromEntries(resp.headers.entries());
     }
 
-    statusCode(): number {
-        return this.respStatusCode;
-    }
-
     headers(): ResponseHeaders {
         return this.respHeaders;
-    }
-
-    rawResponse(): Response {
-        return this.res;
     }
 
     async json(): Promise<ResponseJSONBody> {
@@ -80,5 +72,13 @@ export class HttpsClientResponse implements HttpsClientResponseClass {
             // TODO Error Handling
             throw new Error('Failed to parse response body to JSON: ' + (err as Error).message);
         }
+    }
+
+    rawResponse(): Response {
+        return this.res;
+    }
+
+    statusCode(): number {
+        return this.respStatusCode;
     }
 }

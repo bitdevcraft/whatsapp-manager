@@ -1,4 +1,11 @@
 import {
+  ComponentTypesEnum,
+  ParametersTypesEnum,
+  TemplateResponse,
+} from "@workspace/wa-cloud-api";
+import z from "zod";
+
+import {
   CardSchema,
   CardsComponentsSchema,
   ComponentValues,
@@ -10,12 +17,6 @@ import {
   HeaderExampleSchema,
   HeaderExampleValue,
 } from "@/types/validations/templates/template-schema";
-import {
-  ComponentTypesEnum,
-  ParametersTypesEnum,
-  TemplateResponse,
-} from "@workspace/wa-cloud-api";
-import z from "zod";
 
 export function ExtractExampleToParameters(
   input: BodyExampleValue | HeaderExampleValue,
@@ -47,8 +48,8 @@ export function ExtractExampleToParameters(
 
     temp?.forEach((text) => {
       parameters.push({
-        type: ParametersTypesEnum.Text,
         text,
+        type: ParametersTypesEnum.Text,
       });
     });
   }
@@ -62,9 +63,9 @@ export function ExtractExampleToParameters(
 
     temp?.forEach((named) => {
       parameters.push({
-        type: ParametersTypesEnum.Text,
-        text: named.example,
         parameter_name: named.param_name,
+        text: named.example,
+        type: ParametersTypesEnum.Text,
       });
     });
   }
@@ -104,18 +105,18 @@ export function TranslateTemplateResponseToMessageTemplate(
   input.components.forEach((component) => {
     if (component.type === "HEADER" && component.example) {
       components.push({
-        type: ComponentTypesEnum.Header,
         parameters: ExtractExampleToParameters(
           component.example,
           component.format
         ),
+        type: ComponentTypesEnum.Header,
       });
     }
 
     if (component.type === "BODY" && component.example) {
       components.push({
-        type: ComponentTypesEnum.Body,
         parameters: ExtractExampleToParameters(component.example),
+        type: ComponentTypesEnum.Body,
       });
     }
 
@@ -128,18 +129,18 @@ export function TranslateTemplateResponseToMessageTemplate(
         card.components.forEach((cardComp) => {
           if (cardComp.type === "HEADER" && cardComp.example) {
             cardComponents.push({
-              type: ComponentTypesEnum.Header,
               parameters: ExtractExampleToParameters(
                 cardComp.example,
                 cardComp.format
               ),
+              type: ComponentTypesEnum.Header,
             });
           }
 
           if (cardComp.type === "BODY" && cardComp.example) {
             cardComponents.push({
-              type: ComponentTypesEnum.Body,
               parameters: ExtractExampleToParameters(cardComp.example),
+              type: ComponentTypesEnum.Body,
             });
           }
         });
@@ -151,18 +152,18 @@ export function TranslateTemplateResponseToMessageTemplate(
       });
 
       components.push({
-        type: ComponentTypesEnum.Carousel,
         cards,
+        type: ComponentTypesEnum.Carousel,
       });
     }
   });
 
   return {
-    name: input.name,
-    language: {
-      policy: "deterministic",
-      code: input.language,
-    },
     components,
+    language: {
+      code: input.language,
+      policy: "deterministic",
+    },
+    name: input.name,
   };
 }

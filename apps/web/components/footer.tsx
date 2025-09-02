@@ -5,22 +5,22 @@ export default function Footer() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col justify-center items-center gap-8">
       <div className="flex justify-between items-center w-full">
-        <Image src={"/logo.png"} alt="logo" width={100} height={100} />
+        <Image alt="logo" height={100} src={"/logo.png"} width={100} />
         <div className="flex gap-4">
-          <Link target="_blank" href={"https://www.facebook.com/ingenious.ae"}>
+          <Link href={"https://www.facebook.com/ingenious.ae"} target="_blank">
             <Facebook strokeWidth={1.5} />
           </Link>
           <Link
-            target="_blank"
             href={"https://www.instagram.com/ingenious_digitalmarketing/"}
+            target="_blank"
           >
             <Instagram strokeWidth={1.5} />
           </Link>
           <Link
-            target="_blank"
             href={
               "https://www.linkedin.com/company/ingenious-digital-marketing-management"
             }
+            target="_blank"
           >
             <Linkedin strokeWidth={1.5} />
           </Link>

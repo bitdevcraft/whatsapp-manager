@@ -1,61 +1,61 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import * as React from "react";
-import {
-  useForm,
-  useFieldArray,
-  useWatch,
-  useFormContext,
-} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
+import { Form } from "@workspace/ui/components/form";
 import axios, { AxiosError } from "axios";
+import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import {
+  useFieldArray,
+  useForm,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import { toast } from "sonner";
+import z from "zod";
 
 import {
   TemplateCarouselCreateSchema,
   TemplateCarouselCreateValue,
   templateCarouselDefault,
 } from "@/types/validations/templates/template-schema";
-
-import { Form } from "@workspace/ui/components/form";
-import { Button } from "@workspace/ui/components/button";
-import { Trash, X } from "lucide-react";
 import { pruneObject } from "@/utils/prune";
-import z from "zod";
 import { toSnake } from "@/utils/string-helper";
+
 import { parseNamed, parsePositional } from "../_lib/utils";
 import { ErrorSummary } from "./helpers";
-import { ButtonsArray } from "./template-button";
-import { HeaderFileField } from "./template-header-file-field";
-import { BodyAutoExamples } from "./template-body-examples";
 import { BodyEditor } from "./template-body-editor";
+import { BodyAutoExamples } from "./template-body-examples";
+import { ButtonsArray } from "./template-button";
 import { TemplateDetails } from "./template-details";
-import { useRouter } from "next/navigation";
+import { HeaderFileField } from "./template-header-file-field";
 
 /* -----------------------------
  * Component
  * --------------------------- */
 
 export default function TemplateCarouselCreateForm({
-  initialValues,
   id,
+  initialValues,
 }: {
-  initialValues?: Partial<TemplateCarouselCreateValue>;
   id?: string;
+  initialValues?: Partial<TemplateCarouselCreateValue>;
 }) {
   const router = useRouter();
 
   const form = useForm<TemplateCarouselCreateValue>({
-    resolver: zodResolver(TemplateCarouselCreateSchema),
     defaultValues: { ...templateCarouselDefault, ...initialValues },
     mode: "onChange",
+    resolver: zodResolver(TemplateCarouselCreateSchema),
     // important to reduce registration churn
     shouldUnregister: false,
   });
 
-  const { control, handleSubmit, setValue, getValues } = form;
+  const { control, getValues, handleSubmit, setValue } = form;
 
   const componentsFA = useFieldArray({ control, name: "components" });
 
@@ -71,7 +71,7 @@ export default function TemplateCarouselCreateForm({
   const parameterFormat = useWatch({
     control,
     name: "parameter_format",
-  }) as "POSITIONAL" | "NAMED";
+  }) as "NAMED" | "POSITIONAL";
 
   // Keep examples in sync with body text + parameter format
   const syncExamples = React.useCallback(
@@ -80,7 +80,7 @@ export default function TemplateCarouselCreateForm({
       const bIdx = comps.findIndex((c) => c?.type === "BODY");
       if (bIdx < 0) return;
 
-      const pf = getValues("parameter_format") as "POSITIONAL" | "NAMED";
+      const pf = getValues("parameter_format") as "NAMED" | "POSITIONAL";
       const bText = bodyTextOverride ?? getValues(`components.${bIdx}.text`);
 
       // reset both
@@ -114,12 +114,12 @@ export default function TemplateCarouselCreateForm({
         const current =
           (getValues(
             `components.${bIdx}.example.body_text_named_params`
-          ) as Array<{ param_name: string; example: string }>) || [];
+          ) as Array<{ example: string; param_name: string }>) || [];
         const map = new Map(current.map((o) => [o.param_name, o.example]));
         const next =
           names.length === 0
             ? undefined
-            : names.map((n) => ({ param_name: n, example: map.get(n) ?? "" }));
+            : names.map((n) => ({ example: map.get(n) ?? "", param_name: n }));
         setValue(`components.${bIdx}.example.body_text_named_params`, next, {
           shouldDirty: true,
         });
@@ -138,8 +138,8 @@ export default function TemplateCarouselCreateForm({
       TemplateCarouselCreateSchema.parse(payload);
 
       const cleanPayload = pruneObject(payload, {
-        removeEmptyObjects: true,
         removeEmptyArrays: true,
+        removeEmptyObjects: true,
         removeEmptyStrings: true,
         trimStrings: true,
       });
@@ -148,14 +148,8 @@ export default function TemplateCarouselCreateForm({
         ? `/api/whatsapp/templates/edit/${id}`
         : `/api/whatsapp/templates/create`;
 
-      console.log(url);
-
       const result = await axios.post(url, cleanPayload);
       return result.data;
-    },
-    onSuccess: () => {
-      toast.success("Saved");
-      router.push("/ing/whatsapp/templates");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -175,8 +169,11 @@ export default function TemplateCarouselCreateForm({
 
       if (error instanceof z.ZodError) {
         //
-        console.log(error);
       }
+    },
+    onSuccess: () => {
+      toast.success("Saved");
+      router.push("/ing/whatsapp/templates");
     },
   });
 
@@ -185,7 +182,7 @@ export default function TemplateCarouselCreateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
         <TemplateDetails />
 
         {/* Components */}
@@ -196,8 +193,8 @@ export default function TemplateCarouselCreateForm({
           <div className="space-y-4">
             {componentsFA.fields.map((comp, idx) => (
               <ComponentItem
-                key={comp.id}
                 index={idx}
+                key={comp.id}
                 parameterFormat={parameterFormat}
                 syncExamples={syncExamples}
               />
@@ -205,7 +202,7 @@ export default function TemplateCarouselCreateForm({
           </div>
         </div>
 
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button disabled={mutation.isPending} type="submit">
           {mutation.isPending ? "Loading…" : "Submit"}
         </Button>
       </form>
@@ -217,13 +214,193 @@ export default function TemplateCarouselCreateForm({
  * ComponentItem: uses useWatch (no watch()) and no setValue during render
  * --------------------------- */
 
+function CardComponentRenderer({
+  cardCompIndex,
+  cardIndex,
+  compIndex,
+  control,
+}: {
+  cardCompIndex: number;
+  cardIndex: number;
+  compIndex: number;
+  control: any;
+}) {
+  const type = useWatch({
+    control,
+    name: `components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.type` as const,
+  }) as "BODY" | "BUTTONS" | "FOOTER" | "HEADER" | undefined;
+
+  if (type === "HEADER") {
+    return (
+      <HeaderFileField
+        name={`components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.example.header_handle.0`}
+      />
+    );
+  }
+
+  if (type === "BUTTONS") {
+    return (
+      <ButtonsArray
+        index={cardCompIndex}
+        prefix={`components.${compIndex}.cards.${cardIndex}`}
+      />
+    );
+  }
+
+  return null;
+}
+
+/* -----------------------------
+ * Carousel: Cards & Components
+ * --------------------------- */
+
+function CarouseComponentArray({
+  cardIndex,
+  compIndex,
+  control,
+}: {
+  cardIndex: number;
+  compIndex: number;
+  control: any;
+}) {
+  const prefix =
+    `components.${compIndex}.cards.${cardIndex}.components` as const;
+
+  const fa = useFieldArray({
+    control,
+    name: prefix,
+  });
+
+  return (
+    <div className="space-y-2">
+      {fa.fields.length === 0 && (
+        <p className="text-xs text-muted-foreground">No Carousel.</p>
+      )}
+      <div className="space-y-3">
+        {fa.fields.map((f, idx) => (
+          <div key={f.id}>
+            <CardComponentRenderer
+              cardCompIndex={idx}
+              cardIndex={cardIndex}
+              compIndex={compIndex}
+              control={control}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CarouselArray({ compIndex }: { compIndex: number }) {
+  const { control, getValues, trigger } =
+    useFormContext<TemplateCarouselCreateValue>();
+
+  const fa = useFieldArray({
+    control,
+    name: `components.${compIndex}.cards`,
+  });
+  const handleAddCard = () => {
+    const cards = getValues(`components.${compIndex}.cards`);
+    const first = cards?.[0];
+    if (first) {
+      const firstHeader = first.components.find(
+        (c: any) => c.type === "HEADER"
+      );
+      const firstButtons = first.components.find(
+        (c: any) => c.type === "BUTTONS"
+      );
+      fa.append({
+        components: [
+          // @ts-expect-error firstHeader
+          { format: firstHeader.format, text: "", type: "HEADER" },
+          {
+            // @ts-expect-error firstButtons
+            buttons: (firstButtons.buttons as any[]).map((b) => ({
+              text: "",
+              type: b.type,
+            })),
+            type: "BUTTONS",
+          },
+        ],
+      });
+    } else {
+      // fallback to some sensible initial structure
+      fa.append({
+        components: [
+          {
+            example: {
+              header_handle: [""],
+            },
+            format: "IMAGE",
+            type: "HEADER",
+          },
+          {
+            buttons: [{ text: "", type: "QUICK_REPLY" }],
+            type: "BUTTONS",
+          },
+        ],
+      });
+    }
+
+    void trigger(`components.${compIndex}`);
+  };
+
+  const handleRemoveCard = (idx: number) => {
+    fa.remove(idx);
+    void trigger(`components.${compIndex}`);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm">Cards</span>
+        <Button onClick={handleAddCard} type="button" variant="secondary">
+          Add Card
+        </Button>
+      </div>
+
+      {fa.fields.length === 0 && (
+        <p className="text-xs text-muted-foreground">No Carousel.</p>
+      )}
+
+      <div className="space-y-3 flex overflow-y-scroll gap-4 py-8">
+        {fa.fields.map((f, idx) => (
+          <div
+            className="border p-2 rounded relative min-w-[300] pt-6 shadow-xl"
+            key={f.id}
+          >
+            <ErrorSummary name={`components.${compIndex}.cards.${idx}`} />
+            <CarouseComponentArray
+              cardIndex={idx}
+              compIndex={compIndex}
+              control={control}
+            />
+            <div className="absolute top-2 right-2">
+              <Button
+                className=""
+                onClick={() => handleRemoveCard(idx)}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <X className="text-destructive" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ComponentItem({
   index,
   parameterFormat,
   syncExamples,
 }: {
   index: number;
-  parameterFormat: "POSITIONAL" | "NAMED";
+  parameterFormat: "NAMED" | "POSITIONAL";
   syncExamples: (opts?: { bodyTextOverride?: string }) => void;
 }) {
   const { control } = useFormContext();
@@ -253,184 +430,4 @@ function ComponentItem({
       {type === "CAROUSEL" && <CarouselArray compIndex={index} />}
     </div>
   );
-}
-
-/* -----------------------------
- * Carousel: Cards & Components
- * --------------------------- */
-
-function CarouselArray({ compIndex }: { compIndex: number }) {
-  const { getValues, trigger, control } =
-    useFormContext<TemplateCarouselCreateValue>();
-
-  const fa = useFieldArray({
-    control,
-    name: `components.${compIndex}.cards`,
-  });
-  const handleAddCard = () => {
-    const cards = getValues(`components.${compIndex}.cards`);
-    const first = cards?.[0];
-    if (first) {
-      const firstHeader = first.components.find(
-        (c: any) => c.type === "HEADER"
-      );
-      const firstButtons = first.components.find(
-        (c: any) => c.type === "BUTTONS"
-      );
-      fa.append({
-        components: [
-          // @ts-expect-error firstHeader
-          { type: "HEADER", format: firstHeader.format, text: "" },
-          {
-            type: "BUTTONS",
-            // @ts-expect-error firstButtons
-            buttons: (firstButtons.buttons as any[]).map((b) => ({
-              type: b.type,
-              text: "",
-            })),
-          },
-        ],
-      });
-    } else {
-      // fallback to some sensible initial structure
-      fa.append({
-        components: [
-          {
-            type: "HEADER",
-            format: "IMAGE",
-            example: {
-              header_handle: [""],
-            },
-          },
-          {
-            type: "BUTTONS",
-            buttons: [{ type: "QUICK_REPLY", text: "" }],
-          },
-        ],
-      });
-    }
-
-    void trigger(`components.${compIndex}`);
-  };
-
-  const handleRemoveCard = (idx: number) => {
-    fa.remove(idx);
-    void trigger(`components.${compIndex}`);
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm">Cards</span>
-        <Button type="button" variant="secondary" onClick={handleAddCard}>
-          Add Card
-        </Button>
-      </div>
-
-      {fa.fields.length === 0 && (
-        <p className="text-xs text-muted-foreground">No Carousel.</p>
-      )}
-
-      <div className="space-y-3 flex overflow-y-scroll gap-4 py-8">
-        {fa.fields.map((f, idx) => (
-          <div
-            key={f.id}
-            className="border p-2 rounded relative min-w-[300] pt-6 shadow-xl"
-          >
-            <ErrorSummary name={`components.${compIndex}.cards.${idx}`} />
-            <CarouseComponentArray
-              control={control}
-              compIndex={compIndex}
-              cardIndex={idx}
-            />
-            <div className="absolute top-2 right-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => handleRemoveCard(idx)}
-                size="sm"
-                className=""
-              >
-                <X className="text-destructive" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CarouseComponentArray({
-  control,
-  compIndex,
-  cardIndex,
-}: {
-  control: any;
-  compIndex: number;
-  cardIndex: number;
-}) {
-  const prefix =
-    `components.${compIndex}.cards.${cardIndex}.components` as const;
-
-  const fa = useFieldArray({
-    control,
-    name: prefix,
-  });
-
-  return (
-    <div className="space-y-2">
-      {fa.fields.length === 0 && (
-        <p className="text-xs text-muted-foreground">No Carousel.</p>
-      )}
-      <div className="space-y-3">
-        {fa.fields.map((f, idx) => (
-          <div key={f.id}>
-            <CardComponentRenderer
-              control={control}
-              compIndex={compIndex}
-              cardIndex={cardIndex}
-              cardCompIndex={idx}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CardComponentRenderer({
-  control,
-  compIndex,
-  cardIndex,
-  cardCompIndex,
-}: {
-  control: any;
-  compIndex: number;
-  cardIndex: number;
-  cardCompIndex: number;
-}) {
-  const type = useWatch({
-    control,
-    name: `components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.type` as const,
-  }) as "HEADER" | "BODY" | "FOOTER" | "BUTTONS" | undefined;
-
-  if (type === "HEADER") {
-    return (
-      <HeaderFileField
-        name={`components.${compIndex}.cards.${cardIndex}.components.${cardCompIndex}.example.header_handle.0`}
-      />
-    );
-  }
-
-  if (type === "BUTTONS") {
-    return (
-      <ButtonsArray
-        prefix={`components.${compIndex}.cards.${cardIndex}`}
-        index={cardCompIndex}
-      />
-    );
-  }
-
-  return null;
 }

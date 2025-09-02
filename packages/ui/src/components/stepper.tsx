@@ -5,7 +5,6 @@ import { Fragment, useCallback } from "react";
 import { cva } from "class-variance-authority";
 import { cn } from "@workspace/ui/lib/utils";
 import { If } from "@workspace/ui/components/if";
-import { Trans } from "@workspace/ui/components/trans";
 
 type Variant = "numbers" | "default" | "dots";
 

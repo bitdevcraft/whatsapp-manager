@@ -3,24 +3,25 @@ import { Button } from "@workspace/ui/components/button";
 import {
   FileUpload,
   FileUploadDropzone,
-  FileUploadTrigger,
-  FileUploadList,
   FileUploadItem,
-  FileUploadItemPreview,
-  FileUploadItemMetadata,
   FileUploadItemDelete,
+  FileUploadItemMetadata,
+  FileUploadItemPreview,
+  FileUploadList,
+  FileUploadTrigger,
 } from "@workspace/ui/components/data-importer/file-upload";
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Upload } from "lucide-react";
 import React from "react";
-import { onHeaderFileUpload, onFileReject } from "../_lib/upload-helpers";
 import { useFormContext } from "react-hook-form";
+
+import { onFileReject, onHeaderFileUpload } from "../_lib/upload-helpers";
 
 export function HeaderFileField({ name }: { name: string }) {
   const { control } = useFormContext();
@@ -36,7 +37,9 @@ export function HeaderFileField({ name }: { name: string }) {
           <FormLabel>Image</FormLabel>
           <FormControl>
             <FileUpload
-              value={files}
+              className="w-full max-w-md mx-auto"
+              maxSize={5 * 1024 * 1024}
+              onFileReject={onFileReject}
               onValueChange={(next) => {
                 setFiles(next);
                 // Upload on add; clear value on delete
@@ -46,9 +49,7 @@ export function HeaderFileField({ name }: { name: string }) {
                   field.onChange(undefined);
                 }
               }}
-              maxSize={5 * 1024 * 1024}
-              className="w-full max-w-md mx-auto"
-              onFileReject={onFileReject}
+              value={files}
             >
               <FileUploadDropzone>
                 <div className="flex flex-col items-center gap-1 text-center">
@@ -61,7 +62,7 @@ export function HeaderFileField({ name }: { name: string }) {
                   </p>
                 </div>
                 <FileUploadTrigger asChild>
-                  <Button variant="outline" size="sm" className="mt-2 w-fit">
+                  <Button className="mt-2 w-fit" size="sm" variant="outline">
                     Browse files
                   </Button>
                 </FileUploadTrigger>

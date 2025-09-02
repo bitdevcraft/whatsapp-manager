@@ -5,60 +5,107 @@ import { WabaConfigType } from '@shared/types/config';
 import { isFlowDataExchangeRequest, isFlowErrorRequest, isFlowPingRequest } from '@shared/utils/flowTypeGuards';
 import Logger from '@shared/utils/logger';
 import crypto from 'crypto';
+
 import WhatsApp from '../../whatsapp';
 import { WebhookMessage, WebhookMessageValue } from '../types';
 
 const LIB_NAME = 'WEBHOOK_UTILS';
 const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
 
-export interface WebhookRequest {
-    method: string;
-    query: Record<string, any>;
-    body: any;
-    headers: Record<string, string | string[] | undefined>;
-    rawBody?: string;
-}
-
-export interface WebhookResponse {
-    statusCode: number;
-    body?: any;
-    headers?: Record<string, string>;
-}
-
-export type MessageHandler = (whatsapp: WhatsApp, message: WebhookMessage) => void | Promise<void>;
 export type FlowHandler = (whatsapp: WhatsApp, request: FlowEndpointRequest) => any | Promise<any>;
 
+export type MessageHandler = (whatsapp: WhatsApp, message: WebhookMessage) => Promise<void> | void;
+
+export interface WebhookRequest {
+    body: any;
+    headers: Record<string, string | string[] | undefined>;
+    method: string;
+    query: Record<string, any>;
+    rawBody?: string;
+}
+export interface WebhookResponse {
+    body?: any;
+    headers?: Record<string, string>;
+    statusCode: number;
+}
+
 /**
- * Pure function to handle webhook verification
+ * Pure function to handle flow requests
  */
-export function verifyWebhook(request: Pick<WebhookRequest, 'query'>, verificationToken: string): WebhookResponse {
-    const mode = request.query['hub.mode'];
-    const token = request.query['hub.verify_token'];
-    const challenge = request.query['hub.challenge'];
+export async function processFlowRequest(
+    request: WebhookRequest,
+    config: WabaConfigType,
+    whatsapp: WhatsApp,
+    flowHandlers: Map<FlowTypeEnum, FlowHandler>,
+): Promise<WebhookResponse> {
+    try {
+        // Validate request signature
+        if (!isRequestSignatureValid(request, config.WEBHOOK_VERIFICATION_TOKEN || '')) {
+            LOGGER.log('Invalid request signature');
+            return {
+                body: { error: 'Unauthorized' },
+                statusCode: 401,
+            };
+        }
 
-    // Check if this is actually a webhook verification request
-    const isWebhookVerificationRequest = mode !== undefined && token !== undefined && challenge !== undefined;
+        const body = JSON.parse(request.rawBody || '{}');
 
-    if (!isWebhookVerificationRequest) {
-        LOGGER.log('Not a webhook verification request - missing required parameters');
+        // Decrypt the request
+        const { decryptedBody } = decryptFlowRequest(body, config);
+
+        // Get the flow handler
+        const handler = flowHandlers.get(FlowTypeEnum.All);
+        if (!handler) {
+            LOGGER.log(`No handler registered for flow action: ${decryptedBody.action}`);
+            return {
+                body: { error: 'Handler not found' },
+                statusCode: 404,
+            };
+        }
+
+        // Handle different flow types
+        if (isFlowPingRequest(decryptedBody)) {
+            return {
+                body: {
+                    data: { status: 'active' },
+                    version: '3.0',
+                },
+                statusCode: 200,
+            };
+        }
+
+        if (isFlowErrorRequest(decryptedBody)) {
+            LOGGER.log(`Flow error: ${JSON.stringify(decryptedBody)}`);
+            return {
+                body: {},
+                statusCode: 200,
+            };
+        }
+
+        if (isFlowDataExchangeRequest(decryptedBody)) {
+            const result = await handler(whatsapp, decryptedBody);
+            const encryptedResponse = encryptFlowResponse(
+                result,
+                Buffer.from(body.aes_key, 'base64'),
+                Buffer.from(body.initial_vector, 'base64'),
+            );
+
+            return {
+                body: encryptedResponse,
+                statusCode: 200,
+            };
+        }
+
+        LOGGER.log(`Unknown flow request type: ${JSON.stringify(decryptedBody)}`);
         return {
+            body: { error: 'Unknown request type' },
             statusCode: 400,
-            body: { error: 'Invalid webhook verification request' },
         };
-    }
-
-    const VERIFICATION_SUCCESS = mode === 'subscribe' && token === verificationToken;
-
-    if (VERIFICATION_SUCCESS) {
-        LOGGER.log('Webhook verified successfully');
+    } catch (error) {
+        LOGGER.log(`Error handling flow request: ${error}`);
         return {
-            statusCode: 200,
-            body: challenge,
-        };
-    } else {
-        LOGGER.log('Webhook verification failed');
-        return {
-            statusCode: 403,
+            body: { error: 'Internal server error' },
+            statusCode: 500,
         };
     }
 }
@@ -71,8 +118,8 @@ export async function processWebhookMessages(
     whatsapp: WhatsApp,
     handlers: {
         messageHandlers: Map<MessageTypesEnum, MessageHandler>;
-        preProcessHandler?: MessageHandler;
         postProcessHandler?: MessageHandler;
+        preProcessHandler?: MessageHandler;
     },
 ): Promise<WebhookResponse> {
     const body = request.body;
@@ -83,8 +130,8 @@ export async function processWebhookMessages(
         const errorMsg = 'Received webhook for non-WhatsApp event';
         LOGGER.log(errorMsg);
         return {
-            statusCode: 404,
             body: { error: errorMsg },
+            statusCode: 404,
         };
     }
 
@@ -105,206 +152,116 @@ export async function processWebhookMessages(
     }
 
     return {
-        statusCode: 200,
         body: errors.length > 0 ? { errors } : undefined,
+        statusCode: 200,
     };
 }
 
 /**
- * Pure function to handle flow requests
+ * Pure function to handle webhook verification
  */
-export async function processFlowRequest(
-    request: WebhookRequest,
-    config: WabaConfigType,
-    whatsapp: WhatsApp,
-    flowHandlers: Map<FlowTypeEnum, FlowHandler>,
-): Promise<WebhookResponse> {
-    try {
-        // Validate request signature
-        if (!isRequestSignatureValid(request, config.WEBHOOK_VERIFICATION_TOKEN || '')) {
-            LOGGER.log('Invalid request signature');
-            return {
-                statusCode: 401,
-                body: { error: 'Unauthorized' },
-            };
-        }
+export function verifyWebhook(request: Pick<WebhookRequest, 'query'>, verificationToken: string): WebhookResponse {
+    const mode = request.query['hub.mode'];
+    const token = request.query['hub.verify_token'];
+    const challenge = request.query['hub.challenge'];
 
-        const body = JSON.parse(request.rawBody || '{}');
+    // Check if this is actually a webhook verification request
+    const isWebhookVerificationRequest = mode !== undefined && token !== undefined && challenge !== undefined;
 
-        // Decrypt the request
-        const { decryptedBody } = decryptFlowRequest(body, config);
-
-        // Get the flow handler
-        const handler = flowHandlers.get(FlowTypeEnum.All);
-        if (!handler) {
-            LOGGER.log(`No handler registered for flow action: ${decryptedBody.action}`);
-            return {
-                statusCode: 404,
-                body: { error: 'Handler not found' },
-            };
-        }
-
-        // Handle different flow types
-        if (isFlowPingRequest(decryptedBody)) {
-            return {
-                statusCode: 200,
-                body: {
-                    version: '3.0',
-                    data: { status: 'active' },
-                },
-            };
-        }
-
-        if (isFlowErrorRequest(decryptedBody)) {
-            LOGGER.log(`Flow error: ${JSON.stringify(decryptedBody)}`);
-            return {
-                statusCode: 200,
-                body: {},
-            };
-        }
-
-        if (isFlowDataExchangeRequest(decryptedBody)) {
-            const result = await handler(whatsapp, decryptedBody);
-            const encryptedResponse = encryptFlowResponse(
-                result,
-                Buffer.from(body.aes_key, 'base64'),
-                Buffer.from(body.initial_vector, 'base64'),
-            );
-
-            return {
-                statusCode: 200,
-                body: encryptedResponse,
-            };
-        }
-
-        LOGGER.log(`Unknown flow request type: ${JSON.stringify(decryptedBody)}`);
+    if (!isWebhookVerificationRequest) {
+        LOGGER.log('Not a webhook verification request - missing required parameters');
         return {
+            body: { error: 'Invalid webhook verification request' },
             statusCode: 400,
-            body: { error: 'Unknown request type' },
         };
-    } catch (error) {
-        LOGGER.log(`Error handling flow request: ${error}`);
+    }
+
+    const VERIFICATION_SUCCESS = mode === 'subscribe' && token === verificationToken;
+
+    if (VERIFICATION_SUCCESS) {
+        LOGGER.log('Webhook verified successfully');
         return {
-            statusCode: 500,
-            body: { error: 'Internal server error' },
+            body: challenge,
+            statusCode: 200,
+        };
+    } else {
+        LOGGER.log('Webhook verification failed');
+        return {
+            statusCode: 403,
         };
     }
 }
 
-/**
- * Private helper functions
- */
-async function processMessages(
-    waba_id: string,
-    value: WebhookMessageValue,
-    whatsapp: WhatsApp,
-    handlers: {
-        messageHandlers: Map<MessageTypesEnum, MessageHandler>;
-        preProcessHandler?: MessageHandler;
-        postProcessHandler?: MessageHandler;
-    },
-): Promise<void> {
-    const metadata = value.metadata;
-    const contacts = value.contacts;
-    const wabaId = waba_id;
-    const displayPhoneNumber = metadata?.display_phone_number || '';
-    const phoneNumberId = metadata?.phone_number_id || '';
-    const profileName = contacts?.[0]?.profile?.name || '';
+function decryptFlowRequest(
+    body: any,
+    config: WabaConfigType,
+): {
+    aesKeyBuffer: Buffer;
+    decryptedBody: FlowEndpointRequest;
+    initialVectorBuffer: Buffer;
+} {
+    const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
 
-    if (value.statuses && value.statuses.length > 0) {
-        const statuses = value.statuses;
-        for (const status of statuses) {
-            const processedStatus: WebhookMessage = {
-                wabaId,
-                id: status.id,
-                from: status.recipient_id,
-                timestamp: status.timestamp,
-                type: MessageTypesEnum.Statuses,
-                phoneNumberId,
-                displayPhoneNumber,
-                profileName,
-                statuses: value.statuses[0],
-                originalData: status,
-            };
-
-            await executeHandler(
-                handlers.messageHandlers.get(MessageTypesEnum.Statuses),
-                whatsapp,
-                processedStatus,
-                MessageTypesEnum.Statuses,
-            );
-        }
-        return;
+    if (!encrypted_aes_key || !encrypted_flow_data || !initial_vector) {
+        throw new Error('Missing required encryption properties');
     }
 
-    if (value.messages && value.messages.length > 0) {
-        const messages = value.messages;
+    const privatePem = config.FLOW_API_PRIVATE_PEM.replace(/\\n/g, '\n');
+    const passphrase = config.FLOW_API_PASSPHRASE;
 
-        for (const message of messages) {
-            const messageType = message.type;
+    const privateKey = crypto.createPrivateKey({ key: privatePem, passphrase });
+    let decryptedAesKey: Buffer;
 
-            const processedMessage: WebhookMessage = {
-                wabaId,
-                id: message.id,
-                from: message.from,
-                timestamp: message.timestamp,
-                type: message.type,
-                phoneNumberId,
-                displayPhoneNumber,
-                profileName,
-                originalData: message,
-            };
+    try {
+        decryptedAesKey = crypto.privateDecrypt(
+            {
+                key: privateKey,
+                oaepHash: 'sha256',
+                padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            },
+            Buffer.from(encrypted_aes_key, 'base64'),
+        );
+    } catch (error) {
+        throw new Error('Failed to decrypt the request. Please verify your private key.');
+    }
 
-            switch (messageType) {
-                case MessageTypesEnum.Text:
-                    processedMessage.text = message.text;
-                    break;
-                case MessageTypesEnum.Image:
-                    processedMessage.image = message.image;
-                    break;
-                case MessageTypesEnum.Video:
-                    processedMessage.video = message.video;
-                    break;
-                case MessageTypesEnum.Audio:
-                    processedMessage.audio = message.audio;
-                    break;
-                case MessageTypesEnum.Document:
-                    processedMessage.document = message.document;
-                    break;
-                case MessageTypesEnum.Sticker:
-                    processedMessage.sticker = message.sticker;
-                    break;
-                case MessageTypesEnum.Location:
-                    processedMessage.location = message.location;
-                    break;
-                case MessageTypesEnum.Contacts:
-                    processedMessage.contacts = message.contacts;
-                    break;
-                case MessageTypesEnum.Interactive:
-                    processedMessage.interactive = message.interactive;
-                    break;
-                case MessageTypesEnum.Button:
-                    processedMessage.button = message.button;
-                    break;
-                case MessageTypesEnum.Order:
-                    processedMessage.order = message.order;
-                    break;
-                case MessageTypesEnum.System:
-                    processedMessage.system = message.system;
-                    break;
-                case MessageTypesEnum.Reaction:
-                    processedMessage.reaction = message.reaction;
-                    break;
-                default:
-                    LOGGER.log(`Unknown message type: ${messageType}`);
-                    break;
-            }
+    const flowDataBuffer = Buffer.from(encrypted_flow_data, 'base64');
+    const initialVectorBuffer = Buffer.from(initial_vector, 'base64');
 
-            // Execute handlers in sequence
-            await executeHandler(handlers.preProcessHandler, whatsapp, processedMessage, 'pre-process');
-            await executeHandler(handlers.messageHandlers.get(messageType), whatsapp, processedMessage, messageType);
-            await executeHandler(handlers.postProcessHandler, whatsapp, processedMessage, 'post-process');
-        }
+    const TAG_LENGTH = 16;
+    const encrypted_flow_data_body = flowDataBuffer.subarray(0, -TAG_LENGTH);
+    const encrypted_flow_data_tag = flowDataBuffer.subarray(-TAG_LENGTH);
+
+    const decipher = crypto.createDecipheriv('aes-128-gcm', decryptedAesKey, initialVectorBuffer);
+    decipher.setAuthTag(encrypted_flow_data_tag);
+
+    const decryptedJSONString = Buffer.concat([decipher.update(encrypted_flow_data_body), decipher.final()]).toString(
+        'utf-8',
+    );
+
+    return {
+        aesKeyBuffer: decryptedAesKey,
+        decryptedBody: JSON.parse(decryptedJSONString),
+        initialVectorBuffer,
+    };
+}
+
+function encryptFlowResponse(response: any, aesKeyBuffer: Buffer, initialVectorBuffer: Buffer): string {
+    const flipped_iv: number[] = [];
+    for (const pair of Array.from(initialVectorBuffer.entries())) {
+        flipped_iv.push(~pair[1]);
+    }
+
+    try {
+        const cipher = crypto.createCipheriv('aes-128-gcm', aesKeyBuffer, Buffer.from(flipped_iv));
+        return Buffer.concat([
+            cipher.update(JSON.stringify(response || {}), 'utf-8'),
+            cipher.final(),
+            cipher.getAuthTag(),
+        ]).toString('base64');
+    } catch (error) {
+        LOGGER.log('Response encryption error:', error);
+        throw new Error('Failed to encrypt response. Internal server error.');
     }
 }
 
@@ -339,75 +296,119 @@ function isRequestSignatureValid(request: WebhookRequest, verificationToken: str
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(formattedExpectedSignature));
 }
 
-function decryptFlowRequest(
-    body: any,
-    config: WabaConfigType,
-): {
-    decryptedBody: FlowEndpointRequest;
-    aesKeyBuffer: Buffer;
-    initialVectorBuffer: Buffer;
-} {
-    const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
+/**
+ * Private helper functions
+ */
+async function processMessages(
+    waba_id: string,
+    value: WebhookMessageValue,
+    whatsapp: WhatsApp,
+    handlers: {
+        messageHandlers: Map<MessageTypesEnum, MessageHandler>;
+        postProcessHandler?: MessageHandler;
+        preProcessHandler?: MessageHandler;
+    },
+): Promise<void> {
+    const metadata = value.metadata;
+    const contacts = value.contacts;
+    const wabaId = waba_id;
+    const displayPhoneNumber = metadata?.display_phone_number || '';
+    const phoneNumberId = metadata?.phone_number_id || '';
+    const profileName = contacts?.[0]?.profile?.name || '';
 
-    if (!encrypted_aes_key || !encrypted_flow_data || !initial_vector) {
-        throw new Error('Missing required encryption properties');
+    if (value.statuses && value.statuses.length > 0) {
+        const statuses = value.statuses;
+        for (const status of statuses) {
+            const processedStatus: WebhookMessage = {
+                displayPhoneNumber,
+                from: status.recipient_id,
+                id: status.id,
+                originalData: status,
+                phoneNumberId,
+                profileName,
+                statuses: value.statuses[0],
+                timestamp: status.timestamp,
+                type: MessageTypesEnum.Statuses,
+                wabaId,
+            };
+
+            await executeHandler(
+                handlers.messageHandlers.get(MessageTypesEnum.Statuses),
+                whatsapp,
+                processedStatus,
+                MessageTypesEnum.Statuses,
+            );
+        }
+        return;
     }
 
-    const privatePem = config.FLOW_API_PRIVATE_PEM.replace(/\\n/g, '\n');
-    const passphrase = config.FLOW_API_PASSPHRASE;
+    if (value.messages && value.messages.length > 0) {
+        const messages = value.messages;
 
-    const privateKey = crypto.createPrivateKey({ key: privatePem, passphrase });
-    let decryptedAesKey: Buffer;
+        for (const message of messages) {
+            const messageType = message.type;
 
-    try {
-        decryptedAesKey = crypto.privateDecrypt(
-            {
-                key: privateKey,
-                padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-                oaepHash: 'sha256',
-            },
-            Buffer.from(encrypted_aes_key, 'base64'),
-        );
-    } catch (error) {
-        throw new Error('Failed to decrypt the request. Please verify your private key.');
-    }
+            const processedMessage: WebhookMessage = {
+                displayPhoneNumber,
+                from: message.from,
+                id: message.id,
+                originalData: message,
+                phoneNumberId,
+                profileName,
+                timestamp: message.timestamp,
+                type: message.type,
+                wabaId,
+            };
 
-    const flowDataBuffer = Buffer.from(encrypted_flow_data, 'base64');
-    const initialVectorBuffer = Buffer.from(initial_vector, 'base64');
+            switch (messageType) {
+                case MessageTypesEnum.Audio:
+                    processedMessage.audio = message.audio;
+                    break;
+                case MessageTypesEnum.Button:
+                    processedMessage.button = message.button;
+                    break;
+                case MessageTypesEnum.Contacts:
+                    processedMessage.contacts = message.contacts;
+                    break;
+                case MessageTypesEnum.Document:
+                    processedMessage.document = message.document;
+                    break;
+                case MessageTypesEnum.Image:
+                    processedMessage.image = message.image;
+                    break;
+                case MessageTypesEnum.Interactive:
+                    processedMessage.interactive = message.interactive;
+                    break;
+                case MessageTypesEnum.Location:
+                    processedMessage.location = message.location;
+                    break;
+                case MessageTypesEnum.Order:
+                    processedMessage.order = message.order;
+                    break;
+                case MessageTypesEnum.Reaction:
+                    processedMessage.reaction = message.reaction;
+                    break;
+                case MessageTypesEnum.Sticker:
+                    processedMessage.sticker = message.sticker;
+                    break;
+                case MessageTypesEnum.System:
+                    processedMessage.system = message.system;
+                    break;
+                case MessageTypesEnum.Text:
+                    processedMessage.text = message.text;
+                    break;
+                case MessageTypesEnum.Video:
+                    processedMessage.video = message.video;
+                    break;
+                default:
+                    LOGGER.log(`Unknown message type: ${messageType}`);
+                    break;
+            }
 
-    const TAG_LENGTH = 16;
-    const encrypted_flow_data_body = flowDataBuffer.subarray(0, -TAG_LENGTH);
-    const encrypted_flow_data_tag = flowDataBuffer.subarray(-TAG_LENGTH);
-
-    const decipher = crypto.createDecipheriv('aes-128-gcm', decryptedAesKey, initialVectorBuffer);
-    decipher.setAuthTag(encrypted_flow_data_tag);
-
-    const decryptedJSONString = Buffer.concat([decipher.update(encrypted_flow_data_body), decipher.final()]).toString(
-        'utf-8',
-    );
-
-    return {
-        decryptedBody: JSON.parse(decryptedJSONString),
-        aesKeyBuffer: decryptedAesKey,
-        initialVectorBuffer,
-    };
-}
-
-function encryptFlowResponse(response: any, aesKeyBuffer: Buffer, initialVectorBuffer: Buffer): string {
-    const flipped_iv: number[] = [];
-    for (const pair of Array.from(initialVectorBuffer.entries())) {
-        flipped_iv.push(~pair[1]);
-    }
-
-    try {
-        const cipher = crypto.createCipheriv('aes-128-gcm', aesKeyBuffer, Buffer.from(flipped_iv));
-        return Buffer.concat([
-            cipher.update(JSON.stringify(response || {}), 'utf-8'),
-            cipher.final(),
-            cipher.getAuthTag(),
-        ]).toString('base64');
-    } catch (error) {
-        LOGGER.log('Response encryption error:', error);
-        throw new Error('Failed to encrypt response. Internal server error.');
+            // Execute handlers in sequence
+            await executeHandler(handlers.preProcessHandler, whatsapp, processedMessage, 'pre-process');
+            await executeHandler(handlers.messageHandlers.get(messageType), whatsapp, processedMessage, messageType);
+            await executeHandler(handlers.postProcessHandler, whatsapp, processedMessage, 'post-process');
+        }
     }
 }

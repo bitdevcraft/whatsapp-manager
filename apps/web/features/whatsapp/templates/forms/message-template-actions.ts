@@ -1,13 +1,13 @@
 import {
-  ParametersTypesEnum,
   ComponentTypesEnum,
+  ParametersTypesEnum,
 } from "@workspace/wa-cloud-api";
-
 import {
   TemplateBody,
   TemplateHeader,
   TemplateResponse,
 } from "@workspace/wa-cloud-api/template";
+
 import { MessageTemplateValues, ParameterValues } from "../lib/schema";
 
 export function transformTemplateResponseToFormValues(
@@ -33,16 +33,16 @@ export function transformTemplateResponseToFormValues(
         .map((parameter_name, idx) => {
           if (comp.format === "TEXT" && format === "POSITIONAL") {
             return {
-              type: ParametersTypesEnum.Text as const,
               text: example[idx] ?? "",
+              type: ParametersTypesEnum.Text as const,
             };
           }
 
           if (comp.format === "TEXT" && format === "NAMED") {
             return {
-              type: ParametersTypesEnum.Text as const,
-              text: example[idx] ?? "",
               parameter_name,
+              text: example[idx] ?? "",
+              type: ParametersTypesEnum.Text as const,
             };
           }
 
@@ -52,8 +52,8 @@ export function transformTemplateResponseToFormValues(
 
       if (comp.format === "IMAGE") {
         parameters.push({
-          type: ParametersTypesEnum.Image as const,
           image: { id: "" },
+          type: ParametersTypesEnum.Image as const,
         });
       }
 
@@ -66,15 +66,15 @@ export function transformTemplateResponseToFormValues(
 
       if (comp.format === "DOCUMENT") {
         parameters.push({
-          type: ParametersTypesEnum.Document as const,
           document: { id: "" },
+          type: ParametersTypesEnum.Document as const,
         });
       }
 
       if (parameters.length > 0)
         components.push({
-          type: ComponentTypesEnum.Header,
           parameters,
+          type: ComponentTypesEnum.Header,
         });
     }
 
@@ -90,13 +90,13 @@ export function transformTemplateResponseToFormValues(
       const parameters =
         format === "POSITIONAL"
           ? paramKeys.map((_, idx) => ({
-              type: ParametersTypesEnum.Text as const,
               text: example[idx] ?? "",
+              type: ParametersTypesEnum.Text as const,
             }))
           : paramKeys.map((parameter_name, idx) => ({
-              type: ParametersTypesEnum.Text as const,
-              text: example[idx] ?? "",
               parameter_name,
+              text: example[idx] ?? "",
+              type: ParametersTypesEnum.Text as const,
             }));
 
       if (parameters.length > 0)
@@ -109,18 +109,19 @@ export function transformTemplateResponseToFormValues(
 
 
   return {
-    name: template.name,
-    language: {
-      policy: "deterministic",
-      code: template.language,
-    },
     components,
+    language: {
+      code: template.language,
+      policy: "deterministic",
+    },
+    name: template.name,
   };
 }
 
+// eslint-disable-next-line perfectionist/sort-modules
 export function extractTemplateParams(
   text: string,
-  format: "POSITIONAL" | "NAMED"
+  format: "NAMED" | "POSITIONAL"
 ) {
   if (format === "POSITIONAL") {
     const matches = [...text.matchAll(/{{(\d+)}}/g)];

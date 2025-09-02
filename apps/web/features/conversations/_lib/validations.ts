@@ -1,4 +1,3 @@
-import { createBaseSearchParams } from "@/lib/validations";
 import { Conversation } from "@workspace/db/schema/conversations";
 import { getSortingStateParser } from "@workspace/ui/lib/parsers";
 import {
@@ -9,15 +8,17 @@ import {
 } from "nuqs/server";
 import { z } from "zod";
 
+import { createBaseSearchParams } from "@/lib/validations";
+
 export const conversationSearchParamsCache = createSearchParamsCache({
   ...createBaseSearchParams<Conversation>(),
-  sort: getSortingStateParser<Conversation>().withDefault([
-    { id: "createdAt", desc: true },
-  ]),
-  createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
-  unread: parseAsBoolean.withDefault(false),
   contact: parseAsString.withDefault(""),
+  createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
   search: parseAsString.withDefault(""),
+  sort: getSortingStateParser<Conversation>().withDefault([
+    { desc: true, id: "createdAt" },
+  ]),
+  unread: parseAsBoolean.withDefault(false),
 });
 
 export type GetConversationSchema = Awaited<

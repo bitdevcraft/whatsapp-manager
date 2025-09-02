@@ -1,5 +1,7 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -17,26 +19,25 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import { authClient } from "@/lib/auth/auth-client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  type SignUpWithPasswordPayload,
-  SignUpWithPasswordSchema,
-} from "@/types/auth";
-import { useMutation } from "@tanstack/react-query";
+import { Loader } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import { Loader } from "lucide-react";
+
+import { authClient } from "@/lib/auth/auth-client";
+import {
+  type SignUpWithPasswordPayload,
+  SignUpWithPasswordSchema,
+} from "@/types/auth";
 
 const useSignupWithPassword = () => {
   return useMutation({
     mutationFn: async (payload: SignUpWithPasswordPayload) => {
       const { data, error } = await authClient.signUp.email({
         email: payload.email,
-        password: payload.password,
         name: payload.name,
+        password: payload.password,
       });
 
       if (error) throw new Error(error.message);
@@ -46,8 +47,8 @@ const useSignupWithPassword = () => {
       return {
         email_address: userData.email,
         id: userData.id,
-        name: userData.name,
         is_email_address_verified: userData.emailVerified,
+        name: userData.name,
       };
     },
   });
@@ -72,12 +73,12 @@ export const SignupForm = () => {
   const router = useRouter();
 
   const form = useForm<SignUpWithPasswordPayload>({
-    resolver: zodResolver(SignUpWithPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
       name: "",
+      password: "",
     },
+    resolver: zodResolver(SignUpWithPasswordSchema),
     reValidateMode: "onChange",
   });
 
@@ -107,7 +108,7 @@ export const SignupForm = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -149,9 +150,9 @@ export const SignupForm = () => {
             />
 
             <Button
-              type="submit"
               className="w-full"
               disabled={signup.isPending}
+              type="submit"
             >
               {signup.isPending ? (
                 <>
@@ -162,16 +163,16 @@ export const SignupForm = () => {
               )}
             </Button>
             <Button
-              type="button"
-              variant="outline"
               className="w-full"
               onClick={onSignupWithGoogle}
+              type="button"
+              variant="outline"
             >
               {t("social_login.google")}
             </Button>
             <div className="mt-4 text-center text-sm">
               {t("signup.already_have_account")}
-              <Link href="/auth/login" className="ml-1 underline">
+              <Link className="ml-1 underline" href="/auth/login">
                 {t("login_button")}
               </Link>
             </div>

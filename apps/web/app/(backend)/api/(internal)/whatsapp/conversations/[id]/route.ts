@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getUserWithTeam } from "@/lib/db/queries";
-import { conversationsTable, conversationMembersTable } from "@workspace/db";
+import { conversationMembersTable, conversationsTable } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/tenant";
-import { eq, and, count, lt, gt, ne } from "drizzle-orm";
+import { and, count, eq, gt, isNull, lt, ne } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+import { getUserWithTeam } from "@/lib/db/queries";
 
 export async function GET(
   request: NextRequest,
@@ -55,7 +56,8 @@ export async function GET(
           const target = await tx.query.conversationsTable.findFirst({
             where: and(
               eq(conversationsTable.contactId, id),
-              eq(conversationsTable.id, messageId)
+              eq(conversationsTable.id, messageId),
+              isNull(conversationsTable.deletedAt)
             ),
             with: {
               user: true,
@@ -63,16 +65,23 @@ export async function GET(
           });
 
           const beforeRecord = await tx.query.conversationsTable.findMany({
-            where: and(
-              eq(conversationsTable.contactId, id),
-              gt(conversationsTable.createdAt, target!.createdAt),
-              ne(conversationsTable.id, target!.id)
-            ),
+            limit: beforeCount,
             orderBy: (conversationsTable, { asc }) => [
               asc(conversationsTable.createdAt),
             ],
-            limit: beforeCount,
+            where: and(
+              eq(conversationsTable.contactId, id),
+              gt(conversationsTable.createdAt, target!.createdAt),
+              ne(conversationsTable.id, target!.id),
+              isNull(conversationsTable.deletedAt)
+            ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
+              template: true,
               user: true,
             },
           });
@@ -86,23 +95,31 @@ export async function GET(
               and(
                 eq(conversationsTable.contactId, id),
                 gt(conversationsTable.createdAt, target!.createdAt),
-                ne(conversationsTable.id, target!.id)
+                ne(conversationsTable.id, target!.id),
+                isNull(conversationsTable.deletedAt)
               )
             )
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
           const afterRecord = await tx.query.conversationsTable.findMany({
-            where: and(
-              eq(conversationsTable.contactId, id),
-              lt(conversationsTable.createdAt, target!.createdAt),
-              ne(conversationsTable.id, target!.id)
-            ),
+            limit: afterCount + 1,
             orderBy: (conversationsTable, { desc }) => [
               desc(conversationsTable.createdAt),
             ],
-            limit: afterCount + 1,
+            where: and(
+              eq(conversationsTable.contactId, id),
+              lt(conversationsTable.createdAt, target!.createdAt),
+              ne(conversationsTable.id, target!.id),
+              isNull(conversationsTable.deletedAt)
+            ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
+              template: true,
               user: true,
             },
           });
@@ -116,7 +133,8 @@ export async function GET(
               and(
                 eq(conversationsTable.contactId, id),
                 lt(conversationsTable.createdAt, target!.createdAt),
-                ne(conversationsTable.id, target!.id)
+                ne(conversationsTable.id, target!.id),
+                isNull(conversationsTable.deletedAt)
               )
             )
             .execute()
@@ -125,13 +143,22 @@ export async function GET(
           batch.push(...beforeRecord.reverse(), target, ...afterRecord);
         } else {
           const data = await tx.query.conversationsTable.findMany({
-            where: eq(conversationsTable.contactId, id),
+            limit: limitPrev > 0 ? limitPrev : limit + 1,
+            offset,
             orderBy: (conversationsTable, { desc }) => [
               desc(conversationsTable.createdAt),
             ],
-            offset,
-            limit: limitPrev > 0 ? limitPrev : limit + 1,
+            where: and(
+              eq(conversationsTable.contactId, id),
+              isNull(conversationsTable.deletedAt)
+            ),
             with: {
+              marketingCampaign: {
+                with: {
+                  template: true,
+                },
+              },
+              template: true,
               user: true,
             },
           });
@@ -144,7 +171,12 @@ export async function GET(
             count: count(),
           })
           .from(conversationsTable)
-          .where(eq(conversationsTable.contactId, id))
+          .where(
+            and(
+              eq(conversationsTable.contactId, id),
+              isNull(conversationsTable.deletedAt)
+            )
+          )
           .execute()
           .then((res) => res[0]?.count ?? 0);
 
@@ -158,7 +190,7 @@ export async function GET(
             )
           );
 
-        return { batch, total, beforeTotal, afterTotal };
+        return { afterTotal, batch, beforeTotal, total };
       }
     );
 
@@ -178,8 +210,8 @@ export async function GET(
     return NextResponse.json(
       {
         data,
-        previousOffset,
         nextOffset,
+        previousOffset,
       },
       { status: 200 }
     );

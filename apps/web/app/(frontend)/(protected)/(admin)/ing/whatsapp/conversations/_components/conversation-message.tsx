@@ -2,8 +2,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { Contact, Conversation, Template } from "@workspace/db/schema";
 import { Button } from "@workspace/ui/components/button";
-import { Textarea } from "@workspace/ui/components/textarea";
 import {
   Form,
   FormControl,
@@ -12,19 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { SendHorizonal } from "lucide-react";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
-import axios from "axios";
-import { useSearchMessageStore } from "../_store/message-store";
 import { ResponsiveDialog } from "@workspace/ui/components/responsive-dialog";
-import { LanguagesEnum } from "@workspace/wa-cloud-api";
-import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
-import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
-
-import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
 import {
   Select,
   SelectContent,
@@ -32,43 +21,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Contact, Template } from "@workspace/db/schema";
+import { Textarea } from "@workspace/ui/components/textarea";
+import { LanguagesEnum } from "@workspace/wa-cloud-api";
+import axios from "axios";
+import { SendHorizonal } from "lucide-react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import {
   MultiStepForm,
   MultiStepFormStep,
 } from "@/components/forms/multi-step-form";
+import { MessageTemplateForm } from "@/features/whatsapp/templates/forms/message-template";
+import { transformTemplateResponseToFormValues } from "@/features/whatsapp/templates/forms/message-template-actions";
 import {
-  TemplateSendValue,
   templateSendSchema,
+  TemplateSendValue,
 } from "@/types/validations/templates/template-send-schema";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { getSelectTemplates } from "../../marketing-campaigns/new/_components/queries";
+import { useSearchMessageStore } from "../_store/message-store";
+import { MessagesTemplateFormV2 } from "../../marketing-campaigns/new/_components/template-form/message-template-form";
+import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { useTemplateStore } from "../../marketing-campaigns/new/_components/store";
+import { DevTool } from "@hookform/devtools";
 
 const FormSchema = z.object({
   text: z.string().nonempty("Message should not be empty"),
 });
 
-type FormValues = z.infer<typeof FormSchema>;
-
 export interface Props {
   contact: Contact;
+  conversation?: Conversation;
   lastMessageDate?: Date;
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }
+
+type FormValues = z.infer<typeof FormSchema>;
 export default function ConversationMessage({
   contact,
+  conversation,
   lastMessageDate,
   templates,
 }: Props) {
   const queryClient = useQueryClient();
 
-  const { updateRandomId, clearSearchMessageId, clearSearchString } =
+  const { clearSearchMessageId, clearSearchString, updateRandomId } =
     useSearchMessageStore();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
     defaultValues: {
       text: "",
     },
+    resolver: zodResolver(FormSchema),
   });
 
   const onSubmit = async (input: FormValues) => {
@@ -103,13 +110,14 @@ export default function ConversationMessage({
       <div className="w-full">
         <ResponsiveDialog
           isOpen={templateDialog}
-          title={"Message Template"}
           setIsOpen={setTemplateDialog}
+          title={"Message Template"}
         >
           <TemplateMessage
             contact={contact}
-            templates={templates}
+            conversation={conversation}
             setIsOpen={setTemplateDialog}
+            templates={templates}
           />
         </ResponsiveDialog>
         <div className="flex gap-2 w-full">
@@ -164,56 +172,60 @@ function isWithinLast24Hours(createdAt: Date | string): boolean {
 
 function TemplateMessage({
   contact,
-  templates,
+  conversation,
   setIsOpen,
+  templates,
 }: {
   contact: Contact;
-  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
+  conversation?: Conversation;
   setIsOpen: (state: boolean) => void;
+  templates: Awaited<ReturnType<typeof getSelectTemplates>>;
 }) {
   const queryClient = useQueryClient();
 
+  const phoneNumber =
+    conversation &&
+    // @ts-expect-error content
+    "phoneNumberId" in conversation.content &&
+    conversation.content.phoneNumberId
+      ? (conversation.content.phoneNumberId as string)
+      : "";
+
   const form = useForm<TemplateSendValue>({
-    resolver: zodResolver(templateSendSchema),
     defaultValues: {
-      template: {
-        template: "",
-        messageTemplate: {
-          name: "",
-          language: {
-            policy: "deterministic",
-            code: LanguagesEnum.English,
-          },
-          components: [],
-        },
+      contactId: contact.id,
+      details: {
+        phoneNumber,
       },
       phone: contact.phone,
-      contactId: contact.id,
+      template: {
+        messageTemplate: {
+          components: [],
+          language: {
+            code: LanguagesEnum.English,
+            policy: "deterministic",
+          },
+          name: "",
+        },
+        template: "",
+      },
+
       templateId: "",
     },
+    resolver: zodResolver(templateSendSchema),
   });
 
-  const [selectedTemplate, setSelectedTemplate] =
-    React.useState<Template | null>(null);
-
-  const defaultMessageTemplate = React.useMemo(() => {
-    return selectedTemplate
-      ? transformTemplateResponseToFormValues(selectedTemplate.content!)
-      : undefined;
-  }, [selectedTemplate]);
+  const { setTemplate, template } = useTemplateStore();
 
   // Patch messageTemplate values when template changes
   React.useEffect(() => {
-    if (defaultMessageTemplate) {
-      form.setValue("template.messageTemplate", defaultMessageTemplate);
-    }
     const templateId = form.getValues().template.template;
 
     if (templateId) {
       const match = templates.templates.find((t: any) => t.id === templateId);
-      setSelectedTemplate(match ?? null);
+      setTemplate(match ?? null);
     }
-  }, [defaultMessageTemplate, form, templates.templates]);
+  }, [form, setTemplate, templates.templates]);
 
   const { setSearchMessageId } = useSearchMessageStore();
 
@@ -221,7 +233,7 @@ function TemplateMessage({
     try {
       await axios.post("/api/whatsapp/conversations/send-template", {
         ...data,
-        templateId: selectedTemplate?.id,
+        templateId: template?.id,
       });
 
       toast.success("Sent");
@@ -237,67 +249,77 @@ function TemplateMessage({
     });
   };
 
+  if (!phoneNumber || phoneNumber === "")
+    return (
+      <p className="text-sm font-light">
+        You can&apos;t message the contact personally, contact should message
+        first before proceeding
+      </p>
+    );
+
   return (
     <div>
-      <MultiStepForm
-        className={"space-y-10"}
-        schema={templateSendSchema}
-        form={form}
-        onSubmit={onSubmit}
-      >
-        <MultiStepFormStep name="templates">
-          <Form {...form}>
-            <div className={"flex flex-col gap-4"}>
-              <FormField
-                name="template.template"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Select Template</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          const match = templates.templates.find(
-                            (t) => t.id === value
-                          );
-                          setSelectedTemplate(match ?? null);
-                        }}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {templates.templates.map((template) => (
-                            <SelectItem key={template.id} value={template.id}>
-                              {template.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <Form {...form}>
+        <form
+          className={"flex flex-col gap-4"}
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FormField
+            name="template.template"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Template</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      const match = templates.templates.find(
+                        (t) => t.id === value
+                      );
+                      setTemplate(match ?? null);
+                    }}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.templates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {template?.content && (
+            <ScrollArea className="h-[70vh]">
+              <MessagesTemplateFormV2
+                initialValue={template.content}
+                key={template.id}
+                prefix="template.messageTemplate"
+                preview
               />
+            </ScrollArea>
+          )}
 
-              {selectedTemplate && (
-                <MessageTemplateForm
-                  namePrefix="template.messageTemplate"
-                  initialTemplate={selectedTemplate.content!}
-                  preview
-                />
-              )}
-
-              <div className="flex justify-end gap-2">
-                <Button type="submit" variant="outline">
-                  Send
-                </Button>
-              </div>
-            </div>
-          </Form>
-        </MultiStepFormStep>
-      </MultiStepForm>
+          <div className="flex justify-end gap-2">
+            <Button
+              disabled={!phoneNumber || phoneNumber === ""}
+              type="submit"
+              variant="outline"
+            >
+              Send
+            </Button>
+          </div>
+        </form>
+      </Form>
+      <DevTool control={form.control} />
     </div>
   );
 }

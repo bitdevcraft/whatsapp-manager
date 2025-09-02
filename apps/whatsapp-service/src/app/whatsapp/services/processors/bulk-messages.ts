@@ -8,7 +8,7 @@ import WhatsApp, {
   ComponentTypesEnum,
   MessageTemplateObject,
 } from "@workspace/wa-cloud-api";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { waClientRegistry } from "@/instance";
 import { waEventQueue } from "@/jobs/queue";
@@ -59,9 +59,12 @@ export async function processOutgoingMarketingCampaign(
       // Get All Contacts
       const contacts = where
         ? cleanToDigitsOnly(
-            (await tx.select().from(contactsTable).where(where)).map(
-              (contact) => contact.phone
-            )
+            (
+              await tx
+                .select()
+                .from(contactsTable)
+                .where(and(where, isNull(contactsTable.deletedAt)))
+            ).map((contact) => contact.phone)
           )
         : [];
 

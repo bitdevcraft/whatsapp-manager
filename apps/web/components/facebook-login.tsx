@@ -2,34 +2,35 @@
 "use client";
 
 import { IconBrandWhatsapp } from "@tabler/icons-react";
+import { Button } from "@workspace/ui/components/button";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+
+import { logger } from "@/lib/logger";
 import {
+  EmbeddedSignUpAuthorizedObject,
   EmbedSignUpFlowEventType,
   EmbedSignUpLoginSuccess,
   EmbedSignUpObject,
-  EmbeddedSignUpAuthorizedObject,
 } from "@/types/embedded-signup";
-import { Button } from "@workspace/ui/components/button";
-import axios from "axios";
-import React, { useState, useEffect, useRef } from "react";
-import { logger } from "@/lib/logger";
 
 interface FacebookLoginProps {
   appId: string;
-  onLoginSuccess?: (response: any) => void;
   onLoginFailure?: (error: string) => void;
+  onLoginSuccess?: (response: any) => void;
 }
 
 const FacebookLogin: React.FC<FacebookLoginProps> = ({
   appId,
-  onLoginSuccess = () => {},
   onLoginFailure = () => {},
+  onLoginSuccess = () => {},
 }) => {
   const [fbLoaded, setFbLoaded] = useState(false);
   const loginResponseRef = useRef<EmbedSignUpLoginSuccess | null>(null);
   const embedDataRef = useRef<EmbedSignUpObject | null>(null);
   const submittedRef = useRef(false);
 
-  const checkReady = async () => {
+  const checkReady = React.useCallback(async () => {
     if (submittedRef.current) return;
 
     const auth = loginResponseRef.current;
@@ -39,8 +40,8 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
       submittedRef.current = true;
 
       const data: EmbeddedSignUpAuthorizedObject = {
-        signUp,
         auth,
+        signUp,
       };
 
       await axios
@@ -53,7 +54,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           onLoginFailure("Signup failed");
         });
     }
-  };
+  }, [onLoginFailure, onLoginSuccess]);
 
   // Dynamically load the Facebook SDK client-side only
   useEffect(() => {
@@ -64,8 +65,8 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         window.FB.init({
           appId,
           cookie: true,
-          xfbml: true,
           version: "v22.0",
+          xfbml: true,
         });
         // Resolve the promise when the SDK is loaded
         // resolve();
@@ -103,7 +104,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         window.removeEventListener("message", messageEvent);
       }
     };
-  }, []);
+  }, [checkReady, onLoginFailure]);
 
   const handleLogin = () => {
     // @ts-expect-error doesn't exist
@@ -120,13 +121,13 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
         },
         {
           config_id: "2166580990454604", // configuration ID goes here
-          response_type: "code", // must be set to 'code' for System User access token
-          override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
           extras: {
-            setup: {},
             featureType: "whatsapp_business_app_onboarding",
             sessionInfoVersion: "3",
+            setup: {},
           },
+          override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
+          response_type: "code", // must be set to 'code' for System User access token
         }
       );
     }
@@ -134,9 +135,9 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
 
   return (
     <Button
-      onClick={handleLogin}
       className="bg-[#25D366] text-white wrap-normal"
       disabled={!fbLoaded}
+      onClick={handleLogin}
     >
       <IconBrandWhatsapp size={40} />
       {fbLoaded ? <span className="flex">Authenticate</span> : <p>Loading</p>}

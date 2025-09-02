@@ -20,6 +20,7 @@ import { contactsTable } from "./contacts";
 import { marketingCampaignsTable } from "./marketing-campaigns";
 import { teamsTable } from "./teams";
 import { usersTable } from "./users";
+import { templatesTable } from "./templates";
 
 export const conversationStatusEnum = pgEnum(
   "message_status",
@@ -40,6 +41,14 @@ export interface ConversationBody {
   buttons?: {
     text?: string;
     type: string;
+  }[];
+  cards?: {
+    body?: baseConversation;
+    buttons?: {
+      text?: string;
+      type: string;
+    }[];
+    header?: baseConversation;
   }[];
   footer?: string;
   header?: baseConversation;
@@ -63,9 +72,11 @@ export const conversationsTable = pgTable(
   "conversations",
   {
     ...baseIdModel,
+    ...timestamps,
     body: jsonb("body").$type<ConversationBody>(),
     contactId: uuid("contact_id").references(() => contactsTable.id),
     content: jsonb("content"),
+    conversationSearch: tsvector("conversation_search").notNull().default(""),
     direction: varchar("direction", {
       enum: ["inbound", "outbound"],
       length: 30,
@@ -75,17 +86,17 @@ export const conversationsTable = pgTable(
     marketingCampaignId: uuid("marketing_campaign_id").references(
       () => marketingCampaignsTable.id
     ),
+    messageTemplate: jsonb("messageTemplate"),
     repliedTo: text("replied_to"),
     status: conversationStatusEnum(),
     success: boolean("success"),
     teamId: uuid("team_id")
       .notNull()
       .references(() => teamsTable.id),
+    templateId: varchar("template_id").references(() => templatesTable.id),
     userId: uuid("user_id").references(() => usersTable.id),
     wamid: text("wamid").unique(),
     waResponse: jsonb("wa_response"),
-    ...timestamps,
-    conversationSearch: tsvector("conversation_search").notNull().default(""),
   },
   (t) => [
     ...createOrganizationPolicies("conversations", t),
@@ -116,6 +127,10 @@ export const conversationsRelations = relations(
     team: one(teamsTable, {
       fields: [conversationsTable.teamId],
       references: [teamsTable.id],
+    }),
+    template: one(templatesTable, {
+      fields: [conversationsTable.templateId],
+      references: [templatesTable.id],
     }),
     user: one(usersTable, {
       fields: [conversationsTable.userId],

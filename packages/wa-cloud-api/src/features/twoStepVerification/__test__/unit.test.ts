@@ -8,8 +8,8 @@ describe('TwoStepVerification API - Unit Tests', () => {
     beforeEach(() => {
         whatsApp = new WhatsApp({
             accessToken: process.env.CLOUD_API_ACCESS_TOKEN || 'test_token',
-            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
             businessAcctId: process.env.WA_BUSINESS_ACCOUNT_ID || 'test_business_id',
+            phoneNumberId: Number(process.env.WA_PHONE_NUMBER_ID) || 123456789,
         });
 
         mockRequestSend = vi.spyOn(whatsApp.requester, 'getJson');
@@ -212,8 +212,8 @@ describe('TwoStepVerification API - Unit Tests', () => {
 
         it('should handle complex response structures', async () => {
             const mockResponse = {
-                success: true,
                 message: 'PIN updated successfully',
+                success: true,
                 timestamp: Date.now(),
             };
             mockRequestSend.mockResolvedValue(mockResponse);

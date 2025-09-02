@@ -1,6 +1,5 @@
 "use client";
 
-import { useSocket } from "@/components/provider/socket-provider";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   NotificationEvent,
@@ -11,6 +10,8 @@ import { nanoid } from "nanoid";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { toast } from "sonner";
+
+import { useSocket } from "@/components/provider/socket-provider";
 
 export default function Notification() {
   const { socket } = useSocket();
@@ -91,6 +92,7 @@ export default function Notification() {
       socket.off(NotificationEvent.WhatsAppBulkMessageOutgoingProcessing);
       socket.off(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return <></>;

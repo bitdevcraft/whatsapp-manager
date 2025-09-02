@@ -1,19 +1,20 @@
 import { auth } from "@workspace/auth";
 import { headers as nextHeaders } from "next/headers";
+
+import { getMember } from "./_lib/queries";
 import { TeamInvitation } from "./invitation";
 import { TeamList } from "./team-list";
-import { getMember } from "./_lib/queries";
 
 export default async function Page() {
   const headers = await nextHeaders();
 
   const data = await auth.api.hasPermission({
-    headers,
     body: {
       permissions: {
         invitation: ["create"], // This must match the structure in your access control
       },
     },
+    headers,
   });
 
   if (data.error) return <div>Unauthorized</div>;

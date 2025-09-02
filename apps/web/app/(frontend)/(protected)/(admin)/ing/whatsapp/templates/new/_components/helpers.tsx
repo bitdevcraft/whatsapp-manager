@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* -----------------------------
  * Helpers
  * ----------------------------- */
@@ -12,14 +13,14 @@ export function ErrorSummary({ name }: { name: string }) {
   } = useFormContext();
 
   const items = React.useMemo(() => {
-    const all: { path: string; message: string }[] = [];
+    const all: { message: string; path: string }[] = [];
 
     const visit = (node: any, path: string[] = []) => {
       if (!node || typeof node !== "object") return;
 
       // 1) primary message
       if (typeof node.message === "string" && node.message.trim()) {
-        all.push({ path: path.join("."), message: node.message });
+        all.push({ message: node.message, path: path.join(".") });
       }
 
       // 2) secondary messages (criteriaMode: "all")
@@ -27,13 +28,13 @@ export function ErrorSummary({ name }: { name: string }) {
         if (Array.isArray(node.types)) {
           node.types.forEach((m: any) => {
             if (typeof m === "string" && m.trim()) {
-              all.push({ path: path.join("."), message: m });
+              all.push({ message: m, path: path.join(".") });
             }
           });
         } else if (typeof node.types === "object") {
           Object.values(node.types).forEach((m: any) => {
             if (typeof m === "string" && m.trim()) {
-              all.push({ path: path.join("."), message: m });
+              all.push({ message: m, path: path.join(".") });
             }
           });
         }
@@ -64,9 +65,9 @@ export function ErrorSummary({ name }: { name: string }) {
 
   return (
     <div
-      role="alert"
       aria-live="polite"
       className="rounded-md border border-destructive/30 bg-destructive/5 p-3"
+      role="alert"
     >
       <ul className="list-disc pl-5 space-y-1 text-sm text-destructive">
         {items.map((m, i) => (

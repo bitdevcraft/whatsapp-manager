@@ -1,5 +1,7 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
 import {
   Card,
@@ -17,19 +19,18 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { Loader } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type SubmitHandler, useForm } from "react-hook-form";
+
 import { authClient } from "@/lib/auth/auth-client";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   type LoginWithEmailPasswordPayload,
   type LoginWithEmailPasswordResponse,
   LoginWithEmailPasswordSchema,
 } from "@/types/auth";
-import { useMutation } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { Loader } from "lucide-react";
 
 export const useLoginWithEmailAndPassword = () => {
   return useMutation({
@@ -60,8 +61,8 @@ export const useLoginWithEmailAndPassword = () => {
       return {
         email_address: userData.email,
         id: userData.id,
-        name: userData.name,
         is_email_address_verified: userData.emailVerified,
+        name: userData.name,
       };
     },
   });
@@ -76,8 +77,8 @@ export const LoginForm = () => {
   const path = searchParams.get("path");
 
   const form = useForm<LoginWithEmailPasswordPayload>({
-    resolver: zodResolver(LoginWithEmailPasswordSchema),
     defaultValues: { email: "", password: "" },
+    resolver: zodResolver(LoginWithEmailPasswordSchema),
     reValidateMode: "onChange",
   });
 
@@ -98,7 +99,7 @@ export const LoginForm = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4">
               <FormField
                 control={form.control}
@@ -121,8 +122,8 @@ export const LoginForm = () => {
                     <div className="flex items-center">
                       <FormLabel>{t("login.form.password.label")}</FormLabel>
                       <Link
-                        href="/auth/forgot-password"
                         className="ml-auto inline-block text-sm underline"
+                        href="/auth/forgot-password"
                       >
                         {t("login.form.forgot_password.label")}
                       </Link>
@@ -136,9 +137,9 @@ export const LoginForm = () => {
               />
 
               <Button
-                type="submit"
                 className="w-full"
                 disabled={login.isPending}
+                type="submit"
               >
                 {login.isPending ? (
                   <>
@@ -148,13 +149,13 @@ export const LoginForm = () => {
                   t("login_button")
                 )}
               </Button>
-              <Button type="button" variant="outline" className="w-full">
+              <Button className="w-full" type="button" variant="outline">
                 {t("social_login.google")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
               {t("login.dont_have_account")}
-              <Link href="/auth/signup" className="ml-1 underline">
+              <Link className="ml-1 underline" href="/auth/signup">
                 {t("signup_button")}
               </Link>
             </div>

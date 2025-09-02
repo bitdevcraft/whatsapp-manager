@@ -1,15 +1,16 @@
-import { RESPONSE_CODE } from "@/lib/constants/response-code";
-import { decryptApiKey } from "@/lib/crypto";
-import { getUserWithTeam } from "@/lib/db/queries";
-import { logger } from "@/lib/logger";
 import {
   whatsAppBusinessAccountPhoneNumbersTable,
   whatsAppBusinessAccountsTable,
 } from "@workspace/db";
 import { withTenantTransaction } from "@workspace/db/index";
 import WhatsApp from "@workspace/wa-cloud-api";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
+
+import { RESPONSE_CODE } from "@/lib/constants/response-code";
+import { decryptApiKey } from "@/lib/crypto";
+import { getUserWithTeam } from "@/lib/db/queries";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   const userWithTeam = await getUserWithTeam();
@@ -23,16 +24,19 @@ export async function POST(request: Request) {
     });
   }
 
-  const { pin, phoneNumberId } = (await request.json()) as {
-    pin: string;
+  const { phoneNumberId, pin } = (await request.json()) as {
     phoneNumberId: string;
+    pin: string;
   };
 
   const { teamId } = userWithTeam;
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
-      where: eq(whatsAppBusinessAccountsTable.teamId, teamId),
+      where: and(
+        eq(whatsAppBusinessAccountsTable.teamId, teamId),
+        isNull(whatsAppBusinessAccountsTable.deletedAt)
+      ),
     });
 
     return data;
@@ -46,14 +50,14 @@ export async function POST(request: Request) {
   }
 
   const decryptedToken = await decryptApiKey({
-    iv: data.accessToken?.iv,
     data: data.accessToken.data,
+    iv: data.accessToken?.iv,
   });
 
   const config = {
     accessToken: decryptedToken,
-    phoneNumberId: Number(phoneNumberId),
     businessAcctId: String(data.id),
+    phoneNumberId: Number(phoneNumberId),
   };
 
   const whatsapp = new WhatsApp(config);

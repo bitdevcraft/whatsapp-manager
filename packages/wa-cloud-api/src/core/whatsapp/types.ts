@@ -1,3 +1,4 @@
+import { WhatsAppConfig } from '@shared/types/config';
 import {
     BusinessProfileApi,
     EncryptionApi,
@@ -12,24 +13,23 @@ import {
     TwoStepVerificationApi,
     WabaApi,
 } from 'src/features';
-import { WhatsAppConfig } from '@shared/types/config';
 
 export declare class WhatsAppClass {
-    constructor(config?: WhatsAppConfig);
+    readonly businessProfile: BusinessProfileApi;
+    readonly encryption: EncryptionApi;
+    readonly fileUpload: FileUploadApi;
+    readonly flow: FlowApi;
+    readonly media: MediaApi;
     readonly messages: MessagesApi;
-    readonly templates: TemplateApi;
     readonly phoneNumber: PhoneNumberApi;
     readonly qrCode: QrCodeApi;
-    readonly encryption: EncryptionApi;
-    readonly twoStepVerification: TwoStepVerificationApi;
     readonly registration: RegistrationApi;
-    readonly media: MediaApi;
-    readonly fileUpload: FileUploadApi;
+    readonly templates: TemplateApi;
+    readonly twoStepVerification: TwoStepVerificationApi;
     readonly waba: WabaApi;
-    readonly flow: FlowApi;
-    readonly businessProfile: BusinessProfileApi;
-    updateTimeout(ms: number): boolean;
-    updatePhoneNumberId(phoneNumberId: number): boolean;
+    constructor(config?: WhatsAppConfig);
     updateAccessToken(accessToken: string): boolean;
+    updatePhoneNumberId(phoneNumberId: number): boolean;
+    updateTimeout(ms: number): boolean;
     updateWabaId(wabaId: string): boolean;
 }

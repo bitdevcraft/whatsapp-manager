@@ -1,9 +1,9 @@
-import { MessageTypesEnum } from '@shared/types';
-import { WabaConfigType, WhatsAppConfig } from '@shared/types/config';
-
 import { FlowTypeEnum } from '@features/flow/types';
 import { importConfig } from '@shared/config/importConfig';
+import { MessageTypesEnum } from '@shared/types';
+import { WabaConfigType, WhatsAppConfig } from '@shared/types/config';
 import Logger from '@shared/utils/logger';
+
 import WhatsApp from '../whatsapp';
 import {
     FlowHandler,
@@ -22,18 +22,25 @@ const LOGGER = new Logger(LIB_NAME, process.env.DEBUG === 'true');
  * Framework-agnostic WebhookHandler using pure functions
  */
 export class WebhookHandler {
-    private config: WabaConfigType;
     private client: WhatsApp;
-    private messageHandlers: Map<MessageTypesEnum, MessageHandler> = new Map();
-    private preProcessHandler: MessageHandler | undefined = undefined;
+    private config: WabaConfigType;
+    private flowHandlers = new Map<FlowTypeEnum, FlowHandler>();
+    private messageHandlers = new Map<MessageTypesEnum, MessageHandler>();
     private postProcessHandler: MessageHandler | undefined = undefined;
-    private flowHandlers: Map<FlowTypeEnum, FlowHandler> = new Map();
+    private preProcessHandler: MessageHandler | undefined = undefined;
 
     constructor(config: WhatsAppConfig) {
         this.config = importConfig(config);
         this.client = new WhatsApp(config);
         LOGGER.log('WebhookHandler instantiated!');
     }
+
+    /**
+     * Handle flow requests (framework-agnostic)
+     */
+    public handleFlow = async (request: WebhookRequest): Promise<WebhookResponse> => {
+        return processFlowRequest(request, this.config, this.client, this.flowHandlers);
+    };
 
     /**
      * Handle webhook verification (framework-agnostic)
@@ -48,17 +55,18 @@ export class WebhookHandler {
     public handleWebhook = async (request: WebhookRequest): Promise<WebhookResponse> => {
         return processWebhookMessages(request, this.client, {
             messageHandlers: this.messageHandlers,
-            preProcessHandler: this.preProcessHandler,
             postProcessHandler: this.postProcessHandler,
+            preProcessHandler: this.preProcessHandler,
         });
     };
 
     /**
-     * Handle flow requests (framework-agnostic)
+     * Register a flow handler for a specific flow type
      */
-    public handleFlow = async (request: WebhookRequest): Promise<WebhookResponse> => {
-        return processFlowRequest(request, this.config, this.client, this.flowHandlers);
-    };
+    public onFlow(type: FlowTypeEnum, handler: FlowHandler): void {
+        this.flowHandlers.set(type, handler);
+        LOGGER.log(`Registered flow handler for ${type}`);
+    }
 
     /**
      * Register a message handler for a specific message type
@@ -66,14 +74,6 @@ export class WebhookHandler {
     public onMessage(type: MessageTypesEnum, handler: MessageHandler): void {
         this.messageHandlers.set(type, handler);
         LOGGER.log(`Registered message handler for ${type}`);
-    }
-
-    /**
-     * Register a pre-process handler that runs before all message handlers
-     */
-    public onMessagePreProcess(handler: MessageHandler): void {
-        this.preProcessHandler = handler;
-        LOGGER.log('Registered pre-process handler');
     }
 
     /**
@@ -85,10 +85,10 @@ export class WebhookHandler {
     }
 
     /**
-     * Register a flow handler for a specific flow type
+     * Register a pre-process handler that runs before all message handlers
      */
-    public onFlow(type: FlowTypeEnum, handler: FlowHandler): void {
-        this.flowHandlers.set(type, handler);
-        LOGGER.log(`Registered flow handler for ${type}`);
+    public onMessagePreProcess(handler: MessageHandler): void {
+        this.preProcessHandler = handler;
+        LOGGER.log('Registered pre-process handler');
     }
 }

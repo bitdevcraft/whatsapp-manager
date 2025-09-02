@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -23,6 +22,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
+import { authClient } from "@/lib/auth/auth-client";
+
 interface Props {
   canInvite: boolean;
 }
@@ -36,19 +37,19 @@ type InviteValues = z.infer<typeof inviteSchema>;
 
 export function TeamInvitation({ canInvite }: Props) {
   const form = useForm<InviteValues>({
-    resolver: zodResolver(inviteSchema),
     defaultValues: {
       email: "",
       role: "member",
     },
+    resolver: zodResolver(inviteSchema),
   });
 
   const onSubmit = async (input: InviteValues) => {
     try {
       const { data, error } = await authClient.organization.inviteMember({
         email: input.email,
-        role: input.role ?? "member",
         resend: true,
+        role: input.role ?? "member",
       });
 
       form.reset();
@@ -59,7 +60,7 @@ export function TeamInvitation({ canInvite }: Props) {
       }
 
       toast.success(`Successfully invited ${data.email}`);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
     } catch (error) {
       toast.error(`Error: ${error}`);
     }

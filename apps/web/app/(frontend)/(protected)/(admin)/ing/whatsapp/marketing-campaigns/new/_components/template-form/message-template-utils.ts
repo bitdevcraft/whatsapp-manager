@@ -7,7 +7,7 @@ export async function onWhatsAppMediaFileUpload(
   data: File[],
   phoneNumber: string,
   field: ControllerRenderProps<any, any>,
-  mediaType: "IMAGE" | "VIDEO" | "DOCUMENT"
+  mediaType: "DOCUMENT" | "IMAGE" | "VIDEO"
 ) {
   const file = data[0];
   if (!file) return false;
@@ -15,10 +15,6 @@ export async function onWhatsAppMediaFileUpload(
   // ✅ Validate file type based on mediaType
   const isValid = (() => {
     switch (mediaType) {
-      case "IMAGE":
-        return file.type.startsWith("image/");
-      case "VIDEO":
-        return file.type.startsWith("video/");
       case "DOCUMENT":
         // allow common doc mimetypes (pdf, docx, etc.)
         return (
@@ -30,6 +26,10 @@ export async function onWhatsAppMediaFileUpload(
           file.type ===
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         );
+      case "IMAGE":
+        return file.type.startsWith("image/");
+      case "VIDEO":
+        return file.type.startsWith("video/");
       default:
         return false;
     }

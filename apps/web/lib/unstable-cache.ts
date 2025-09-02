@@ -13,7 +13,7 @@ export const unstable_cache = <Inputs extends unknown[], Output>(
     /**
      * The revalidation interval in seconds.
      */
-    revalidate?: number | false;
+    revalidate?: false | number;
     tags?: string[];
   },
 ) => cache(next_unstable_cache(cb, keyParts, options));

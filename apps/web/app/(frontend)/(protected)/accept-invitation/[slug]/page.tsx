@@ -1,5 +1,6 @@
 import { auth } from "@workspace/auth";
 import { headers as nextHeaders } from "next/headers";
+
 import InvitationExpired from "./invitation-expired";
 import InvitationSuccess from "./invitation-success";
 

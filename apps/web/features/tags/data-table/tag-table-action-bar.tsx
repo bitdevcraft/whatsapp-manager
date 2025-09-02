@@ -1,18 +1,19 @@
 "use client";
 
-import { Tag } from "@workspace/db/schema";
 import type { Table } from "@tanstack/react-table";
-import { Download, Trash2 } from "lucide-react";
-import * as React from "react";
 
+import { Tag } from "@workspace/db/schema";
+import { Separator } from "@workspace/ui/components/separator";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@workspace/ui/data-table";
-
-import { Separator } from "@workspace/ui/components/separator";
 import { exportTableToCSV } from "@workspace/ui/lib/export";
+import { Download, Trash2 } from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
+import { deleteTags } from "../_lib/actions";
 // import { deleteTasks, updateTasks } from "../_lib/actions";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,27 +40,17 @@ export function TagsTableActionBar({ table }: TagsTableActionBarProps) {
     [isPending, currentAction]
   );
 
-  const onTaskExport = React.useCallback(() => {
-    setCurrentAction("export");
-    startTransition(() => {
-      exportTableToCSV(table, {
-        excludeColumns: ["select", "actions"],
-        onlySelected: true,
-      });
-    });
-  }, [table]);
-
   const onTaskDelete = React.useCallback(() => {
     setCurrentAction("delete");
     startTransition(async () => {
-      //   const { error } = await deleteTasks({
-      //     ids: rows.map((row) => row.original.id),
-      //   });
+      const { error } = await deleteTags({
+        ids: rows.map((row) => row.original.id),
+      });
 
-      //   if (error) {
-      //     toast.error(error);
-      //     return;
-      //   }
+      if (error) {
+        toast.error(error);
+        return;
+      }
       table.toggleAllRowsSelected(false);
     });
   }, [rows, table]);
@@ -68,23 +59,15 @@ export function TagsTableActionBar({ table }: TagsTableActionBarProps) {
     <DataTableActionBar table={table} visible={rows.length > 0}>
       <DataTableActionBarSelection table={table} />
       <Separator
-        orientation="vertical"
         className="hidden data-[orientation=vertical]:h-5 sm:block"
+        orientation="vertical"
       />
       <div className="flex items-center gap-1.5">
         <DataTableActionBarAction
-          size="icon"
-          tooltip="Export Tags"
-          isPending={getIsActionPending("export")}
-          onClick={onTaskExport}
-        >
-          <Download />
-        </DataTableActionBarAction>
-        <DataTableActionBarAction
-          size="icon"
-          tooltip="Delete Tags"
           isPending={getIsActionPending("delete")}
           onClick={onTaskDelete}
+          size="icon"
+          tooltip="Delete Tags"
         >
           <Trash2 />
         </DataTableActionBarAction>
