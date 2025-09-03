@@ -4,7 +4,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { ArrowLeft } from "lucide-react";
 
-import TemplateCreateForm from "../_components/template-create-default-form";
+import TemplateCreateForm from "../../_components/template-create-default-form";
 
 export default function NewTemplatePage() {
   return (

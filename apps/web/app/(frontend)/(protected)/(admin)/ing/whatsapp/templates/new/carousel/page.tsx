@@ -3,7 +3,7 @@
 import { Button } from "@workspace/ui/components/button";
 import { ArrowLeft } from "lucide-react";
 
-import TemplateCarouselCreateForm from "../_components/template-create-carousel-form";
+import TemplateCarouselCreateForm from "../../_components/template-create-carousel-form";
 
 export default function NewTemplatePage() {
   return (

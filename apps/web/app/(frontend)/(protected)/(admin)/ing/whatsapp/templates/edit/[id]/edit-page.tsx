@@ -10,14 +10,21 @@ import {
   TemplateCreateSchema,
 } from "@/types/validations/templates/template-schema";
 
-import TemplateCarouselCreateForm from "../../new/_components/template-create-carousel-form";
-import TemplateCreateForm from "../../new/_components/template-create-default-form";
+import TemplateCarouselCreateForm from "../../_components/template-create-carousel-form";
+import TemplateCreateForm from "../../_components/template-create-default-form";
+import { useTemplateStore } from "../../_components/template-store";
 
 interface Props {
   promises: Promise<[Awaited<ReturnType<typeof getTemplateById>>]>;
 }
 export function EditPage({ promises }: Props) {
   const [data] = React.use(promises);
+
+  const setEditMode = useTemplateStore((state) => state.setEditMode);
+
+  React.useEffect(() => {
+    setEditMode(true);
+  }, [setEditMode]);
 
   if (!data) return null;
 
