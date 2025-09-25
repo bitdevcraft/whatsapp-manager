@@ -60,11 +60,12 @@ export function TeamInvitation({ canInvite }: Props) {
       }
 
       toast.success(`Successfully invited ${data.email}`);
-       
     } catch (error) {
       toast.error(`Error: ${error}`);
     }
   };
+
+  if (!canInvite) return null;
 
   return (
     <Card>

@@ -146,87 +146,92 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
         <PreviewForm onSubmit={onSubmit} pending={sendPreview.isPending} />
       </ResponsiveDialog>
       <section className="p-8 grid gap-4 ">
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="flex gap-2 items-center">
-            <Badge variant="outline">{data?.status}</Badge>
-            <p className="text-muted-foreground text-sm">
-              Created on&nbsp;
-              {data?.createdAt && new Date(data?.createdAt).toDateString()}
-            </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="flex gap-2 items-center">
+              <Badge variant="outline">{data?.status}</Badge>
+              <p className="text-muted-foreground text-sm">
+                Created on&nbsp;
+                {data?.createdAt && new Date(data?.createdAt).toDateString()}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      className="bg-green-600 text-white font-semibold text-sm"
+                      disabled={
+                        (data?.status !== "draft" &&
+                          data?.status !== "pending") ||
+                        !remainingUsage.success
+                      }
+                      onClick={sendMarketingCampaign}
+                      size="sm"
+                      variant="outline"
+                    >
+                      <SendHorizontal />
+                      Send
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{remainingUsage.message ?? "Send Now"}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      disabled={!remainingUsage.success}
+                      onClick={() => setOpenPreview(true)}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Preview
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {remainingUsage.message ??
+                      "Send to Internal Contact to test"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+              <Button
+                disabled={
+                  data?.status !== "draft" && data?.status !== "pending"
+                }
+                size="sm"
+                variant="destructive"
+              >
+                <Trash />
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Button
-                    className="bg-green-600 text-white font-semibold text-sm"
-                    disabled={
-                      (data?.status !== "draft" &&
-                        data?.status !== "pending") ||
-                      !remainingUsage.success
-                    }
-                    onClick={sendMarketingCampaign}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <SendHorizontal />
-                    Send
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{remainingUsage.message ?? "Send Now"}</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Button
-                    disabled={!remainingUsage.success}
-                    onClick={() => setOpenPreview(true)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    Preview
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>
-                  {remainingUsage.message ?? "Send to Internal Contact to test"}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-            <Button
-              disabled={data?.status !== "draft" && data?.status !== "pending"}
-              size="sm"
-              variant="destructive"
-            >
-              <Trash />
-            </Button>
-          </div>
-        </div>
-        <h1 className="font-semibold text-lg">{data?.name}</h1>
-        <CampaignAnalytics
-          engagement={engagement}
-          messageSent={messageSent}
-          openRate={openRate}
-          replyRate={replyRate}
-          status={data?.status}
-          totalRecipients={
-            data?.status !== "draft" ? totalRecipients : estRecipients
-          }
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DeliveryStatus
+          <h1 className="font-semibold text-lg">{data?.name}</h1>
+          <CampaignAnalytics
+            engagement={engagement}
             messageSent={messageSent}
-            totalRecipients={totalRecipients}
+            openRate={openRate}
+            replyRate={replyRate}
+            status={data?.status}
+            totalRecipients={
+              data?.status !== "draft" ? totalRecipients : estRecipients
+            }
           />
-          <CampaignDetails
-            contacts={contacts}
-            schedule={data?.scheduleAt}
-            tags={data?.tags}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DeliveryStatus
+              messageSent={messageSent}
+              totalRecipients={totalRecipients}
+            />
+            <CampaignDetails
+              contacts={contacts}
+              schedule={data?.scheduleAt}
+              tags={data?.tags}
+            />
+          </div>
         </div>
 
         <div>

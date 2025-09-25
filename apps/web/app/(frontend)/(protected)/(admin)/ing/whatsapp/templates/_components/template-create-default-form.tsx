@@ -34,6 +34,9 @@ import { ButtonsArray } from "./template-button";
 import { TemplateDetails } from "./template-details";
 import { FooterEditor } from "./template-footer-editor";
 import { HeaderField } from "./template-header";
+import { BubbleChatPreview } from "../../marketing-campaigns/[id]/bubble-chat-preview";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
+import { MobilePreview } from "@/components/mobile-preview";
 
 /* -----------------------------
  * Component
@@ -150,6 +153,7 @@ export default function TemplateCreateForm({
 
       if (pf === "POSITIONAL") {
         // HEADER positional (only if TEXT)
+
         if (hFormat === "TEXT") {
           const nums = parsePositional(hText);
           const current = getValues(
@@ -162,6 +166,7 @@ export default function TemplateCreateForm({
                   { length: nums.length },
                   (_, i) => current?.[i] ?? ""
                 );
+
           setValue(`components.${hIdx}.example.header_text`, next, {
             shouldDirty: true,
           });
@@ -379,10 +384,10 @@ export default function TemplateCreateForm({
   };
 
   return (
-    <>
+    <div className="flex gap-9">
       <Form {...form}>
         <form
-          className="space-y-6"
+          className="space-y-6 w-full"
           noValidate
           onSubmit={handleSubmit(onSubmit)}
         >
@@ -415,9 +420,18 @@ export default function TemplateCreateForm({
             {mutation.isPending ? "Loading…" : "Submit"}
           </Button>
         </form>
+        <DevTool control={control} />
       </Form>
-      <DevTool control={control} />
-    </>
+      <MobilePreview className="hidden md:block">
+        <div className="p-2 size-full flex flex-col items-center">
+          <div className="h-full w-full">
+            <BubbleChatPreview
+              template={form.getValues() as TemplateResponse}
+            />
+          </div>
+        </div>
+      </MobilePreview>
+    </div>
   );
 }
 

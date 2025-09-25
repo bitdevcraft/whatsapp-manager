@@ -171,7 +171,6 @@ export function MessageTemplateComponentItemCards({
             <MessageTemplateComponentItemCardComponent
               prefix={`${prefix}.cards.${idx}`}
             />
-            Test
           </CarouselItem>
         ))}
       </CarouselContent>

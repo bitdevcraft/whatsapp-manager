@@ -64,6 +64,8 @@ function HeaderEditorField({
   const onAddVariable = React.useCallback(() => {
     const current = String(field.value ?? "");
 
+    
+
     // Header rule: only ONE variable allowed
     const allVars = current.match(VAR_RE) || [];
     if (allVars.length >= 1) {

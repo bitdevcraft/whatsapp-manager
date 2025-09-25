@@ -15,6 +15,7 @@ import {
   isNull,
   lte,
   ne,
+  sql,
 } from "drizzle-orm";
 
 import { getUserWithTeam } from "@/lib/db/queries";
@@ -108,7 +109,7 @@ export async function getMarketingCampaignById(id: string) {
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
-          const contacts = await tx
+          let contacts = await tx
             .select({
               name: contactsTable.name,
               id: contactsTable.id,
@@ -121,6 +122,24 @@ export async function getMarketingCampaignById(id: string) {
             )
             .where(eq(conversationsTable.marketingCampaignId, id));
 
+          if (data?.status === "draft" && data?.tags && data?.tags.length > 0) {
+            contacts = await tx
+              .select({
+                name: contactsTable.name,
+                id: contactsTable.id,
+                phone: contactsTable.phone,
+              })
+              .from(contactsTable)
+              .where(
+                and(
+                  sql`${contactsTable.tags} ?| ARRAY[${sql.join(
+                    data.tags.map((v) => sql`${v}`),
+                    sql`, `
+                  )}]`,
+                  isNull(contactsTable.deletedAt)
+                )
+              );
+          }
           // Engagement
 
           return {
