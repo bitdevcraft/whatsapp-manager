@@ -4,7 +4,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@workspace/ui/components/carousel";
 import { Form } from "@workspace/ui/components/form";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
 import axios, { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -18,6 +24,7 @@ import {
 import { toast } from "sonner";
 import z from "zod";
 
+import { MobilePreview } from "@/components/mobile-preview";
 import {
   TemplateCarouselCreateSchema,
   TemplateCarouselCreateValue,
@@ -26,6 +33,7 @@ import {
 import { pruneObject } from "@/utils/prune";
 import { toSnake } from "@/utils/string-helper";
 
+import { BubbleChatPreview } from "../../marketing-campaigns/[id]/bubble-chat-preview";
 import { parseNamed, parsePositional } from "../_lib/utils";
 import { ErrorSummary } from "./helpers";
 import { BodyEditor } from "./template-body-editor";
@@ -181,32 +189,45 @@ export default function TemplateCarouselCreateForm({
     mutation.mutate(values);
 
   return (
-    <Form {...form}>
-      <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
-        <TemplateDetails />
-
-        {/* Components */}
-        <div className="space-y-3">
-          {componentsFA.fields.length === 0 && (
-            <p className="text-sm text-muted-foreground">No components.</p>
-          )}
-          <div className="space-y-4">
-            {componentsFA.fields.map((comp, idx) => (
-              <ComponentItem
-                index={idx}
-                key={comp.id}
-                parameterFormat={parameterFormat}
-                syncExamples={syncExamples}
-              />
-            ))}
+    <div className="flex gap-8">
+      <Form {...form}>
+        <form
+          className="space-y-6 w-full"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <TemplateDetails />
+          {/* Components */}
+          <div className="space-y-3">
+            {componentsFA.fields.length === 0 && (
+              <p className="text-sm text-muted-foreground">No components.</p>
+            )}
+            <div className="space-y-4">
+              {componentsFA.fields.map((comp, idx) => (
+                <ComponentItem
+                  index={idx}
+                  key={comp.id}
+                  parameterFormat={parameterFormat}
+                  syncExamples={syncExamples}
+                />
+              ))}
+            </div>
+          </div>
+          <Button disabled={mutation.isPending} type="submit">
+            {mutation.isPending ? "Loading…" : "Submit"}
+          </Button>
+        </form>
+      </Form>
+      <MobilePreview className="hidden md:block">
+        <div className="p-2 size-full flex flex-col items-center">
+          <div className="h-full w-full">
+            <BubbleChatPreview
+              template={form.getValues() as TemplateResponse}
+            />
           </div>
         </div>
-
-        <Button disabled={mutation.isPending} type="submit">
-          {mutation.isPending ? "Loading…" : "Submit"}
-        </Button>
-      </form>
-    </Form>
+      </MobilePreview>
+    </div>
   );
 }
 
@@ -364,32 +385,33 @@ function CarouselArray({ compIndex }: { compIndex: number }) {
         <p className="text-xs text-muted-foreground">No Carousel.</p>
       )}
 
-      <div className="space-y-3 flex overflow-y-scroll gap-4 py-8">
-        {fa.fields.map((f, idx) => (
-          <div
-            className="border p-2 rounded relative min-w-[300] pt-6 shadow-xl"
-            key={f.id}
-          >
-            <ErrorSummary name={`components.${compIndex}.cards.${idx}`} />
-            <CarouseComponentArray
-              cardIndex={idx}
-              compIndex={compIndex}
-              control={control}
-            />
-            <div className="absolute top-2 right-2">
-              <Button
-                className=""
-                onClick={() => handleRemoveCard(idx)}
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
-                <X className="text-destructive" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Carousel>
+        <CarouselContent>
+          {fa.fields.map((f, idx) => (
+            <CarouselItem className="basis-2/3 md:basis-1/3 " key={f.id}>
+              <div className="border p-2 rounded relative ">
+                <ErrorSummary name={`components.${compIndex}.cards.${idx}`} />
+                <CarouseComponentArray
+                  cardIndex={idx}
+                  compIndex={compIndex}
+                  control={control}
+                />
+                <div className="absolute top-2 right-2">
+                  <Button
+                    className=""
+                    onClick={() => handleRemoveCard(idx)}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  >
+                    <X className="text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 }

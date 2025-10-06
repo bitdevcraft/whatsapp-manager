@@ -10,7 +10,7 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 export function AutoArrayInputs({
   baseName,
@@ -21,27 +21,20 @@ export function AutoArrayInputs({
 }) {
   const { control } = useFormContext();
 
-  const [len, setLen] = React.useState(0);
-  React.useEffect(() => {
-    const v = control._formValues;
-    const parts = baseName.split(".");
-    let cur: any = v;
-    for (const p of parts) {
-      if (cur == null) break;
-      cur = cur[p];
-    }
-    setLen(Array.isArray(cur) ? cur.length : 0);
-  }, [control._formValues, baseName]);
+  const example = useFieldArray({
+    control,
+    name: baseName,
+  });
 
   return (
     <div className="space-y-2">
-      {len === 0 ? null : (
+      {example.fields.length === 0 ? null : (
         <div className="grid gap-2">
           <div className="text-sm">{label}</div>
-          {Array.from({ length: len }).map((_, i) => (
+          {example.fields.map((example, i) => (
             <FormField
               control={control}
-              key={i}
+              key={example.id}
               name={`${baseName}.${i}`}
               render={({ field }) => (
                 <FormItem>

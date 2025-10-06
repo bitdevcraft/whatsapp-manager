@@ -22,8 +22,12 @@ import { useFormContext } from "react-hook-form";
 import { BaseCreateValue } from "@/types/validations/templates/template-schema";
 import { toSnake } from "@/utils/string-helper";
 
+import { useTemplateStore } from "./template-store";
+
 export function TemplateDetails() {
   const { control } = useFormContext<BaseCreateValue>();
+
+  const isEditMode = useTemplateStore((state) => state.isEditMode);
 
   const categoryOptions = ["MARKETING", "UTILITY", "AUTHENTICATION"] as const;
   const parameterFormatOptions = ["POSITIONAL", "NAMED"] as const;
@@ -48,6 +52,7 @@ export function TemplateDetails() {
               <Input
                 placeholder="template_name"
                 {...field}
+                disabled={isEditMode}
                 onChange={(e) => field.onChange(toSnake(e.target.value))}
               />
             </FormControl>
@@ -64,7 +69,11 @@ export function TemplateDetails() {
             <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  disabled={isEditMode}
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -90,6 +99,7 @@ export function TemplateDetails() {
               <FormControl>
                 <Select
                   defaultValue={field.value as unknown as string | undefined}
+                  disabled={isEditMode}
                   onValueChange={(v) => field.onChange(v)}
                   value={field.value as unknown as string | undefined}
                 >
@@ -117,7 +127,11 @@ export function TemplateDetails() {
             <FormItem>
               <FormLabel>Parameter Format</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  disabled={isEditMode}
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select format" />
                   </SelectTrigger>
