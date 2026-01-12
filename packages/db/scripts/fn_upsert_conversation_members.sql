@@ -28,7 +28,7 @@ BEGIN
          tm.user_id,
          '1970-01-01'                       -- default value; tweak freely
   FROM   public.team_members AS tm
-  WHERE  tm.team_id = NEW.team_id
+  WHERE  tm.organization_id = NEW.team_id
   ON CONFLICT (user_id, contact_id) DO NOTHING;
 
   RETURN NEW;
