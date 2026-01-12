@@ -1,0 +1,18 @@
+-- Custom SQL migration file, put your code below! --
+
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE USER app_user WITH
+  PASSWORD 'postgres'
+  NOSUPERUSER
+  NOCREATEDB
+  NOCREATEROLE
+  NOREPLICATION
+  INHERIT
+  LOGIN;
+
+GRANT CONNECT ON DATABASE app_db TO app_user;
+
+GRANT USAGE ON SCHEMA public TO app_user;

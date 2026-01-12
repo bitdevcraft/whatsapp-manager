@@ -1,1 +1,0 @@
-ALTER TABLE "contacts" ADD COLUMN "normalized_phone" varchar(255) GENERATED ALWAYS AS (regexp_replace("contacts"."phone", '\D', '', 'g')) STORED;

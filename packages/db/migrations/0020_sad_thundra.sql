@@ -1,1 +1,0 @@
-ALTER TABLE "conversations" ADD CONSTRAINT "conversations_wamid_unique" UNIQUE("wamid");

@@ -1,1 +1,0 @@
-ALTER TABLE "teams" ADD COLUMN "whatsapp_subscribe_at" timestamp;

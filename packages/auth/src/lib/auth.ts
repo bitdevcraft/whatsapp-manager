@@ -14,7 +14,6 @@ import "dotenv/config";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
-  
   advanced: {
     database: {
       generateId: () => uuidv4(),
@@ -79,6 +78,7 @@ export const auth = betterAuth({
       console.log(`Password for user ${user.email} has been reset.`);
     },
     sendResetPassword: async ({ user, url, token }, request) => {
+      console.log(url);
       await resend.emails.send({
         from: "No-Reply <noreply@ingeniousuae.com>",
         subject: "Password Reset",

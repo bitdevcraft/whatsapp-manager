@@ -24,7 +24,7 @@ export class UsageLimitRepository {
 
       if (!subscriptionDate) return null;
 
-      const teamUsage = await tx
+      let teamUsage = await tx
         .select({
           limit: sql<number>`AVG(${teamsTable.whatsappLimit})`,
           remaining: sql<number>`AVG(${teamsTable.whatsappLimit}) - SUM(${teamMembersUsageTracking.usageCount})`,
@@ -53,7 +53,19 @@ export class UsageLimitRepository {
           teamMembersUsageTracking.periodStart
         );
 
-      if (teamUsage.length === 0) return null;
+      if (teamUsage.length === 0) {
+        teamUsage = await tx
+          .select({
+            limit: sql<number>`AVG(${teamsTable.whatsappLimit})`,
+            remaining: sql<number>`AVG(${teamsTable.whatsappLimit})`,
+            teamId: teamsTable.id,
+            used: sql<number>`0`,
+          })
+          .from(teamsTable)
+
+          .where(and(eq(teamsTable.id, this.teamId)))
+          .groupBy(teamsTable.id);
+      }
 
       let memberLimit: {
         limitType: string;
@@ -142,6 +154,19 @@ export class UsageLimitRepository {
               teamMembersUsageTracking.periodEnd,
               teamMembersUsageTracking.periodStart
             );
+        }
+
+        if (memberLimit.length === 0) {
+          memberLimit = await tx
+            .select({
+              limitType: sql<string>`MAX(${teamMemberLimitsTable.limitType})`,
+              maxLimit: sql<number>`MAX(${teamMemberLimitsTable.maxLimit})`,
+              maxLimitType: sql<string>`MAX(${teamMemberLimitsTable.maxLimitType})`,
+              usage: sql<number>`0`,
+            })
+            .from(teamMemberLimitsTable)
+
+            .where(and(eq(teamMemberLimitsTable.userId, userId)));
         }
       }
 

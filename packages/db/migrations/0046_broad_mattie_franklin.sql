@@ -1,1 +1,0 @@
-ALTER TABLE "teams" ALTER COLUMN "whatsapp_limit" SET DEFAULT 20;

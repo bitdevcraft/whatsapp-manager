@@ -1,1 +1,0 @@
-CREATE INDEX "idx_conversations_body_trgm" ON "conversations" USING gin (("body"::text) gin_trgm_ops);

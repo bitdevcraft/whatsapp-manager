@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "contacts_team_phone_unique" ON "contacts" USING btree ("team_id","phone");

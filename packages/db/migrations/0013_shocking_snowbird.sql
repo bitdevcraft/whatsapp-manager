@@ -1,1 +1,0 @@
-ALTER TABLE "whatsapp_business_account_phone_numbers" ALTER COLUMN "display_phone_number" SET DATA TYPE varchar(50);

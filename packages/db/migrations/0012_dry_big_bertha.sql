@@ -1,3 +1,0 @@
-ALTER TABLE "conversations" ADD COLUMN "marketing_campaign_id" uuid;--> statement-breakpoint
-ALTER TABLE "conversations" ADD COLUMN "success" boolean;--> statement-breakpoint
-ALTER TABLE "conversations" ADD CONSTRAINT "conversations_marketing_campaign_id_marketing_campaigns_id_fk" FOREIGN KEY ("marketing_campaign_id") REFERENCES "public"."marketing_campaigns"("id") ON DELETE no action ON UPDATE no action;
