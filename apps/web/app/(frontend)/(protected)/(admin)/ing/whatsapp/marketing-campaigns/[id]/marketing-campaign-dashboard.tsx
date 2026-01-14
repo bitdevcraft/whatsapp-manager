@@ -37,6 +37,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import { TemplateResponse } from "@workspace/wa-cloud-api";
 import axios from "axios";
 import {
   Calendar,
@@ -58,14 +59,13 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { getMarketingCampaignById } from "@/features/marketing-campaigns/_lib/queries";
+import { ComponentsValue } from "@/features/whatsapp/templates/lib/schema";
 import { logger } from "@/lib/logger";
 
 import { getEstimatedRecipients, hasRemainingUsage } from "./action";
+import { BubbleChatPreview } from "./bubble-chat-preview";
 import { handleMergeTemplateMessage } from "./lib";
 import { SingleTemplatePreview } from "./template-preview";
-import { BubbleChatPreview } from "./bubble-chat-preview";
-import { ComponentsValue } from "@/features/whatsapp/templates/lib/schema";
-import { TemplateResponse } from "@workspace/wa-cloud-api";
 
 interface Props {
   promises: Promise<
@@ -162,6 +162,7 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             <div className="space-y-2">
               <div className="flex gap-2 items-center flex-wrap">
                 <Badge
+                  className="capitalize"
                   variant={
                     data?.status === "sent"
                       ? "default"
@@ -169,13 +170,13 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
                         ? "secondary"
                         : "outline"
                   }
-                  className="capitalize"
                 >
                   {data?.status}
                 </Badge>
                 <p className="text-muted-foreground text-sm">
                   Created on&nbsp;
-                  {data?.createdAt && new Date(data?.createdAt).toLocaleDateString()}
+                  {data?.createdAt &&
+                    new Date(data?.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <h1 className="font-bold text-2xl">{data?.name}</h1>
@@ -250,7 +251,11 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
         </div>
 
         {/* Tabs Navigation */}
-        <Tabs className="px-6 md:px-8" onValueChange={setActiveTab} value={activeTab}>
+        <Tabs
+          className="px-6 md:px-8"
+          onValueChange={setActiveTab}
+          value={activeTab}
+        >
           <TabsList className="bg-muted/50">
             <TabsTrigger value="overview">
               <Calendar className="h-4 w-4 mr-2" />
@@ -264,7 +269,7 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
               <Users className="h-4 w-4 mr-2" />
               Contact List
               {contacts && contacts.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
+                <Badge className="ml-2" variant="secondary">
                   {contacts.length}
                 </Badge>
               )}
@@ -276,7 +281,7 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
       {/* Tabs Content */}
       <section className="p-6 md:p-8">
         <Tabs onValueChange={setActiveTab} value={activeTab}>
-          <TabsContent value="overview" className="mt-0 space-y-6">
+          <TabsContent className="mt-0 space-y-6" value="overview">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <DeliveryStatus
                 messageSent={messageSent}
@@ -290,13 +295,12 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             </div>
           </TabsContent>
 
-          <TabsContent value="template" className="mt-0">
+          <TabsContent className="mt-0" value="template">
             {data && data.template.content && data.messageTemplate ? (
               <CampaignTemplatePreview
                 messageTemplate={data.messageTemplate}
                 template={data.template.content}
                 templateName={data.template.name}
-                templateLanguage={data.template.language}
               />
             ) : (
               <div className="text-center py-12 text-muted-foreground">
@@ -305,7 +309,7 @@ export default function MarketingCampaignDashboard({ promises }: Props) {
             )}
           </TabsContent>
 
-          <TabsContent value="contacts" className="mt-0">
+          <TabsContent className="mt-0" value="contacts">
             {contacts && contacts.length > 0 ? (
               <ContactListTable contacts={contacts} />
             ) : (
@@ -337,34 +341,34 @@ function CampaignAnalytics({
 }) {
   const stats = [
     {
-      label: status === "draft" ? "Est. Recipients" : "Total Recipients",
-      value: totalRecipients.toString(),
       description: "Total Number of contacts",
       icon: Users,
+      label: status === "draft" ? "Est. Recipients" : "Total Recipients",
+      value: totalRecipients.toString(),
     },
     {
-      label: "Messages Sent",
-      value: messageSent.toString(),
       description: "Total messages dispatched",
       icon: SendHorizontal,
+      label: "Messages Sent",
+      value: messageSent.toString(),
     },
     {
-      label: "Open Rate",
-      value: `${openRate.toFixed(1)}%`,
       description: "Messages viewed",
       icon: MessageSquare,
+      label: "Open Rate",
+      value: `${openRate.toFixed(1)}%`,
     },
     {
-      label: "Replies",
-      value: replyRate.toString(),
       description: "Received responses",
       icon: MessageSquare,
+      label: "Replies",
+      value: replyRate.toString(),
     },
     {
-      label: "Engagement",
-      value: `${engagement}%`,
       description: "Overall engagement",
       icon: Check,
+      label: "Engagement",
+      value: `${engagement}%`,
     },
   ];
 
@@ -372,8 +376,8 @@ function CampaignAnalytics({
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {stats.map((stat) => (
         <div
-          key={stat.label}
           className="min-h-20 bg-card border rounded-xl p-4 flex flex-col gap-2 hover:shadow-md transition-shadow"
+          key={stat.label}
         >
           <div className="flex items-center gap-2 text-muted-foreground">
             <stat.icon size={14} />
@@ -419,7 +423,7 @@ function CampaignDetails({
         <div>
           <p className="text-sm text-muted-foreground mb-2">Schedule</p>
           <div className="flex gap-2 items-center">
-            <Calendar size={16} className="text-muted-foreground" />
+            <Calendar className="text-muted-foreground" size={16} />
             <p className="text-sm">
               {new Date(schedule).toLocaleDateString()} at&nbsp;
               {new Date(schedule).toLocaleTimeString()}
@@ -434,6 +438,49 @@ function CampaignDetails({
           <p className="text-sm font-medium">{contacts.length} contacts</p>
         </div>
       )}
+    </div>
+  );
+}
+
+function CampaignTemplatePreview({
+  messageTemplate,
+  template,
+  templateLanguage = "",
+  templateName = "",
+}: {
+  messageTemplate: { components?: ComponentsValue[] };
+  template: TemplateResponse;
+  templateLanguage?: string;
+  templateName?: string;
+}) {
+  return (
+    <div className="space-y-6">
+      {/* Template Info Card */}
+      <div className="rounded-lg border bg-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Template Information</h3>
+          <Badge variant="outline">{templateLanguage.toUpperCase()}</Badge>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Template Name</p>
+            <p className="font-medium">{templateName}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Phone Preview Card */}
+      <div className="rounded-lg border bg-card p-6">
+        <h3 className="text-lg font-semibold mb-4">Message Preview</h3>
+        <div className="flex justify-center">
+          <div className="w-full max-w-md bg-muted/50 rounded-2xl p-6 shadow-sm">
+            <BubbleChatPreview
+              messageTemplate={messageTemplate}
+              template={template}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -471,8 +518,8 @@ function ContactListTable({
           <tbody>
             {contacts.map((contact, index) => (
               <tr
-                key={contact.id}
                 className={index !== contacts.length - 1 ? "border-b" : ""}
+                key={contact.id}
               >
                 <td className="p-4">
                   <div className="flex items-center gap-3">
@@ -492,7 +539,7 @@ function ContactListTable({
                       target="_blank"
                     >
                       <Button size="sm" variant="outline">
-                        <SquareArrowOutUpRight size={14} className="mr-2" />
+                        <SquareArrowOutUpRight className="mr-2" size={14} />
                         View Chat
                       </Button>
                     </Link>
@@ -507,83 +554,6 @@ function ContactListTable({
   );
 }
 
-function CampaignTemplatePreview({
-  messageTemplate,
-  template,
-  templateName = "",
-  templateLanguage = "",
-}: {
-  messageTemplate: { components?: ComponentsValue[] };
-  template: TemplateResponse;
-  templateName?: string;
-  templateLanguage?: string;
-}) {
-  return (
-    <div className="space-y-6">
-      {/* Template Info Card */}
-      <div className="rounded-lg border bg-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Template Information</h3>
-          <Badge variant="outline">{templateLanguage.toUpperCase()}</Badge>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Template Name</p>
-            <p className="font-medium">{templateName}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Template Type</p>
-            <p className="font-medium capitalize">{template.type}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Phone Preview Card */}
-      <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-semibold mb-4">Message Preview</h3>
-        <div className="flex justify-center">
-          <div className="w-full max-w-md bg-muted/50 rounded-2xl p-6 shadow-sm">
-            <BubbleChatPreview
-              messageTemplate={messageTemplate}
-              template={template}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Components Summary */}
-      {messageTemplate.components && messageTemplate.components.length > 0 && (
-        <div className="rounded-lg border bg-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Template Components</h3>
-          <div className="grid gap-3">
-            {messageTemplate.components.map((component, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
-              >
-                <Badge variant="secondary" className="capitalize">
-                  {component.type}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {component.type === "header"
-                    ? "Header section"
-                    : component.type === "body"
-                      ? "Main message content"
-                      : component.type === "footer"
-                        ? "Footer section"
-                        : component.type === "button"
-                          ? `${component.parameters?.length || 0} button(s)`
-                          : component.type}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function DeliveryStatus({
   messageSent,
   totalRecipients,
@@ -591,8 +561,12 @@ function DeliveryStatus({
   messageSent: number;
   totalRecipients: number;
 }) {
-  const deliveredPercent = totalRecipients > 0 ? (messageSent / totalRecipients) * 100 : 0;
-  const failedPercent = totalRecipients > 0 ? ((totalRecipients - messageSent) / totalRecipients) * 100 : 0;
+  const deliveredPercent =
+    totalRecipients > 0 ? (messageSent / totalRecipients) * 100 : 0;
+  const failedPercent =
+    totalRecipients > 0
+      ? ((totalRecipients - messageSent) / totalRecipients) * 100
+      : 0;
 
   return (
     <div className="rounded-lg border bg-card p-6 grid gap-6">
@@ -610,8 +584,10 @@ function DeliveryStatus({
             {messageSent} / {totalRecipients}
           </span>
         </div>
-        <Progress value={deliveredPercent} className="h-2" />
-        <p className="text-xs text-muted-foreground text-right">{deliveredPercent.toFixed(1)}%</p>
+        <Progress className="h-2" value={deliveredPercent} />
+        <p className="text-xs text-muted-foreground text-right">
+          {deliveredPercent.toFixed(1)}%
+        </p>
       </div>
 
       <div className="grid gap-2">
@@ -626,8 +602,10 @@ function DeliveryStatus({
             {totalRecipients - messageSent} / {totalRecipients}
           </span>
         </div>
-        <Progress value={failedPercent} className="h-2" />
-        <p className="text-xs text-muted-foreground text-right">{failedPercent.toFixed(1)}%</p>
+        <Progress className="h-2" value={failedPercent} />
+        <p className="text-xs text-muted-foreground text-right">
+          {failedPercent.toFixed(1)}%
+        </p>
       </div>
     </div>
   );
