@@ -2,21 +2,31 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Conversation, Template } from "@workspace/db/schema";
-import { cn } from "@workspace/ui/lib/utils";
-import React from "react";
-
-import { useContactStore } from "../_store/contact-store";
-import { useSearchMessageStore } from "../_store/message-store";
-import { ChatInfiniteScroll } from "./chat-infinite-scroll";
-import { PreviewMessage } from "./preview-message";
-import { MarketingCampaign } from "@workspace/db";
-import { BubbleChatPreview } from "../../marketing-campaigns/[id]/bubble-chat-preview";
+import { Conversation, Template, User } from "@workspace/db/schema";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@workspace/ui/components/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
+import { cn } from "@workspace/ui/lib/utils";
+import React, { useMemo } from "react";
+
+import { useContactStore } from "../_store/contact-store";
+import { useSearchMessageStore } from "../_store/message-store";
+import { ChatInfiniteScroll } from "./chat-infinite-scroll";
+import { MessageBubble } from "./message-bubble";
+import { DateSeparator } from "./date-separator";
+import {
+  shouldInsertDateSeparator,
+  shouldGroupMessages,
+  type Message,
+} from "../_lib/message-utils";
+import { BubbleChatPreview } from "../../marketing-campaigns/[id]/bubble-chat-preview";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -29,8 +39,6 @@ export function ScrollableChats() {
 
   const { loading, searchMessageId, searchRandomId, setLoading } =
     useSearchMessageStore();
-
-  // const [rId, setRid] = useQueryState("rId", parseAsString);
 
   const [remaining, setRemaining] = React.useState<number>(0);
   const {
@@ -46,8 +54,9 @@ export function ScrollableChats() {
   } = useInfiniteQuery<
     PaginatedResponse<
       Conversation & {
-        marketingCampaign?: MarketingCampaign;
+        marketingCampaign?: any;
         template: Template;
+        user?: User;
       }
     >
   >({
@@ -65,8 +74,9 @@ export function ScrollableChats() {
     }): Promise<
       PaginatedResponse<
         Conversation & {
-          marketingCampaign?: MarketingCampaign;
+          marketingCampaign?: any;
           template: Template;
+          user?: User;
         }
       >
     > => {
@@ -100,124 +110,176 @@ export function ScrollableChats() {
       contactId,
       searchMessageId,
       searchRandomId,
-      // rId,
     ],
   });
 
+  // Flatten all pages into a single array
+  const allMessages = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page.data ?? []);
+  }, [data]);
+
   if (status === "pending") {
     return (
-      <div className="flex justify-center py-2 bg-background">
+      <div className="flex justify-center py-8 bg-background">
         <div className="animate-spin border-4 border-muted border-t-primary rounded-full w-6 h-6" />
       </div>
     );
   }
 
   if (status === "error") {
-    return <span>Error: {error.message}</span>;
+    return (
+      <div className="flex items-center justify-center h-60">
+        <span className="text-muted-foreground">Error: {error.message}</span>
+      </div>
+    );
+  }
+
+  if (allMessages.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-60">
+        <p className="text-muted-foreground">No messages yet. Start the conversation!</p>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="h-full">
       <div
         id="scrollableDiv"
+        className="flex flex-col-reverse h-full overflow-auto px-4 py-2"
         style={{
-          display: "flex",
-          flexDirection: "column-reverse",
-          height: "60vh",
-          overflow: "auto",
+          maxHeight: "calc(90vh - 14rem)", // Adjust based on header and input height
         }}
       >
         <ChatInfiniteScroll
           anchorDelayMs={300}
-          className=" p-4"
+          className="space-y-1"
           hasNext={hasNextPage}
           hasPrevious={hasPreviousPage}
           isReverse={true}
           loadingNext={isFetchingNextPage}
           loadingPrevious={isFetchingPreviousPage}
-          next={() => {
-            fetchNextPage();
-          }}
-          previous={() => {
-            fetchPreviousPage();
-          }}
+          next={() => fetchNextPage()}
+          previous={() => fetchPreviousPage()}
           showMiddle={!!searchMessageId}
         >
-          {data.pages?.map((page) => (
-            <React.Fragment key={page.nextOffset}>
-              {page.data?.map((el: any) => (
-                <div
-                  className={cn(
-                    `flex mb-2`,
-                    el.direction === "inbound" ? "justify-start" : "justify-end"
-                  )}
-                  key={el.id}
-                >
+          {allMessages.map((message: any, index: number) => {
+            const prevMessage = allMessages[index - 1];
+            const nextMessage = allMessages[index + 1];
+
+            // Helper to safely get direction
+            const getDirection = (msg: any): "inbound" | "outbound" =>
+              msg.direction || "outbound";
+
+            const messageDirection = getDirection(message);
+
+            // Check if we need a date separator before this message
+            const needsDateSeparator =
+              !prevMessage ||
+              shouldInsertDateSeparator(
+                { id: prevMessage.id, createdAt: prevMessage.createdAt, direction: getDirection(prevMessage) },
+                { id: message.id, createdAt: message.createdAt, direction: messageDirection }
+              );
+
+            // Check message grouping
+            const isGroupedWithNext =
+              nextMessage &&
+              shouldGroupMessages(
+                { id: message.id, createdAt: message.createdAt, direction: messageDirection, userId: message.userId },
+                { id: nextMessage.id, createdAt: nextMessage.createdAt, direction: getDirection(nextMessage), userId: nextMessage.userId }
+              );
+
+            const isGroupedWithPrev =
+              prevMessage &&
+              shouldGroupMessages(
+                { id: prevMessage.id, createdAt: prevMessage.createdAt, direction: getDirection(prevMessage), userId: prevMessage.userId },
+                { id: message.id, createdAt: message.createdAt, direction: messageDirection, userId: message.userId }
+              );
+
+            // Show avatar for inbound messages that start a group
+            const showAvatar = messageDirection === "inbound" && !isGroupedWithPrev;
+
+            return (
+              <React.Fragment key={message.id}>
+                {/* Date Separator */}
+                {needsDateSeparator && (
+                  <DateSeparator date={message.createdAt} />
+                )}
+
+                {/* Message */}
+                {message.marketingCampaign || message.templateId ? (
+                  // Template message - use existing preview
+                  <div
+                    className={cn(
+                      "flex mb-2",
+                      messageDirection === "inbound" ? "justify-start" : "justify-end ml-auto"
+                    )}
+                  >
+                    <div className="mb-4 text-left">
+                      {message.marketingCampaign ? (
+                        <BubbleChatPreview
+                          messageTemplate={message.marketingCampaign.messageTemplate}
+                          template={message.marketingCampaign.template.content}
+                        />
+                      ) : (
+                        <BubbleChatPreview
+                          messageTemplate={message.messageTemplate}
+                          template={message.template}
+                        />
+                      )}
+                      <div className="text-[10px] text-muted-foreground text-right mt-1 pr-1">
+                        {new Date(message.createdAt).toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Regular message - use new MessageBubble
                   <Tooltip delayDuration={500}>
                     <TooltipTrigger asChild>
-                      <div className="mb-4 text-left">
-                        {el.marketingCampaign ? (
-                          <BubbleChatPreview
-                            messageTemplate={
-                              el.marketingCampaign.messageTemplate
-                            }
-                            template={el.marketingCampaign.template.content}
-                          />
-                        ) : (
-                          <>
-                            {el.templateId ? (
-                              <>
-                                <BubbleChatPreview
-                                  messageTemplate={el.messageTemplate}
-                                  template={el.template}
-                                />
-                              </>
-                            ) : (
-                              <>
-                                {el.body && (
-                                  <PreviewMessage
-                                    className={
-                                      searchMessageId === el.id
-                                        ? "bg-yellow-200 dark:bg-yellow-900"
-                                        : ""
-                                    }
-                                    date={el.createdAt}
-                                    input={el.body}
-                                    user={el.user}
-                                  />
-                                )}
-                              </>
-                            )}
-                          </>
-                        )}
-                        <div className="text-xs font-light text-right mt-1">
-                          {new Date(el.createdAt).toLocaleDateString()}
-                          &nbsp;
-                          {new Date(el.createdAt).toLocaleTimeString()}
-                        </div>
+                      <div>
+                        <MessageBubble
+                          body={message.body}
+                          createdAt={message.createdAt}
+                          direction={messageDirection}
+                          isRead={message.isRead}
+                          isDelivered={message.isDelivered}
+                          isError={message.isError}
+                          isGrouped={isGroupedWithNext}
+                          isGroupEnd={!isGroupedWithNext}
+                          searchHighlight={searchMessageId === message.id}
+                          senderEmail={message.user?.email}
+                          showAvatar={showAvatar}
+                          avatar={
+                            showAvatar ? (
+                              <Avatar className="h-6 w-6">
+                                <AvatarImage src="" />
+                                <AvatarFallback className="text-[10px] bg-muted">
+                                  {message.user?.name?.[0] || "?"}
+                                </AvatarFallback>
+                              </Avatar>
+                            ) : undefined
+                          }
+                        />
                       </div>
                     </TooltipTrigger>
-                    {el.direction !== "inbound" && (
-                      <TooltipContent
-                        data-side="left"
-                        side="left"
-                        sticky="always"
-                      >
-                        <div>
-                          {el.user?.email && (
-                            <div className="text-xs text-right">
-                              <p>Sent by:</p>
-                              <p>{el.user?.email}</p>
-                            </div>
-                          )}
+                    {messageDirection !== "inbound" && message.user?.email && (
+                      <TooltipContent side="left" sticky="always">
+                        <div className="text-xs">
+                          <p className="font-medium">Sent by:</p>
+                          <p>{message.user.email}</p>
                         </div>
                       </TooltipContent>
                     )}
                   </Tooltip>
-                </div>
-              ))}
-            </React.Fragment>
-          ))}
+                )}
+              </React.Fragment>
+            );
+          })}
         </ChatInfiniteScroll>
       </div>
     </div>

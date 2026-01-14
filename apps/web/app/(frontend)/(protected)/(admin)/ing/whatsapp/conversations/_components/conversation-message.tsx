@@ -24,7 +24,7 @@ import {
 import { Textarea } from "@workspace/ui/components/textarea";
 import { LanguagesEnum } from "@workspace/wa-cloud-api";
 import axios from "axios";
-import { SendHorizonal } from "lucide-react";
+import { Paperclip, SendHorizonal } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,9 +47,10 @@ import { MessagesTemplateFormV2 } from "../../marketing-campaigns/new/_component
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { useTemplateStore } from "../../marketing-campaigns/new/_components/store";
 import { DevTool } from "@hookform/devtools";
+import { cn } from "@workspace/ui/lib/utils";
 
 const FormSchema = z.object({
-  text: z.string().nonempty("Message should not be empty"),
+  text: z.string().min(1, "Message should not be empty"),
 });
 
 export interface Props {
@@ -57,14 +58,17 @@ export interface Props {
   conversation?: Conversation;
   lastMessageDate?: Date;
   templates: Awaited<ReturnType<typeof getSelectTemplates>>;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
 type FormValues = z.infer<typeof FormSchema>;
+
 export default function ConversationMessage({
   contact,
   conversation,
   lastMessageDate,
   templates,
+  onTypingChange,
 }: Props) {
   const queryClient = useQueryClient();
 
@@ -77,6 +81,19 @@ export default function ConversationMessage({
     },
     resolver: zodResolver(FormSchema),
   });
+
+  const messageText = form.watch("text");
+
+  // Handle typing indicator
+  React.useEffect(() => {
+    if (!onTypingChange) return;
+
+    const timeout = setTimeout(() => {
+      onTypingChange(!!messageText);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [messageText, onTypingChange]);
 
   const onSubmit = async (input: FormValues) => {
     try {
@@ -92,11 +109,19 @@ export default function ConversationMessage({
       form.reset();
 
       queryClient.invalidateQueries({
-        queryKey: ["conversations", contact.id], // prefix
+        queryKey: ["conversations", contact.id],
       });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Error Sending");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (messageText.trim()) {
+        form.handleSubmit(onSubmit)();
+      }
     }
   };
 
@@ -107,7 +132,7 @@ export default function ConversationMessage({
     (lastMessageDate && !isWithinLast24Hours(lastMessageDate))
   ) {
     return (
-      <div className="w-full">
+      <div className="w-full bg-background border-t p-3">
         <ResponsiveDialog
           isOpen={templateDialog}
           setIsOpen={setTemplateDialog}
@@ -120,16 +145,19 @@ export default function ConversationMessage({
             templates={templates}
           />
         </ResponsiveDialog>
-        <div className="flex gap-2 w-full">
+        <div className="flex gap-2 w-full items-end">
           <Textarea
-            className="flex-1"
+            className="flex-1 resize-none"
             disabled
             placeholder="24-hr window time is done. Please send a message using a template"
+            rows={1}
           />
-
-          <Button onClick={() => setTemplateDialog(true)}>
+          <Button
+            onClick={() => setTemplateDialog(true)}
+            variant="default"
+          >
             Send Template
-            <SendHorizonal />
+            <SendHorizonal className="ml-2 size-4" />
           </Button>
         </div>
       </div>
@@ -137,27 +165,55 @@ export default function ConversationMessage({
   }
 
   return (
-    <Form {...form}>
-      <form
-        className="bg-background flex gap-2 w-full"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
-        <FormField
-          name="text"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Textarea {...field} placeholder="Message" rows={1} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button size="icon" type="submit">
-          <SendHorizonal />
-        </Button>
-      </form>
-    </Form>
+    <div className="w-full bg-background border-t p-3">
+      <Form {...form}>
+        <form
+          className="flex gap-2 w-full items-end"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <Button
+            size="icon"
+            type="button"
+            variant="ghost"
+            className="flex-shrink-0"
+          >
+            <Paperclip className="size-5" />
+          </Button>
+
+          <FormField
+            name="text"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    autoComplete="off"
+                    className="resize-none min-h-[40px] max-h-32 py-2"
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a message..."
+                    rows={1}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            size="icon"
+            type="submit"
+            variant={messageText.trim() ? "default" : "ghost"}
+            disabled={!messageText.trim()}
+            className={cn(
+              "flex-shrink-0 transition-all",
+              messageText.trim() && "shadow-md"
+            )}
+          >
+            <SendHorizonal className="size-5" />
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }
 
@@ -245,7 +301,7 @@ function TemplateMessage({
     setSearchMessageId("");
 
     queryClient.invalidateQueries({
-      queryKey: ["conversations", contact.id], // prefix
+      queryKey: ["conversations", contact.id],
     });
   };
 

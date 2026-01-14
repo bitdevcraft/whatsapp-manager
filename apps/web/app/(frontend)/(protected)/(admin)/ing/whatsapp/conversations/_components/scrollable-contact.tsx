@@ -11,8 +11,7 @@ import { useQueryState } from "nuqs";
 import React from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-import { formatMessageTimestamp } from "@/utils/format-message-timestamp";
-
+import { ContactItem } from "./contact-item";
 import { useSearchMessageStore } from "../_store/message-store";
 import { useContactStore } from "../_store/contact-store";
 
@@ -63,57 +62,89 @@ export function ScrollableContacts() {
     return [...acc, ...page.data];
   }, []);
 
+  const { contactId } = useContactStore();
+
   if (status === "pending") {
     return (
-      <div className="flex justify-center py-2 bg-background">
-        <div className="animate-spin border-4 border-muted border-t-primary rounded-full w-6 h-6" />
+      <div className="flex flex-col gap-2 p-2">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg animate-pulse"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-muted rounded w-24" />
+              <div className="h-3 bg-muted/50 rounded w-36" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (status === "error") {
-    return <span>Error: {error.message}</span>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <span className="text-destructive text-sm">Error: {error.message}</span>
+      </div>
+    );
   }
+
+  if (!messages || messages.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <p className="text-muted-foreground text-sm">No conversations yet</p>
+        <p className="text-muted-foreground text-xs mt-1">
+          Messages will appear here when you start chatting
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
         id="scrollable_contact"
+        className="flex flex-col overflow-auto"
         style={{
-          display: "flex",
-          flexDirection: "column",
           height: "70vh",
-          overflow: "auto",
         }}
       >
         <InfiniteScroll
           dataLength={messages ? messages.length : 0}
           hasMore={hasNextPage}
-          loader={<h4 className="text-center">Loading...</h4>}
+          loader={
+            <div className="flex justify-center py-3">
+              <div className="animate-spin border-2 border-muted border-t-primary rounded-full w-4 h-4" />
+            </div>
+          }
           next={() => fetchNextPage()}
           scrollableTarget="scrollable_contact"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-          }}
         >
-          {data.pages?.map((page) => (
-            <React.Fragment key={page.nextOffset}>
-              {page.data.map((el) => (
-                <ContactMessageItem item={el} key={el.id} />
-              ))}
-            </React.Fragment>
-          ))}
+          <div className="p-2 space-y-1">
+            {data.pages?.map((page) => (
+              <React.Fragment key={page.nextOffset}>
+                {page.data.map((item) => (
+                  <ContactListItem
+                    item={item}
+                    key={item.id}
+                    isActive={contactId === item.id}
+                  />
+                ))}
+              </React.Fragment>
+            ))}
+          </div>
         </InfiniteScroll>
       </div>
     </>
   );
 }
 
-function ContactMessageItem({
+function ContactListItem({
   item,
-  ...props
-}: React.ComponentProps<"div"> & {
+  isActive,
+}: {
   item: {
     contact: {
       name: null | string;
@@ -125,6 +156,7 @@ function ContactMessageItem({
     message: ConversationBody | null;
     rn: number;
   };
+  isActive: boolean;
 }) {
   const [, setContact] = useQueryState("contact", {
     defaultValue: "",
@@ -132,57 +164,51 @@ function ContactMessageItem({
   });
 
   const queryClient = useQueryClient();
+  const [, startTransition] = React.useTransition();
+  const { setContactId } = useContactStore();
+  const { clearSearchMessageId } = useSearchMessageStore();
 
-  const [, startTransaction] = React.useTransition();
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      if (!item.id) return;
 
-  const onRead = React.useCallback(
-    (id: string) => {
-      startTransaction(async () => {
+      setContact(item.id);
+      setContactId(item.id);
+      clearSearchMessageId();
+
+      startTransition(async () => {
         try {
-          console.log({
-            contactId: id,
-            markAsRead: true,
-          });
-
           await axios.post("/api/whatsapp/conversations/members", {
-            contactId: id,
+            contactId: item.id,
             markAsRead: true,
           });
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-          //
+          // Silently handle error
         }
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["conversation_contacts"], // prefix
+        queryKey: ["conversation_contacts"],
       });
     },
-    [queryClient]
+    [item.id, setContact, setContactId, clearSearchMessageId, queryClient]
   );
 
-  const { clearSearchMessageId } = useSearchMessageStore();
+  // Extract last message text
+  const lastMessageText = item.message?.body?.text || null;
 
-  const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
-  const lastSend: string = formatMessageTimestamp(createdDate);
   return (
-    <div
-      className="flex justify-between p-2 relative h-16 border-b hover:bg-muted"
-      onClick={(e) => {
-        e.stopPropagation();
-        setContact(item.id!);
-        clearSearchMessageId();
-        if (item.id) onRead(item.id);
-      }}
-      {...props}
-    >
-      <div className="flex items-center pl-2">
-        {item.isUnread && (
-          <div className="rounded-full size-2 bg-primary absolute top-2 left-2"></div>
-        )}
-        {item.contact.name || item.contact.phone}
-      </div>
-      <p className="font-light text-xs">{lastSend}</p>
-    </div>
+    <ContactItem
+      id={item.id || ""}
+      name={item.contact.name}
+      phone={item.contact.phone}
+      lastMessage={lastMessageText}
+      lastMessageTime={item.createdAt}
+      isUnread={item.isUnread}
+      unreadCount={item.isUnread ? 1 : 0}
+      isActive={isActive}
+      onClick={handleClick}
+    />
   );
 }
