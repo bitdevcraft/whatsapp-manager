@@ -6,38 +6,34 @@ import {
   AvatarImage,
 } from "@workspace/ui/components/avatar";
 import { Button } from "@workspace/ui/components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
-import { Separator } from "@workspace/ui/components/separator";
+import { useSidebar } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
-import { MoreVertical, Phone, Search, Video, Info } from "lucide-react";
+import { Search } from "lucide-react";
 import React from "react";
 
 export interface ChatHeaderProps {
-  name: string | null;
-  phone: string | null;
-  avatar?: string | null;
-  isOnline?: boolean;
-  lastSeen?: Date | string | null;
-  onSearch?: () => void;
-  onInfo?: () => void;
+  avatar?: null | string;
   className?: string;
+  isOnline?: boolean;
+  lastSeen?: Date | null | string;
+  name: null | string;
+  onInfo?: () => void;
+  onSearch?: () => void;
+  phone: null | string;
 }
 
 export function ChatHeader({
-  name,
-  phone,
   avatar,
+  className,
   isOnline = false,
   lastSeen,
-  onSearch,
+  name,
   onInfo,
-  className,
+  onSearch,
+  phone,
 }: ChatHeaderProps) {
+  const { toggleSidebar } = useSidebar();
+
   const getInitials = () => {
     if (name) {
       const parts = name.trim().split(" ");
@@ -68,7 +64,7 @@ export function ChatHeader({
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={avatar || undefined} alt={displayName} />
+          <AvatarImage alt={displayName} src={avatar || undefined} />
           <AvatarFallback className="bg-primary/20 text-primary font-medium">
             {getInitials()}
           </AvatarFallback>
@@ -91,25 +87,23 @@ export function ChatHeader({
         {!isOnline && lastSeen && (
           <p className="text-xs text-muted-foreground">last seen recently</p>
         )}
-        {isOnline && (
-          <p className="text-xs text-primary">online</p>
-        )}
+        {isOnline && <p className="text-xs text-primary">online</p>}
       </div>
 
       {/* Action buttons */}
       <div className="flex items-center gap-1">
-        {onSearch && (
+        {toggleSidebar && (
           <Button
+            className="h-8 w-8"
+            onClick={toggleSidebar}
             size="icon"
             variant="ghost"
-            className="h-8 w-8"
-            onClick={onSearch}
           >
             <Search className="h-4 w-4" />
           </Button>
         )}
 
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="h-8 w-8">
               <MoreVertical className="h-4 w-4" />
@@ -139,7 +133,7 @@ export function ChatHeader({
               Delete Chat
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
     </div>
   );

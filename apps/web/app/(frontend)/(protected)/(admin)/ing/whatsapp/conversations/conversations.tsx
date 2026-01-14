@@ -66,10 +66,6 @@ export function Conversations({ promises, searchContact }: Props) {
     },
   });
 
-  const handleSearchToggle = () => {
-    // Search sidebar is handled by the SearchSidebar component
-  };
-
   return (
     <SidebarProvider
       className="min-h-[90vh]"
@@ -111,7 +107,6 @@ export function Conversations({ promises, searchContact }: Props) {
                 <ChatHeader
                   name={contact.data.name}
                   phone={contact.data.phone}
-                  onSearch={handleSearchToggle}
                 />
 
                 {/* Messages area */}
