@@ -27,7 +27,7 @@ export function PreviewMessage({
   return (
     <Card
       className={cn(
-        "border rounded max-w-sm text-wrap text-black bg-[#dcf8c6] grid gap-2",
+        "border rounded max-w-sm text-wrap bg-card text-card-foreground grid gap-2",
         className,
         input.body?.media?.id ? "pt-0" : ""
       )}
@@ -49,7 +49,7 @@ export function PreviewMessage({
         <div className="flex flex-col items-center gap-4">
           {input.buttons?.map((el, i) => (
             <div key={i}>
-              <button className="text-black bg-[#dcf8c6] text-sm hover:text-black">
+              <button className="bg-accent text-accent-foreground text-sm hover:bg-accent/80">
                 {el.text}
               </button>
             </div>

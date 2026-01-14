@@ -107,7 +107,7 @@ export function ScrollableChats() {
   if (status === "pending") {
     return (
       <div className="flex justify-center py-2 bg-background">
-        <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
+        <div className="animate-spin border-4 border-muted border-t-primary rounded-full w-6 h-6" />
       </div>
     );
   }
@@ -178,7 +178,7 @@ export function ScrollableChats() {
                                   <PreviewMessage
                                     className={
                                       searchMessageId === el.id
-                                        ? "bg-yellow-200"
+                                        ? "bg-yellow-200 dark:bg-yellow-900"
                                         : ""
                                     }
                                     date={el.createdAt}

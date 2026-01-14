@@ -44,7 +44,7 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
     <div className="">
       <Card
         className={cn(
-          "text-foreground bg-[#dcf8c6] max-w-sm",
+          "text-card-foreground bg-card max-w-sm",
           getHeaderMediaSrc(data.header) ? "pt-0" : ""
         )}
       >
@@ -67,7 +67,6 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
               <Separator />
               {data.buttons.map((btn, i) => (
                 <Button
-                  className="text-green-900"
                   key={i}
                   size="sm"
                   variant="ghost"
@@ -93,7 +92,7 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
                   <CarouselItem className="basis-3/4 max-w-sm" key={idx}>
                     <Card
                       className={cn(
-                        "bg-[#dcf8c6]",
+                        "bg-card",
                         getHeaderMediaSrc(card.header) ? "pt-0" : ""
                       )}
                     >
@@ -115,7 +114,6 @@ export function BubbleChatPreview({ messageTemplate, template }: Props) {
                           <Separator />
                           {card.buttons.map((btn, i) => (
                             <Button
-                              className="text-green-900"
                               key={i}
                               size="sm"
                               variant="ghost"

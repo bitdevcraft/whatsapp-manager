@@ -290,7 +290,7 @@ export function ChatInfiniteScroll({
   // Loading spinner
   const Spinner = () => (
     <div className="flex justify-center py-2">
-      <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6" />
+      <div className="animate-spin border-4 border-muted border-t-primary rounded-full w-6 h-6" />
     </div>
   );
 
