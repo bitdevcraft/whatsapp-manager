@@ -1,6 +1,6 @@
 {
-  "id": "14dceb08-4437-4989-8b25-7a5eea0561da",
-  "prevId": "b3ff912f-25e8-465c-a23e-cb9a273207c7",
+  "id": "bed42a1f-2118-437d-a854-818186ba7528",
+  "prevId": "a60d8c26-c091-4719-b569-dc0f31644de7",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -52,28 +52,28 @@
         "activity_logs_team_id_teams_id_fk": {
           "name": "activity_logs_team_id_teams_id_fk",
           "tableFrom": "activity_logs",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "activity_logs_user_id_users_id_fk": {
           "name": "activity_logs_user_id_users_id_fk",
           "tableFrom": "activity_logs",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -156,8 +156,8 @@
           "primaryKey": false,
           "notNull": false,
           "generated": {
-            "as": "regexp_replace(\"contacts\".\"phone\", '\\D', '', 'g')",
-            "type": "stored"
+            "type": "stored",
+            "as": "regexp_replace(\"contacts\".\"phone\", '\\D', '', 'g')"
           }
         },
         "opt_in": {
@@ -205,37 +205,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "contacts_assigned_to_users_id_fk": {
           "name": "contacts_assigned_to_users_id_fk",
           "tableFrom": "contacts",
-          "tableTo": "users",
           "columnsFrom": [
             "assigned_to"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "contacts_team_id_teams_id_fk": {
           "name": "contacts_team_id_teams_id_fk",
           "tableFrom": "contacts",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -324,9 +324,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "cm_conv_idx": {
           "name": "cm_conv_idx",
@@ -339,50 +339,50 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversation_members_contact_id_contacts_id_fk": {
           "name": "conversation_members_contact_id_contacts_id_fk",
           "tableFrom": "conversation_members",
-          "tableTo": "contacts",
           "columnsFrom": [
             "contact_id"
           ],
+          "tableTo": "contacts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_members_team_id_teams_id_fk": {
           "name": "conversation_members_team_id_teams_id_fk",
           "tableFrom": "conversation_members",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_members_user_id_users_id_fk": {
           "name": "conversation_members_user_id_users_id_fk",
           "tableFrom": "conversation_members",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -547,101 +547,101 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         },
         "idx_conversations_body_trgm": {
           "name": "idx_conversations_body_trgm",
           "columns": [
             {
               "expression": "(\"body\"::text) gin_trgm_ops",
-              "asc": true,
               "isExpression": true,
+              "asc": true,
               "nulls": "last"
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversations_contact_id_contacts_id_fk": {
           "name": "conversations_contact_id_contacts_id_fk",
           "tableFrom": "conversations",
-          "tableTo": "contacts",
           "columnsFrom": [
             "contact_id"
           ],
+          "tableTo": "contacts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversations_marketing_campaign_id_marketing_campaigns_id_fk": {
           "name": "conversations_marketing_campaign_id_marketing_campaigns_id_fk",
           "tableFrom": "conversations",
-          "tableTo": "marketing_campaigns",
           "columnsFrom": [
             "marketing_campaign_id"
           ],
+          "tableTo": "marketing_campaigns",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversations_team_id_teams_id_fk": {
           "name": "conversations_team_id_teams_id_fk",
           "tableFrom": "conversations",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversations_template_id_templates_id_fk": {
           "name": "conversations_template_id_templates_id_fk",
           "tableFrom": "conversations",
-          "tableTo": "templates",
           "columnsFrom": [
             "template_id"
           ],
+          "tableTo": "templates",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversations_user_id_users_id_fk": {
           "name": "conversations_user_id_users_id_fk",
           "tableFrom": "conversations",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "conversations_wamid_unique": {
           "name": "conversations_wamid_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "wamid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {
@@ -746,15 +746,15 @@
         "events_team_id_teams_id_fk": {
           "name": "events_team_id_teams_id_fk",
           "tableFrom": "events",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -863,15 +863,15 @@
         "file_attachment_team_id_teams_id_fk": {
           "name": "file_attachment_team_id_teams_id_fk",
           "tableFrom": "file_attachment",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -935,28 +935,28 @@
         "invitations_invited_by_users_id_fk": {
           "name": "invitations_invited_by_users_id_fk",
           "tableFrom": "invitations",
-          "tableTo": "users",
           "columnsFrom": [
             "invited_by"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "invitations_team_id_teams_id_fk": {
           "name": "invitations_team_id_teams_id_fk",
           "tableFrom": "invitations",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1051,28 +1051,28 @@
         "leads_assignedTo_users_id_fk": {
           "name": "leads_assignedTo_users_id_fk",
           "tableFrom": "leads",
-          "tableTo": "users",
           "columnsFrom": [
             "assignedTo"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "leads_team_id_teams_id_fk": {
           "name": "leads_team_id_teams_id_fk",
           "tableFrom": "leads",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1174,15 +1174,15 @@
         "list_views_team_id_teams_id_fk": {
           "name": "list_views_team_id_teams_id_fk",
           "tableFrom": "list_views",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1369,41 +1369,41 @@
         "marketing_campaigns_created_by_users_id_fk": {
           "name": "marketing_campaigns_created_by_users_id_fk",
           "tableFrom": "marketing_campaigns",
-          "tableTo": "users",
           "columnsFrom": [
             "created_by"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "marketing_campaigns_team_id_teams_id_fk": {
           "name": "marketing_campaigns_team_id_teams_id_fk",
           "tableFrom": "marketing_campaigns",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "marketing_campaigns_template_id_templates_id_fk": {
           "name": "marketing_campaigns_template_id_templates_id_fk",
           "tableFrom": "marketing_campaigns",
-          "tableTo": "templates",
           "columnsFrom": [
             "template_id"
           ],
+          "tableTo": "templates",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1485,28 +1485,28 @@
         "outbox_event_id_events_id_fk": {
           "name": "outbox_event_id_events_id_fk",
           "tableFrom": "outbox",
-          "tableTo": "events",
           "columnsFrom": [
             "event_id"
           ],
+          "tableTo": "events",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "outbox_team_id_teams_id_fk": {
           "name": "outbox_team_id_teams_id_fk",
           "tableFrom": "outbox",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1551,8 +1551,8 @@
           "primaryKey": false,
           "notNull": false,
           "generated": {
-            "as": "\n      lower(                                      \n        replace(                                  \n          regexp_replace(                         \n            trim(\"tags\".\"name\"),              \n            '\\s+', ' ', 'g'\n          ),\n          ' ', '-'\n        )\n      )\n    ",
-            "type": "stored"
+            "type": "stored",
+            "as": "\n      lower(                                      \n        replace(                                  \n          regexp_replace(                         \n            trim(\"tags\".\"name\"),              \n            '\\s+', ' ', 'g'\n          ),\n          ' ', '-'\n        )\n      )\n    "
           }
         },
         "team_id": {
@@ -1573,26 +1573,26 @@
         "tags_team_id_teams_id_fk": {
           "name": "tags_team_id_teams_id_fk",
           "tableFrom": "tags",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "tags_per_team": {
           "name": "tags_per_team",
-          "nullsNotDistinct": false,
           "columns": [
             "team_id",
             "name"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {
@@ -1709,28 +1709,28 @@
         "team_invitations_inviter_id_users_id_fk": {
           "name": "team_invitations_inviter_id_users_id_fk",
           "tableFrom": "team_invitations",
-          "tableTo": "users",
           "columnsFrom": [
             "inviter_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "team_invitations_organization_id_teams_id_fk": {
           "name": "team_invitations_organization_id_teams_id_fk",
           "tableFrom": "team_invitations",
-          "tableTo": "teams",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1823,37 +1823,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "team_member_limits_team_id_teams_id_fk": {
           "name": "team_member_limits_team_id_teams_id_fk",
           "tableFrom": "team_member_limits",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "team_member_limits_user_id_users_id_fk": {
           "name": "team_member_limits_user_id_users_id_fk",
           "tableFrom": "team_member_limits",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1993,37 +1993,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "team_members_usage_tracking_team_id_teams_id_fk": {
           "name": "team_members_usage_tracking_team_id_teams_id_fk",
           "tableFrom": "team_members_usage_tracking",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "team_members_usage_tracking_user_id_users_id_fk": {
           "name": "team_members_usage_tracking_user_id_users_id_fk",
           "tableFrom": "team_members_usage_tracking",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2138,28 +2138,28 @@
         "team_members_organization_id_teams_id_fk": {
           "name": "team_members_organization_id_teams_id_fk",
           "tableFrom": "team_members",
-          "tableTo": "teams",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "team_members_user_id_users_id_fk": {
           "name": "team_members_user_id_users_id_fk",
           "tableFrom": "team_members",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2287,17 +2287,17 @@
       "uniqueConstraints": {
         "teams_stripe_customer_id_unique": {
           "name": "teams_stripe_customer_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "stripe_customer_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "teams_stripe_subscription_id_unique": {
           "name": "teams_stripe_subscription_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "stripe_subscription_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2357,15 +2357,15 @@
         "templates_team_id_teams_id_fk": {
           "name": "templates_team_id_teams_id_fk",
           "tableFrom": "templates",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2508,15 +2508,15 @@
         "user_accounts_user_id_users_id_fk": {
           "name": "user_accounts_user_id_users_id_fk",
           "tableFrom": "user_accounts",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2579,15 +2579,15 @@
         "user_activity_logs_user_id_users_id_fk": {
           "name": "user_activity_logs_user_id_users_id_fk",
           "tableFrom": "user_activity_logs",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2668,28 +2668,28 @@
         "user_sessions_active_organization_id_teams_id_fk": {
           "name": "user_sessions_active_organization_id_teams_id_fk",
           "tableFrom": "user_sessions",
-          "tableTo": "teams",
           "columnsFrom": [
             "active_organization_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "user_sessions_user_id_users_id_fk": {
           "name": "user_sessions_user_id_users_id_fk",
           "tableFrom": "user_sessions",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2829,10 +2829,10 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -3019,15 +3019,15 @@
         "whatsapp_business_account_phone_numbers_team_id_teams_id_fk": {
           "name": "whatsapp_business_account_phone_numbers_team_id_teams_id_fk",
           "tableFrom": "whatsapp_business_account_phone_numbers",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3176,25 +3176,25 @@
         "whatsapp_business_accounts_team_id_teams_id_fk": {
           "name": "whatsapp_business_accounts_team_id_teams_id_fk",
           "tableFrom": "whatsapp_business_accounts",
-          "tableTo": "teams",
           "columnsFrom": [
             "team_id"
           ],
+          "tableTo": "teams",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "whatsapp_business_accounts_waba_id_unique": {
           "name": "whatsapp_business_accounts_waba_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "waba_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {
@@ -3300,10 +3300,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

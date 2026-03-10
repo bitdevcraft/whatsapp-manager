@@ -5,22 +5,50 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1768240280602,
-      "tag": "0000_init",
+      "when": 1761251424404,
+      "tag": "0000_create-app-user",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1768240363903,
-      "tag": "0001_entities",
+      "when": 1761251776139,
+      "tag": "0001_install-ext-fuzzy",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1768240406572,
-      "tag": "0002_triggers",
+      "when": 1761251804486,
+      "tag": "0002_furry_mattie_franklin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761251842124,
+      "tag": "0003_create-member-auto-populate-fn",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761251852626,
+      "tag": "0004_create-upsert-conversation-member-fn",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761251860112,
+      "tag": "0005_create-conversation-trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761251865400,
+      "tag": "0006_create-phone-number-normalize-trigger",
       "breakpoints": true
     }
   ]
