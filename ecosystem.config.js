@@ -2,21 +2,7 @@
 module.exports = {
   apps: [
     {
-      name: "web",
-      cwd: "./apps/web",
-      script: "node_modules/next/dist/bin/next",
-      args: "start -p 3001",
-      env: {
-        NODE_ENV: "development",
-        PORT: 3001,
-      },
-      env_production: {
-        NODE_ENV: "production",
-        PORT: 3001,
-      },
-    },
-    {
-      name: "whatsapp-service",
+      name: "frontend",
       cwd: "./apps/whatsapp-service",
       script: "node",
       args: "dist/index.js",

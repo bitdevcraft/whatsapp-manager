@@ -1,9 +1,12 @@
 import {
   baseConversation,
+  campaignErrorLogsTable,
+  campaignMessageStatusTable,
+  CampaignErrorType,
+  CampaignMessageStatus,
   contactsTable,
   ConversationBody,
   conversationsTable,
-  db,
   marketingCampaignsTable,
   NewContact,
   NewConversation,
@@ -21,11 +24,12 @@ import {
   ParametersTypesEnum,
 } from "@workspace/wa-cloud-api";
 import { MessageStatus } from "@workspace/wa-cloud-api/core/webhook";
-import { Worker } from "bullmq";
+import { Worker, Job } from "bullmq";
 import { and, eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { waClientRegistry } from "@/instance";
+import { createCampaignLogger } from "@/lib/logger";
 import { redisConnection } from "@/lib/redis";
 import { ioInstance } from "@/socket";
 import { BulkMessageQueue } from "@/types/bulk-message";
@@ -56,24 +60,220 @@ export function interpolate(
   });
 }
 
+function classifyError(error: Error | unknown): CampaignErrorType {
+  const err = error instanceof Error ? error : new Error(String(error));
+  const message = err.message.toLowerCase();
+
+  if (message.includes("network") || message.includes("econnrefused") || message.includes("timeout")) {
+    return CampaignErrorType.NETWORK_ERROR;
+  }
+  if (message.includes("rate limit") || message.includes("too many requests")) {
+    return CampaignErrorType.RATE_LIMIT;
+  }
+  if (message.includes("auth") || message.includes("unauthorized") || message.includes("token")) {
+    return CampaignErrorType.AUTH_ERROR;
+  }
+  if (message.includes("template") || message.includes("invalid template")) {
+    return CampaignErrorType.TEMPLATE_ERROR;
+  }
+  if (message.includes("recipient") || message.includes("phone") || message.includes("invalid number")) {
+    return CampaignErrorType.INVALID_RECIPIENT;
+  }
+  if (message.includes("database") || message.includes("sql")) {
+    return CampaignErrorType.DATABASE_ERROR;
+  }
+  if (message.includes("whatsapp") || message.includes("facebook") || message.includes("meta")) {
+    return CampaignErrorType.WHATSAPP_API_ERROR;
+  }
+
+  return CampaignErrorType.UNKNOWN_ERROR;
+}
+
+async function logCampaignError(
+  teamId: string,
+  marketingCampaignId: string,
+  recipientPhone: string,
+  error: Error | unknown,
+  jobData: BulkMessageQueue,
+  errorType: CampaignErrorType
+) {
+  try {
+    await withTenantTransaction(teamId, async (tx) => {
+      await tx.insert(campaignErrorLogsTable).values({
+        marketingCampaignId,
+        teamId,
+        recipientPhone,
+        errorType,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : null,
+        jobData: jobData as any,
+      });
+    });
+  } catch (logError) {
+    // If we can't log to database, at least log to console
+    console.error("Failed to log campaign error:", logError);
+  }
+}
+
+async function updateMessageStatus(
+  teamId: string,
+  marketingCampaignId: string,
+  recipientPhone: string,
+  status: CampaignMessageStatus,
+  wamid?: string,
+  errorCode?: string,
+  errorMessage?: string,
+  canRetry = true
+) {
+  try {
+    await withTenantTransaction(teamId, async (tx) => {
+      // Check if status record exists
+      const existing = await tx.query.campaignMessageStatusTable.findFirst({
+        where: (table, { eq, and }) =>
+          and(
+            eq(table.marketingCampaignId, marketingCampaignId),
+            eq(table.recipientPhone, recipientPhone)
+          ),
+      });
+
+      if (existing) {
+        // Update existing record
+        await tx
+          .update(campaignMessageStatusTable)
+          .set({
+            status,
+            wamid: wamid ?? existing.wamid,
+            errorCode,
+            errorMessage,
+            canRetry,
+            sentAt: status === CampaignMessageStatus.SENT ? new Date() : existing.sentAt,
+            deliveredAt: status === CampaignMessageStatus.DELIVERED ? new Date() : existing.deliveredAt,
+          })
+          .where(eq(campaignMessageStatusTable.id, existing.id));
+      } else {
+        // Insert new record
+        await tx.insert(campaignMessageStatusTable).values({
+          marketingCampaignId,
+          teamId,
+          recipientPhone,
+          status,
+          wamid,
+          errorCode,
+          errorMessage,
+          canRetry,
+          sentAt: status === CampaignMessageStatus.SENT ? new Date() : undefined,
+          deliveredAt: status === CampaignMessageStatus.DELIVERED ? new Date() : undefined,
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Failed to update message status:", error);
+  }
+}
+
+async function incrementCampaignCounters(
+  teamId: string,
+  marketingCampaignId: string,
+  sentDelta = 0,
+  deliveredDelta = 0,
+  failedDelta = 0,
+  errorType?: string
+) {
+  try {
+    await withTenantTransaction(teamId, async (tx) => {
+      const campaign = await tx.query.marketingCampaignsTable.findFirst({
+        where: eq(marketingCampaignsTable.id, marketingCampaignId),
+      });
+
+      if (!campaign) return;
+
+      // Update counters
+      await tx
+        .update(marketingCampaignsTable)
+        .set({
+          sentCount: (campaign.sentCount || 0) + sentDelta,
+          deliveredCount: (campaign.deliveredCount || 0) + deliveredDelta,
+          failedCount: (campaign.failedCount || 0) + failedDelta,
+        })
+        .where(eq(marketingCampaignsTable.id, marketingCampaignId));
+
+      // Update error summary if provided
+      if (errorType && failedDelta > 0) {
+        const currentSummary = (campaign.errorSummary as Record<string, number>) || {};
+        const newSummary = {
+          ...currentSummary,
+          [errorType]: (currentSummary[errorType] || 0) + failedDelta,
+        };
+
+        await tx
+          .update(marketingCampaignsTable)
+          .set({ errorSummary: newSummary })
+          .where(eq(marketingCampaignsTable.id, marketingCampaignId));
+      }
+    });
+  } catch (error) {
+    console.error("Failed to increment campaign counters:", error);
+  }
+}
+
 export function setupBulkMessagesWorker() {
   const worker = new Worker<BulkMessageQueue>(
     WhatsAppEvents.ProcessingBulkMessagesOutgoing,
-    async (job) => {
-      try {
-        const { marketingCampaignId, registryId, teamId, template, userId } =
-          job.data;
+    async (job: Job<BulkMessageQueue>) => {
+      const { marketingCampaignId, registryId, teamId, template, userId } =
+        job.data;
 
+      const campaignLogger = createCampaignLogger({
+        marketingCampaignId,
+        teamId,
+        userId,
+        jobId: job.id,
+      });
+
+      const recipientPhone = template.to;
+
+      campaignLogger.info("Processing message", { recipientPhone });
+
+      // Initialize message status as PENDING
+      await updateMessageStatus(
+        teamId,
+        marketingCampaignId,
+        recipientPhone,
+        CampaignMessageStatus.PENDING
+      );
+
+      try {
         const whatsapp = waClientRegistry.get(registryId);
 
-        const response =
-          //  {
-          //   contacts: [{ input: "971555606707" }],
-          //   messages: [{ id: nanoid() }],
-          // };
-          await whatsapp?.messages.template(template);
+        if (!whatsapp) {
+          throw new Error("WhatsApp client not found in registry");
+        }
+
+        const response = await whatsapp.messages.template(template);
 
         const isSuccess = !!response?.messages[0]?.id;
+        const wamid = response?.messages[0]?.id;
+
+        if (!isSuccess) {
+          throw new Error("WhatsApp API returned unsuccessful response");
+        }
+
+        campaignLogger.info("Message sent successfully", {
+          recipientPhone,
+          wamid,
+        });
+
+        // Update message status to SENT
+        await updateMessageStatus(
+          teamId,
+          marketingCampaignId,
+          recipientPhone,
+          CampaignMessageStatus.SENT,
+          wamid
+        );
+
+        // Increment sent counter
+        await incrementCampaignCounters(teamId, marketingCampaignId, 1, 0, 0);
 
         const conversationBody: ConversationBody = {};
 
@@ -139,7 +339,7 @@ export function setupBulkMessagesWorker() {
           const { type } = component;
 
           if (type === ComponentTypesEnum.Header) {
-            const baseConversation: baseConversation = {};
+            const baseConversationHeader: baseConversation = {};
             const parameterName: Record<string, string> = {};
             const indexName: string[] = [];
             component.parameters.forEach((parameter) => {
@@ -147,7 +347,7 @@ export function setupBulkMessagesWorker() {
                 case ParametersTypesEnum.Document:
                 case ParametersTypesEnum.Image:
                 case ParametersTypesEnum.Video:
-                  baseConversation.media = {
+                  baseConversationHeader.media = {
                     caption: parameter.caption,
                     id: parameter.id,
                     url: parameter.link,
@@ -165,7 +365,7 @@ export function setupBulkMessagesWorker() {
             });
 
             if (conversationBody.header)
-              conversationBody.header.media = baseConversation.media;
+              conversationBody.header.media = baseConversationHeader.media;
 
             if (
               Object.keys(parameterName).length > 0 &&
@@ -275,8 +475,46 @@ export function setupBulkMessagesWorker() {
 
         await upsertUsage(teamId, conv.length, userId);
       } catch (error) {
-        console.error(error);
-        throw Error("");
+        const errorType = classifyError(error);
+
+        campaignLogger.error("Message sending failed", error, {
+          recipientPhone,
+          errorType,
+        });
+
+        // Log error to database
+        await logCampaignError(
+          teamId,
+          marketingCampaignId,
+          recipientPhone,
+          error,
+          job.data,
+          errorType
+        );
+
+        // Update message status to FAILED
+        await updateMessageStatus(
+          teamId,
+          marketingCampaignId,
+          recipientPhone,
+          CampaignMessageStatus.FAILED,
+          undefined,
+          errorType,
+          error instanceof Error ? error.message : String(error),
+          errorType !== CampaignErrorType.INVALID_RECIPIENT // Can retry most errors except invalid recipients
+        );
+
+        // Increment failed counter
+        await incrementCampaignCounters(
+          teamId,
+          marketingCampaignId,
+          0,
+          0,
+          1,
+          errorType
+        );
+
+        throw error; // Re-throw to mark job as failed
       }
     },
     {
@@ -291,6 +529,14 @@ export function setupBulkMessagesWorker() {
 
   worker.on("completed", (job) => {
     const { marketingCampaignId, teamId } = job.data;
+
+    const campaignLogger = createCampaignLogger({
+      marketingCampaignId,
+      teamId,
+      jobId: job.id,
+    });
+
+    campaignLogger.info("Message job completed");
 
     ioInstance
       .to(`team:${teamId}`)
@@ -310,11 +556,19 @@ export function setupBulkMessagesWorker() {
     if (!job) return;
     const { marketingCampaignId, teamId } = job.data;
 
+    const campaignLogger = createCampaignLogger({
+      marketingCampaignId,
+      teamId,
+      jobId: job.id,
+    });
+
+    campaignLogger.error("Message job failed", err);
+
     ioInstance
       .to(`team:${teamId}`)
       .emit(NotificationEvent.WhatsAppBulkMessageOutgoingSuccess, {
         error: err,
-        jobId: job.id, // if `job.id` is possibly undefined, make sure it's not
+        jobId: job.id,
         payload: {
           message: "Campaign Failed",
         },
@@ -327,18 +581,7 @@ export function setupBulkMessagesWorker() {
   return worker;
 }
 
-function getMonthBounds(date: Date = new Date()) {
-  // First day of the month (midnight)
-  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-
-  // Last day of the month (23:59:59.999)
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-
-  return { firstDay, lastDay };
-}
-
 async function upsertUsage(teamId: string, usage: number, userId?: string) {
   const repo = new UsageLimitRepository(teamId);
-  console.log("test");
   if (userId && usage > 0) await repo.upsertUsageTracking(userId, usage);
 }

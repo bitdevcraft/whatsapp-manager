@@ -5,6 +5,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  text,
   timestamp,
   uuid,
   varchar,
@@ -55,13 +56,17 @@ export const marketingCampaignsTable = pgTable(
       .references(() => templatesTable.id)
       .notNull(),
     totalRecipients: integer("total_recipients"),
+    sentCount: integer("sent_count").default(0),
+    deliveredCount: integer("delivered_count").default(0),
+    failedCount: integer("failed_count").default(0),
+    errorSummary: jsonb("error_summary").$type<Record<string, number>>(),
   },
   (t) => [...createOrganizationPolicies("marketing_campaigns", t)]
 );
 
 export const marketingCampaignRelations = relations(
   marketingCampaignsTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     team: one(teamsTable, {
       fields: [marketingCampaignsTable.teamId],
       references: [teamsTable.id],
@@ -69,6 +74,87 @@ export const marketingCampaignRelations = relations(
     template: one(templatesTable, {
       fields: [marketingCampaignsTable.templateId],
       references: [templatesTable.id],
+    }),
+    errorLogs: many(campaignErrorLogsTable),
+    messageStatuses: many(campaignMessageStatusTable),
+  })
+);
+
+// Error types for campaign error classification
+export enum CampaignErrorType {
+  NETWORK_ERROR = "NETWORK_ERROR",
+  TEMPLATE_ERROR = "TEMPLATE_ERROR",
+  RATE_LIMIT = "RATE_LIMIT",
+  AUTH_ERROR = "AUTH_ERROR",
+  INVALID_RECIPIENT = "INVALID_RECIPIENT",
+  WHATSAPP_API_ERROR = "WHATSAPP_API_ERROR",
+  DATABASE_ERROR = "DATABASE_ERROR",
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+}
+
+// Status for individual campaign messages
+export enum CampaignMessageStatus {
+  PENDING = "pending",
+  SENT = "sent",
+  DELIVERED = "delivered",
+  READ = "read",
+  FAILED = "failed",
+}
+
+// Table for logging all errors encountered during campaign processing
+export const campaignErrorLogsTable = pgTable(
+  "campaign_error_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketingCampaignId: uuid("marketing_campaign_id")
+      .references(() => marketingCampaignsTable.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id").notNull(),
+    recipientPhone: varchar("recipient_phone", { length: 20 }),
+    errorType: varchar("error_type", { length: 100 }),
+    errorMessage: varchar("error_message", { length: 65535 }),
+    errorStack: text("error_stack"),
+    jobData: jsonb("job_data"),
+    createdAt: timestamp("created_at").defaultNow(),
+  }
+);
+
+// Table for tracking individual message status within a campaign
+export const campaignMessageStatusTable = pgTable(
+  "campaign_message_status",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    marketingCampaignId: uuid("marketing_campaign_id")
+      .references(() => marketingCampaignsTable.id, { onDelete: "cascade" }),
+    teamId: uuid("team_id").notNull(),
+    recipientPhone: varchar("recipient_phone", { length: 20 }).notNull(),
+    wamid: varchar("wamid", { length: 100 }),
+    status: varchar("status", { length: 50 }).notNull(),
+    errorCode: varchar("error_code", { length: 100 }),
+    errorMessage: varchar("error_message", { length: 65535 }),
+    retryCount: integer("retry_count").default(0),
+    canRetry: boolean("can_retry").default(true),
+    sentAt: timestamp("sent_at"),
+    deliveredAt: timestamp("delivered_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  }
+);
+
+export const campaignErrorLogsRelations = relations(
+  campaignErrorLogsTable,
+  ({ one }) => ({
+    campaign: one(marketingCampaignsTable, {
+      fields: [campaignErrorLogsTable.marketingCampaignId],
+      references: [marketingCampaignsTable.id],
+    }),
+  })
+);
+
+export const campaignMessageStatusRelations = relations(
+  campaignMessageStatusTable,
+  ({ one }) => ({
+    campaign: one(marketingCampaignsTable, {
+      fields: [campaignMessageStatusTable.marketingCampaignId],
+      references: [marketingCampaignsTable.id],
     }),
   })
 );

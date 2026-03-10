@@ -1,4 +1,6 @@
 import {
+  campaignErrorLogsTable,
+  CampaignErrorType,
   contactsTable,
   marketingCampaignsTable,
   withTenantTransaction,
@@ -12,17 +14,77 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { waClientRegistry } from "@/instance";
 import { waEventQueue } from "@/jobs/queue";
+import { createCampaignLogger } from "@/lib/logger";
 import { decryptApiKey } from "@/lib/crypto";
 import { getEnv } from "@/lib/env";
 import { BulkMessageQueue } from "@/types/bulk-message";
 import { cleanToDigitsOnly } from "@/utils/clean-data";
+
+function classifyError(error: Error | unknown): CampaignErrorType {
+  const err = error instanceof Error ? error : new Error(String(error));
+  const message = err.message.toLowerCase();
+
+  if (message.includes("network") || message.includes("econnrefused") || message.includes("timeout")) {
+    return CampaignErrorType.NETWORK_ERROR;
+  }
+  if (message.includes("rate limit") || message.includes("too many requests")) {
+    return CampaignErrorType.RATE_LIMIT;
+  }
+  if (message.includes("auth") || message.includes("unauthorized") || message.includes("token")) {
+    return CampaignErrorType.AUTH_ERROR;
+  }
+  if (message.includes("template") || message.includes("invalid template")) {
+    return CampaignErrorType.TEMPLATE_ERROR;
+  }
+  if (message.includes("recipient") || message.includes("phone") || message.includes("invalid number")) {
+    return CampaignErrorType.INVALID_RECIPIENT;
+  }
+  if (message.includes("database") || message.includes("sql")) {
+    return CampaignErrorType.DATABASE_ERROR;
+  }
+  if (message.includes("whatsapp") || message.includes("facebook") || message.includes("meta")) {
+    return CampaignErrorType.WHATSAPP_API_ERROR;
+  }
+
+  return CampaignErrorType.UNKNOWN_ERROR;
+}
+
+async function logCampaignError(
+  teamId: string,
+  marketingCampaignId: string,
+  error: Error | unknown,
+  errorType: CampaignErrorType
+) {
+  try {
+    await withTenantTransaction(teamId, async (tx) => {
+      await tx.insert(campaignErrorLogsTable).values({
+        marketingCampaignId,
+        teamId,
+        errorType,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : null,
+        jobData: { campaignLevel: true, stage: "processOutgoingMarketingCampaign" },
+      });
+    });
+  } catch (logError) {
+    console.error("Failed to log campaign error:", logError);
+  }
+}
 
 export async function processOutgoingMarketingCampaign(
   marketingId: string,
   tenantId: string,
   userId: string
 ) {
-  // Get the Team, Marketing Campaign, Whatsapp Account
+  const campaignLogger = createCampaignLogger({
+    marketingCampaignId: marketingId,
+    teamId: tenantId,
+    userId,
+  });
+
+  campaignLogger.info("Processing outgoing marketing campaign", {
+    marketingCampaignId: marketingId,
+  });
 
   try {
     const data = await withTenantTransaction(tenantId, async (tx) => {
@@ -38,15 +100,15 @@ export async function processOutgoingMarketingCampaign(
         },
       });
 
-      if (!data?.team.waBusinessAccount[0])
-        return {
-          businessAcctId: "",
-          contacts: [],
-          encryptedApiKey: null,
-          messageTemplate: null,
-          phoneNumberId: "",
-          webhookVerificationToken: "",
-        };
+      if (!data) {
+        campaignLogger.error("Campaign not found", new Error("Campaign not found"));
+        return null;
+      }
+
+      if (!data.team.waBusinessAccount || data.team.waBusinessAccount.length === 0) {
+        campaignLogger.error("No WhatsApp business account found", new Error("No WhatsApp business account found"));
+        return null;
+      }
 
       const where =
         data.tags && data.tags.length > 0
@@ -68,8 +130,9 @@ export async function processOutgoingMarketingCampaign(
           )
         : [];
 
-      if (data.recipients && data.recipients.length > 0)
+      if (data.recipients && data.recipients.length > 0) {
         contacts.push(...cleanToDigitsOnly(data.recipients));
+      }
 
       await tx
         .update(marketingCampaignsTable)
@@ -78,10 +141,8 @@ export async function processOutgoingMarketingCampaign(
         })
         .where(eq(marketingCampaignsTable.id, marketingId));
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const encryptedApiKey = data.team.waBusinessAccount[0]?.accessToken;
       const phoneNumberId = data.phoneNumber;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const businessAcctId = data.team.waBusinessAccount[0]?.id;
       const webhookVerificationToken = getEnv("WEBHOOK_VERIFICATION_TOKEN");
 
@@ -95,8 +156,35 @@ export async function processOutgoingMarketingCampaign(
       };
     });
 
-    if (!data.encryptedApiKey) return false;
-    if (!data.messageTemplate) return false;
+    if (!data) {
+      const error = new Error("Failed to retrieve campaign data");
+      campaignLogger.error("Campaign data retrieval failed", error);
+      await logCampaignError(tenantId, marketingId, error, CampaignErrorType.DATABASE_ERROR);
+      return false;
+    }
+
+    if (!data.encryptedApiKey) {
+      const error = new Error("No encrypted API key found");
+      campaignLogger.error("No API key found", error);
+      await logCampaignError(tenantId, marketingId, error, CampaignErrorType.AUTH_ERROR);
+      return false;
+    }
+
+    if (!data.messageTemplate) {
+      const error = new Error("No message template found");
+      campaignLogger.error("No message template found", error);
+      await logCampaignError(tenantId, marketingId, error, CampaignErrorType.TEMPLATE_ERROR);
+      return false;
+    }
+
+    if (data.contacts.length === 0) {
+      campaignLogger.warn("No contacts found for campaign");
+      return false;
+    }
+
+    campaignLogger.info("Found contacts for campaign", {
+      contactCount: data.contacts.length,
+    });
 
     const apiKey = decryptApiKey({
       data: data.encryptedApiKey.data,
@@ -129,14 +217,35 @@ export async function processOutgoingMarketingCampaign(
       return temp;
     });
 
+    campaignLogger.info("Adding messages to queue", {
+      messageCount: messageTemplate.length,
+    });
+
     await waEventQueue.addBulk(
       messageTemplate.map((r) => ({
         data: r,
         name: `${WhatsAppEvents.ProcessingBulkMessagesOutgoing}:${tenantId}`,
       }))
     );
+
+    campaignLogger.info("Messages queued successfully");
+
+    return true;
   } catch (error) {
-    console.error(error);
+    const errorType = classifyError(error);
+
+    campaignLogger.error("Campaign processing failed", error, {
+      errorType,
+    });
+
+    // Log error to database
+    await logCampaignError(
+      tenantId,
+      marketingId,
+      error,
+      errorType
+    );
+
     return false;
   }
 }
