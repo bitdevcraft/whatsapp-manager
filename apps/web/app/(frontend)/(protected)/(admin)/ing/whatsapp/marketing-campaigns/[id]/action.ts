@@ -57,8 +57,11 @@ export async function hasRemainingUsage(id: string): Promise<{
 
   const contactCount = await contactRepo.countContactByMarketingCampaignId(id);
 
+  const isInheritedLimit =
+    !usages?.memberLimit || usages.memberLimit.limitType === "inherited";
+
   const limit =
-    usages?.memberLimit?.limitType === "inherited"
+    isInheritedLimit
       ? (usages?.teamUsage?.limit ?? 0)
       : (usages?.memberLimit?.maxLimit ?? 0);
 

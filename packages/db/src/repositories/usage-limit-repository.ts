@@ -18,11 +18,9 @@ export class UsageLimitRepository {
 
       if (!team) return null;
 
-      const subscriptionDate = team.whatsappSubscribeAt
-        ? getSubscriptionPeriod(team.whatsappSubscribeAt)
-        : null;
-
-      if (!subscriptionDate) return null;
+      const subscriptionDate = getSubscriptionPeriod(
+        team.whatsappSubscribeAt ?? team.createdAt
+      );
 
       let teamUsage = await tx
         .select({
@@ -76,7 +74,10 @@ export class UsageLimitRepository {
 
       if (userId) {
         let userLimit = await tx.query.teamMemberLimitsTable.findFirst({
-          where: eq(teamMemberLimitsTable.userId, userId),
+          where: and(
+            eq(teamMemberLimitsTable.userId, userId),
+            eq(teamMemberLimitsTable.teamId, this.teamId)
+          ),
         });
 
         userLimit ??= (
@@ -111,9 +112,23 @@ export class UsageLimitRepository {
             .from(teamMemberLimitsTable)
             .leftJoin(
               teamMembersUsageTracking,
-              eq(teamMembersUsageTracking.userId, teamMemberLimitsTable.userId)
+              and(
+                eq(
+                  teamMembersUsageTracking.userId,
+                  teamMemberLimitsTable.userId
+                ),
+                eq(
+                  teamMembersUsageTracking.teamId,
+                  teamMemberLimitsTable.teamId
+                )
+              )
             )
-            .where(and(eq(teamMemberLimitsTable.userId, userId)))
+            .where(
+              and(
+                eq(teamMemberLimitsTable.userId, userId),
+                eq(teamMemberLimitsTable.teamId, this.teamId)
+              )
+            )
             .orderBy(desc(teamMembersUsageTracking.periodStart))
             .groupBy(
               teamMembersUsageTracking.userId,
@@ -132,11 +147,21 @@ export class UsageLimitRepository {
             .from(teamMemberLimitsTable)
             .leftJoin(
               teamMembersUsageTracking,
-              eq(teamMembersUsageTracking.userId, teamMemberLimitsTable.userId)
+              and(
+                eq(
+                  teamMembersUsageTracking.userId,
+                  teamMemberLimitsTable.userId
+                ),
+                eq(
+                  teamMembersUsageTracking.teamId,
+                  teamMemberLimitsTable.teamId
+                )
+              )
             )
             .where(
               and(
                 eq(teamMemberLimitsTable.userId, userId),
+                eq(teamMemberLimitsTable.teamId, this.teamId),
                 eq(
                   teamMembersUsageTracking.periodStart,
                   subscriptionDate.periodStart
@@ -166,7 +191,12 @@ export class UsageLimitRepository {
             })
             .from(teamMemberLimitsTable)
 
-            .where(and(eq(teamMemberLimitsTable.userId, userId)));
+            .where(
+              and(
+                eq(teamMemberLimitsTable.userId, userId),
+                eq(teamMemberLimitsTable.teamId, this.teamId)
+              )
+            );
         }
       }
 
@@ -182,13 +212,13 @@ export class UsageLimitRepository {
 
       if (!team) return null;
 
-      const subscriptionDate = team.whatsappSubscribeAt
-        ? getSubscriptionPeriod(team.whatsappSubscribeAt)
-        : null;
+      const subscriptionDate = getSubscriptionPeriod(
+        team.whatsappSubscribeAt ?? team.createdAt
+      );
 
       const usageTracking: typeof teamMembersUsageTracking.$inferInsert = {
-        periodEnd: subscriptionDate?.periodEnd,
-        periodStart: subscriptionDate?.periodStart,
+        periodEnd: subscriptionDate.periodEnd,
+        periodStart: subscriptionDate.periodStart,
         teamId: this.teamId,
         usageCount: usage,
         userId,

@@ -28,11 +28,13 @@ export async function getUsage() {
   const repo = new UsageLimitRepository(teamId);
 
   const result = await repo.getTeamLimit(user.id);
+  const isInheritedLimit =
+    !result?.memberLimit || result.memberLimit.limitType === "inherited";
 
   return {
     personal: {
       limit:
-        result?.memberLimit?.limitType === "inherited"
+        isInheritedLimit
           ? (result?.teamUsage?.limit ?? 0)
           : (result?.memberLimit?.maxLimit ?? 0),
       usage: result?.memberLimit?.usage ?? 0,
