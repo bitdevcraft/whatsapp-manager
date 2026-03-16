@@ -24,18 +24,12 @@ jobs:
           - context: .
             dockerfile: apps/web/Dockerfile
             image_name: tasweeq-whatsapp-web
-            build_args: |
-              BASE_URL=${{ vars.BASE_URL }}
-              NEXT_PUBLIC_WEB_URL=${{ vars.NEXT_PUBLIC_WEB_URL }}
-              NEXT_PUBLIC_WEB_SOCKET=${{ vars.NEXT_PUBLIC_WEB_SOCKET }}
           - context: .
             dockerfile: apps/whatsapp-service/Dockerfile
             image_name: tasweeq-whatsapp-whatsapp-service
-            build_args: ""
           - context: .
             dockerfile: packages/db/Dockerfile
             image_name: tasweeq-whatsapp-db
-            build_args: ""
 
     steps:
       - name: Checkout
@@ -68,12 +62,28 @@ jobs:
             type=ref,event=tag
             type=sha
 
-      - name: Build And Push Image
+      - name: Build And Push Web Image
+        if: matrix.image_name == 'tasweeq-whatsapp-web'
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
-          build-args: ${{ matrix.build_args }}
+          build-args: |
+            BASE_URL=${{ vars.BASE_URL }}
+            NEXT_PUBLIC_WEB_URL=${{ vars.NEXT_PUBLIC_WEB_URL }}
+            NEXT_PUBLIC_WEB_SOCKET=${{ vars.NEXT_PUBLIC_WEB_SOCKET }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build And Push Non-Web Image
+        if: matrix.image_name != 'tasweeq-whatsapp-web'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
