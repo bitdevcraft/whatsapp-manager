@@ -120,7 +120,9 @@ export const AdSetReadFieldSchema = z.object({
   start_time: z.date().optional(),
   status: z.enum(DefaultStatus).optional(),
   targeting: z.any(),
-  targeting_optimization_types: z.array(z.record(z.number())).optional(),
+  targeting_optimization_types: z
+    .array(z.record(z.string(), z.number()))
+    .optional(),
   time_based_ad_rotation_id_blocks: z.array(z.array(z.number())).optional(),
   time_based_ad_rotation_intervals: z.array(z.number()).optional(),
   updated_time: z.date().optional(),
@@ -142,7 +144,7 @@ export const AdSetCopiesPayloadSchema = z.object({
   campaign_id: NumericStringSchema.optional(),
   deep_copy: z.boolean().default(false),
   end_time: z.date().optional(),
-  rename_options: z.record(z.any()).optional(),
+  rename_options: z.record(z.string(), z.any()).optional(),
   start_time: z.date().optional(),
   status_option: z
     .enum(["ACTIVE", "PAUSED", "INHERITED_FROM_SOURCE"])

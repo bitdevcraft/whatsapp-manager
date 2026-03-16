@@ -6,6 +6,12 @@ settings:
   injectWorkspacePackages:
     - true
 
+catalogs:
+  default:
+    zod:
+      specifier: 4.0.17
+      version: 4.0.17
+
 importers:
 
   .:
@@ -38,7 +44,7 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
       zod:
-        specifier: ^4.0.17
+        specifier: 'catalog:'
         version: 4.0.17
     devDependencies:
       '@types/uuid':
@@ -69,8 +75,8 @@ importers:
   apps/web:
     dependencies:
       '@autoform/zod':
-        specifier: ^3.1.0
-        version: 3.1.0(zod@3.25.76)
+        specifier: ^5.0.0
+        version: 5.0.0(zod@4.0.17)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -126,8 +132,8 @@ importers:
         specifier: ^1.2.7
         version: 1.2.7(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@t3-oss/env-nextjs':
-        specifier: ^0.13.8
-        version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
+        specifier: ^0.13.10
+        version: 0.13.10(typescript@5.8.3)(zod@4.0.17)
       '@tabler/icons-react':
         specifier: ^3.34.0
         version: 3.34.1(react@19.1.0)
@@ -249,8 +255,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       zod:
-        specifier: ^3.25.76
-        version: 3.25.76
+        specifier: 'catalog:'
+        version: 4.0.17
       zustand:
         specifier: ^5.0.6
         version: 5.0.6(@types/react@19.1.8)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
@@ -340,8 +346,8 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5
       openai:
-        specifier: ^4.104.0
-        version: 4.104.0(ws@8.18.3)(zod@3.25.76)
+        specifier: ^6.29.0
+        version: 6.29.0(ws@8.18.3)(zod@4.0.17)
       pino:
         specifier: ^10.2.0
         version: 10.2.0
@@ -395,7 +401,7 @@ importers:
         specifier: workspace:*
         version: link:../db
       better-auth:
-        specifier: ^1.2.12
+        specifier: ^1.3.3
         version: 1.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       dotenv:
         specifier: ^16.6.1
@@ -410,8 +416,8 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
       zod:
-        specifier: ^4.0.10
-        version: 4.0.10
+        specifier: 'catalog:'
+        version: 4.0.17
     devDependencies:
       '@types/node':
         specifier: ^24.0.4
@@ -529,8 +535,8 @@ importers:
         specifier: ^17.2.0
         version: 17.2.1
       zod:
-        specifier: ^3.25.64
-        version: 3.25.76
+        specifier: 'catalog:'
+        version: 4.0.17
     devDependencies:
       '@types/node':
         specifier: ^24.0.13
@@ -560,8 +566,8 @@ importers:
         specifier: ^16.5.0
         version: 16.6.1
       zod:
-        specifier: ^3.25.64
-        version: 3.25.76
+        specifier: 'catalog:'
+        version: 4.0.17
     devDependencies:
       '@types/node':
         specifier: ^24.0.1
@@ -590,11 +596,11 @@ importers:
   packages/ui:
     dependencies:
       '@autoform/react':
-        specifier: ^3.1.0
-        version: 3.1.0(react-hook-form@7.61.1(react@19.1.0))(react@19.1.0)(yup@1.6.1)(zod@3.25.76)
+        specifier: ^4.0.0
+        version: 4.0.0(@hookform/resolvers@5.1.1(react-hook-form@7.61.1(react@19.1.0)))(react-hook-form@7.61.1(react@19.1.0))(react@19.1.0)
       '@autoform/zod':
-        specifier: ^3.1.0
-        version: 3.1.0(zod@3.25.76)
+        specifier: ^5.0.0
+        version: 5.0.0(zod@4.0.17)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -803,8 +809,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       zod:
-        specifier: ^3.25.64
-        version: 3.25.76
+        specifier: 'catalog:'
+        version: 4.0.17
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.10
@@ -931,21 +937,17 @@ packages:
   '@autoform/core@3.0.0':
     resolution: {integrity: sha512-wBBJgqhw2lDc8VCf4Om/ONZH7RyvaLoqkAcNaU+c8Qo+U5kfY7Fke1mltW6CV0njoWMLarQ+0ZKnWdPRulDpgA==}
 
-  '@autoform/react@3.1.0':
-    resolution: {integrity: sha512-VmEom1uJ7f7e0Cx8NWI2bb1b+Y4LlM+tw3hTH6hh4kly9cTZVJufeFMk1drMHKJ4u08DCTGRjM83g6dtI6waDw==}
+  '@autoform/react@4.0.0':
+    resolution: {integrity: sha512-OVYRY7u+KnNxEZY6RF4tOmKgO3R68Y0amqyourU9vrFL/mi/4bW/6mi6hkWK8HwHK6a8C7clSm73/4nGQPSuaw==}
     peerDependencies:
+      '@hookform/resolvers': ^3.9.0
       react: ^16.8.0 || ^17 || ^18 || ^19
       react-hook-form: ^7
 
-  '@autoform/yup@3.0.0':
-    resolution: {integrity: sha512-toS+EEtR0AMG2P0JJqUbThhc74BdP5yyqOQ8gBUuvWUMJEvUw1JZim99RKYy+6lA0A7eej9pQJETrCtmkcZyJA==}
+  '@autoform/zod@5.0.0':
+    resolution: {integrity: sha512-n9mxQAVbaPS3uP6Laxn/36lDv74pmkoRS4nIOKEohFg5me3nLFXrnOnrSk4aENjYpolhB5JuGWUMIwgEzRK8fg==}
     peerDependencies:
-      yup: ^1.4.0
-
-  '@autoform/zod@3.1.0':
-    resolution: {integrity: sha512-XvNTp5pc+ZwhH+5TSsuuXdNbMjI7srbpKSCuhOqrXQJyYAksI3/vGz1pf0J2WeTBf5dDtlPi44qrYBKRz7vlaQ==}
-    peerDependencies:
-      zod: ^3
+      zod: ^3.25.0 || ^4.0.0
 
   '@aws-crypto/crc32@5.2.0':
     resolution: {integrity: sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==}
@@ -1523,11 +1525,9 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.is'
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -2219,11 +2219,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
       react-dom: ^16.8.0 || ^17 || ^18 || ^19
-
-  '@hookform/resolvers@3.10.0':
-    resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
-    peerDependencies:
-      react-hook-form: ^7.0.0
 
   '@hookform/resolvers@5.1.1':
     resolution: {integrity: sha512-J/NVING3LMAEvexJkyTLjruSm7aOFx7QX21pzkiJfMoNG0wl5aFEjLTl7ay7IQb9EWY6AkrBy7tHL2Alijpdcg==}
@@ -3590,13 +3585,13 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
-  '@t3-oss/env-core@0.13.8':
-    resolution: {integrity: sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw==}
+  '@t3-oss/env-core@0.13.10':
+    resolution: {integrity: sha512-NNFfdlJ+HmPHkLi2HKy7nwuat9SIYOxei9K10lO2YlcSObDILY7mHZNSHsieIM3A0/5OOzw/P/b+yLvPdaG52g==}
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
       valibot: ^1.0.0-beta.7 || ^1.0.0
-      zod: ^3.24.0 || ^4.0.0-beta.0
+      zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
         optional: true
@@ -3607,13 +3602,13 @@ packages:
       zod:
         optional: true
 
-  '@t3-oss/env-nextjs@0.13.8':
-    resolution: {integrity: sha512-QmTLnsdQJ8BiQad2W2nvV6oUpH4oMZMqnFEjhVpzU0h3sI9hn8zb8crjWJ1Amq453mGZs6A4v4ihIeBFDOrLeQ==}
+  '@t3-oss/env-nextjs@0.13.10':
+    resolution: {integrity: sha512-JfSA2WXOnvcc/uMdp31paMsfbYhhdvLLRxlwvrnlPE9bwM/n0Z+Qb9xRv48nPpvfMhOrkrTYw1I5Yc06WIKBJQ==}
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
       valibot: ^1.0.0-beta.7 || ^1.0.0
-      zod: ^3.24.0 || ^4.0.0-beta.0
+      zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
         optional: true
@@ -3885,19 +3880,12 @@ packages:
 
   '@types/minimatch@6.0.0':
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
-    deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
 
   '@types/morgan@1.9.10':
     resolution: {integrity: sha512-sS4A1zheMvsADRVfT0lYbJ4S9lmsey8Zo2F7cnbYjWHP67Q0AwMYuuzLlkIM2N8gAbb9cubhIVFwcIN2XyYCkA==}
 
-  '@types/node-fetch@2.6.12':
-    resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
-
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
-
-  '@types/node@18.19.120':
-    resolution: {integrity: sha512-WtCGHFXnVI8WHLxDAt5TbnCM4eSE+nI0QN2NJtwzcgMhht2eNz6V9evJrk+lwC8bCY8OWV5Ym8Jz7ZEyGnKnMA==}
 
   '@types/node@20.19.9':
     resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
@@ -4199,10 +4187,6 @@ packages:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
     hasBin: true
 
-  abort-controller@3.0.0:
-    resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
-    engines: {node: '>=6.5'}
-
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
     engines: {node: '>= 0.6'}
@@ -4228,10 +4212,6 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
-
-  agentkeepalive@4.6.0:
-    resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
-    engines: {node: '>= 8.0.0'}
 
   aggregate-error@3.1.0:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
@@ -5410,10 +5390,6 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  event-target-shim@5.0.1:
-    resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
-    engines: {node: '>=6'}
-
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
 
@@ -5601,16 +5577,9 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  form-data-encoder@1.7.2:
-    resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
-
   form-data@4.0.4:
     resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
-
-  formdata-node@4.4.1:
-    resolution: {integrity: sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==}
-    engines: {node: '>= 12.20'}
 
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
@@ -5748,12 +5717,10 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-directory@4.0.1:
     resolution: {integrity: sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q==}
@@ -5899,9 +5866,6 @@ packages:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
 
-  humanize-ms@1.2.1:
-    resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
-
   husky@9.1.7:
     resolution: {integrity: sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA==}
     engines: {node: '>=18'}
@@ -5942,7 +5906,6 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -6404,7 +6367,6 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
-    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.isarguments@3.1.0:
     resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
@@ -6709,7 +6671,6 @@ packages:
   next@15.4.4:
     resolution: {integrity: sha512-kNcubvJjOL9yUOfwtZF3HfDhuhp+kVD+FM2A6Tyua1eI/xfmY4r/8ZS913MMz+oWKDlbps/dQOWdDricuIkXLw==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
-    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -6736,11 +6697,6 @@ packages:
 
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
-
-  node-domexception@1.0.0:
-    resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
-    engines: {node: '>=10.5.0'}
-    deprecated: Use your platform's native DOMException instead
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -6851,12 +6807,12 @@ packages:
     resolution: {integrity: sha512-VXJjc87FScF88uafS3JllDgvAm+c/Slfz06lorj2uAY34rlUu0Nt+v8wreiImcrgAjjIHp1rXpTDlLOGw29WwQ==}
     engines: {node: '>=18'}
 
-  openai@4.104.0:
-    resolution: {integrity: sha512-p99EFNsA/yX6UhVO93f5kJsDRLAg+CTA2RBqdHK4RtK8u5IJw32Hyb2dTGKbnnFmnuoBv5r7Z2CURI9sGZpSuA==}
+  openai@6.29.0:
+    resolution: {integrity: sha512-YxoArl2BItucdO89/sN6edksV0x47WUTgkgVfCgX7EuEMhbirENsgYe5oO4LTjBL9PtdKtk2WqND1gSLcTd2yw==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: ^3.23.8
+      zod: ^3.25 || ^4.0
     peerDependenciesMeta:
       ws:
         optional: true
@@ -7184,9 +7140,6 @@ packages:
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
-
-  property-expr@2.0.6:
-    resolution: {integrity: sha512-SVtmxhRE/CGkn3eZY1T6pC8Nln6Fr/lu1mKSgRud0eC73whjGfoAogbn78LkD8aFL0zz3bAFerKSnOl7NlErBA==}
 
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -7519,12 +7472,10 @@ packages:
 
   rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rollup@4.45.1:
@@ -7739,7 +7690,6 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
-    deprecated: The work that was done in this beta branch won't be included in future versions
 
   spawndamnit@3.0.1:
     resolution: {integrity: sha512-MmnduQUuHCoFckZoWnXsTg7JaiLBJrKFj9UI2MbRPGaJeVpsLcVBu6P/IGZovziM/YBsellCmsprgNA+w0CzVg==}
@@ -7922,7 +7872,6 @@ packages:
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
@@ -7949,9 +7898,6 @@ packages:
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
-
-  tiny-case@1.0.3:
-    resolution: {integrity: sha512-Eet/eeMhkO6TX8mnUteS9zgPbUMQa4I6Kkp5ORiBD5476/m+PIRiumP5tmh5ioJpH7k51Kehawy2UDfsnxxY8Q==}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -8008,9 +7954,6 @@ packages:
   token-types@6.0.4:
     resolution: {integrity: sha512-MD9MjpVNhVyH4fyd5rKphjvt/1qj+PtQUz65aFqAZA6XniWAuSFRjLk3e2VALEFlh9OwBpXUN7rfeqSnT/Fmkw==}
     engines: {node: '>=14.16'}
-
-  toposort@2.0.2:
-    resolution: {integrity: sha512-0a5EOkAUp8D4moMi2W8ZF8jcga7BgZd91O/yabJCFY8az+XSzeGyTKs0Aoo897iV1Nj6guFq8orWDS96z91oGg==}
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
@@ -8137,10 +8080,6 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
 
-  type-fest@2.19.0:
-    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
-    engines: {node: '>=12.20'}
-
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
@@ -8200,9 +8139,6 @@ packages:
 
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
-
-  undici-types@5.26.5:
-    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
@@ -8405,10 +8341,6 @@ packages:
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
-  web-streams-polyfill@4.0.0-beta.3:
-    resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
-    engines: {node: '>= 14'}
-
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
@@ -8562,15 +8494,6 @@ packages:
     resolution: {integrity: sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==}
     engines: {node: '>=12.20'}
 
-  yup@1.6.1:
-    resolution: {integrity: sha512-JED8pB50qbA4FOkDol0bYF/p60qSEDQqBD0/qeIrUCG1KbPBIQ776fCUNb9ldbPcSTxA69g/47XTo4TqWiuXOA==}
-
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.0.10:
-    resolution: {integrity: sha512-3vB+UU3/VmLL2lvwcY/4RV2i9z/YU0DTV/tDuYjrwmx5WeJ7hwy+rGEEx8glHp6Yxw7ibRbKSaIFBgReRPe5KA==}
-
   zod@4.0.17:
     resolution: {integrity: sha512-1PHjlYRevNxxdy2JZ8JcNAw7rX8V9P1AKkP+x/xZfxB0K5FYfuV+Ug6P/6NVSR2jHQ+FzDDoDHS04nYUsOIyLQ==}
 
@@ -8618,26 +8541,16 @@ snapshots:
 
   '@autoform/core@3.0.0': {}
 
-  '@autoform/react@3.1.0(react-hook-form@7.61.1(react@19.1.0))(react@19.1.0)(yup@1.6.1)(zod@3.25.76)':
+  '@autoform/react@4.0.0(@hookform/resolvers@5.1.1(react-hook-form@7.61.1(react@19.1.0)))(react-hook-form@7.61.1(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@autoform/core': 3.0.0
-      '@autoform/yup': 3.0.0(yup@1.6.1)
-      '@autoform/zod': 3.1.0(zod@3.25.76)
-      '@hookform/resolvers': 3.10.0(react-hook-form@7.61.1(react@19.1.0))
+      '@hookform/resolvers': 5.1.1(react-hook-form@7.61.1(react@19.1.0))
       react: 19.1.0
       react-hook-form: 7.61.1(react@19.1.0)
-    transitivePeerDependencies:
-      - yup
-      - zod
 
-  '@autoform/yup@3.0.0(yup@1.6.1)':
+  '@autoform/zod@5.0.0(zod@4.0.17)':
     dependencies:
-      yup: 1.6.1
-
-  '@autoform/zod@3.1.0(zod@3.25.76)':
-    dependencies:
-      '@autoform/core': 3.0.0
-      zod: 3.25.76
+      zod: 4.0.17
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -10219,10 +10132,6 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@hookform/resolvers@3.10.0(react-hook-form@7.61.1(react@19.1.0))':
-    dependencies:
-      react-hook-form: 7.61.1(react@19.1.0)
-
   '@hookform/resolvers@5.1.1(react-hook-form@7.61.1(react@19.1.0))':
     dependencies:
       '@standard-schema/utils': 0.3.0
@@ -11637,17 +11546,17 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@t3-oss/env-core@0.13.8(typescript@5.8.3)(zod@3.25.76)':
+  '@t3-oss/env-core@0.13.10(typescript@5.8.3)(zod@4.0.17)':
     optionalDependencies:
       typescript: 5.8.3
-      zod: 3.25.76
+      zod: 4.0.17
 
-  '@t3-oss/env-nextjs@0.13.8(typescript@5.8.3)(zod@3.25.76)':
+  '@t3-oss/env-nextjs@0.13.10(typescript@5.8.3)(zod@4.0.17)':
     dependencies:
-      '@t3-oss/env-core': 0.13.8(typescript@5.8.3)(zod@3.25.76)
+      '@t3-oss/env-core': 0.13.10(typescript@5.8.3)(zod@4.0.17)
     optionalDependencies:
       typescript: 5.8.3
-      zod: 3.25.76
+      zod: 4.0.17
 
   '@tabler/icons-react@3.34.1(react@19.1.0)':
     dependencies:
@@ -11932,16 +11841,7 @@ snapshots:
     dependencies:
       '@types/node': 24.1.0
 
-  '@types/node-fetch@2.6.12':
-    dependencies:
-      '@types/node': 24.1.0
-      form-data: 4.0.4
-
   '@types/node@12.20.55': {}
-
-  '@types/node@18.19.120':
-    dependencies:
-      undici-types: 5.26.5
 
   '@types/node@20.19.9':
     dependencies:
@@ -12307,10 +12207,6 @@ snapshots:
       jsonparse: 1.3.1
       through: 2.3.8
 
-  abort-controller@3.0.0:
-    dependencies:
-      event-target-shim: 5.0.1
-
   accepts@1.3.8:
     dependencies:
       mime-types: 2.1.35
@@ -12329,10 +12225,6 @@ snapshots:
   adler-32@1.3.1: {}
 
   agent-base@7.1.4: {}
-
-  agentkeepalive@4.6.0:
-    dependencies:
-      humanize-ms: 1.2.1
 
   aggregate-error@3.1.0:
     dependencies:
@@ -13729,8 +13621,6 @@ snapshots:
 
   etag@1.8.1: {}
 
-  event-target-shim@5.0.1: {}
-
   eventemitter3@4.0.7: {}
 
   eventemitter3@5.0.1: {}
@@ -13979,8 +13869,6 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  form-data-encoder@1.7.2: {}
-
   form-data@4.0.4:
     dependencies:
       asynckit: 0.4.0
@@ -13988,11 +13876,6 @@ snapshots:
       es-set-tostringtag: 2.1.0
       hasown: 2.0.2
       mime-types: 2.1.35
-
-  formdata-node@4.4.1:
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 4.0.0-beta.3
 
   forwarded@0.2.0: {}
 
@@ -14339,10 +14222,6 @@ snapshots:
   human-signals@2.1.0: {}
 
   human-signals@5.0.0: {}
-
-  humanize-ms@1.2.1:
-    dependencies:
-      ms: 2.1.3
 
   husky@9.1.7: {}
 
@@ -15122,8 +15001,6 @@ snapshots:
 
   node-addon-api@7.1.1: {}
 
-  node-domexception@1.0.0: {}
-
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
@@ -15230,20 +15107,10 @@ snapshots:
     dependencies:
       mimic-function: 5.0.1
 
-  openai@4.104.0(ws@8.18.3)(zod@3.25.76):
-    dependencies:
-      '@types/node': 18.19.120
-      '@types/node-fetch': 2.6.12
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
+  openai@6.29.0(ws@8.18.3)(zod@4.0.17):
     optionalDependencies:
       ws: 8.18.3
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - encoding
+      zod: 4.0.17
 
   optionator@0.9.4:
     dependencies:
@@ -15567,8 +15434,6 @@ snapshots:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
-
-  property-expr@2.0.6: {}
 
   proxy-addr@2.0.7:
     dependencies:
@@ -16443,8 +16308,6 @@ snapshots:
 
   through@2.3.8: {}
 
-  tiny-case@1.0.3: {}
-
   tiny-invariant@1.3.3: {}
 
   tinybench@2.9.0: {}
@@ -16492,8 +16355,6 @@ snapshots:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
-
-  toposort@2.0.2: {}
 
   tr46@0.0.3: {}
 
@@ -16674,8 +16535,6 @@ snapshots:
 
   type-fest@0.21.3: {}
 
-  type-fest@2.19.0: {}
-
   type-is@1.6.18:
     dependencies:
       media-typer: 0.3.0
@@ -16746,8 +16605,6 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   uncrypto@0.1.3: {}
-
-  undici-types@5.26.5: {}
 
   undici-types@6.21.0: {}
 
@@ -16935,8 +16792,6 @@ snapshots:
     dependencies:
       defaults: 1.0.4
 
-  web-streams-polyfill@4.0.0-beta.3: {}
-
   webidl-conversions@3.0.1: {}
 
   webidl-conversions@4.0.2: {}
@@ -17085,17 +16940,6 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.1: {}
-
-  yup@1.6.1:
-    dependencies:
-      property-expr: 2.0.6
-      tiny-case: 1.0.3
-      toposort: 2.0.2
-      type-fest: 2.19.0
-
-  zod@3.25.76: {}
-
-  zod@4.0.10: {}
 
   zod@4.0.17: {}
 

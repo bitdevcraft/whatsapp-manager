@@ -12,13 +12,20 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Path, UseFormReturn } from "react-hook-form";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-interface MultiStepFormProps<T extends z.ZodType> {
+type MultiStepFormSchema = z.ZodObject<Record<string, z.ZodTypeAny>>;
+type MultiStepFormValues<T extends MultiStepFormSchema> = z.infer<T> &
+  FieldValues;
+type MultiStepFormContextValue = ReturnType<
+  typeof useMultiStepForm<MultiStepFormSchema>
+>;
+
+interface MultiStepFormProps<T extends MultiStepFormSchema> {
   className?: string;
-  form: UseFormReturn<z.infer<T>>;
-  onSubmit: (data: z.infer<T>) => void;
+  form: UseFormReturn<MultiStepFormValues<T>>;
+  onSubmit: (data: MultiStepFormValues<T>) => void;
   schema: T;
   useStepTransition?: boolean;
 }
@@ -30,9 +37,9 @@ type StepProps = React.PropsWithChildren<
   }
 >;
 
-const MultiStepFormContext = createContext<null | ReturnType<
-  typeof useMultiStepForm
->>(null);
+const MultiStepFormContext = createContext<MultiStepFormContextValue | null>(
+  null
+);
 
 /**
  * @name MultiStepForm
@@ -44,7 +51,7 @@ const MultiStepFormContext = createContext<null | ReturnType<
  * @param className
  * @constructor
  */
-export function MultiStepForm<T extends z.ZodType>({
+export function MultiStepForm<T extends MultiStepFormSchema>({
   children,
   className,
   form,
@@ -78,7 +85,9 @@ export function MultiStepForm<T extends z.ZodType>({
   const multiStepForm = useMultiStepForm(schema, form, stepNames);
 
   return (
-    <MultiStepFormContext.Provider value={multiStepForm}>
+    <MultiStepFormContext.Provider
+      value={multiStepForm as unknown as MultiStepFormContextValue}
+    >
       <form
         className={cn(className, "flex size-full flex-col overflow-hidden")}
         onSubmit={form.handleSubmit(onSubmit)}
@@ -150,9 +159,9 @@ export const MultiStepFormStep = React.forwardRef<
  * @param form
  * @param stepNames
  */
-export function useMultiStepForm<Schema extends z.ZodType>(
+export function useMultiStepForm<Schema extends MultiStepFormSchema>(
   schema: Schema,
-  form: UseFormReturn<z.infer<Schema>>,
+  form: UseFormReturn<MultiStepFormValues<Schema>>,
   stepNames: string[]
 ) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -160,25 +169,20 @@ export function useMultiStepForm<Schema extends z.ZodType>(
 
   const isStepValid = useCallback(() => {
     const currentStepName = stepNames[currentStepIndex] as Path<
-      z.TypeOf<Schema>
+      MultiStepFormValues<Schema>
     >;
+    const currentStepSchema = schema.shape[currentStepName] as z.ZodTypeAny;
 
-    if (schema instanceof z.ZodObject) {
-      const currentStepSchema = schema.shape[currentStepName] as z.ZodType;
-
-      // the user may not want to validate the current step
-      // or the step doesn't contain any form field
-      if (!currentStepSchema) {
-        return true;
-      }
-
-      const currentStepData = form.getValues(currentStepName) ?? {};
-      const result = currentStepSchema.safeParse(currentStepData);
-
-      return result.success;
+    // the user may not want to validate the current step
+    // or the step doesn't contain any form field
+    if (!currentStepSchema) {
+      return true;
     }
 
-    throw new Error(`Unsupported schema type: ${schema.constructor.name}`);
+    const currentStepData = form.getValues(currentStepName) ?? {};
+    const result = currentStepSchema.safeParse(currentStepData);
+
+    return result.success;
   }, [schema, form, stepNames, currentStepIndex]);
 
   const nextStep = useCallback(
@@ -191,25 +195,23 @@ export function useMultiStepForm<Schema extends z.ZodType>(
 
       if (!isValid) {
         const currentStepName = stepNames[currentStepIndex] as Path<
-          z.TypeOf<Schema>
+          MultiStepFormValues<Schema>
         >;
+        const currentStepSchema = schema.shape[currentStepName] as z.ZodTypeAny;
 
-        if (schema instanceof z.ZodObject) {
-          const currentStepSchema = schema.shape[currentStepName] as z.ZodType;
+        if (currentStepSchema) {
+          const fields = Object.keys(
+            (currentStepSchema as z.ZodObject<Record<string, z.ZodTypeAny>>)
+              .shape
+          );
+          const keys = fields.map((field) => `${currentStepName}.${field}`);
 
-          if (currentStepSchema) {
-            const fields = Object.keys(
-              (currentStepSchema as z.ZodObject<never>).shape
-            );
-            const keys = fields.map((field) => `${currentStepName}.${field}`);
-
-            // trigger validation for all fields in the current step
-            for (const key of keys) {
-              void form.trigger(key as Path<z.TypeOf<Schema>>);
-            }
-
-            return;
+          // trigger validation for all fields in the current step
+          for (const key of keys) {
+            void form.trigger(key as Path<MultiStepFormValues<Schema>>);
           }
+
+          return;
         }
       }
 
@@ -279,8 +281,8 @@ export function useMultiStepForm<Schema extends z.ZodType>(
   );
 }
 
-export function useMultiStepFormContext<Schema extends z.ZodType>() {
-  const context = useContext(MultiStepFormContext) as ReturnType<
+export function useMultiStepFormContext<Schema extends MultiStepFormSchema>() {
+  const context = useContext(MultiStepFormContext) as unknown as ReturnType<
     typeof useMultiStepForm<Schema>
   >;
 
@@ -339,7 +341,7 @@ interface AnimatedStepProps {
  * @description Create a schema for a multi-step form
  * @param steps
  */
-export function createStepSchema<T extends Record<string, z.ZodType>>(
+export function createStepSchema<T extends Record<string, z.ZodTypeAny>>(
   steps: T
 ) {
   return z.object(steps);

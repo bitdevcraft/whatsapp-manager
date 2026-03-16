@@ -115,9 +115,9 @@ export const AdAccountReadResponseSchema = z.object({
   timezone_id: z.number().optional(),
   timezone_name: z.string().optional(),
   timezone_offset_hours_utc: z.number().optional(),
-  tos_accepted: z.record(z.number()).optional(),
+  tos_accepted: z.record(z.string(), z.number()).optional(),
   user_tasks: z.array(z.string()).optional(),
-  user_tos_accepted: z.record(z.number()).optional(),
+  user_tos_accepted: z.record(z.string(), z.number()).optional(),
 });
 
 export type AdAccountReadResponse = z.infer<typeof AdAccountReadResponseSchema>;

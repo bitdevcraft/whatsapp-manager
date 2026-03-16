@@ -1,5 +1,9 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
+
+catalog:
+  zod: 4.0.17
+
 injectWorkspacePackages:
   - true

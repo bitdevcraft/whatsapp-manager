@@ -159,9 +159,9 @@ export const PromotedObjectSchema = z.object({
   dataset_split_id: NumericStringSchema.optional(),
   omnichannel_object: z
     .object({
-      app: z.record(z.any()).optional(),
-      pixel: z.record(z.any()),
-      onsite: z.record(z.any()).optional(),
+      app: z.record(z.string(), z.any()).optional(),
+      pixel: z.record(z.string(), z.any()),
+      onsite: z.record(z.string(), z.any()).optional(),
     })
     .optional(),
   whats_app_business_phone_number_id: NumericStringSchema.optional(),
@@ -180,7 +180,7 @@ export const AdCampaignSchema = z.object({
     .optional(),
   is_skadnetwork_attribution: z.boolean().optional(),
   is_using_l3_schedule: z.boolean().optional(),
-  iterative_split_test_configs: z.array(z.any({})),
+  iterative_split_test_configs: z.array(z.any()),
   lifetime_budget: z.number().optional(),
   name: z.string(),
   objective: CampaignObjectiveSchema,

@@ -17,32 +17,32 @@ type ActionWithTeamFunction<T> = (
   team: TeamDataWithMembers
 ) => Promise<T>;
 
-type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
+type ValidatedActionFunction<S extends z.ZodTypeAny, T> = (
   data: z.infer<S>,
   formData: FormData
 ) => Promise<T>;
 
-type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
+type ValidatedActionWithUserFunction<S extends z.ZodTypeAny, T> = (
   data: z.infer<S>,
   formData: FormData,
   user: User
 ) => Promise<T>;
 
-export function validatedAction<S extends z.ZodType<any, any>, T>(
+export function validatedAction<S extends z.ZodTypeAny, T>(
   schema: S,
   action: ValidatedActionFunction<S, T>
 ) {
   return async (prevState: ActionState, formData: FormData) => {
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result?.error?.errors[0]?.message };
+      return { error: result.error.issues[0]?.message };
     }
 
     return action(result.data, formData);
   };
 }
 
-export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
+export function validatedActionWithUser<S extends z.ZodTypeAny, T>(
   schema: S,
   action: ValidatedActionWithUserFunction<S, T>
 ) {
@@ -54,7 +54,7 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
 
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
-      return { error: result?.error?.errors[0]?.message };
+      return { error: result.error.issues[0]?.message };
     }
 
     return action(result.data, formData, user);
