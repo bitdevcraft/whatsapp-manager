@@ -152,7 +152,7 @@ export default function Home() {
               <strong>Email:</strong> info@tasweequae.com
             </li>
             <li>
-              <strong>Phone:</strong> +971 58 514 2884
+              <strong>Phone:</strong> +971 52 402 1867
             </li>
             <li>
               <strong>Website:</strong> tasweequae.com
