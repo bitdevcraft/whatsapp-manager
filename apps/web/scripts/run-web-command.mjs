@@ -14,10 +14,6 @@ if (!command) {
 
 loadCommandEnv(command);
 
-if (process.env.DATABASE_URL_APPUSER && !process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.DATABASE_URL_APPUSER;
-}
-
 if (command === "start") {
   process.env.PORT ??= "3001";
   process.env.HOSTNAME ??= "0.0.0.0";

@@ -9,7 +9,7 @@ export const env = createEnv({
 
     ENCRYPTION_KEY: z.string().min(1),
 
-    DATABASE_URL_APPUSER: z.string().url().min(1),
+    DATABASE_URL: z.string().url().min(1),
 
     REDIS_HOST: z.string().min(1),
     REDIS_PORT: z.string().min(1),
@@ -48,7 +48,7 @@ export const env = createEnv({
     BASE_URL: process.env.BASE_URL,
     WEB_SOCKET: process.env.WEB_SOCKET,
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
-    DATABASE_URL_APPUSER: process.env.DATABASE_URL_APPUSER,
+    DATABASE_URL: process.env.DATABASE_URL,
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,

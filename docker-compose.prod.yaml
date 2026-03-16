@@ -93,7 +93,7 @@ services:
       AWS_REGION: ${AWS_REGION:?AWS_REGION is required for web}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required for web}
       BASE_URL: ${BASE_URL:?BASE_URL is required for web}
-      DATABASE_URL_APPUSER: ${DATABASE_URL_APPUSER:?DATABASE_URL_APPUSER is required for web}
+      DATABASE_URL: ${DATABASE_URL_APPUSER:?DATABASE_URL_APPUSER is required for web}
       DEBUG: ${DEBUG:-false}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required for web}
       M4D_APP_ID: ${M4D_APP_ID:?M4D_APP_ID is required for web}
