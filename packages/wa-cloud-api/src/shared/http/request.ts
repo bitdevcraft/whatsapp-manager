@@ -36,7 +36,7 @@ export default class Requester implements RequesterClass {
     }
 
     buildCAPIPath(endpoint: string): string {
-        return `v${this.apiVersion}.0/${endpoint}`;
+        return `v${normalizeApiVersion(this.apiVersion)}.0/${endpoint}`;
     }
 
     buildHeader(contentType: string, additionalHeaders?: Record<string, string>): HeadersInit {
@@ -170,4 +170,10 @@ export default class Requester implements RequesterClass {
         );
         return (await res.json()) as T;
     }
+}
+
+function normalizeApiVersion(apiVersion: string): string {
+    const normalized = apiVersion.trim().replace(/^v/i, '').replace(/\.0$/, '');
+
+    return normalized || '22';
 }

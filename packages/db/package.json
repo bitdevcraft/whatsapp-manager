@@ -6,6 +6,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm db:migrate && tsup",
+    "db:seed:bootstrap": "dotenv -e .env tsx src/seed/bootstrap.ts",
+    "db:seed:bootstrap:web-env": "dotenv -e ../../apps/web/.env.development tsx src/seed/bootstrap.ts",
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
@@ -20,6 +22,7 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "@workspace/wa-cloud-api": "workspace:*",
+    "better-auth": "^1.3.3",
     "dotenv": "^16.5.0",
     "drizzle-zod": "^0.8.3",
     "pg": "^8.16.0",
