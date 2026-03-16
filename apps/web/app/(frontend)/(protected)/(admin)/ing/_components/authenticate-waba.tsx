@@ -66,7 +66,7 @@ function AuthenticateNotice() {
           </p>
           <p className="text-sm font-semibold">Need help? Contact Us</p>
         </div>
-        <FacebookLogin appId="935427792299866" />
+        <FacebookLogin />
       </div>
     </>
   );

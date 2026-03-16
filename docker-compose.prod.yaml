@@ -81,6 +81,12 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        BASE_URL: ${BASE_URL:?BASE_URL is required for web build}
+        NEXT_PUBLIC_FACEBOOK_APP_ID: ${NEXT_PUBLIC_FACEBOOK_APP_ID:?NEXT_PUBLIC_FACEBOOK_APP_ID is required for web build}
+        NEXT_PUBLIC_FACEBOOK_CONFIG_ID: ${NEXT_PUBLIC_FACEBOOK_CONFIG_ID:?NEXT_PUBLIC_FACEBOOK_CONFIG_ID is required for web build}
+        NEXT_PUBLIC_WEB_SOCKET: ${NEXT_PUBLIC_WEB_SOCKET:?NEXT_PUBLIC_WEB_SOCKET is required for web build}
+        NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required for web build}
     depends_on:
       db-migrate:
         condition: service_completed_successfully
@@ -101,6 +107,8 @@ services:
       M4D_APP_ID: ${M4D_APP_ID:?M4D_APP_ID is required for web}
       META_BUSINESS_ID: ${META_BUSINESS_ID:?META_BUSINESS_ID is required for web}
       META_CLIENT_SECRET: ${META_CLIENT_SECRET:?META_CLIENT_SECRET is required for web}
+      NEXT_PUBLIC_FACEBOOK_APP_ID: ${NEXT_PUBLIC_FACEBOOK_APP_ID:?NEXT_PUBLIC_FACEBOOK_APP_ID is required for web}
+      NEXT_PUBLIC_FACEBOOK_CONFIG_ID: ${NEXT_PUBLIC_FACEBOOK_CONFIG_ID:?NEXT_PUBLIC_FACEBOOK_CONFIG_ID is required for web}
       NEXT_PUBLIC_WEB_SOCKET: ${NEXT_PUBLIC_WEB_SOCKET:?NEXT_PUBLIC_WEB_SOCKET is required for web}
       NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required for web}
       REDIS_HOST: ${REDIS_HOST:-redis}

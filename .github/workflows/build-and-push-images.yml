@@ -70,6 +70,8 @@ jobs:
           file: ${{ matrix.dockerfile }}
           build-args: |
             BASE_URL=${{ vars.BASE_URL }}
+            NEXT_PUBLIC_FACEBOOK_APP_ID=${{ vars.NEXT_PUBLIC_FACEBOOK_APP_ID }}
+            NEXT_PUBLIC_FACEBOOK_CONFIG_ID=${{ vars.NEXT_PUBLIC_FACEBOOK_CONFIG_ID }}
             NEXT_PUBLIC_WEB_URL=${{ vars.NEXT_PUBLIC_WEB_URL }}
             NEXT_PUBLIC_WEB_SOCKET=${{ vars.NEXT_PUBLIC_WEB_SOCKET }}
           push: true

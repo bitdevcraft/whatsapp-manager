@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 
+import { env } from "@/env/client";
 import { logger } from "@/lib/logger";
 import {
   EmbeddedSignUpAuthorizedObject,
@@ -15,13 +16,11 @@ import {
 } from "@/types/embedded-signup";
 
 interface FacebookLoginProps {
-  appId: string;
   onLoginFailure?: (error: string) => void;
   onLoginSuccess?: (response: any) => void;
 }
 
 const FacebookLogin: React.FC<FacebookLoginProps> = ({
-  appId,
   onLoginFailure = () => {},
   onLoginSuccess = () => {},
 }) => {
@@ -29,6 +28,8 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
   const loginResponseRef = useRef<EmbedSignUpLoginSuccess | null>(null);
   const embedDataRef = useRef<EmbedSignUpObject | null>(null);
   const submittedRef = useRef(false);
+  const appId = env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+  const configId = env.NEXT_PUBLIC_FACEBOOK_CONFIG_ID;
 
   const checkReady = React.useCallback(async () => {
     if (submittedRef.current) return;
@@ -120,7 +121,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           }
         },
         {
-          config_id: "1307529718097458", // configuration ID goes here
+          config_id: configId,
           extras: {
             featureType: "whatsapp_business_app_onboarding",
             sessionInfoVersion: "3",
