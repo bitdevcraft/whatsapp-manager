@@ -120,7 +120,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           }
         },
         {
-          config_id: "1636763904414125", // configuration ID goes here
+          config_id: "1307529718097458", // configuration ID goes here
           extras: {
             featureType: "whatsapp_business_app_onboarding",
             sessionInfoVersion: "3",
