@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col justify-center items-center gap-8">
       <div className="flex justify-between items-center w-full">
-        <Image alt="logo" height={100} src={"/logo.png"} width={100} />
+        <Image alt="logo" height={100} src={"/logo.webp"} width={100} />
         <div className="flex gap-4">
           <Link
             href={"https://www.facebook.com/tasweequae.com"}

@@ -13,7 +13,7 @@ export default function Navbar() {
             className="dark:invert"
             height={38}
             priority
-            src="/logo.png"
+            src="/logo.webp"
             width={180}
           />
         </Link>
