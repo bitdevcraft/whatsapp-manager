@@ -72,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
-          dockerfile: ${{ matrix.dockerfile }}
+          file: ${{ matrix.dockerfile }}
           build-args: ${{ matrix.build_args }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
