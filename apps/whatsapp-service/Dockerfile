@@ -33,8 +33,8 @@ COPY apps ./apps
 COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @workspace/wa-cloud-api build
-RUN pnpm --filter @workspace/shared build
+RUN pnpm --filter @workspace/wa-cloud-api build:pkg
+RUN pnpm --filter @workspace/shared build:pkg
 RUN pnpm --filter @workspace/db exec tsup
 RUN pnpm --filter whatsapp-service build
 RUN pnpm --filter whatsapp-service deploy --prod /prod/whatsapp-service
@@ -50,6 +50,7 @@ RUN adduser --system --uid 1001 nextjs
 WORKDIR /app
 
 COPY --from=builder --chown=nextjs:nodejs /prod/whatsapp-service ./
+RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app
 
 USER nextjs
 

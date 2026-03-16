@@ -61,10 +61,10 @@ COPY apps ./apps
 COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @workspace/wa-cloud-api build
-RUN pnpm --filter @workspace/shared build
+RUN pnpm --filter @workspace/wa-cloud-api build:pkg
+RUN pnpm --filter @workspace/shared build:pkg
 RUN pnpm --filter @workspace/db exec tsup
-RUN pnpm --filter @workspace/auth build
+RUN pnpm --filter @workspace/auth build:pkg
 RUN pnpm --filter web build
 
 FROM base AS runner

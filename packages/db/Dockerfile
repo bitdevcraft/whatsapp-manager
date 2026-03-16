@@ -32,7 +32,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.json ./
 COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @workspace/wa-cloud-api build
+RUN pnpm --filter @workspace/wa-cloud-api build:pkg
 
 FROM base AS runner
 

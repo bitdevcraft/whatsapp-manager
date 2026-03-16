@@ -72,7 +72,6 @@ services:
       WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:?WHATSAPP_API_VERSION is required for db-seed}
       WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID:?WHATSAPP_BUSINESS_ACCOUNT_ID is required for db-seed}
       WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:?WHATSAPP_PHONE_NUMBER_ID is required for db-seed}
-    profiles: ["seed"]
     restart: "no"
 
   web:
