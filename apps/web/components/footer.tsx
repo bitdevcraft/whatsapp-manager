@@ -7,18 +7,21 @@ export default function Footer() {
       <div className="flex justify-between items-center w-full">
         <Image alt="logo" height={100} src={"/logo.png"} width={100} />
         <div className="flex gap-4">
-          <Link href={"https://www.facebook.com/ingenious.ae"} target="_blank">
+          <Link
+            href={"https://www.facebook.com/tasweequae.com"}
+            target="_blank"
+          >
             <Facebook strokeWidth={1.5} />
           </Link>
           <Link
-            href={"https://www.instagram.com/ingenious_digitalmarketing/"}
+            href={"https://www.instagram.com/tasweeq_digitalmarketing/"}
             target="_blank"
           >
             <Instagram strokeWidth={1.5} />
           </Link>
           <Link
             href={
-              "https://www.linkedin.com/company/ingenious-digital-marketing-management"
+              "https://www.linkedin.com/company/tasweeq-digital-marketing-management"
             }
             target="_blank"
           >

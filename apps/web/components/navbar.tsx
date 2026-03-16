@@ -22,8 +22,13 @@ export default function Navbar() {
             <NavbarMenu />
           </li>
           <li>
-            <Link href={"/sign-in"}>
-              <Button>Login</Button>
+            <Link href="/auth/login">
+              <Button variant="outline">Login</Button>
+            </Link>
+          </li>
+          <li>
+            <Link href="/auth/signup">
+              <Button>Sign Up</Button>
             </Link>
           </li>
         </ul>

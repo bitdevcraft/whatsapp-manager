@@ -126,6 +126,34 @@ CREATE TABLE "list_views" (
 );
 --> statement-breakpoint
 ALTER TABLE "list_views" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE TABLE "campaign_error_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"marketing_campaign_id" uuid,
+	"team_id" uuid NOT NULL,
+	"recipient_phone" varchar(20),
+	"error_type" varchar(100),
+	"error_message" varchar(65535),
+	"error_stack" text,
+	"job_data" jsonb,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE "campaign_message_status" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"marketing_campaign_id" uuid,
+	"team_id" uuid NOT NULL,
+	"recipient_phone" varchar(20) NOT NULL,
+	"wamid" varchar(100),
+	"status" varchar(50) NOT NULL,
+	"error_code" varchar(100),
+	"error_message" varchar(65535),
+	"retry_count" integer DEFAULT 0,
+	"can_retry" boolean DEFAULT true,
+	"sent_at" timestamp,
+	"delivered_at" timestamp,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE "marketing_campaigns" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -147,7 +175,11 @@ CREATE TABLE "marketing_campaigns" (
 	"tags" jsonb,
 	"team_id" uuid NOT NULL,
 	"template_id" varchar NOT NULL,
-	"total_recipients" integer
+	"total_recipients" integer,
+	"sent_count" integer DEFAULT 0,
+	"delivered_count" integer DEFAULT 0,
+	"failed_count" integer DEFAULT 0,
+	"error_summary" jsonb
 );
 --> statement-breakpoint
 ALTER TABLE "marketing_campaigns" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -399,6 +431,8 @@ ALTER TABLE "invitations" ADD CONSTRAINT "invitations_team_id_teams_id_fk" FOREI
 ALTER TABLE "leads" ADD CONSTRAINT "leads_assignedTo_users_id_fk" FOREIGN KEY ("assignedTo") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "leads" ADD CONSTRAINT "leads_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "list_views" ADD CONSTRAINT "list_views_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "campaign_error_logs" ADD CONSTRAINT "campaign_error_logs_marketing_campaign_id_marketing_campaigns_id_fk" FOREIGN KEY ("marketing_campaign_id") REFERENCES "public"."marketing_campaigns"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "campaign_message_status" ADD CONSTRAINT "campaign_message_status_marketing_campaign_id_marketing_campaigns_id_fk" FOREIGN KEY ("marketing_campaign_id") REFERENCES "public"."marketing_campaigns"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "marketing_campaigns" ADD CONSTRAINT "marketing_campaigns_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "marketing_campaigns" ADD CONSTRAINT "marketing_campaigns_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "marketing_campaigns" ADD CONSTRAINT "marketing_campaigns_template_id_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

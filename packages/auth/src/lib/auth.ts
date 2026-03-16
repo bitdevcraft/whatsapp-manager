@@ -80,7 +80,7 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url, token }, request) => {
       console.log(url);
       await resend.emails.send({
-        from: "No-Reply <noreply@ingeniousuae.com>",
+        from: "No-Reply <noreply@tasweequae.com>",
         subject: "Password Reset",
         text: `Click the link to verify your email: ${url}`,
         to: [user.email],
@@ -145,7 +145,7 @@ export const auth = betterAuth({
       async sendInvitationEmail(data) {
         const inviteLink = `${process.env.BASE_URL!}/accept-invitation/${data.id}`;
         await resend.emails.send({
-          from: "No-Reply <noreply@ingeniousuae.com>",
+          from: "No-Reply <noreply@tasweequae.com>",
           subject: "Team Invitation",
           text: `You are invited by ${data.inviter.user.name}. Click the link to verify your email: ${inviteLink}`,
           to: [data.email],

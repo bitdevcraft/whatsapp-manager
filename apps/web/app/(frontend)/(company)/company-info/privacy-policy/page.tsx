@@ -6,10 +6,10 @@ export default function Home() {
       <h1 className="text-3xl font-bold">Privacy Policy</h1>
 
       <div>
-        At Ingenious Digital Marketing Management (&quot;Company&quot;,
-        &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;), your privacy is our
-        priority. This Privacy Policy explains how we collect, use, disclose,
-        <Link href={"https://ingeniousuae.com"}>
+        At Tasweeq Zone Digital (&quot;Company&quot;, &quot;we&quot;,
+        &quot;our&quot;, or &quot;us&quot;), your privacy is our priority. This
+        Privacy Policy explains how we collect, use, disclose,
+        <Link href={"https://tasweequae.com"}>
           and safeguard your information when you interact with our website
         </Link>
         , our services, and third-party platforms we integrate with—including
@@ -112,7 +112,7 @@ export default function Home() {
           </ul>
           <p>
             To make a request, please contact us at{" "}
-            <Link href="mailto:info@ingenious.ae">info@ingenious.ae</Link>
+            <Link href="mailto:info@tasweequae.com">info@tasweequae.com</Link>
           </p>
         </div>
       </section>
@@ -167,17 +167,17 @@ export default function Home() {
             For questions about this Privacy Policy or your data rights,
             contact:
           </p>
-          <p className="font-bold">Ingenious Digital Marketing Management</p>
+          <p className="font-bold">Tasweeq Zone Digital</p>
           <p>Dubai, UAE</p>
           <ul className="ml-2">
             <li>
-              <strong>Email:</strong> info@ingenious.ae
+              <strong>Email:</strong> info@tasweequae.com
             </li>
             <li>
               <strong>Phone:</strong> +971 58 514 2884
             </li>
             <li>
-              <strong>Website:</strong> ingeniousuae.com
+              <strong>Website:</strong> tasweequae.com
             </li>
           </ul>
         </div>

@@ -149,6 +149,12 @@ export const LoginForm = () => {
                   t("login_button")
                 )}
               </Button>
+              <div className="text-center text-sm">
+                {t("login.dont_have_account")}
+                <Link className="ml-1 underline" href="/auth/signup">
+                  {t("signup_button")}
+                </Link>
+              </div>
             </div>
           </form>
         </Form>

@@ -29,7 +29,7 @@ export function NavbarMenu() {
                   href="/"
                 >
                   {/* <Icons.logo className="h-6 w-6" /> */}
-                  <div className="mb-2 mt-4 text-lg font-medium">Ingenious</div>
+                  <div className="mb-2 mt-4 text-lg font-medium">Tasweeq</div>
                   <p className="text-sm leading-tight text-muted-foreground">
                     Leading company in Dubai dedicated to enhance your
                     brand&lsquo;s online presence.
@@ -66,7 +66,7 @@ const ListItem = React.forwardRef<
         <a
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
+            className,
           )}
           ref={ref}
           {...props}

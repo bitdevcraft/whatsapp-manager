@@ -5,14 +5,14 @@ export default function Home() {
     <div className="max-w-5xl mx-auto mt-32 px-4 flex flex-col gap-8 pb-32">
       <h1 className="text-3xl font-bold">Terms of Service</h1>
       <div>
-        Welcome to Ingenious Digital Marketing Management (&quot;Company&quot;,
-        &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms of
-        Service (&quot;Terms&quot;) govern your use of our{" "}
-        <Link href={"https://ingeniousuae.com"}>website</Link>, our services,
-        and any associated products or platforms, including those integrated
-        with Meta platforms such as WhatsApp Embedded Flows. By accessing or
-        using our services, you agree to be bound by these Terms. If you do not
-        agree, please do not use our services.
+        Welcome to Tasweeq Zone Digital (&quot;Company&quot;, &quot;we&quot;,
+        &quot;our&quot;, or &quot;us&quot;). These Terms of Service
+        (&quot;Terms&quot;) govern your use of our{" "}
+        <Link href={"https://tasweequae.com"}>website</Link>, our services, and
+        any associated products or platforms, including those integrated with
+        Meta platforms such as WhatsApp Embedded Flows. By accessing or using
+        our services, you agree to be bound by these Terms. If you do not agree,
+        please do not use our services.
       </div>
 
       <section className="flex flex-col gap-4">
@@ -99,7 +99,7 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <p>
             All content, branding, and creative assets provided on our website
-            or through our services remain the property of Ingenious Digital
+            or through our services remain the property of Tasweeq Digital
             Marketing Management unless otherwise stated. You may not copy,
             reproduce, or use our content without express permission.
           </p>
@@ -146,16 +146,16 @@ export default function Home() {
             If you have any questions or concerns regarding these Terms, please
             contact us at:
           </p>
-          <p className="font-bold">Ingenious Digital Marketing Management</p>
+          <p className="font-bold">Tasweeq Zone Digital</p>
           <ul className="ml-2">
             <li>
-              <strong>Email:</strong> info@ingenious.ae
+              <strong>Email:</strong> info@tasweequae.com
             </li>
             <li>
               <strong>Phone:</strong> +971 58 514 2884
             </li>
             <li>
-              <strong>Website:</strong> ingeniousuae.com
+              <strong>Website:</strong> tasweequae.com
             </li>
           </ul>
         </div>
