@@ -45,7 +45,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required for db-migrate}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD is required for db-migrate}
+      POSTGRES_APP_USER: ${POSTGRES_APP_USER:?POSTGRES_APP_USER is required for db-migrate}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required for db-migrate}
     restart: "no"
 
   db-seed:
@@ -57,7 +60,7 @@ services:
       db-migrate:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required for db-seed}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
       DB_SEED_AD_ACCOUNT_ID: ${DB_SEED_AD_ACCOUNT_ID:-}
       DB_SEED_TEAM_METADATA: ${DB_SEED_TEAM_METADATA:-{"personal":false}}
       DB_SEED_TEAM_NAME: ${DB_SEED_TEAM_NAME:?DB_SEED_TEAM_NAME is required for db-seed}
@@ -92,7 +95,7 @@ services:
       AWS_REGION: ${AWS_REGION:?AWS_REGION is required for web}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required for web}
       BASE_URL: ${BASE_URL:?BASE_URL is required for web}
-      DATABASE_URL: ${DATABASE_URL_APPUSER:?DATABASE_URL_APPUSER is required for web}
+      DATABASE_URL: postgres://${POSTGRES_APP_USER:?POSTGRES_APP_USER is required}:${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
       DEBUG: ${DEBUG:-false}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required for web}
       M4D_APP_ID: ${M4D_APP_ID:?M4D_APP_ID is required for web}
@@ -100,9 +103,9 @@ services:
       META_CLIENT_SECRET: ${META_CLIENT_SECRET:?META_CLIENT_SECRET is required for web}
       NEXT_PUBLIC_WEB_SOCKET: ${NEXT_PUBLIC_WEB_SOCKET:?NEXT_PUBLIC_WEB_SOCKET is required for web}
       NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required for web}
-      REDIS_HOST: redis
+      REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_INTERNAL_PORT:-6379}
       RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required for web}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required for web}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET is required for web}
@@ -129,7 +132,7 @@ services:
         condition: service_healthy
     environment:
       CLOUD_API_ACCESS_TOKEN: ${CLOUD_API_ACCESS_TOKEN:?CLOUD_API_ACCESS_TOKEN is required for whatsapp-service}
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required for whatsapp-service}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
       GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       NODE_ENV: production
@@ -137,8 +140,8 @@ services:
       OPEN_AI_ORG_ID: ${OPEN_AI_ORG_ID:-}
       OPEN_AI_PROJECT_ID: ${OPEN_AI_PROJECT_ID:-}
       PORT: 4000
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_INTERNAL_PORT:-6379}
       WEBHOOK_VERIFICATION_TOKEN: ${WEBHOOK_VERIFICATION_TOKEN:?WEBHOOK_VERIFICATION_TOKEN is required for whatsapp-service}
     ports:
       - "${WHATSAPP_SERVICE_PORT:-4000}:4000"

@@ -45,4 +45,4 @@ COPY --from=builder /app/packages/db ./packages/db
 COPY --from=builder /app/packages/wa-cloud-api/package.json ./packages/wa-cloud-api/package.json
 COPY --from=builder /app/packages/wa-cloud-api/dist ./packages/wa-cloud-api/dist
 
-CMD ["pnpm", "--filter", "@workspace/db", "db:migrate"]
+CMD ["pnpm", "--filter", "@workspace/db", "db:migrate:deploy"]

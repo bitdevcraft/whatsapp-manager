@@ -14,6 +14,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:deploy": "pnpm db:migrate && pnpm db:sync-app-user",
+    "db:sync-app-user": "tsx src/sync-app-user.ts",
     "db:studio": "drizzle-kit studio"
   },
   "keywords": [],

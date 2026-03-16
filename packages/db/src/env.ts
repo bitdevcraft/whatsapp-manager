@@ -4,6 +4,8 @@ export interface BootstrapSeedEnv {
   adAccountId?: string;
   databaseUrl: string;
   encryptionKey: string;
+  postgresAppPassword?: string;
+  postgresAppUser?: string;
   postgresUserRole: string;
   teamMetadata: string;
   teamName: string;
@@ -38,6 +40,8 @@ export function loadBootstrapSeedEnv(): BootstrapSeedEnv {
     adAccountId: getOptionalEnv("DB_SEED_AD_ACCOUNT_ID"),
     databaseUrl: getRequiredEnv("DATABASE_URL"),
     encryptionKey: getRequiredEnv("ENCRYPTION_KEY"),
+    postgresAppPassword: getOptionalEnv("POSTGRES_APP_PASSWORD"),
+    postgresAppUser: getOptionalEnv("POSTGRES_APP_USER"),
     postgresUserRole: getRequiredEnv("POSTGRES_USER_ROLE"),
     teamMetadata: parseMetadata(
       getOptionalEnv("DB_SEED_TEAM_METADATA") ?? DEFAULT_TEAM_METADATA
@@ -52,6 +56,22 @@ export function loadBootstrapSeedEnv(): BootstrapSeedEnv {
     whatsappApiVersion: getRequiredEnv("WHATSAPP_API_VERSION"),
     whatsappBusinessAccountId: getRequiredEnv("WHATSAPP_BUSINESS_ACCOUNT_ID"),
     whatsappPhoneNumberId: getRequiredEnv("WHATSAPP_PHONE_NUMBER_ID"),
+  };
+}
+
+export interface AppUserSyncEnv {
+  databaseName: string;
+  databaseUrl: string;
+  postgresAppPassword: string;
+  postgresAppUser: string;
+}
+
+export function loadAppUserSyncEnv(): AppUserSyncEnv {
+  return {
+    databaseName: getRequiredEnv("POSTGRES_DB"),
+    databaseUrl: getRequiredEnv("DATABASE_URL"),
+    postgresAppPassword: getRequiredEnv("POSTGRES_APP_PASSWORD"),
+    postgresAppUser: getRequiredEnv("POSTGRES_APP_USER"),
   };
 }
 
