@@ -120,7 +120,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           }
         },
         {
-          config_id: "2166580990454604", // configuration ID goes here
+          config_id: "1636763904414125", // configuration ID goes here
           extras: {
             featureType: "whatsapp_business_app_onboarding",
             sessionInfoVersion: "3",
@@ -128,7 +128,7 @@ const FacebookLogin: React.FC<FacebookLoginProps> = ({
           },
           override_default_response_type: true, // when true, any response types passed in the "response_type" will take precedence over the default types
           response_type: "code", // must be set to 'code' for System User access token
-        }
+        },
       );
     }
   };
