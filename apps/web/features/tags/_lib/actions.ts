@@ -59,10 +59,10 @@ export async function deleteTags(input: { ids: string[] }) {
       });
     });
 
-    revalidateTag(`contacts:tags:${userWithTeam.teamId}`);
-    revalidateTag(`tags:select:${userWithTeam.teamId}`);
-    revalidateTag(`tags:${userWithTeam.teamId}`);
-    revalidateTag(`contacts:${userWithTeam.teamId}`);
+    revalidateTag(`contacts:tags:${userWithTeam.teamId}`, "max");
+    revalidateTag(`tags:select:${userWithTeam.teamId}`, "max");
+    revalidateTag(`tags:${userWithTeam.teamId}`, "max");
+    revalidateTag(`contacts:${userWithTeam.teamId}`, "max");
 
     return {
       data: null,

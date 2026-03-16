@@ -29,7 +29,7 @@ export async function deleteContact(input: { id: string }) {
         .where(eq(contactsTable.id, input.id));
     });
 
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+    revalidateTag(`contacts:${userWithTeam?.teamId}`, "max");
 
     return {
       data: null,
@@ -65,7 +65,7 @@ export async function deleteContacts(input: { ids: string[] }) {
         .where(inArray(contactsTable.id, input.ids));
     });
 
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+    revalidateTag(`contacts:${userWithTeam?.teamId}`, "max");
 
     return {
       data: null,
@@ -107,7 +107,7 @@ export async function removeContactTags(input: { ids: string[]; tag: string }) {
         .where(inArray(contactsTable.id, input.ids));
     });
 
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+    revalidateTag(`contacts:${userWithTeam?.teamId}`, "max");
 
     return {
       data: null,
@@ -149,7 +149,7 @@ export async function updateContact(input: { id: string; tags?: string[] }) {
         .where(eq(contactsTable.id, input.id));
     });
 
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+    revalidateTag(`contacts:${userWithTeam?.teamId}`, "max");
 
     return {
       data: null,
@@ -195,7 +195,7 @@ export async function updateContacts(input: {
         .where(inArray(contactsTable.id, input.ids));
     });
 
-    revalidateTag(`contacts:${userWithTeam?.teamId}`);
+    revalidateTag(`contacts:${userWithTeam?.teamId}`, "max");
 
     return {
       data: null,

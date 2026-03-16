@@ -3,11 +3,11 @@ import type { TemplateResponse } from "@workspace/wa-cloud-api";
 import { templatesTable } from "@workspace/db/schema";
 import { withTenantTransaction } from "@workspace/db/tenant";
 import { CategoryEnum } from "@workspace/wa-cloud-api";
-import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 import { getTemplates } from "@/features/whatsapp/templates/get-template";
+import { revalidateTemplateTags } from "@/features/whatsapp/templates/lib/revalidate-template-tags";
 import { getUserWithTeam } from "@/lib/db/queries";
 
 // Extend the TemplateResponse type to include meta
@@ -43,8 +43,7 @@ export async function GET(request: NextRequest) {
   try {
     const result = await getTemplates(!!sync);
 
-    revalidateTag(`templates:select:${userWithTeam?.teamId}`);
-    revalidateTag(`templates:${userWithTeam?.teamId}`);
+    revalidateTemplateTags(userWithTeam.teamId);
 
     return new NextResponse(JSON.stringify(result), {
       headers: {
@@ -156,6 +155,12 @@ export async function POST(request: NextRequest) {
             .returning();
         }
       );
+
+      if (!newTemplate) {
+        throw new Error("Failed to create template");
+      }
+
+      revalidateTemplateTags(userWithTeam.teamId, newTemplate.id);
 
       return new NextResponse(JSON.stringify(newTemplate), {
         headers: {

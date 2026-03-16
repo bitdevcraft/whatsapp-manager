@@ -29,3 +29,16 @@ To use the components in your app, import them from the `ui` package.
 ```tsx
 import { Button } from "@workspace/ui/components/button"
 ```
+
+
+permissions
+Business Asset User Profile Access
+Meta oEmbed Read
+whatsapp_business_management
+instagram_manage_events
+instagram_business_basic
+instagram_business_manage_messages
+instagram_business_content_publish
+instagram_business_manage_insights
+instagram_business_manage_comments
+whatsapp_business_manage_events

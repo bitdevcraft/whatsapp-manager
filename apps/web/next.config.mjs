@@ -1,9 +1,14 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const hostnames = ["lookaside.fbsbx.com", "scontent.whatsapp.net"];
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: join(__dirname, "../.."),
   transpilePackages: [
     "@workspace/ui",
     "@workspace/db",
@@ -23,11 +28,6 @@ const nextConfig = {
     })),
   },
   trailingSlash: false,
-
-  // experimental: {
-  //   nodeMiddleware: true,
-  // },
-  // output: "standalone",
   async rewrites() {
     const REALTIME_SVC = process.env.WEB_SOCKET ?? "http://localhost:3000";
     return [

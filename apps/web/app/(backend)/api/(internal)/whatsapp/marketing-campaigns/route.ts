@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`);
+    revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`, "max");
 
     const body = (await request.json()) as MarketingCampaignFormValues;
 

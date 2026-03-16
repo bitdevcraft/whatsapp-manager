@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   }
 
   tags.forEach((tag) => {
-    revalidateTag(tag); // ✅ revalidate
+    revalidateTag(tag, "max");
   });
 
   return NextResponse.json({ success: true });

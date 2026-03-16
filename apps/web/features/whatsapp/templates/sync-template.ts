@@ -9,12 +9,13 @@ import WhatsApp, {
   WhatsAppConfig,
 } from "@workspace/wa-cloud-api";
 import { and, eq, notInArray } from "drizzle-orm";
-import { revalidateTag } from "next/cache";
 
 import { env } from "@/env/server";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { logger } from "@/lib/logger";
+
+import { revalidateTemplateTags } from "./lib/revalidate-template-tags";
 
 const waPhoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID;
 const waAccessToken = env.WHATSAPP_API_ACCESS_TOKEN;
@@ -121,7 +122,7 @@ export async function syncTemplate() {
         );
     });
 
-    revalidateTag(`templates:${teamId}`);
+    revalidateTemplateTags(teamId);
   } catch (error) {
     logger.error(error);
   }

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const { teamId } = userWithTeam;
 
-  revalidateTag(`phone-number:${teamId}`);
+  revalidateTag(`phone-number:${teamId}`, "max");
 
   const data = await withTenantTransaction(teamId, async (tx) => {
     const data = await tx.query.whatsAppBusinessAccountsTable.findFirst({
@@ -76,10 +76,10 @@ export async function POST(request: Request) {
         );
     });
 
-    revalidateTag(`phone-number:${teamId}`);
+    revalidateTag(`phone-number:${teamId}`, "max");
     return new Response(JSON.stringify(response), { status: 200 });
   }
 
-  revalidateTag(`phone-number:${teamId}`);
+  revalidateTag(`phone-number:${teamId}`, "max");
   return new Response(JSON.stringify(response), { status: 400 });
 }

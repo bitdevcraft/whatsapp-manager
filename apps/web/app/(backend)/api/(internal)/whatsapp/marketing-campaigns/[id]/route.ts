@@ -109,7 +109,7 @@ export async function POST(
       };
     });
 
-    revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`);
+    revalidateTag(`marketing-campaigns:${userWithTeam?.teamId}`, "max");
 
     if (!result.data) {
       return new Response("", {

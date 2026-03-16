@@ -120,7 +120,7 @@ export async function GET() {
           });
     });
 
-    revalidateTag(`phone-number:${teamId}`);
+    revalidateTag(`phone-number:${teamId}`, "max");
     return new Response(JSON.stringify(""), { status: 200 });
   } catch (error) {
     logger.error(error);

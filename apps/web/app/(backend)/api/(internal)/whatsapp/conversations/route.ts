@@ -239,7 +239,7 @@ export async function POST(request: Request) {
       await tx.insert(conversationsTable).values(conversation).returning();
     });
 
-    revalidateTag(`conversations:${teamId}:${contactId}`);
+    revalidateTag(`conversations:${teamId}:${contactId}`, "max");
 
     const usageRepo = new UsageLimitRepository(teamId);
     await usageRepo.upsertUsageTracking(user.id, 1);

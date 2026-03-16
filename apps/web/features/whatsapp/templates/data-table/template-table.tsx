@@ -22,10 +22,8 @@ import { cn } from "@workspace/ui/lib/utils";
 import { DataTableRowAction } from "@workspace/ui/types/data-table";
 import axios from "axios";
 import { Plus, RefreshCcw } from "lucide-react";
-import { nanoid } from "nanoid";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -35,7 +33,6 @@ import { FeatureFlagsToggle } from "@/components/provider/feature-flags-toggle";
 import { useTitle } from "@/components/provider/title-provider";
 
 import { getTemplates } from "../lib/queries";
-import { TemplateTableActionBar } from "./template-table-action-bar";
 import { getTableColumns } from "./template-table-columns";
 
 const useTemplateSync = () => {
@@ -47,7 +44,6 @@ const useTemplateSync = () => {
 
       return response.data;
     },
-    onSuccess: () => toast.success("Synced"),
     onError: (error: unknown) =>
       toast.error(
         <div>
@@ -57,6 +53,7 @@ const useTemplateSync = () => {
           </p>
         </div>
       ),
+    onSuccess: () => toast.success("Synced"),
   });
 };
 
@@ -65,12 +62,11 @@ interface Props {
 }
 export default function TemplateTable({ promises }: Props) {
   const setTitle = useTitle();
+  const router = useRouter();
 
   useEffect(() => {
     setTitle("Templates");
   }, [setTitle]);
-
-  const [, setRId] = useQueryState("rId", parseAsString);
 
   const { enableAdvancedFilter } = useFeatureFlags();
 
@@ -107,7 +103,7 @@ export default function TemplateTable({ promises }: Props) {
   const onTemplateSync = () => {
     templateSync.mutate(undefined, {
       onSuccess: () => {
-        setRId(nanoid());
+        router.refresh();
       },
     });
   };

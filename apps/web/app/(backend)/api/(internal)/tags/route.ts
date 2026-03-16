@@ -29,8 +29,8 @@ export async function POST(request: Request) {
 
   const { teamId } = userWithTeam;
 
-  revalidateTag(`tags:select:${teamId}`);
-  revalidateTag(`tags:${teamId}`);
+  revalidateTag(`tags:select:${teamId}`, "max");
+  revalidateTag(`tags:${teamId}`, "max");
 
   const body = (await request.json()) as TagsFormValues;
 

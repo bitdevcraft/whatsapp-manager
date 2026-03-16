@@ -5,11 +5,11 @@ import {
 import WhatsApp, { WhatsAppConfig } from "@workspace/wa-cloud-api";
 import { TemplateRequestBody } from "@workspace/wa-cloud-api/template";
 import { eq } from "drizzle-orm";
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import z from "zod";
 
 import { getTemplates } from "@/features/whatsapp/templates/get-template";
+import { revalidateTemplateTags } from "@/features/whatsapp/templates/lib/revalidate-template-tags";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 
@@ -63,10 +63,9 @@ export async function POST(request: Request) {
 
     const response = await whatsapp.templates.createTemplate(body);
 
-    getTemplates(true);
+    await getTemplates(true);
 
-    revalidateTag(`templates:select:${userWithTeam?.teamId}`);
-    revalidateTag(`templates:${userWithTeam?.teamId}`);
+    revalidateTemplateTags(teamId);
 
     return new Response(JSON.stringify(response), { status: 200 });
   } catch (error) {

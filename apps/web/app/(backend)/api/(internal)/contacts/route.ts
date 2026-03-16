@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       .returning();
   });
 
-  revalidateTag(`contacts:${teamId}`);
+  revalidateTag(`contacts:${teamId}`, "max");
 
   return new Response(JSON.stringify(result), { status: 200 });
 }

@@ -5,10 +5,10 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "pnpm db:migrate && tsup",
+    "build:pkg": "pnpm db:migrate && tsup",
     "db:seed:bootstrap": "dotenv -e .env tsx src/seed/bootstrap.ts",
     "db:seed:bootstrap:web-env": "dotenv -e ../../apps/web/.env.development tsx src/seed/bootstrap.ts",
-    "dev": "tsup --watch",
+    "dev:pkg": "tsup --watch",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "typecheck": "tsc --noEmit",

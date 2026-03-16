@@ -6,6 +6,7 @@ import axios from "axios";
 import { and, eq, isNull } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+import { revalidateTemplateTags } from "@/features/whatsapp/templates/lib/revalidate-template-tags";
 import { decryptApiKey } from "@/lib/crypto";
 import { getUserWithTeam } from "@/lib/db/queries";
 import { AppTemplateResponse, TemplateMeta } from "@/types/template";
@@ -236,6 +237,8 @@ export async function POST(request: Request) {
       if (!updatedTemplate) {
         throw new Error("Failed to update template with Meta submission info");
       }
+
+      revalidateTemplateTags(teamId, updatedTemplate.id);
 
       const response: TemplateSubmissionResponse = {
         message: "Template submitted to Meta for approval",
