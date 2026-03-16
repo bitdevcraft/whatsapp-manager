@@ -1,0 +1,144 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: "${APP_NAME:-tasweeq}-postgres"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app_db}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      TZ: ${TZ:-UTC}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}",
+        ]
+      interval: 5s
+      retries: 20
+      timeout: 5s
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8
+    container_name: "${APP_NAME:-tasweeq}-redis"
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+      timeout: 3s
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  db-migrate:
+    image: ${DB_IMAGE:?DB_IMAGE is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD is required for db-migrate}
+      POSTGRES_APP_USER: ${POSTGRES_APP_USER:?POSTGRES_APP_USER is required for db-migrate}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required for db-migrate}
+    restart: "no"
+
+  db-seed:
+    image: ${DB_IMAGE:?DB_IMAGE is required}
+    command: ["pnpm", "--filter", "@workspace/db", "db:seed:bootstrap"]
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
+      DB_SEED_AD_ACCOUNT_ID: ${DB_SEED_AD_ACCOUNT_ID:-}
+      DB_SEED_TEAM_METADATA: ${DB_SEED_TEAM_METADATA:-{"personal":false}}
+      DB_SEED_TEAM_NAME: ${DB_SEED_TEAM_NAME:?DB_SEED_TEAM_NAME is required for db-seed}
+      DB_SEED_TEAM_SLUG: ${DB_SEED_TEAM_SLUG:?DB_SEED_TEAM_SLUG is required for db-seed}
+      DB_SEED_TEAM_WHATSAPP_LIMIT: ${DB_SEED_TEAM_WHATSAPP_LIMIT:-}
+      DB_SEED_USER_EMAIL: ${DB_SEED_USER_EMAIL:?DB_SEED_USER_EMAIL is required for db-seed}
+      DB_SEED_USER_NAME: ${DB_SEED_USER_NAME:?DB_SEED_USER_NAME is required for db-seed}
+      DB_SEED_USER_PASSWORD: ${DB_SEED_USER_PASSWORD:?DB_SEED_USER_PASSWORD is required for db-seed}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required for db-seed}
+      POSTGRES_USER_ROLE: ${POSTGRES_USER_ROLE:?POSTGRES_USER_ROLE is required for db-seed}
+      WHATSAPP_API_ACCESS_TOKEN: ${WHATSAPP_API_ACCESS_TOKEN:?WHATSAPP_API_ACCESS_TOKEN is required for db-seed}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:?WHATSAPP_API_VERSION is required for db-seed}
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID:?WHATSAPP_BUSINESS_ACCOUNT_ID is required for db-seed}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:?WHATSAPP_PHONE_NUMBER_ID is required for db-seed}
+    restart: "no"
+
+  web:
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required for web}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?AWS_ACCESS_KEY_ID is required for web}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:?AWS_BUCKET_NAME is required for web}
+      AWS_REGION: ${AWS_REGION:?AWS_REGION is required for web}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?AWS_SECRET_ACCESS_KEY is required for web}
+      BASE_URL: ${BASE_URL:?BASE_URL is required for web}
+      DATABASE_URL: postgres://${POSTGRES_APP_USER:?POSTGRES_APP_USER is required}:${POSTGRES_APP_PASSWORD:?POSTGRES_APP_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
+      DEBUG: ${DEBUG:-false}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required for web}
+      M4D_APP_ID: ${M4D_APP_ID:?M4D_APP_ID is required for web}
+      META_BUSINESS_ID: ${META_BUSINESS_ID:?META_BUSINESS_ID is required for web}
+      META_CLIENT_SECRET: ${META_CLIENT_SECRET:?META_CLIENT_SECRET is required for web}
+      NEXT_PUBLIC_WEB_SOCKET: ${NEXT_PUBLIC_WEB_SOCKET:?NEXT_PUBLIC_WEB_SOCKET is required for web}
+      NEXT_PUBLIC_WEB_URL: ${NEXT_PUBLIC_WEB_URL:?NEXT_PUBLIC_WEB_URL is required for web}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PORT: ${REDIS_INTERNAL_PORT:-6379}
+      RESEND_API_KEY: ${RESEND_API_KEY:?RESEND_API_KEY is required for web}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required for web}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?STRIPE_WEBHOOK_SECRET is required for web}
+      WEB_SOCKET: http://whatsapp-service:4000
+      WHATSAPP_API_ACCESS_TOKEN: ${WHATSAPP_API_ACCESS_TOKEN:?WHATSAPP_API_ACCESS_TOKEN is required for web}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:?WHATSAPP_API_VERSION is required for web}
+      WHATSAPP_BUSINESS_ACCOUNT_ID: ${WHATSAPP_BUSINESS_ACCOUNT_ID:?WHATSAPP_BUSINESS_ACCOUNT_ID is required for web}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:?WHATSAPP_PHONE_NUMBER_ID is required for web}
+      WHATSAPP_WEBHOOK_SECRET: ${WHATSAPP_WEBHOOK_SECRET:?WHATSAPP_WEBHOOK_SECRET is required for web}
+    ports:
+      - "${WEB_PORT:-3001}:3001"
+    restart: unless-stopped
+
+  whatsapp-service:
+    image: ${WHATSAPP_SERVICE_IMAGE:?WHATSAPP_SERVICE_IMAGE is required}
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      CLOUD_API_ACCESS_TOKEN: ${CLOUD_API_ACCESS_TOKEN:?CLOUD_API_ACCESS_TOKEN is required for whatsapp-service}
+      DATABASE_URL: postgres://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@${POSTGRES_HOST:-postgres}:${POSTGRES_INTERNAL_PORT:-5432}/${POSTGRES_DB:?POSTGRES_DB is required}
+      GOOGLE_GENAI_API_KEY: ${GOOGLE_GENAI_API_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+      OPEN_AI_API_KEY: ${OPEN_AI_API_KEY:-}
+      OPEN_AI_ORG_ID: ${OPEN_AI_ORG_ID:-}
+      OPEN_AI_PROJECT_ID: ${OPEN_AI_PROJECT_ID:-}
+      PORT: 4000
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_INTERNAL_PORT:-6379}
+      WEBHOOK_VERIFICATION_TOKEN: ${WEBHOOK_VERIFICATION_TOKEN:?WEBHOOK_VERIFICATION_TOKEN is required for whatsapp-service}
+    ports:
+      - "${WHATSAPP_SERVICE_PORT:-4000}:4000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

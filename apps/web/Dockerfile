@@ -25,13 +25,19 @@ RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 
+ARG BASE_URL=http://localhost:3001
+ARG NEXT_PUBLIC_WEB_URL=http://localhost:3001
+ARG NEXT_PUBLIC_WEB_SOCKET=http://localhost:3001
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Build-time values baked into the Next.js bundle.
+ENV BASE_URL=${BASE_URL}
+ENV NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL}
+ENV NEXT_PUBLIC_WEB_SOCKET=${NEXT_PUBLIC_WEB_SOCKET}
+
 # Build-time placeholders required by Next.js page-data collection.
-ENV BASE_URL=http://localhost:3001
-ENV NEXT_PUBLIC_WEB_URL=http://localhost:3001
-ENV NEXT_PUBLIC_WEB_SOCKET=http://localhost:3001
 ENV WEB_SOCKET=http://localhost:4000
 ENV ENCRYPTION_KEY=build-time-encryption-key
 ENV DATABASE_URL=postgresql://app_user:app_user@localhost:5432/app_db
